@@ -267,16 +267,14 @@ namespace RTE {
 		while (!System::IsSetToQuit()) {
 			bool serverUpdated = false;
 			updateStartTime = g_TimerMan.GetAbsoluteTime();
+			PollSDLEvents();
+			g_WindowMan.Update();
 
 			g_TimerMan.Update();
 
 			// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
 			while (g_TimerMan.TimeForSimUpdate()) {
 				serverUpdated = false;
-
-				PollSDLEvents();
-
-				g_WindowMan.Update();
 
 				g_PerformanceMan.NewPerformanceSample();
 				g_PerformanceMan.UpdateMSPSU();
@@ -398,6 +396,10 @@ int main(int argc, char **argv) {
 	InitializeManagers();
 
 	HandleMainArgs(argc, argv);
+
+	if (g_NetworkServer.IsServerModeEnabled()) {
+		SDL_ShowCursor(SDL_ENABLE);
+	}
 
 	g_PresetMan.LoadAllDataModules();
 

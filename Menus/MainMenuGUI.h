@@ -2,6 +2,8 @@
 #define _RTEMAINMENUGUI_
 
 #include "Controller.h"
+
+#include "SaveLoadMenuGUI.h"
 #include "SettingsGUI.h"
 #include "ModManagerGUI.h"
 

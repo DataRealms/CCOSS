@@ -14,6 +14,7 @@ namespace RTE {
 	class GUIButton;
 	class SettingsGUI;
 	class ModManagerGUI;
+	class SaveLoadMenuGUI;
 
 	/// <summary>
 	/// Handling for the pause menu screen composition and interaction.
@@ -85,6 +86,7 @@ namespace RTE {
 		/// </summary>
 		enum PauseMenuScreen {
 			MainScreen,
+			SaveOrLoadGameScreen,
 			SettingsScreen,
 			ModManagerScreen,
 			ScreenCount
@@ -95,8 +97,7 @@ namespace RTE {
 		/// </summary>
 		enum PauseMenuButton {
 			BackToMainButton,
-			SaveGameButton,
-			LoadLastSaveButton,
+			SaveOrLoadGameButton,
 			SettingsButton,
 			ModManagerButton,
 			ResumeButton,
@@ -118,6 +119,7 @@ namespace RTE {
 
 		Timer m_ResumeButtonBlinkTimer; //!< Activity resume button blink timer.
 
+		std::unique_ptr<SaveLoadMenuGUI> m_SaveLoadMenu; //!< The settings menu screen.
 		std::unique_ptr<SettingsGUI> m_SettingsMenu; //!< The settings menu screen.
 		std::unique_ptr<ModManagerGUI> m_ModManagerMenu; //!< The mod manager menu screen.
 

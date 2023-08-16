@@ -399,6 +399,7 @@ namespace RTE {
 		} else {
 			m_ResolutionChanged = true;
 			g_FrameMan.CreateBackBuffers();
+			g_PostProcessMan.CreateGLBackBuffers();
 			CreateBackBufferTexture();
 		}
 
@@ -572,6 +573,10 @@ namespace RTE {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		g_FrameMan.ClearBackBuffer32();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -593,6 +598,7 @@ namespace RTE {
 			GL_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]));
 		} else {
 			glDisable(GL_BLEND);
+			glBindTexture(GL_TEXTURE_2D, 0);
 			GL_CHECK(glActiveTexture(GL_TEXTURE1));
 			GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture));
 			GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]));

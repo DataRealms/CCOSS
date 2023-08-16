@@ -403,19 +403,19 @@ namespace RTE {
 		GL_CHECK(glDisable(GL_BLEND));
 		GL_CHECK(glActiveTexture(GL_TEXTURE0));
 		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_BackBuffer8));
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, 0, GL_RED, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer8()->line[0]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h, 0, GL_RED, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer8()->line[0]);
 		GL_CHECK(glActiveTexture(GL_TEXTURE1));
 		GL_CHECK(glBindTexture(GL_TEXTURE_1D, m_Palette8Texture));
 		GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_BlitFramebuffer));
 		GL_CHECK(glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_BackBuffer32, 0));
+		glViewport(0, 0, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h);
 		m_Blit8->Use();
 		m_Blit8->SetInt(m_Blit8->GetTextureUniform(), 0);
 		int paletteUniform = m_Blit8->GetUniformLocation("rtePalette");
 		m_Blit8->SetInt(paletteUniform, 1);
-		glm::mat4 transformMatrix(1);
 		m_Blit8->SetMatrix4f(m_Blit8->GetProjectionUniform(), glm::mat4(1));
 		m_Blit8->SetMatrix4f(m_Blit8->GetUVTransformUniform(), glm::mat4(1));
-		m_Blit8->SetMatrix4f(m_Blit8->GetTransformUniform(), transformMatrix);
+		m_Blit8->SetMatrix4f(m_Blit8->GetTransformUniform(), glm::mat4(1));
 		GL_CHECK(glBindVertexArray(m_VertexArray));
 		GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 

@@ -1065,23 +1065,23 @@ namespace RTE {
 
 #ifndef RELEASE_BUILD
 			// Draw all player's screen into one
-			if (g_UInputMan.KeyHeld(KEY_5)) {
+			if (g_UInputMan.KeyHeld(SDLK_5)) {
 				stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i].get(), m_BackBuffer8.get(), 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h, dx, dy, dw, dh);
 			}
 #endif
 		}
 
 #ifndef RELEASE_BUILD
-		if (g_UInputMan.KeyHeld(KEY_1)) {
+		if (g_UInputMan.KeyHeld(SDLK_1)) {
 			stretch_blit(m_NetworkBackBufferFinal8[0][0].get(), m_BackBuffer8.get(), 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 		}
-		if (g_UInputMan.KeyHeld(KEY_2)) {
+		if (g_UInputMan.KeyHeld(SDLK_2)) {
 			stretch_blit(m_NetworkBackBufferFinal8[1][0].get(), m_BackBuffer8.get(), 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][1]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][1]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 		}
-		if (g_UInputMan.KeyHeld(KEY_3)) {
+		if (g_UInputMan.KeyHeld(SDLK_3)) {
 			stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][2].get(), m_BackBuffer8.get(), 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][2]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][2]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 		}
-		if (g_UInputMan.KeyHeld(KEY_4)) {
+		if (g_UInputMan.KeyHeld(SDLK_4)) {
 			stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][3].get(), m_BackBuffer8.get(), 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][3]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][3]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 		}
 #endif

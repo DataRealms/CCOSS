@@ -604,27 +604,44 @@ namespace RTE {
 	void WindowMan::ClearRenderer() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		g_FrameMan.ClearBackBuffer32();
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::UploadFrame() {
+		glDisable(GL_DEPTH_TEST);
 		GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 		GL_CHECK(glActiveTexture(GL_TEXTURE0));
+
+		int windowW, windowH;
+		SDL_GL_GetDrawableSize(m_PrimaryWindow.get(), &windowW, &windowH);
+		GL_CHECK(glViewport(0, 0, windowW, windowH));
+
 		glDisable(GL_BLEND);
 		if (g_ActivityMan.IsInActivity()) {
 			GL_CHECK(glBindTexture(GL_TEXTURE_2D, g_PostProcessMan.GetPostProcessColorBuffer()));
+			GL_CHECK(glActiveTexture(GL_TEXTURE1));
+			GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture));
+			GL_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]));
 		} else {
+			glDisable(GL_BLEND);
 			glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]);
 		}
+
 		GL_CHECK(glBindVertexArray(m_ScreenVAO));
 		m_ScreenBlitShader->Use();
 		m_ScreenBlitShader->SetInt(m_ScreenBlitShader->GetTextureUniform(), 0);
 		m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), glm::mat4(1.0f));
 		m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), glm::mat4(1.0f));
+		if(g_ActivityMan.IsInActivity()) {
+			m_ScreenBlitShader->SetInt(m_ScreenBlitShader->GetUniformLocation("rteGUITexture"), 1);
+		}
 
 		GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+
+
 		SDL_GL_SwapWindow(m_PrimaryWindow.get());
 	}
 

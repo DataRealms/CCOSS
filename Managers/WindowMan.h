@@ -233,8 +233,7 @@ namespace RTE {
 		glm::mat4 m_PrimaryWindowProjection;
 
 		std::vector<std::shared_ptr<SDL_Window>> m_MultiDisplayWindows; //!< Additional windows for multi-display fullscreen.
-		std::vector<GLuint> m_MultiDisplayTextures; //!< Additional textures when drawing to multiple displays.
-		std::vector<SDL_Rect> m_MultiDisplayTextureOffsets; //!< Texture offsets for multi-display fullscreen.
+		std::vector<glm::mat4> m_MultiDisplayTextureOffsets; //!< Texture offsets for multi-display fullscreen.
 
 		std::unique_ptr<void, SDLContextDeleter> m_GLContext; //!< OpenGL context.
 		GLuint m_ScreenVAO;
@@ -277,7 +276,7 @@ namespace RTE {
 		/// <summary>
 		/// Creates the main game window renderer's drawing surface.
 		/// </summary>
-		void CreatePrimaryTexture();
+		void CreateBackBufferTexture();
 #pragma endregion
 
 #pragma region Resolution Handling
@@ -306,11 +305,6 @@ namespace RTE {
 		/// Clears all the multi-display data, resetting the game to a single-window-single-display state.
 		/// </summary>
 		void ClearMultiDisplayData();
-
-		/// <summary>
-		/// Creates a drawing surface for each window's renderer for multi-display fullscreen.
-		/// </summary>
-		void CreateMultiDisplayTextures();
 
 		/// <summary>
 		/// Resize the window to enable fullscreen on multiple displays, using the arrangement info gathered during display mapping.

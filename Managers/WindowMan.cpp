@@ -11,6 +11,8 @@
 #include "SDL.h"
 #include "glad/gl.h"
 #include "Shader.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 namespace RTE {
 
@@ -57,12 +59,8 @@ namespace RTE {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::ClearMultiDisplayData() {
-		#if 0
 		m_MultiDisplayTextureOffsets.clear();
-		m_MultiDisplayTextures.clear();
-		// m_MultiDisplayRenderers.clear();
 		m_MultiDisplayWindows.clear();
-		#endif
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +94,7 @@ namespace RTE {
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		CreatePrimaryWindow();
 		InitializeOpenGL();
-		CreatePrimaryTexture();
+		CreateBackBufferTexture();
 		m_ScreenBlitShader = std::make_unique<Shader>(g_PresetMan.GetFullModulePath("Base.rte/Shaders/ScreenBlit.vert"), g_PresetMan.GetFullModulePath("Base.rte/Shaders/ScreenBlit.frag"));
 
 		// SDL is kinda dumb about the taskbar icon so we need to poll after creating the window for it to show up, otherwise there's no icon till it starts polling in the main menu loop.
@@ -169,14 +167,14 @@ namespace RTE {
 		glBufferData(GL_ARRAY_BUFFER, sizeof(c_Quad), c_Quad.data(), GL_STATIC_DRAW);
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1,2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 		glBindVertexArray(0);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::CreatePrimaryTexture() {
+	void WindowMan::CreateBackBufferTexture() {
 		glDeleteTextures(1, &m_BackBuffer32Texture);
 		glGenTextures(1, &m_BackBuffer32Texture);
 		glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture);
@@ -186,27 +184,10 @@ namespace RTE {
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void WindowMan::CreateMultiDisplayTextures() {
-#if 0
-		m_MultiDisplayTextures.resize(m_MultiDisplayTextureOffsets.size());
-		for (size_t i = 0; i < m_MultiDisplayTextures.size(); ++i) {
-			m_MultiDisplayTextures[i] = std::unique_ptr<SDL_Texture, SDLTextureDeleter>(SDL_CreateTexture(m_MultiDisplayRenderers[i].get(), SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, m_MultiDisplayTextureOffsets[i].w, m_MultiDisplayTextureOffsets[i].h));
-			if (!m_MultiDisplayTextures[i]) {
-				RTEAbort("Failed to create texture for multi-display because:\n" + std::string(SDL_GetError()));
-			}
-			SDL_RenderSetLogicalSize(m_MultiDisplayRenderers[i].get(), m_MultiDisplayTextureOffsets[i].w, m_MultiDisplayTextureOffsets[i].h);
-		}
-#endif
-	}
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	void WindowMan::SetVSyncEnabled(bool enable) {
 		m_EnableVSync = enable;
 
 		int sdlEnableVSync = m_EnableVSync ? SDL_TRUE : SDL_FALSE;
-		int result = -1;
 
 		SDL_GL_SetSwapInterval(sdlEnableVSync);
 	}
@@ -412,18 +393,13 @@ namespace RTE {
 
 		if (onlyResMultiplierChange) {
 			if (!newResFullyCoversAllDisplays) {
-				CreatePrimaryTexture();
+				CreateBackBufferTexture();
 			}
 			g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
 		} else {
 			m_ResolutionChanged = true;
 			g_FrameMan.CreateBackBuffers();
-
-			if (newResFullyCoversAllDisplays) {
-				CreateMultiDisplayTextures();
-			} else {
-				CreatePrimaryTexture();
-			}
+			CreateBackBufferTexture();
 		}
 
 		g_ConsoleMan.PrintString("SYSTEM: " + std::string(!recoveredToPreviousSettings ? "Switched to different resolution." : "Failed to switch to different resolution. Reverted to previous settings."));
@@ -446,8 +422,6 @@ namespace RTE {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool WindowMan::ChangeResolutionToMultiDisplayFullscreen(int resMultiplier) {
-		return false;
-#if 0
 		if (!m_CanMultiDisplayFullscreen) {
 			return false;
 		}
@@ -463,7 +437,7 @@ namespace RTE {
 
 		bool errorSettingFullscreen = false;
 
-		for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
+		for (const auto &[displayIndex, displayBounds]: m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
 			int displayOffsetX = displayBounds.x;
 			int displayOffsetY = displayBounds.y;
 			int displayWidth = displayBounds.w;
@@ -471,14 +445,9 @@ namespace RTE {
 
 			if (displayIndex == m_PrimaryWindowDisplayIndex) {
 				m_MultiDisplayWindows.emplace_back(m_PrimaryWindow);
-				m_MultiDisplayRenderers.emplace_back(m_PrimaryRenderer);
 			} else {
 				m_MultiDisplayWindows.emplace_back(SDL_CreateWindow(nullptr, displayOffsetX, displayOffsetY, displayWidth, displayHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SKIP_TASKBAR), SDLWindowDeleter());
 				if (m_MultiDisplayWindows.back()) {
-					m_MultiDisplayRenderers.emplace_back(SDL_CreateRenderer(m_MultiDisplayWindows.back().get(), -1, SDL_RENDERER_ACCELERATED), SDLRendererDeleter());
-					if (!m_MultiDisplayRenderers.back()) {
-						errorSettingFullscreen = true;
-					}
 				} else {
 					errorSettingFullscreen = true;
 				}
@@ -490,14 +459,14 @@ namespace RTE {
 			int textureOffsetX = (displayOffsetX - m_DisplayArrangementLeftMostOffset);
 			int textureOffsetY = (displayOffsetY - m_DisplayArrangementTopMostOffset);
 
-			m_MultiDisplayTextureOffsets.emplace_back(SDL_Rect{
-				textureOffsetX / resMultiplier,
-				// Sometimes an odd Y offset implodes all the things, depending on the stupidity of the arrangement and what display is primary.
-				// Sometimes it needs to be in multiples of 4 for reasons unknown to man, so we're just gonna go with this and hope for the best, for now at least.
-				RoundToNearestMultiple(textureOffsetY, 2) / resMultiplier,
-				displayWidth / resMultiplier,
-				displayHeight / resMultiplier
-			});
+			m_MultiDisplayTextureOffsets.emplace_back(glm::ortho<float>(
+			    textureOffsetX / resMultiplier,
+			    // Sometimes an odd Y offset implodes all the things, depending on the stupidity of the arrangement and what display is primary.
+			    // Sometimes it needs to be in multiples of 4 for reasons unknown to man, so we're just gonna go with this and hope for the best, for now at least.
+			    RoundToNearestMultiple(textureOffsetY, 2) / resMultiplier,
+			    displayWidth / resMultiplier,
+			    displayHeight / resMultiplier,
+			    -1.0f, 1.0f));
 		}
 
 		if (errorSettingFullscreen) {
@@ -506,10 +475,8 @@ namespace RTE {
 			return false;
 		}
 
-		CreateMultiDisplayTextures();
 		SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
 		return true;
-#endif
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -626,21 +593,30 @@ namespace RTE {
 			GL_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]));
 		} else {
 			glDisable(GL_BLEND);
-			glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]);
+			GL_CHECK(glActiveTexture(GL_TEXTURE1));
+			GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture));
+			GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]));
 		}
 
 		GL_CHECK(glBindVertexArray(m_ScreenVAO));
 		m_ScreenBlitShader->Use();
 		m_ScreenBlitShader->SetInt(m_ScreenBlitShader->GetTextureUniform(), 0);
-		m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), glm::mat4(1.0f));
-		m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), glm::mat4(1.0f));
-		if(g_ActivityMan.IsInActivity()) {
-			m_ScreenBlitShader->SetInt(m_ScreenBlitShader->GetUniformLocation("rteGUITexture"), 1);
+		m_ScreenBlitShader->SetInt(m_ScreenBlitShader->GetUniformLocation("rteGUITexture"), 1);
+		if (m_MultiDisplayWindows.empty()) {
+			m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), glm::mat4(1.0f));
+			m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), glm::mat4(1.0f));
+			GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+		} else {
+			for (size_t i = 0; i < m_MultiDisplayWindows.size(); ++i) {
+				SDL_GL_MakeCurrent(m_MultiDisplayWindows.at(i).get(), m_GLContext.get());
+				int windowW, windowH;
+				SDL_GL_GetDrawableSize(m_PrimaryWindow.get(), &windowW, &windowH);
+				GL_CHECK(glViewport(0, 0, windowW, windowH));
+				glm::mat4 viewportMatrix = glm::ortho<float>(0, windowW, windowH, 0, -1.0, 1.0);
+				m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), viewportMatrix);
+				m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), m_MultiDisplayTextureOffsets.at(i));
+			}
 		}
-
-		GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-
 
 		SDL_GL_SwapWindow(m_PrimaryWindow.get());
 	}

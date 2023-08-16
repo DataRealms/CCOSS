@@ -414,6 +414,7 @@ namespace RTE {
 		m_Blit8->SetInt(paletteUniform, 1);
 		glm::mat4 transformMatrix(1);
 		m_Blit8->SetMatrix4f(m_Blit8->GetProjectionUniform(), glm::mat4(1));
+		m_Blit8->SetMatrix4f(m_Blit8->GetUVTransformUniform(), glm::mat4(1));
 		m_Blit8->SetMatrix4f(m_Blit8->GetTransformUniform(), transformMatrix);
 		GL_CHECK(glBindVertexArray(m_VertexArray));
 		GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
@@ -453,7 +454,6 @@ namespace RTE {
 		GL_CHECK(glBindTexture(GL_TEXTURE_2D, *reinterpret_cast<GLuint*>(m_YellowGlow->extra)));
 
 		// Randomly sample the entire backbuffer, looking for pixels to put a glow on.
-		// NOTE THIS IS SLOW, especially on higher resolutions!
 		for (const Box &glowBox : m_PostScreenGlowBoxes) {
 			startX = glowBox.m_Corner.GetFloorIntX();
 			startY = glowBox.m_Corner.GetFloorIntY();
@@ -484,7 +484,6 @@ namespace RTE {
 						m_PostProcessShader->SetMatrix4f(m_PostProcessShader->GetProjectionUniform(), m_ProjectionMatrix);
 						m_PostProcessShader->SetMatrix4f(m_PostProcessShader->GetTransformUniform(), transformMatrix);
 						GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-						std::cout << "drew glow" <<  std::endl;
 					}
 					// TODO: Enable and add more colors once we actually have something that needs these.
 					// RED

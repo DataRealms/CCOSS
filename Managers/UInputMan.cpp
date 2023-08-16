@@ -770,7 +770,7 @@ namespace RTE {
 						break;
 					}
 					m_RawMouseMovement += Vector(static_cast<float>(inputEvent.motion.xrel), static_cast<float>(inputEvent.motion.yrel));
-					m_AbsoluteMousePos.SetXY(static_cast<float>(inputEvent.motion.x * g_WindowMan.GetResMultiplier()), static_cast<float>(inputEvent.motion.y * g_WindowMan.GetResMultiplier()));
+					m_AbsoluteMousePos.SetXY(static_cast<float>(inputEvent.motion.x), static_cast<float>(inputEvent.motion.y));
 					if (g_WindowMan.FullyCoversAllDisplays()) {
 						int windowPosX = 0;
 						int windowPosY = 0;

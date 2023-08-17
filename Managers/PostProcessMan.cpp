@@ -107,12 +107,12 @@ namespace RTE {
 	void PostProcessMan::CreateGLBackBuffers() {
 		glBindTexture(GL_TEXTURE_2D, m_BackBuffer8);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, m_BackBuffer32);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindTexture(GL_TEXTURE_1D, m_Palette8Texture);
 		glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, c_PaletteEntriesNumber, 0, GL_RGBA, GL_UNSIGNED_INT, 0);
@@ -427,6 +427,7 @@ namespace RTE {
 		GL_CHECK(glBlendColor(0.5F, 0.5F, 0.5F, 0.5F));
 		GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, m_PostProcessFramebuffer));
 		GL_CHECK(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_BackBuffer32, 0));
+		glViewport(0, 0, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h);
 
 		m_PostProcessShader->Use();
 
@@ -478,8 +479,8 @@ namespace RTE {
 					// YELLOW
 					if ((testpixel == g_YellowGlowColor && RandomNum() < 0.9F) || testpixel == 98 || (testpixel == 120 && RandomNum() < 0.7F)) {
 						glm::mat4 transformMatrix(1);
-						transformMatrix = glm::translate(transformMatrix, glm::vec3(x - 2, y - 2, 0));
-						transformMatrix = glm::scale(transformMatrix, glm::vec3(m_YellowGlow->w, m_YellowGlow->h, 1.0));
+						transformMatrix = glm::translate(transformMatrix, glm::vec3(x + 0.5f, y + 0.5f, 0));
+						transformMatrix = glm::scale(transformMatrix, glm::vec3(m_YellowGlow->w * 0.5f, m_YellowGlow->h * 0.5f, 1.0));
 						m_PostProcessShader->SetInt(m_PostProcessShader->GetTextureUniform(), 0);
 						m_PostProcessShader->SetMatrix4f(m_PostProcessShader->GetProjectionUniform(), m_ProjectionMatrix);
 						m_PostProcessShader->SetMatrix4f(m_PostProcessShader->GetTransformUniform(), transformMatrix);
@@ -526,7 +527,7 @@ namespace RTE {
 				glm::mat4 transformMatrix(1);
 				transformMatrix = glm::translate(transformMatrix, glm::vec3(effectPosX, effectPosY, 0));
 				transformMatrix = glm::translate(transformMatrix, glm::vec3(-0.5f, -0.5f, 0.0f));
-				transformMatrix = glm::scale(transformMatrix, glm::vec3(effectBitmap->w*0.5f, effectBitmap->h*0.5f, 1.0));
+				transformMatrix = glm::scale(transformMatrix, glm::vec3(effectBitmap->w * 0.5f, effectBitmap->h * 0.5f, 1.0));
 				transformMatrix = glm::rotate(transformMatrix, glm::radians(postEffect.m_Angle), glm::vec3(0, 0, 1));
 
 				glBindTexture(GL_TEXTURE_2D, *reinterpret_cast<GLuint*>(postEffect.m_Bitmap->extra));

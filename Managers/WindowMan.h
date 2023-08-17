@@ -102,7 +102,7 @@ namespace RTE {
 		/// Gets how many times the game resolution is currently being multiplied and the backbuffer stretched across for better readability.
 		/// </summary>
 		/// <returns>What multiple the game resolution is currently sized at.</returns>
-		int GetResMultiplier() const { return m_ResMultiplier; }
+		float GetResMultiplier() const { return m_ResMultiplier; }
 
 		/// <summary>
 		/// Gets whether VSync is enabled.
@@ -260,7 +260,7 @@ namespace RTE {
 
 		int m_ResX; //!< Game window width.
 		int m_ResY; //!< Game window height.
-		int m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
+		float m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
 
 		bool m_EnableVSync; //!< Whether vertical synchronization is enabled.
 		bool m_IgnoreMultiDisplays; //!< Whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
@@ -291,7 +291,7 @@ namespace RTE {
 		/// <param name="resX">Game window width to check.</param>
 		/// <param name="resY">Game window height to check.</param>
 		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
-		void ValidateResolution(int &resX, int &resY, int &resMultiplier) const;
+		void ValidateResolution(int &resX, int &resY, float &resMultiplier) const;
 
 		/// <summary>
 		/// Attempts to revert to the previous resolution settings if the new ones failed for whatever reason. Will recursively attempt to revert to defaults if previous settings fail as well.

@@ -13,6 +13,7 @@
 #include "Shader.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/epsilon.hpp"
 
 namespace RTE {
 
@@ -126,7 +127,7 @@ namespace RTE {
 
 		int windowPosX = (m_ResX * m_ResMultiplier <= m_PrimaryWindowDisplayWidth) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
 		int windowPosY = SDL_WINDOWPOS_CENTERED;
-		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
+		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE;
 
 		if (FullyCoversPrimaryWindowDisplayOnly()) {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -146,6 +147,7 @@ namespace RTE {
 				RTEAbort("Failed to create window because:\n" + std::string(SDL_GetError()));
 			}
 		}
+		SDL_SetWindowMinimumSize(m_PrimaryWindow.get(), c_DefaultResX, c_DefaultResY);
 	}
 
 	void WindowMan::InitializeOpenGL() {
@@ -155,7 +157,9 @@ namespace RTE {
 			RTEAbort("Failed to create OpenGL context because:\n" + std::string(SDL_GetError()));
 		}
 
-		std::cout << gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress) << std::endl;
+		if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress)) {
+			RTEAbort("Failed to load GL functions!");
+		}
 
 		SDL_GL_SetSwapInterval(m_EnableVSync ? 1 : 0);
 		glEnable(GL_BLEND);
@@ -179,8 +183,8 @@ namespace RTE {
 		glGenTextures(1, &m_BackBuffer32Texture);
 		glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_ResX, m_ResY, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -305,11 +309,11 @@ namespace RTE {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::ValidateResolution(int &resX, int &resY, int &resMultiplier) const {
+	void WindowMan::ValidateResolution(int &resX, int &resY, float &resMultiplier) const {
 		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY || resMultiplier < 1 || resMultiplier > 8) {
-			resMultiplier = std::clamp<int>(resMultiplier, 1, 8);
-			resX = std::min(resX, m_MaxResX / resMultiplier);
-			resY = std::min(resY, m_MaxResY / resMultiplier);
+			resMultiplier = std::clamp<float>(resMultiplier, 1, 8);
+			resX = std::min<float>(resX, m_MaxResX / resMultiplier);
+			resY = std::min<float>(resY, m_MaxResY / resMultiplier);
 			RTEError::ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 			g_SettingsMan.SetSettingsNeedOverwrite();
 		}
@@ -352,7 +356,7 @@ namespace RTE {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::ChangeResolution(int newResX, int newResY, bool upscaled, bool displaysAlreadyMapped) {
-		int newResMultiplier = upscaled ? 2 : 1;
+		float newResMultiplier = upscaled ? 2 : 1;
 
 		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier) {
 			return;
@@ -560,6 +564,22 @@ namespace RTE {
 					m_FocusEventsDispatchedByDisplaySwitchIn = false;
 					m_FocusEventsDispatchedByMovingBetweenWindows = false;
 					break;
+				case SDL_WINDOWEVENT_SIZE_CHANGED:
+				{
+					double aspectRatio = 16.0/9.0;
+					double inverseRatio = 9.0/16.0;
+					double newRatio = (static_cast<double>(windowEvent.window.data1) / static_cast<double>(windowEvent.window.data2));
+					if (glm::epsilonNotEqual<double>(aspectRatio, newRatio, glm::epsilon<double>())) {
+						if (newRatio > aspectRatio){
+							SDL_SetWindowSize(m_PrimaryWindow.get(), windowEvent.window.data1, windowEvent.window.data1 * inverseRatio);
+							m_ResMultiplier = static_cast<float>(windowEvent.window.data1) / static_cast<float>(m_ResX);
+						} else {
+							SDL_SetWindowSize(m_PrimaryWindow.get(), aspectRatio * windowEvent.window.data2, windowEvent.window.data2);
+							m_ResMultiplier = static_cast<float>(windowEvent.window.data2) / static_cast<float>(m_ResY);
+						}
+					}
+					break;
+				}
 				default:
 					break;
 			}

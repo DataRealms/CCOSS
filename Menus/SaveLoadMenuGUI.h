@@ -48,8 +48,10 @@ namespace RTE {
 		/// Struct containing information about a valid Savegame.
 		/// </summary>
 		struct SaveRecord {
-			std::string SaveName; //!< Savegame name.
-			std::filesystem::file_time_type SaveDate; //!< Savegame last modified date.
+			std::filesystem::path SavePath; //!< Savegame filepath.
+			std::filesystem::file_time_type SaveDate; //!< Last modified date.
+			std::string Activity; //!< The activity name.
+			std::string Scene; //!< The scene name.
 
 			bool operator<(const SaveRecord &rhs) const { return SaveDate > rhs.SaveDate; }
 		};
@@ -78,9 +80,14 @@ namespace RTE {
 		bool ListsFetched() const { return m_SaveGamesFetched; }
 
 		/// <summary>
-		/// Fills the SaveGames list with all valid savegames, then fills the SaveGamesListBox using it.
+		/// Fills the SaveGames list with all valid savegames.
 		/// </summary>
 		void PopulateSaveGamesList();
+
+		/// <summary>
+		/// Updates the SaveGamesListBox GUI.
+		/// </summary>
+		void UpdateSaveGamesGUIList();
 
 		/// <summary>
 		/// Loads the currently selected savefile.

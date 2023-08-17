@@ -213,7 +213,7 @@ namespace RTE {
 
 	void GUIInputWrapper::UpdateKeyJoyMouseInput(float keyElapsedTime) {
 		//TODO Try to not use magic numbers throughout this method.
-		int mouseDenominator = g_WindowMan.GetResMultiplier();
+		float mouseDenominator = g_WindowMan.GetResMultiplier();
 		Vector joyKeyDirectional = g_UInputMan.GetMenuDirectional() * 5;
 
 		// See how much to accelerate the joystick input based on how long the stick has been pushed around.

@@ -110,29 +110,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PauseMenuGUI::EnableOrDisablePauseMenuFeatures() {
-		bool disableSaving = true;
 		bool disableModManager = true;
 
 		if (const Activity *activity = g_ActivityMan.GetActivity(); activity) {
-			disableSaving = !activity->GetAllowsUserSaving();
 			disableModManager = activity->GetClassName() != "GAScripted";
 		}
-
-		if (m_SavingButtonsDisabled != disableSaving) {
-			int yOffset = 0;
-
-			for (size_t pauseMenuButton = PauseMenuButton::SaveOrLoadGameButton; pauseMenuButton < PauseMenuButton::SettingsButton; ++pauseMenuButton) {
-				m_PauseMenuButtons[pauseMenuButton]->SetEnabled(!disableSaving);
-				m_PauseMenuButtons[pauseMenuButton]->SetVisible(!disableSaving);
-				yOffset += m_PauseMenuButtons[pauseMenuButton]->GetHeight();
-			}
-
-			for (size_t pauseMenuButton = PauseMenuButton::SettingsButton; pauseMenuButton < PauseMenuButton::ButtonCount; ++pauseMenuButton) {
-				m_PauseMenuButtons[pauseMenuButton]->MoveRelative(0, yOffset * (disableSaving ? -1 : 1));
-			}
-			m_PauseMenuBox->MoveRelative(0, yOffset / 2 * (disableSaving ? 1 : -1));
-		}
-		m_SavingButtonsDisabled = disableSaving;
 
 		if (m_ModManagerButtonDisabled != disableModManager) {
 			GUIButton *modManagerButton = m_PauseMenuButtons[PauseMenuButton::ModManagerButton];
@@ -143,9 +125,10 @@ namespace RTE {
 			int yOffset = m_PauseMenuButtons[PauseMenuButton::ModManagerButton]->GetHeight();
 
 			m_PauseMenuButtons[PauseMenuButton::ResumeButton]->MoveRelative(0, yOffset * (disableModManager ? -1 : 1));
-			m_PauseMenuBox->MoveRelative(0, yOffset / 2 * (disableSaving ? 1 : -1));
+			m_PauseMenuBox->MoveRelative(0, yOffset / 2 * -1);
+
+			m_ModManagerButtonDisabled = disableModManager;
 		}
-		m_ModManagerButtonDisabled = disableModManager;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

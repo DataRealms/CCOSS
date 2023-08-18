@@ -13,6 +13,7 @@
 #include "GUIButton.h"
 #include "GUIListBox.h"
 #include "GUITextBox.h"
+#include "GUIComboBox.h"
 
 namespace RTE {
 
@@ -31,6 +32,12 @@ namespace RTE {
 		GUICollectionBox *saveGameMenuBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSaveGameMenu"));
 		saveGameMenuBox->CenterInParent(true, true);
 		saveGameMenuBox->SetPositionAbs(saveGameMenuBox->GetXPos(), (rootBox->GetHeight() < 540) ? saveGameMenuBox->GetYPos() - 15 : 140);
+
+		m_OrderByComboBox = dynamic_cast<GUIComboBox*>(m_GUIControlManager->GetControl("ComboOrderBy"));
+		m_OrderByComboBox->AddItem("Name");
+		m_OrderByComboBox->AddItem("Date");
+		m_OrderByComboBox->AddItem("Activity");
+		m_OrderByComboBox->SetSelectedIndex(1); //order by Date by default
 
 		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMainMenu"));
 
@@ -107,7 +114,14 @@ namespace RTE {
 
 	void SaveLoadMenuGUI::UpdateSaveGamesGUIList()
 	{
-		std::sort(m_SaveGames.begin(), m_SaveGames.end());
+		const std::string& currentOrder = m_OrderByComboBox->GetSelectedItem()->m_Name;
+		if (currentOrder == "Name") {
+			std::stable_sort(m_SaveGames.begin(), m_SaveGames.end(), [](const SaveRecord& lhs, const SaveRecord& rhs) { return lhs.SavePath.stem().string() < rhs.SavePath.stem().string(); });
+		} else if (currentOrder == "Date") {
+			std::stable_sort(m_SaveGames.begin(), m_SaveGames.end(), [](const SaveRecord& lhs, const SaveRecord& rhs) { return lhs.SaveDate > rhs.SaveDate; });
+		} else if (currentOrder == "Activity") {
+			std::stable_sort(m_SaveGames.begin(), m_SaveGames.end(), [](const SaveRecord& lhs, const SaveRecord& rhs) { return lhs.Activity < rhs.Activity; });
+		}
 
 		m_SaveGamesListBox->ClearList();
 		for (int i = 0; i < m_SaveGames.size(); i++) {
@@ -180,6 +194,10 @@ namespace RTE {
 					const SaveRecord &record = m_SaveGames.at(m_SaveGamesListBox->GetSelected()->m_ExtraIndex);
 					//m_DescriptionLabel->SetText(record.GetDisplayString());
 					m_SaveGameName->SetText(record.SavePath.stem().string());
+				}
+
+				if (guiEvent.GetControl() == m_OrderByComboBox && guiEvent.GetMsg() == GUIComboBox::Closed) {
+					UpdateSaveGamesGUIList();
 				}
 			}
 		}

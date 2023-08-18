@@ -12,6 +12,7 @@ namespace RTE {
 	class GUIButton;
 	class GUIListBox;
 	class GUITextBox;
+	class GUIComboBox;
 
 	/// <summary>
 	/// Integrated savegame user interface composition and handling.
@@ -52,8 +53,6 @@ namespace RTE {
 			std::filesystem::file_time_type SaveDate; //!< Last modified date.
 			std::string Activity; //!< The activity name.
 			std::string Scene; //!< The scene name.
-
-			bool operator<(const SaveRecord &rhs) const { return SaveDate > rhs.SaveDate; }
 		};
 
 		std::unique_ptr<GUIControlManager> m_GUIControlManager; //!< The GUIControlManager which holds all the GUIControls of the SaveLoadMenuGUI.
@@ -70,7 +69,8 @@ namespace RTE {
 		GUIButton *m_LoadButton;
 		GUIButton *m_CreateButton;
 		GUIListBox *m_SaveGamesListBox;
-		GUILabel *m_DescriptionLabel;
+		GUILabel* m_DescriptionLabel;
+		GUIComboBox *m_OrderByComboBox;
 
 #pragma region Mod and Script Handling
 		/// <summary>

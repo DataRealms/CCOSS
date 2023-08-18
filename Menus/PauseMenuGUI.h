@@ -68,6 +68,11 @@ namespace RTE {
 		void StoreFrameForUseAsBackdrop();
 
 		/// <summary>
+		/// Clears the current backdrop back to black.
+		/// </summary>
+		void ClearBackdrop();
+
+		/// <summary>
 		/// Updates the PauseMenuGUI state.
 		/// </summary>
 		/// <returns>The result of the PauseMenuGUI input and event update. See PauseMenuUpdateResult enumeration.</returns>

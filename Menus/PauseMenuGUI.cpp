@@ -154,6 +154,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void PauseMenuGUI::ClearBackdrop() {
+		clear_bitmap(m_BackdropBitmap);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	PauseMenuGUI::PauseMenuUpdateResult PauseMenuGUI::Update() {
 		m_UpdateResult = PauseMenuUpdateResult::NoEvent;
 
@@ -169,7 +175,7 @@ namespace RTE {
 				BlinkResumeButton();
 				break;
 			case PauseMenuScreen::SaveOrLoadGameScreen:
-				backToMainScreen = m_SaveLoadMenu->HandleInputEvents();
+				backToMainScreen = m_SaveLoadMenu->HandleInputEvents(this);
 				break;
 			case PauseMenuScreen::SettingsScreen:
 				backToMainScreen = m_SettingsMenu->HandleInputEvents();

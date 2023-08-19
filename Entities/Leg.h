@@ -82,6 +82,18 @@ namespace RTE {
 		float GetMaxLength() const { return m_MaxExtension; }
 
 		/// <summary>
+		/// Gets the move speed of this Leg, where 1.0 is instant and 0.0 is no movement.
+		/// </summary>
+		/// <returns>The move speed of this Leg.</returns>
+		float GetMoveSpeed() const { return m_MoveSpeed; }
+
+		/// <summary>
+		/// Sets the move speed of this Leg, where 1.0 is instant and 0.0 is no movement.
+		/// </summary>
+		/// <returns>The new move speed of this Leg.</returns>
+		void SetMoveSpeed(float newMoveSpeed) { m_MoveSpeed = newMoveSpeed; }
+
+		/// <summary>
 		/// Sets the position this Leg should move towards, in absolute coordinates.
 		/// </summary>
 		/// <param name="targetPosition">The position the Leg should move towards.</param>

@@ -461,40 +461,59 @@ namespace RTE {
 		AllegroBitmap playerGUIBitmap(drawScreen);
 		GUIFont *font = m_IsSmall ? g_FrameMan.GetSmallFont() : g_FrameMan.GetLargeFont();
 		Matrix rotation = Matrix(m_RotAngle);
+		Vector targetPosAdjustment = Vector();
 
 		BITMAP *tempDrawBitmap = nullptr;
 		if (m_BlendMode > DrawBlendMode::NoBlend || m_RotAngle != 0) {
-			tempDrawBitmap = create_bitmap_ex(8, font->CalculateWidth(m_Text), font->CalculateHeight(m_Text));
+			int textWidth = font->CalculateWidth(m_Text);
+			int textHeight = font->CalculateHeight(m_Text);
+
+			tempDrawBitmap = create_bitmap_ex(8, textWidth * 2, textHeight);
 			clear_to_color(tempDrawBitmap, ColorKeys::g_MaskColor);
 			AllegroBitmap tempDrawAllegroBitmap(tempDrawBitmap);
-			font->DrawAligned(&tempDrawAllegroBitmap, 0, 0, m_Text, m_Alignment);
+			font->DrawAligned(&tempDrawAllegroBitmap, textWidth, 0, m_Text, m_Alignment);
+
+			targetPosAdjustment = Vector(static_cast<float>(textWidth), 0);
 		}
 
 		if (!g_SceneMan.SceneWrapsX() && !g_SceneMan.SceneWrapsY()) {
-			Vector drawStart = m_StartPos - targetPos;
+			Vector drawStart = m_StartPos - targetPos - targetPosAdjustment;
 
-			if (m_BlendMode > DrawBlendMode::NoBlend && m_RotAngle != 0) {
-				rotate_sprite_trans(drawScreen, tempDrawBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
-			} else if (m_RotAngle != 0) {
-				rotate_sprite(drawScreen, tempDrawBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+			if (m_BlendMode > DrawBlendMode::NoBlend) {
+				if (m_RotAngle != 0) {
+					rotate_sprite_trans(drawScreen, tempDrawBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+				} else {
+					draw_trans_sprite(drawScreen, tempDrawBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY());
+				}
 			} else {
-				font->DrawAligned(&playerGUIBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_Text, m_Alignment);
+				if (m_RotAngle != 0) {
+					rotate_sprite(drawScreen, tempDrawBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+				} else {
+					font->DrawAligned(&playerGUIBitmap, drawStart.GetFloorIntX(), drawStart.GetFloorIntY(), m_Text, m_Alignment);
+				}
 			}
 		} else {
 			Vector drawStartLeft;
 			Vector drawStartRight;
 
-			TranslateCoordinates(targetPos, m_StartPos, drawStartLeft, drawStartRight);
+			TranslateCoordinates(targetPos - targetPosAdjustment, m_StartPos, drawStartLeft, drawStartRight);
 
-			if (m_BlendMode > DrawBlendMode::NoBlend && m_RotAngle != 0) {
-				rotate_sprite_trans(drawScreen, tempDrawBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
-				rotate_sprite_trans(drawScreen, tempDrawBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
-			} else if (m_RotAngle != 0) {
-				rotate_sprite(drawScreen, tempDrawBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
-				rotate_sprite(drawScreen, tempDrawBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+			if (m_BlendMode > DrawBlendMode::NoBlend) {
+				if (m_RotAngle != 0) {
+					rotate_sprite_trans(drawScreen, tempDrawBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+					rotate_sprite_trans(drawScreen, tempDrawBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+				} else {
+					draw_trans_sprite(drawScreen, tempDrawBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY());
+					draw_trans_sprite(drawScreen, tempDrawBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY());
+				}
 			} else {
-				font->DrawAligned(&playerGUIBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), m_Text, m_Alignment);
-				font->DrawAligned(&playerGUIBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), m_Text, m_Alignment);
+				if (m_RotAngle != 0) {
+					rotate_sprite(drawScreen, tempDrawBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+					rotate_sprite(drawScreen, tempDrawBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), ftofix(rotation.GetAllegroAngle()));
+				} else {
+					font->DrawAligned(&playerGUIBitmap, drawStartLeft.GetFloorIntX(), drawStartLeft.GetFloorIntY(), m_Text, m_Alignment);
+					font->DrawAligned(&playerGUIBitmap, drawStartRight.GetFloorIntX(), drawStartRight.GetFloorIntY(), m_Text, m_Alignment);
+				}
 			}
 		}
 		if (tempDrawBitmap) { destroy_bitmap(tempDrawBitmap); }

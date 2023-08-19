@@ -191,8 +191,8 @@ namespace RTE {
 		int m_SceneWidth; //!<
 		int m_SceneHeight; //!<
 
-		int m_MouseButtonPressedState[3]; //!<
-		int m_MouseButtonReleasedState[3]; //!<
+		int m_MouseButtonPressedState[MAX_MOUSE_BUTTONS]; //!<
+		int m_MouseButtonReleasedState[MAX_MOUSE_BUTTONS]; //!<
 		int m_MouseWheelMoved; //!< Whether the mouse wheel was moved this Update. Used to make mouse wheel detection better.
 
 	private:

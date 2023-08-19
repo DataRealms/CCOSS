@@ -2963,7 +2963,7 @@ void MetagameGUI::CompletedActivity()
             // However, don't suck up actors of any non-winning team, and don't save the brains if we autoresolved, because that took care of placing the resident brains already
             pAlteredScene->RetrieveSceneObjects(true, winningTeam, autoResolved);
             // Save out the altered scene before clearing out its data from memory
-            pAlteredScene->SaveData(METASAVEPATH + std::string(AUTOSAVENAME) + " - " + pAlteredScene->GetPresetName());
+            pAlteredScene->SaveData(METASAVEPATH + std::string(AUTOSAVENAME) + " - " + pAlteredScene->GetPresetName(), false);
             // Clear the bitmap data etc of the altered scene, we don't need to copy that over
             pAlteredScene->ClearData();
 

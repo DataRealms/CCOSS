@@ -108,6 +108,9 @@ namespace RTE {
 		m_ScreenDumpNamePlaceholder = std::unique_ptr<BITMAP, BitmapDeleter>(create_bitmap_ex(24, 1, 1));
 		clear_bitmap(m_ScreenDumpNamePlaceholder.get());
 
+		// Use fastest compression in save_png().
+		_png_compression_level = 1;
+
 		return 0;
 	}
 

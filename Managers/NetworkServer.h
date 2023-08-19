@@ -219,7 +219,7 @@ namespace RTE {
 
 		std::string m_ServerPort; //!<
 
-		ClientConnection m_ClientConnections[c_MaxClients]; //!<
+		std::array<ClientConnection, c_MaxClients> m_ClientConnections; //!<
 
 		bool m_UseNATService; //!< Whether a NAT service is used for punch-through.
 		RakNet::NatPunchthroughClient m_NATPunchthroughClient; //!<
@@ -276,12 +276,12 @@ namespace RTE {
 
 		std::mutex m_Mutex[c_MaxClients]; //!<
 
-		std::queue<MsgInput> m_InputMessages[c_MaxClients]; //!<
+		std::vector<MsgInput> m_InputMessages[c_MaxClients]; //!< Message Queue for received input events to be processed this frame.
 
 		unsigned char m_SceneID; //!<
 
-		bool m_EndActivityVotes[c_MaxClients]; //!< Votes from each player required to return to the Multiplayer Lobby.
-		bool m_RestartActivityVotes[c_MaxClients]; //!< Votes from each player required to restart the current activity.
+		std::array<bool, c_MaxClients> m_EndActivityVotes; //!< Votes from each player required to return to the Multiplayer Lobby.
+		std::array<bool, c_MaxClients> m_RestartActivityVotes; //!< Votes from each player required to restart the current activity.
 
 		long long m_LatestRestartTime; //!< The time, in ticks, that the last activity restart took place on the server.
 

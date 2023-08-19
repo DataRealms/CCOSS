@@ -5,6 +5,5 @@ if host_machine.system() in ['linux', 'darwin']
 endif
 if host_machine.system() == 'windows'
   external_inc_dirs += include_directories('win',
-                                           'win/SDL2',
                                            'win/LZ4',)
 endif

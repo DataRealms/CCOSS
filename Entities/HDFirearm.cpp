@@ -655,7 +655,7 @@ void HDFirearm::Activate() {
 
     if (!IsReloading()) {
 		if (m_DeactivationSound && m_DeactivationSound->IsBeingPlayed()) { m_DeactivationSound->FadeOut(); }
-        if (m_ActiveSound && !m_ActiveSound->IsBeingPlayed()) { m_ActiveSound->Play(this->m_Pos); }
+        if (m_ActiveSound && !m_ActiveSound->IsBeingPlayed() && (m_ActiveSound->GetLoopSetting() == -1 || !wasActivated)) { m_ActiveSound->Play(this->m_Pos); }
         if (m_PreFireSound && !wasActivated && !m_PreFireSound->IsBeingPlayed()) { m_PreFireSound->Play(this->m_Pos); }
     }
 }

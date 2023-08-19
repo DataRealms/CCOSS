@@ -68,7 +68,7 @@ jobs:
           CC: "gcc"
           CXX: "g++"
         run: |
-          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} build
+          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} -Db_lto=true build
 
       - name: Configure for AppImage
         if: ${{inputs.upload_artefacts}}
@@ -133,7 +133,7 @@ jobs:
           CXX: "g++-12"
           LDFLAGS: "-static-libgcc -static-libstdc++"
         run: |
-          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}}  build
+          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} -Db_lto=false build
           meson compile -C build
 
       - name: Artifact Deploy

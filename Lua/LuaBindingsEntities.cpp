@@ -287,7 +287,6 @@ namespace RTE {
 		.def("DropAllInventory", &Actor::DropAllInventory)
 		.def("DropAllGold", &Actor::DropAllGold)
 		.def("IsInventoryEmpty", &Actor::IsInventoryEmpty)
-		.def("FlashWhite", &Actor::FlashWhite)
 		.def("DrawWaypoints", &Actor::DrawWaypoints)
 		.def("SetMovePathToUpdate", &Actor::SetMovePathToUpdate)
 		.def("UpdateMovePath", &Actor::UpdateMovePath)
@@ -770,7 +769,8 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, Leg) {
 		return ConcreteTypeLuaClassDefinition(Leg, Attachable)
 
-		.property("Foot", &Leg::GetFoot, &LuaAdaptersPropertyOwnershipSafetyFaker::LegSetFoot);
+		.property("Foot", &Leg::GetFoot, &LuaAdaptersPropertyOwnershipSafetyFaker::LegSetFoot)
+		.property("MoveSpeed", &Leg::GetMoveSpeed, &Leg::SetMoveSpeed);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -926,6 +926,7 @@ namespace RTE {
 		.def("ForceDeepCheck", &MOSRotating::ForceDeepCheck)
 		.def("GibThis", &MOSRotating::GibThis)
 		.def("MoveOutOfTerrain", &MOSRotating::MoveOutOfTerrain)
+		.def("FlashWhite", &MOSRotating::FlashWhite)
 		.def("GetGibWoundLimit", (int (MOSRotating:: *)() const) &MOSRotating::GetGibWoundLimit)
 		.def("GetGibWoundLimit", (int (MOSRotating:: *)(bool positiveDamage, bool negativeDamage, bool noDamage) const) &MOSRotating::GetGibWoundLimit)
 		.def("GetWoundCount", (int (MOSRotating:: *)() const) &MOSRotating::GetWoundCount)

@@ -31,3 +31,10 @@ sources += files(
 #'GLCheck.cpp',
 'SpatialPartitionGrid.cpp',
 )
+
+if host_machine.system() == 'windows'
+  sources += files(
+	'StackWalker/StackWalker.cpp',
+    'RTEStackTrace.cpp',
+  )
+endif

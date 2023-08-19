@@ -71,6 +71,7 @@ namespace RTE {
 		GUITextBox *m_SaveGameName;
 		GUIButton *m_LoadButton;
 		GUIButton *m_CreateButton;
+		GUIButton *m_OverwriteButton;
 		GUIButton *m_DeleteButton;
 		GUIListBox *m_SaveGamesListBox;
 		GUILabel *m_ActivityCannotBeSavedLabel;

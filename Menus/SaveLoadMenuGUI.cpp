@@ -60,6 +60,7 @@ namespace RTE {
 		m_SaveGameName = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("SaveGameName"));
 		m_LoadButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonLoad"));
 		m_CreateButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonCreate"));
+		m_OverwriteButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonOverwrite"));
 		m_DeleteButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonDelete"));
 		m_ActivityCannotBeSavedLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ActivityCannotBeSavedWarning"));
 
@@ -210,13 +211,31 @@ namespace RTE {
 
 	void SaveLoadMenuGUI::UpdateButtonEnabledStates() {
 		bool allowSave = g_ActivityMan.GetActivityAllowsSaving() && m_SaveGameName->GetText() != "";
-		bool allowLoad = m_SaveGamesListBox->GetSelectedIndex() > -1 && m_SaveGameName->GetText() != "" && m_SaveGameName->GetText() == m_SaveGames[m_SaveGamesListBox->GetSelected()->m_ExtraIndex].SavePath.stem().string();
-		bool allowDelete = allowLoad;
 
-		m_CreateButton->SetVisible(allowSave);
-		m_CreateButton->SetEnabled(allowSave);
-		m_LoadButton->SetEnabled(allowLoad);
-		m_DeleteButton->SetEnabled(allowDelete);
+		int existingSaveItemIndex = -1;
+		for (int i = 0; i < m_SaveGamesListBox->GetItemList()->size(); ++i) {
+			SaveRecord& save = m_SaveGames[m_SaveGamesListBox->GetItem(i)->m_ExtraIndex];
+			if (save.SavePath.stem().string() == m_SaveGameName->GetText()) {
+				existingSaveItemIndex = i;
+				break;
+			}
+		}
+
+		// Select the item in the list - selecting -1 unselects all
+		m_SaveGamesListBox->SetSelectedIndex(existingSaveItemIndex);
+
+		bool saveExists = existingSaveItemIndex != -1;
+
+		bool allowCreate = allowSave && !saveExists;
+		m_CreateButton->SetVisible(allowCreate);
+		m_CreateButton->SetEnabled(allowCreate);
+
+		bool allowOverwrite = allowSave && saveExists;
+		m_OverwriteButton->SetVisible(allowOverwrite);
+		m_OverwriteButton->SetEnabled(allowOverwrite);
+
+		m_LoadButton->SetEnabled(saveExists);
+		m_DeleteButton->SetEnabled(saveExists);
 
 		m_ActivityCannotBeSavedLabel->SetVisible(g_ActivityMan.GetActivity() && !g_ActivityMan.GetActivityAllowsSaving());
 	}
@@ -244,7 +263,7 @@ namespace RTE {
 						}
 						return true;
 					}
-				} else if (guiEvent.GetControl() == m_CreateButton) {
+				} else if (guiEvent.GetControl() == m_CreateButton || guiEvent.GetControl() == m_OverwriteButton) {
 					CreateSave();
 				} else if (guiEvent.GetControl() == m_DeleteButton) {
 					DeleteSave();

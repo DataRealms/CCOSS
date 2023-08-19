@@ -15,6 +15,7 @@ namespace RTE {
 	class GUIListBox;
 	class GUITextBox;
 	class GUIComboBox;
+	class GUICollectionBox;
 
 	/// <summary>
 	/// Integrated savegame user interface composition and handling.
@@ -48,6 +49,12 @@ namespace RTE {
 #pragma endregion
 
 	private:
+		enum class ConfirmDialogMode {
+			None,
+			ConfirmOverwrite,
+			ConfirmDelete
+		};
+
 		/// <summary>
 		/// Struct containing information about a valid Savegame.
 		/// </summary>
@@ -67,6 +74,7 @@ namespace RTE {
 		/// <summary>
 		/// GUI elements that compose the Mod Manager menu screen.
 		/// </summary>
+		GUICollectionBox *m_SaveGameMenuBox;
 		GUIButton *m_BackToMainButton;
 		GUITextBox *m_SaveGameName;
 		GUIButton *m_LoadButton;
@@ -76,6 +84,13 @@ namespace RTE {
 		GUIListBox *m_SaveGamesListBox;
 		GUILabel *m_ActivityCannotBeSavedLabel;
 		GUIComboBox *m_OrderByComboBox;
+
+		// The confirmation box and its controls
+		ConfirmDialogMode m_ConfirmDialogMode;
+		GUICollectionBox *m_ConfirmationBox;
+		GUILabel *m_ConfirmationLabel;
+		GUIButton* m_ConfirmationButton;
+		GUIButton *m_CancelButton;
 
 #pragma region Savegame Handling
 		/// <summary>
@@ -115,6 +130,11 @@ namespace RTE {
 		/// Updates buttons and sets whether or not they should be enabled.
 		/// </summary>
 		void UpdateButtonEnabledStates();
+
+		/// <summary>
+		/// Shows confirmation box for overwrite or delete.
+		/// </summary>
+		void SwitchToConfirmDialogMode(ConfirmDialogMode mode);
 
 		// Disallow the use of some implicit methods.
 		SaveLoadMenuGUI(const SaveLoadMenuGUI &reference) = delete;

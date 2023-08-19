@@ -33,9 +33,9 @@ namespace RTE {
 		GUICollectionBox *rootBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("root"));
 		rootBox->Resize(rootBoxMaxWidth, g_WindowMan.GetResY());
 
-		GUICollectionBox *saveGameMenuBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSaveGameMenu"));
-		saveGameMenuBox->CenterInParent(true, true);
-		saveGameMenuBox->SetPositionAbs(saveGameMenuBox->GetXPos(), (rootBox->GetHeight() < 540) ? saveGameMenuBox->GetYPos() - 15 : 140);
+		m_SaveGameMenuBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("CollectionBoxSaveGameMenu"));
+		m_SaveGameMenuBox->CenterInParent(true, true);
+		m_SaveGameMenuBox->SetPositionAbs(m_SaveGameMenuBox->GetXPos(), (rootBox->GetHeight() < 540) ? m_SaveGameMenuBox->GetYPos() - 15 : 140);
 
 		m_OrderByComboBox = dynamic_cast<GUIComboBox*>(m_GUIControlManager->GetControl("ComboOrderBy"));
 		m_OrderByComboBox->AddItem("Name");
@@ -49,7 +49,7 @@ namespace RTE {
 			m_BackToMainButton->SetSize(120, 20);
 			m_BackToMainButton->SetText("Back to Pause Menu");
 		}
-		m_BackToMainButton->SetPositionAbs((rootBox->GetWidth() - m_BackToMainButton->GetWidth()) / 2, saveGameMenuBox->GetYPos() + saveGameMenuBox->GetHeight() + 10);
+		m_BackToMainButton->SetPositionAbs((rootBox->GetWidth() - m_BackToMainButton->GetWidth()) / 2, m_SaveGameMenuBox->GetYPos() + m_SaveGameMenuBox->GetHeight() + 10);
 
 		m_SaveGamesListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ListBoxSaveGames"));
 		m_SaveGamesListBox->SetFont(m_GUIControlManager->GetSkin()->GetFont("FontConsoleMonospace.png"));
@@ -63,6 +63,15 @@ namespace RTE {
 		m_OverwriteButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonOverwrite"));
 		m_DeleteButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonDelete"));
 		m_ActivityCannotBeSavedLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ActivityCannotBeSavedWarning"));
+
+		m_ConfirmationBox = dynamic_cast<GUICollectionBox *>(m_GUIControlManager->GetControl("ConfirmDialog"));
+		m_ConfirmationBox->CenterInParent(true, true);
+
+		m_ConfirmationLabel = dynamic_cast<GUILabel *>(m_GUIControlManager->GetControl("ConfirmLabel"));
+		m_ConfirmationButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ConfirmButton"));
+		m_CancelButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("CancelButton"));
+
+		SwitchToConfirmDialogMode(ConfirmDialogMode::None);
 
 		m_SaveGamesFetched = false;
 	}
@@ -242,6 +251,27 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void SaveLoadMenuGUI::SwitchToConfirmDialogMode(ConfirmDialogMode mode)
+	{
+		m_ConfirmDialogMode = mode;
+
+		bool dialogOpen = m_ConfirmDialogMode != ConfirmDialogMode::None;
+		m_SaveGameMenuBox->SetEnabled(!dialogOpen);
+		m_ConfirmationBox->SetEnabled(dialogOpen);
+		m_ConfirmationBox->SetVisible(dialogOpen);
+
+		switch (m_ConfirmDialogMode) {
+		case ConfirmDialogMode::ConfirmOverwrite:
+			m_ConfirmationLabel->SetText("Are you sure you want to overwrite this savegame?");
+			break;
+		case ConfirmDialogMode::ConfirmDelete:
+			m_ConfirmationLabel->SetText("Are you sure you want to delete this savegame?");
+			break;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool SaveLoadMenuGUI::HandleInputEvents(PauseMenuGUI *pauseMenu) {
 		if (!ListsFetched()) {
 			PopulateSaveGamesList();
@@ -263,10 +293,24 @@ namespace RTE {
 						}
 						return true;
 					}
-				} else if (guiEvent.GetControl() == m_CreateButton || guiEvent.GetControl() == m_OverwriteButton) {
+				} else if (guiEvent.GetControl() == m_CreateButton) {
 					CreateSave();
+				} else if (guiEvent.GetControl() == m_OverwriteButton) {
+					SwitchToConfirmDialogMode(ConfirmDialogMode::ConfirmOverwrite);
 				} else if (guiEvent.GetControl() == m_DeleteButton) {
-					DeleteSave();
+					SwitchToConfirmDialogMode(ConfirmDialogMode::ConfirmDelete);
+				} else if (guiEvent.GetControl() == m_ConfirmationButton) {
+					switch (m_ConfirmDialogMode) {
+					case ConfirmDialogMode::ConfirmOverwrite:
+						CreateSave();
+						break;
+					case ConfirmDialogMode::ConfirmDelete:
+						DeleteSave();
+						break;
+					}
+					SwitchToConfirmDialogMode(ConfirmDialogMode::None);
+				} else if (guiEvent.GetControl() == m_CancelButton) {
+					SwitchToConfirmDialogMode(ConfirmDialogMode::None);
 				}
 			} else if (guiEvent.GetType() == GUIEvent::Notification) {
 				if (guiEvent.GetMsg() == GUIButton::Focused && dynamic_cast<GUIButton *>(guiEvent.GetControl())) { 

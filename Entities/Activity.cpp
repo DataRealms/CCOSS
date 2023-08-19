@@ -340,7 +340,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::End() {
-		g_AudioMan.FinishAllLoopingSounds();
+		g_AudioMan.FinishIngameLoopingSounds();
 		// Actor control is automatically disabled when players are set to observation mode, so no need to do anything directly.
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ViewState[player] = ViewState::Observe;
@@ -639,7 +639,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Activity::GetDifficultyString(int difficulty) {
-		if (difficulty < DifficultySetting::CakeDifficulty) {
+		if (difficulty <= DifficultySetting::CakeDifficulty) {
 			return "Cake";
 		} else if (difficulty <= DifficultySetting::EasyDifficulty) {
 			return "Easy";
@@ -811,24 +811,29 @@ void Activity::Clear() {
 		}
 
 		float totalValue = orbitedCraft->GetTotalValue(0, foreignCostMult, nativeCostMult);
-		std::snprintf(messageString, sizeof(messageString), "Returned Craft + Cargo added %.0f oz to Funds!", totalValue);
 
+		std::string craftText = "Returned craft";
+		if (!orbitedCraft->IsInventoryEmpty()) { 
+			craftText += " + cargo";
+		}
+		if (totalValue > 0.0F) {
+			m_TeamFunds[orbitedCraftTeam] += totalValue;
+			std::snprintf(messageString, sizeof(messageString), "%s added %.0f oz to funds!", craftText.c_str(), totalValue);
+		}
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			if (m_IsActive[player]) {
 				if (brainOnBoard && orbitedCraft == GetPlayerBrain(static_cast<Players>(player))) {
 					m_BrainEvacuated[player] = true;
-					std::snprintf(messageString, sizeof(messageString), "YOUR BRAIN HAS BEEN EVACUATED BACK INTO ORBIT!");
-				}
-
-				if (m_Team[player] == orbitedCraftTeam) {
-					g_FrameMan.ClearScreenText(ScreenOfPlayer(ScreenOfPlayer(static_cast<Players>(player))));
+					g_FrameMan.ClearScreenText(ScreenOfPlayer(static_cast<Players>(player)));
+					g_FrameMan.SetScreenText("YOUR BRAIN HAS BEEN EVACUATED BACK INTO ORBIT!", ScreenOfPlayer(static_cast<Players>(player)), 0, 3500);
+				} else if (m_Team[player] == orbitedCraftTeam && totalValue > 0.0F) {
+					g_FrameMan.ClearScreenText(ScreenOfPlayer(static_cast<Players>(player)));
 					g_FrameMan.SetScreenText(messageString, ScreenOfPlayer(static_cast<Players>(player)), 0, 3500);
 					m_MessageTimer[player].Reset();
 				}
 			}
 		}
 
-		m_TeamFunds[orbitedCraftTeam] += totalValue;
 		orbitedCraft->SetGoldCarried(0);
 		orbitedCraft->SetHealth(orbitedCraft->GetMaxHealth());
 

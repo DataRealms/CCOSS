@@ -228,17 +228,10 @@ namespace RTE {
 		msg.MouseY = static_cast<int>(mouse.GetY());
 
 		// Those are update in Update every frame to catch short events like clicks and releases
-		msg.MouseButtonPressed[MOUSE_LEFT] = m_MouseButtonPressedState[MOUSE_LEFT] == 1 ? true : false;
-		msg.MouseButtonPressed[MOUSE_MIDDLE] = m_MouseButtonPressedState[MOUSE_MIDDLE] == 1 ? true : false;
-		msg.MouseButtonPressed[MOUSE_RIGHT] = m_MouseButtonPressedState[MOUSE_RIGHT] == 1 ? true : false;
 
-		msg.MouseButtonReleased[MOUSE_LEFT] = m_MouseButtonReleasedState[MOUSE_LEFT] == 1 ? true : false;
-		msg.MouseButtonReleased[MOUSE_MIDDLE] = m_MouseButtonReleasedState[MOUSE_MIDDLE] == 1 ? true : false;
-		msg.MouseButtonReleased[MOUSE_RIGHT] = m_MouseButtonReleasedState[MOUSE_RIGHT] == 1 ? true : false;
-
-		msg.MouseButtonHeld[MOUSE_LEFT] = g_UInputMan.MouseButtonHeld(MOUSE_LEFT, -1);
-		msg.MouseButtonHeld[MOUSE_MIDDLE] = g_UInputMan.MouseButtonHeld(MOUSE_MIDDLE, -1);
-		msg.MouseButtonHeld[MOUSE_RIGHT] = g_UInputMan.MouseButtonHeld(MOUSE_RIGHT, -1);
+		msg.MouseButtonState[MOUSE_LEFT] = g_UInputMan.MouseButtonHeld(MOUSE_LEFT, -1);
+		msg.MouseButtonState[MOUSE_MIDDLE] = g_UInputMan.MouseButtonHeld(MOUSE_MIDDLE, -1);
+		msg.MouseButtonState[MOUSE_RIGHT] = g_UInputMan.MouseButtonHeld(MOUSE_RIGHT, -1);
 
 		for (int i = 0; i < MAX_MOUSE_BUTTONS; i++) {
 			m_MouseButtonPressedState[i] = -1;
@@ -251,20 +244,16 @@ namespace RTE {
 			msg.MouseWheelMoved = 0;
 		}
 
-		msg.InputElementHeld = 0;
-		msg.InputElementPressed = 0;
-		msg.InputElementReleased = 0;
+		msg.InputElementState = 0;
 
-		msg.ResetActivityVote = g_UInputMan.KeyHeld(KEY_BACKSPACE) ? true : false;
-		msg.RestartActivityVote = g_UInputMan.KeyHeld(KEY_BACKSLASH) ? true : false;
+		msg.ResetActivityVote = g_UInputMan.KeyHeld(SDLK_BACKSPACE) ? true : false;
+		msg.RestartActivityVote = g_UInputMan.KeyHeld(SDLK_BACKSLASH) ? true : false;
 
 		unsigned int bitMask = 0x1;
 
 		// Store element states as bit flags
 		for (int i = 0; i < INPUT_COUNT; i++) {
-			if (g_UInputMan.ElementHeld(0, i)) { msg.InputElementHeld = msg.InputElementHeld | bitMask; }
-			if (g_UInputMan.NetworkAccumulatedElementPressed(i)) { msg.InputElementPressed = msg.InputElementPressed | bitMask; }
-			if (g_UInputMan.NetworkAccumulatedElementReleased(i)) { msg.InputElementReleased = msg.InputElementReleased | bitMask; }
+			if (g_UInputMan.ElementHeld(0, i)) { msg.InputElementState = msg.InputElementState | bitMask; }
 
 			bitMask <<= 1;
 		}

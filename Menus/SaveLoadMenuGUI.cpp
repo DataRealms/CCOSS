@@ -251,8 +251,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void SaveLoadMenuGUI::SwitchToConfirmDialogMode(ConfirmDialogMode mode)
-	{
+	void SaveLoadMenuGUI::SwitchToConfirmDialogMode(ConfirmDialogMode mode) {
 		m_ConfirmDialogMode = mode;
 
 		bool dialogOpen = m_ConfirmDialogMode != ConfirmDialogMode::None;

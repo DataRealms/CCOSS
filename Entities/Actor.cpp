@@ -112,8 +112,6 @@ void Actor::Clear() {
 	m_MaxInventoryMass = -1.0F;
 	m_pItemInReach = nullptr;
     m_HUDStack = 0;
-    m_FlashWhiteMS = 0;
-    m_WhiteFlashTimer.Reset();
 	m_DeploymentID = 0;
     m_PassengerSlots = 1;
 
@@ -601,7 +599,7 @@ bool Actor::HasObjectInGroup(std::string groupName) const
 
 void Actor::SetTeam(int team)
 {
-    SceneObject::SetTeam(team);
+	MovableObject::SetTeam(team);
 
     // Change the Team Icon to display
     m_pTeamIcon = 0;
@@ -1140,40 +1138,6 @@ bool Actor::ParticlePenetration(HitData &hd) {
     return penetrated;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnMOHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits another MO.
-//                  This is called by the owned Atom/AtomGroup of this MovableObject during
-//                  travel.
-
-bool Actor::OnMOHit(MovableObject *pOtherMO)
-{
-/* The ACraft now actively suck things in with cast rays instead
-    // See if we hit any craft with open doors to get sucked into
-    ACraft *pCraft = dynamic_cast<ACraft *>(pOtherMO);
-
-    // Don't let things of wrong teams get sucked into other team's craft
-    if (!IsSetToDelete() && pCraft && m_Team == pCraft->GetTeam() && (pCraft->GetHatchState() == ACraft::OPEN || pCraft->GetHatchState() == ACraft::OPENING))
-    {
-        // Switch control to the craft we just entered, if this is currently player controlled
-        // Set AI controller of this one going into the ship
-        if (g_ActivityMan.GetActivity() && this->GetController()->IsPlayerControlled())
-            g_ActivityMan.GetActivity()->SwitchToActor(pCraft, this->GetController()->GetPlayer(), this->GetTeam());
-        // Add (copy) to the ship's inventory
-        pCraft->AddInventoryItem(dynamic_cast<MovableObject *>(this->Clone()));
-        // Delete the original from scene - this is safer than 'removing' or handing over ownership halfway through MovableMan's update
-        this->SetToDelete();
-        // Terminate; we got sucked into the craft; so communicate this out
-        return true;
-    }
-*/
-    // Don't terminate, continue travel
-    return false;
-}
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetAIModeIcon
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1482,15 +1446,6 @@ void Actor::Update()
         g_MovableMan.SortTeamRoster(m_Team);
     }
 
-    // Reduce the remaining white flash time
-    if (m_FlashWhiteMS)
-    {
-        m_FlashWhiteMS -= m_WhiteFlashTimer.GetElapsedRealTimeMS();
-        m_WhiteFlashTimer.Reset();
-        if (m_FlashWhiteMS < 0)
-            m_FlashWhiteMS = 0;
-    }
-
 	int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
 	if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer)) {
 		if (m_PrevHealth - m_Health > 1.5F) {
@@ -1529,22 +1484,6 @@ void Actor::FullUpdate() {
     m_Controller.Update();
     Update();
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this Actor's current graphical representation to a
-//                  BITMAP of choice.
-
-void Actor::Draw(BITMAP *pTargetBitmap,
-                 const Vector &targetPos,
-                 DrawMode mode,
-                 bool onlyPhysical) const
-{
-    // Make it draw white if is going to be drawn as color
-    MOSRotating::Draw(pTargetBitmap, targetPos, mode == g_DrawColor && m_FlashWhiteMS ? g_DrawWhite : mode, onlyPhysical);
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DrawHUD

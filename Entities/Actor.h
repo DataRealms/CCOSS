@@ -995,17 +995,6 @@ ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FlashWhite
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells to make this and all children get drawn as completely white, but
-//                  only for a specified amount of time.
-// Arguments:       For how long to flash the whiteness, in MS.
-// Return value:    None.
-
-    void FlashWhite(int howLongMS = 32) { m_FlashWhiteMS = howLongMS; m_WhiteFlashTimer.Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          DrawWaypoints
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes this draw its current waypoints and related data on the scene in
@@ -1053,20 +1042,6 @@ ClassInfoGetters;
 //                  false will trivially be returned here.
 
 	bool ParticlePenetration(HitData &hd) override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnMOHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits another MO.
-//                  This is called by the owned Atom/AtomGroup of this MovableObject during
-//                  travel.
-// Arguments:       The other MO hit. Ownership is not transferred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this hit.
-
-	bool OnMOHit(MovableObject *pOtherMO) override;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  PreTravel
@@ -1204,20 +1179,6 @@ ClassInfoGetters;
 // Return value:    None.
 
 	void SetSightDistance(float newValue) { m_SightDistance = newValue; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this Actor's current graphical representation to a
-//                  BITMAP of choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  In which mode to draw in. See the DrawMode enumeration for the modes.
-//                  Whether to not draw any extra 'ghost' items of this MovableObject,
-//                  indicator arrows or hovering HUD text and so on.
-// Return value:    None.
-
-    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1523,10 +1484,6 @@ protected:
     HeldDevice *m_pItemInReach;
     // HUD positioning aid
     int m_HUDStack;
-    // For how much longer to draw this as white. 0 means don't draw as white
-    int m_FlashWhiteMS;
-    // The timer that measures and deducts past time from the remaining white flash time
-    Timer m_WhiteFlashTimer;
 	// ID of deployment which spawned this actor
 	unsigned int m_DeploymentID;
     // How many passenger slots this actor will take in a craft

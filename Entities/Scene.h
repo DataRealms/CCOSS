@@ -391,10 +391,11 @@ EntityAllocation(Scene)
 // Description:     Saves data currently in memory to disk.
 // Arguments:       The filepath base to the where to save the Bitmap data. This means
 //                  everything up to the extension. "FG" and "Mat" etc will be added.
+//					Whether or not to save asynchronously.
 // Return value:    An error return value signaling success or any particular failure.
 //                  Anything below 0 is an error signal.
 
-	int SaveData(std::string pathBase);
+	int SaveData(std::string pathBase, bool doAsyncSaves = true);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

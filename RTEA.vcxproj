@@ -205,9 +205,10 @@
       <ConformanceMode>true</ConformanceMode>
       <IncludeInUnityFile>false</IncludeInUnityFile>
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
+      <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;libminizip.lib;libpng16-static.lib;setupapi.lib;version.lib;imm32.lib;fmod_vc.lib;allegro-debug.lib;loadpng-debug.lib;liblz4_debug_static.lib;luajit-debug.lib;luabind-debug.lib;raknet-debug.lib;sdl2main-debug.lib;sdl2-debug.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;libminizip.lib;libpng16-static.lib;setupapi.lib;version.lib;imm32.lib;fmod_vc.lib;allegro-debug.lib;loadpng-debug.lib;liblz4_debug_static.lib;luajit-debug.lib;luabind-debug.lib;raknet-debug.lib;sdl2main-debug.lib;sdl2-debug.lib;opengl32.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external\sources\zlib-ng-2.1.3\_Bin;external\sources\libpng-1.6.40\_Bin;external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\sources\minizip-ng-4.0.0\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -308,9 +309,10 @@
       <ConformanceMode>true</ConformanceMode>
       <IncludeInUnityFile>false</IncludeInUnityFile>
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
+      <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;libminizip.lib;libpng16-static.lib;setupapi.lib;version.lib;imm32.lib;fmod_vc.lib;allegro-debug.lib;loadpng-debug.lib;liblz4_debug_static.lib;luajit-debug-release.lib;luabind-debug.lib;raknet-debug.lib;sdl2main-debug.lib;sdl2-debug.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;libminizip.lib;libpng16-static.lib;setupapi.lib;version.lib;imm32.lib;fmod_vc.lib;allegro-debug.lib;loadpng-debug.lib;liblz4_debug_static.lib;luajit-debug-release.lib;luabind-debug.lib;raknet-debug.lib;sdl2main-debug.lib;sdl2-debug.lib;opengl32.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external\sources\zlib-ng-2.1.3\_Bin;external\sources\libpng-1.6.40\_Bin;external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\sources\minizip-ng-4.0.0\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -340,7 +342,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\sources\libpng-1.6.40\include;$(ProjectDir)external\sources\zlib-ng-2.1.3\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include;$(ProjectDir)external\sources\minizip-ng-4.0.0\include;$(ProjectDir)external\sources\minizip-ng-4.0.0\src</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;ZLIB_COMPAT;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;TARGET_MACHINE_X86;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -429,7 +431,7 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;libminizip.lib;libpng16-static.lib;fmod_vc.lib;allegro-debug-release.lib;loadpng-debug-release.lib;liblz4_release_static.lib;luajit-debug-release.lib;luabind-debug-release.lib;raknet-release.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;libminizip.lib;libpng16-static.lib;fmod_vc.lib;allegro-debug-release.lib;loadpng-debug-release.lib;liblz4_release_static.lib;luajit-debug-release.lib;luabind-debug-release.lib;raknet-release.lib;opengl32.lib;SDL2.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external\sources\zlib-ng-2.1.3\_Bin;external\sources\libpng-1.6.40\_Bin;external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\sources\minizip-ng-4.0.0\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -490,7 +492,7 @@
       <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic-32.lib;libminizip-32.lib;libpng16-static-32.lib;fmodL_vc.lib;allegro-release-32.lib;loadpng-release-32.lib;liblz4_release_static.lib;luajit-release-32.lib;luabind-release-32.lib;raknet-release-32.lib;opengl32.lib;SDL2-32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external\sources\zlib-ng-2.1.3\_Bin;external\sources\libpng-1.6.40\_Bin;external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\sources\minizip-ng-4.0.0\_Bin;external\lib\win\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
       <OptimizeReferences>true</OptimizeReferences>
@@ -547,10 +549,10 @@
       <AddCodeAfterSourceInclude>#undef GetClassName</AddCodeAfterSourceInclude>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;libminizip.lib;libpng16-static.lib;fmod_vc.lib;allegro-release.lib;loadpng-release.lib;liblz4_release_static.lib;luajit-release.lib;luabind-release.lib;raknet-release.lib;opengl32.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;ws2_32.lib;dinput8.lib;ddraw.lib;dxguid.lib;dsound.lib;zlibstatic.lib;libminizip.lib;libpng16-static.lib;fmod_vc.lib;allegro-release.lib;loadpng-release.lib;liblz4_release_static.lib;luajit-release.lib;luabind-release.lib;raknet-release.lib;opengl32.lib;SDL2.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <AdditionalLibraryDirectories>external\sources\zlib-ng-2.1.3\_Bin;external\sources\libpng-1.6.40\_Bin;external\sources\allegro 4.4.3.1-custom\_Bin;external\sources\SDL2-2.26.3\_Bin;external\sources\luabind-0.7.1\_Bin;external\sources\LuaJIT-2.1\_Bin;external\sources\RakNet\_Bin;external\sources\minizip-ng-4.0.0\_Bin;external\lib\win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
       <OptimizeReferences>true</OptimizeReferences>
@@ -634,6 +636,8 @@
     <ClInclude Include="System\Semver200\semver200.h" />
     <ClInclude Include="System\Semver200\version.h" />
     <ClInclude Include="System\SpatialPartitionGrid.h" />
+    <ClInclude Include="System\RTEStackTrace.h" />
+    <ClInclude Include="System\StackWalker\StackWalker.h" />
     <ClInclude Include="System\StandardIncludes.h" />
     <ClInclude Include="System\Box.h" />
     <ClInclude Include="System\Color.h" />
@@ -864,6 +868,8 @@
     <ClCompile Include="System\Semver200\Semver200_parser.cpp" />
     <ClCompile Include="System\Serializable.cpp" />
     <ClCompile Include="System\SpatialPartitionGrid.cpp" />
+    <ClCompile Include="System\RTEStackTrace.cpp" />
+    <ClCompile Include="System\StackWalker\StackWalker.cpp" />
     <ClCompile Include="System\StandardIncludes.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>StandardIncludes.h</PrecompiledHeaderFile>

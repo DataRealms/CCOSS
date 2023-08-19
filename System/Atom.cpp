@@ -854,8 +854,8 @@ namespace RTE {
 					// Report the hit to both MO's in collision
 					m_LastHit.RootBody[HITOR] = m_LastHit.Body[HITOR]->GetRootParent();
 					m_LastHit.RootBody[HITEE] = m_LastHit.Body[HITEE]->GetRootParent();
-					m_LastHit.RootBody[HITOR]->OnMOHit(m_LastHit.RootBody[HITEE]);
-					m_LastHit.RootBody[HITEE]->OnMOHit(m_LastHit.RootBody[HITOR]);
+					m_LastHit.RootBody[HITOR]->OnMOHit(m_LastHit);
+					m_LastHit.RootBody[HITEE]->OnMOHit(m_LastHit);
 				}
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////

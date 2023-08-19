@@ -14,6 +14,7 @@ namespace RTE {
 	bool System::s_Quit = false;
 	bool System::s_LogToCLI = false;
 	bool System::s_ExternalModuleValidation = false;
+	std::string System::s_ThisExePathAndName = "";
 	std::string System::s_WorkingDirectory = ".";
 	std::vector<size_t> System::s_WorkingTree;
 	std::filesystem::file_time_type System::s_ProgramStartTime = std::filesystem::file_time_type::clock::now();
@@ -28,7 +29,9 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void System::Initialize() {
+	void System::Initialize(const char *thisExePathAndName) {
+		s_ThisExePathAndName = std::filesystem::path(thisExePathAndName).generic_string();
+
 		s_WorkingDirectory = std::filesystem::current_path().generic_string();
 		if (s_WorkingDirectory.back() != '/') { s_WorkingDirectory.append("/"); }
 

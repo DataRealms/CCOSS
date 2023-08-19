@@ -803,37 +803,6 @@ float ACraft::GetCollectedInventoryMass() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnMOHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits another MO.
-//                  This is called by the owned Atom/AtomGroup of this MovableObject during
-//                  travel.
-
-bool ACraft::OnMOHit(MovableObject *pOtherMO)
-{
-/* Obviously don't put craft into craft
-    // See if we hit any craft with open doors to get sucked into
-    ACraft *pCraft = dynamic_cast<ACraft *>(pOtherMO);
-
-    // Don't let things of wrong teams get sucked into other team's craft
-    if (!IsSetToDelete() && pCraft && m_Team == pCraft->GetTeam() && (pCraft->GetHatchState() == ACraft::OPEN || pCraft->GetHatchState() == ACraft::OPENING))
-    {
-        // Add (copy) to the ship's inventory
-        pCraft->AddInventoryItem(dynamic_cast<MovableObject *>(this->Clone()));
-        // Delete the original from scene - this is safer than 'removing' or handing over ownership halfway through MovableMan's update
-        this->SetToDelete();
-        // Terminate; we got sucked into the craft; so communicate this out
-        return true;
-    }
-*/
-    // Don't terminate, continue travel
-    return false;
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void ACraft::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
 	if (g_SettingsMan.CrabBombsEnabled() && !s_CrabBombInEffect) {
 		s_CrabBombInEffect = true;

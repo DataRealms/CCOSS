@@ -544,6 +544,11 @@ enum MOType
 
     bool GetsHitByMOs() const { return m_GetsHitByMOs; }
 
+	/// <summary>
+	/// Sets the team of this MovableObject.
+	/// </summary>
+	/// <param name="team">The new team to assign.</returns>
+	void SetTeam(int team) override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetIgnoresTeamHits
@@ -1259,19 +1264,6 @@ enum MOType
 //                  after this hit.
 
 	bool OnMOHit(HitData &hd);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnMOHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits another MO.
-//                  This is called by the owned Atom/AtomGroup of this MovableObject during
-//                  travel.
-// Arguments:       The other MO hit. Ownership is not transferred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this hit.
-
-    virtual bool OnMOHit(MovableObject *pOtherMO);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

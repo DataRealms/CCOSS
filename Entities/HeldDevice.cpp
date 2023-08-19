@@ -371,21 +371,6 @@ void HeldDevice::Deactivate()
     m_Activated = false;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnMOHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits another MO.
-//                  This is called by the owned Atom/AtomGroup of this MovableObject during
-//                  travel.
-
-bool HeldDevice::OnMOHit(MovableObject *pOtherMO)
-{
-    // Don't terminate, continue on
-    return false;
-}
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool HeldDevice::TransferJointImpulses(Vector &jointImpulses, float jointStiffnessValueToUse, float jointStrengthValueToUse, float gibImpulseLimitValueToUse) {

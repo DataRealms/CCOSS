@@ -183,14 +183,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::SaveAllText(const std::string &filePath) {
+	bool ConsoleMan::SaveAllText(const std::string &filePath) {
 		Writer logWriter(filePath.c_str());
 		if (logWriter.WriterOK()) {
 			for (const std::string &loggedString : m_OutputLog) {
 				logWriter << loggedString;
 			}
+			logWriter.EndWrite();
 			PrintString("SYSTEM: Entire console contents saved to " + filePath);
+			return true;
 		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

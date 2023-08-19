@@ -89,6 +89,8 @@ void MOSRotating::Clear()
     m_LoudnessOnGib = 1;
 	m_DamageMultiplier = 0;
     m_NoSetDamageMultiplier = true;
+	m_FlashWhiteTimer.Reset();
+	m_FlashWhiteTimer.SetRealTimeLimitMS(0);
     m_StringValueMap.clear();
     m_NumberValueMap.clear();
     m_ObjectValueMap.clear();
@@ -1819,6 +1821,8 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode 
     if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
         return;
     }
+
+	if (mode == g_DrawColor && !m_FlashWhiteTimer.IsPastRealTimeLimit()) { mode = g_DrawWhite; }
 
     // Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
     // Only draw attachables and emitters which are not drawn after parent, so we draw them before

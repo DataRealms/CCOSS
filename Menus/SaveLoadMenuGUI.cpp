@@ -72,8 +72,6 @@ namespace RTE {
 		m_CancelButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("CancelButton"));
 
 		SwitchToConfirmDialogMode(ConfirmDialogMode::None);
-
-		m_SaveGamesFetched = false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +84,7 @@ namespace RTE {
 
 		std::string saveFilePath = g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/";
 		for (const auto &entry : std::filesystem::directory_iterator(saveFilePath)) {
-			if (entry.path().extension() == ".ini" && entry.path().filename() != "Index.ini") {
+			if (entry.is_directory()) {
 				SaveRecord record;
 				record.SavePath = entry.path();
 				record.SaveDate = entry.last_write_time();
@@ -97,7 +95,7 @@ namespace RTE {
 		std::for_each(std::execution::par_unseq,
 			m_SaveGames.begin(), m_SaveGames.end(),
 			[](SaveRecord &record) {
-				Reader reader(record.SavePath.string(), true, nullptr, true);
+				Reader reader(record.SavePath.string() + "/Save.ini", true, nullptr, true);
 
 				bool readActivity = false;
 				bool readSceneName = false;
@@ -124,7 +122,6 @@ namespace RTE {
 				record.Scene = originalScenePresetName;
 			});
 
-		m_SaveGamesFetched = true;
 		UpdateSaveGamesGUIList();
 	}
 
@@ -204,23 +201,7 @@ namespace RTE {
 	void SaveLoadMenuGUI::DeleteSave() {
 		std::string saveFilePath = g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + m_SaveGameName->GetText();
 
-		// TODO - it'd be nice to have this all zipped up into one file...
-		std::vector<std::filesystem::path> filePaths;
-		filePaths.emplace_back(saveFilePath + ".ini");
-		filePaths.emplace_back(saveFilePath + " BG.png");
-		filePaths.emplace_back(saveFilePath + " FG.png");
-		filePaths.emplace_back(saveFilePath + " Mat.png");
-		filePaths.emplace_back(saveFilePath + " UST1.png");
-		filePaths.emplace_back(saveFilePath + " UST2.png");
-		filePaths.emplace_back(saveFilePath + " UST3.png");
-		filePaths.emplace_back(saveFilePath + " UST4.png");
-
-		std::for_each(std::execution::par_unseq,
-			filePaths.begin(), filePaths.end(),
-			[](const std::filesystem::path &path) {
-				std::filesystem::remove(path);
-			});
-
+		std::filesystem::remove_all(saveFilePath);
 		g_GUISound.ConfirmSound()->Play();
 
 		PopulateSaveGamesList();
@@ -282,11 +263,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool SaveLoadMenuGUI::HandleInputEvents(PauseMenuGUI *pauseMenu) {
-		if (!ListsFetched()) {
-			PopulateSaveGamesList();
-			UpdateButtonEnabledStates();
-		}
-
 		m_GUIControlManager->Update();
 
 		GUIEvent guiEvent;
@@ -340,6 +316,13 @@ namespace RTE {
 		UpdateButtonEnabledStates();
 
 		return false;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void SaveLoadMenuGUI::Refresh() {
+		PopulateSaveGamesList();
+		UpdateButtonEnabledStates();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

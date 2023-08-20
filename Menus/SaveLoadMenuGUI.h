@@ -43,6 +43,11 @@ namespace RTE {
 		bool HandleInputEvents(PauseMenuGUI *pauseMenu = nullptr);
 
 		/// <summary>
+		/// Causes a refresh of the save files.
+		/// </summary>
+		void Refresh();
+
+		/// <summary>
 		/// Draws the SaveLoadMenuGUI to the screen.
 		/// </summary>
 		void Draw() const;

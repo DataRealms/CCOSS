@@ -136,6 +136,9 @@ namespace RTE {
 	void PauseMenuGUI::SetActiveMenuScreen(PauseMenuScreen screenToShow, bool playButtonPressSound) {
 		if (screenToShow != m_ActiveMenuScreen) {
 			m_ActiveMenuScreen = screenToShow;
+			if (screenToShow == PauseMenuScreen::SaveOrLoadGameScreen) {
+				m_SaveLoadMenu->Refresh();
+			}
 			if (playButtonPressSound) {
 				g_GUISound.ButtonPressSound()->Play();
 			}

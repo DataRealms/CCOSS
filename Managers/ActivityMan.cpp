@@ -78,7 +78,10 @@ namespace RTE {
 			return false;
 		}
 
-		if (scene->SaveData(c_UserScriptedSavesModuleName + "/" + fileName) < 0) {
+		// TODO, save to a zip instead of a directory
+		std::filesystem::create_directory(g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName);
+
+		if (scene->SaveData(c_UserScriptedSavesModuleName + "/" + fileName + "/Save") < 0) {
 			// This print is actually pointless because game will abort if it fails to save layer bitmaps. It stays here for now because in reality the game doesn't properly abort if the layer bitmaps fail to save. It is what it is.
 			g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while saving!");
 			return false;
@@ -102,7 +105,7 @@ namespace RTE {
 		modifiableScene->GetTerrain()->MigrateToModule(g_PresetMan.GetModuleID(c_UserScriptedSavesModuleName));
 
 		// Block the main thread for a bit to let the Writer access the relevant data.
-		std::unique_ptr<Writer> writer(std::make_unique<Writer>(g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini"));
+		std::unique_ptr<Writer> writer(std::make_unique<Writer>(g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + "/Save.ini"));
 		writer->NewPropertyWithValue("Activity", activity);
 
 		// Pull all stuff from MovableMan into the Scene for saving, so existing Actors/ADoors are saved, without transferring ownership, so the game can continue.
@@ -144,7 +147,7 @@ namespace RTE {
 			return false;
 		}
 
-		std::string saveFilePath = g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + ".ini";
+		std::string saveFilePath = g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + "/Save.ini";
 
 		if (!std::filesystem::exists(saveFilePath)) {
 			RTEError::ShowMessageBox("Game loading failed! Make sure you have a saved game called \"" + fileName + "\"");

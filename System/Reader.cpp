@@ -152,7 +152,11 @@ namespace RTE {
 				EndIncludeFile();
 				break;
 			}
-			if (!m_Stream->good() || temp == -1) { ReportError("Stream failed for some reason"); }
+			if (!m_Stream->good() || temp == -1) { 
+				ReportError("Stream failed for some reason");
+				EndIncludeFile(); 
+				break; 
+			}
 			retString.append(1, temp);
 		}
 		// Trim the string of whitespace

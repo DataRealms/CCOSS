@@ -149,8 +149,18 @@ namespace RTE {
 			saveNameText << std::left << std::setfill(' ') << std::setw(32) << save.SavePath.stem().string();
 
 			// This is so much more fucking difficult than it has any right to be
+#if __cpp_lib_chrono >= 201907L
 			const auto saveFsTime = std::chrono::clock_cast<std::chrono::system_clock>(save.SaveDate);
 			const auto saveTime = std::chrono::system_clock::to_time_t(saveFsTime);
+#else
+			// TODO - kill this monstrosity when we move to GCC13
+			auto saveFsTime = std::chrono::system_clock::time_point(save.SaveDate.time_since_epoch());
+	#ifdef _WIN32
+			// Windows epoch time are the number of seconds since... 1601-01-01 00:00:00. Seriously.
+			saveFsTime -= std::chrono::seconds(11644473600LL);
+	#endif
+			const auto saveTime = std::chrono::system_clock::to_time_t(saveFsTime);
+#endif
 			const auto saveTimeLocal = std::localtime(&saveTime);
 
 			std::stringstream saveDateTimeText;

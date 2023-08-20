@@ -15,6 +15,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	Writer::Writer(const std::string &fileName, bool append, bool createDir) {
+		Clear(); 
+		Create(fileName, append, createDir);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Writer::Writer(std::unique_ptr<std::ostream> &&stream) {
+		Clear();
+		Create(std::move(stream));
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int Writer::Create(const std::string &fileName, bool append, bool createDir) {
 		m_FilePath = fileName;
 
@@ -23,13 +37,21 @@ namespace RTE {
 		m_FileName = m_FilePath.substr(slashPos + 1);
 		m_FolderPath = m_FilePath.substr(0, slashPos + 1);
 
-		if (createDir && !std::filesystem::exists(System::GetWorkingDirectory() + m_FolderPath)) { System::MakeDirectory(System::GetWorkingDirectory() + m_FolderPath); }
+		if (createDir && !std::filesystem::exists(System::GetWorkingDirectory() + m_FolderPath)) { 
+			System::MakeDirectory(System::GetWorkingDirectory() + m_FolderPath); 
+		}
 
-		m_Stream = std::make_unique<std::ofstream>(fileName, append ? (std::ios::out | std::ios::app | std::ios::ate) : (std::ios::out | std::ios::trunc));
+		return Create(std::make_unique<std::ofstream>(fileName, append ? (std::ios::out | std::ios::app | std::ios::ate) : (std::ios::out | std::ios::trunc)));
+	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int Writer::Create(std::unique_ptr<std::ostream> &&stream) {
+		m_Stream = std::move(stream);
 		if (!m_Stream->good()) {
 			return -1;
 		}
+
 		return 0;
 	}
 

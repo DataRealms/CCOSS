@@ -127,7 +127,7 @@ namespace RTE {
 
 		int windowPosX = (m_ResX * m_ResMultiplier <= m_PrimaryWindowDisplayWidth) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
 		int windowPosY = SDL_WINDOWPOS_CENTERED;
-		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE;
+		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
 
 		if (FullyCoversPrimaryWindowDisplayOnly()) {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;

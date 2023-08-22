@@ -65,7 +65,7 @@ void MovableMan::Clear()
     m_AlarmEvents.clear();
     m_MOIDIndex.clear();
     m_SplashRatio = 0.75;
-    m_MaxDroppedItems = 25;
+	m_MaxDroppedItems = 100;
     m_SettlingEnabled = true;
     m_MOSubtractionEnabled = true;
 }
@@ -847,6 +847,7 @@ void MovableMan::AddActor(Actor *actorToAdd) {
         }
 
         m_AddedActors.push_back(actorToAdd);
+		// This will call SetTeam and subsequently force the team as active.
 		AddActorToTeamRoster(actorToAdd);
     }
 }
@@ -855,6 +856,7 @@ void MovableMan::AddActor(Actor *actorToAdd) {
 
 void MovableMan::AddItem(HeldDevice *itemToAdd) {
     if (itemToAdd) {
+		g_ActivityMan.GetActivity()->ForceSetTeamAsActive(itemToAdd->GetTeam());
 		itemToAdd->SetAsAddedToMovableMan();
 		itemToAdd->CorrectAttachableAndWoundPositionsAndRotations();
 
@@ -874,6 +876,7 @@ void MovableMan::AddItem(HeldDevice *itemToAdd) {
 
 void MovableMan::AddParticle(MovableObject *particleToAdd){
     if (particleToAdd) {
+		g_ActivityMan.GetActivity()->ForceSetTeamAsActive(particleToAdd->GetTeam());
         particleToAdd->SetAsAddedToMovableMan();
 		if (MOSRotating *particleToAddAsMOSRotating = dynamic_cast<MOSRotating *>(particleToAdd)) { particleToAddAsMOSRotating->CorrectAttachableAndWoundPositionsAndRotations(); }
 

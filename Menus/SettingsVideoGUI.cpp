@@ -39,7 +39,7 @@ namespace RTE {
 
 		m_IgnoreMultiDisplaysCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxIgnoreMultiDisplays"));
 		m_IgnoreMultiDisplaysCheckbox->SetCheck(g_WindowMan.GetIgnoreMultiDisplays());
-		m_IgnoreMultiDisplaysCheckbox->SetVisible(SDL_GetNumVideoDisplays() > 1);
+		m_IgnoreMultiDisplaysCheckbox->SetVisible(m_IgnoreMultiDisplaysCheckbox->GetVisible() && SDL_GetNumVideoDisplays() > 1);
 
 		m_PresetResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioPresetResolution"));
 		m_CustomResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioCustomResolution"));

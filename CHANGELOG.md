@@ -7,12 +7,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ## [Unreleased]
 
 <details><summary><b>Added</b></summary>
+
+- Added in-game pause menu when pressing `Esc`. Pressing `Shift + Esc` will skip this menu and pause into scenario/conquest menu. 
+
 </details>
 
 <details><summary><b>Changed</b></summary>
+
+- Unofficial modules (mods) now use [Semantic Versioning](https://semver.org/) to check which version of the game they target.  
+	As such, the `Index.ini` property `SupportedGameVersion` must now be a valid semantic version number. The game version has also been updated to match this standard.  
+
+	The `SupportedGameVersion` version number must be of the form `X.Y.z`, where:  
+
+	`X` matches the major version of the game,  
+	`Y` is the minimum minor version of the game the mod requires,  
+	`z` is the patch number, which is currently not enforced.  
+
+  Mods published for any development builds must match that development version exactly.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
+
+- Fixed music resuming from incorrect position when unpausing.
+
 </details>
 
 <details><summary><b>Removed</b></summary>
@@ -601,8 +619,6 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - New `MovableObject` Lua (R) property `DistanceTravelled` which returns the amount of pixels the object has travelled since its creation.
 
-- Added `Activity` Lua function `ForceSetTeamAsActive(team)`, which forcefully sets a team as active. Necessary for `Activity`s that don't want to define/show all used teams, but still want `Actor`s of hidden teams to work properly.
-
 - Added `GameActivity` INI property `DefaultGoldMaxDifficulty`, which lets you specify the default gold when the difficulty slider is maxed out.
 
 - Added `HDFirearm` Lua (R/W) property `BaseReloadTime` that lets you get and set the `HDFirearm`'s base reload time (i.e. the reload time before it's adjusted for one-handed reloads where appropriate).
@@ -636,6 +652,10 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `Controller` control state `PIE_MENU_OPENED` that is true for the first Update in which the `PieMenu` is opened.
 
 - Added `Activity` Lua function `GetPlayerController`, which gets you the `Controller` used for GUI stuff and when there's no `Actor` selected in an `Activity`. Be aware, it's very likely possible to cause problems by doing dumb things with this.
+
+- Added `Leg` Lua (R/W) property `MoveSpeed`, which lets you get and set the `Leg`'s `MoveSpeed` scalar, similar to `Arm`s. 1 means instant movement and 0 means no movement.
+
+- Added `LuaMan` Lua function `FileExists`, which lets you check whether a specified file exists. Like with `FileOpen`, the file must be inside a folder ending in `.rte`.
 
 </details>
 
@@ -859,6 +879,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 
 - Changed `LuaMan:FileOpen` access modes so it only allows `"r", "r+", "w", "w+", "a", "a+"`, i.e. specifying type (text, binary) is not supported. See [this reference page](https://cplusplus.com/reference/cstdio/fopen) for details on the access modes.
 
+- Moved `FlashWhite` function from `Actor` to `MOSRotating`.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -885,6 +907,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Fixed `Entity.ModuleName` returning an empty string for `Entities` defined in `Base.rte`. They now return "Base.rte", as they should.
 
 - Fixed `MOSRotating`s registering all penetrations in one frame even when exceeding gibbing conditions. They now omit all collisions after being flagged for deletion, allowing particles like grenade fragments to penetrate other objects.
+
+- Fixed immobile `SoundContainers` not pausing and resuming when you pause/resume an `Activity`.
 
 </details>
 

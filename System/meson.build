@@ -1,6 +1,9 @@
 sources += files(
 'MicroPather/micropather.cpp',
 'glad/gl.c',
+'Semver200/Semver200_comparator.cpp',
+'Semver200/Semver200_modifier.cpp',
+'Semver200/Semver200_parser.cpp',
 'StandardIncludes.cpp',
 'Atom.cpp',
 'ContentFile.cpp',
@@ -44,3 +47,10 @@ imgui_sources = files(
 imugui_include_dirs = include_directories('.', 'imgui')
 
 imgui = static_library('imgui', imgui_sources, dependencies: deps, include_directories:imugui_include_dirs)
+
+if host_machine.system() == 'windows'
+  sources += files(
+	'StackWalker/StackWalker.cpp',
+    'RTEStackTrace.cpp',
+  )
+endif

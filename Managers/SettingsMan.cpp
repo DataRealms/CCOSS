@@ -85,7 +85,7 @@ namespace RTE {
 
 			m_SettingsNeedOverwrite = true;
 
-			Reader newSettingsReader(m_SettingsPath);
+			Reader newSettingsReader(m_SettingsPath, false, nullptr, false, true);
 			return Serializable::Create(newSettingsReader);
 		}
 		return Serializable::Create(settingsReader);

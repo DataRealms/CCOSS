@@ -7,7 +7,7 @@
 #include "loadpng.h"
 
 #ifdef _WIN32
-#define DebuggerBreak __debugbreak()
+#define DebuggerBreak IsDebuggerPresent() ? __debugbreak() : std::abort();
 #else
 #define DebuggerBreak std::abort()
 #endif
@@ -27,40 +27,86 @@ namespace RTE {
 
 	public:
 
-		static bool s_CurrentlyAborting; // Flag to prevent a potential recursive fault while attempting to save the game when aborting.
+		static bool s_CurrentlyAborting; //!< Flag to prevent a potential recursive fault while attempting to save the game when aborting.
+		static bool s_IgnoreAllAsserts; //!< Whether to skip the assert dialog and just let everything burn at whatever point that happens.
+		static std::string s_LastIgnoredAssertDescription; //!< The last ignored assert message.
+		static std::source_location s_LastIgnoredAssertLocation; //!< The last ignored assert call site.
+
+		/// <summary>
+		/// Sets custom handlers for C++ and platform specific exceptions.
+		/// </summary>
+		static void SetExceptionHandlers();
 
 		/// <summary>
 		/// Pops up a message box dialog in the OS. For debug purposes mostly.
 		/// </summary>
 		/// <param name="message">The string that the message box should display.</param>
-		/// <param name="abortMessage">Whether the message box should display the abort title and icon. If not, the warning title and icon will be displayed.</param>
-		static void ShowMessageBox(const std::string &message, bool abortMessage = false);
+		static void ShowMessageBox(const std::string &message);
 
 		/// <summary>
-		/// Abort on Error function. Will try to dump a screenshot, show an abort message, and then quit the program immediately.
+		/// Abort on unhandled exception function. Will try save the current game, to dump a screenshot, dump the console log and show an abort message. Then quit the program immediately.
+		/// </summary>
+		/// <param name="description">Message explaining the exception.</param>
+		/// <param name="callstack">The call stack in string form.</param>
+		static void UnhandledExceptionFunc(const std::string &description, const std::string &callstack = "");
+
+		/// <summary>
+		/// Abort on Error function. Will try save the current game, to dump a screenshot, dump the console log and show an abort message. Then quit the program immediately.
 		/// </summary>
 		/// <param name="description">Message explaining the reason for aborting.</param>
-		/// <param name="file">The source file from which abort was called.</param>
-		/// <param name="line">The line abort was called from in the source file.</param>
-		[[noreturn]] static void AbortFunc(const std::string &description, const std::string &file, int line);
+		/// <param name="srcLocation">std::source_location corresponding to the location of the call site.</param>
+		[[noreturn]] static void AbortFunc(const std::string &description, const std::source_location &srcLocation);
 
 		/// <summary>
-		/// An assert, which upon failure will abort.
+		/// An assert, which will prompt to abort or ignore it.
 		/// </summary>
 		/// <param name="description">The description of the assertion.</param>
-		/// <param name="file">The source file in which the assertion is made.</param>
-		/// <param name="line">The line where the assertion is made.</param>
-		[[noreturn]] static void AssertFunc(const std::string &description, const char *file, int line);
+		/// <param name="srcLocation">std::source_location corresponding to the location of the call site.</param>
+		static void AssertFunc(const std::string &description, const std::source_location &srcLocation);
+
+		/// <summary>
+		/// Formats function signatures so they're slightly more sane.
+		/// </summary>
+		/// <param name="funcSig">Reference to the function signature to format.</param>
+		static void FormatFunctionSignature(std::string &funcSig);
+
+	private:
+
+		/// <summary>
+		/// Pops up the abort message box dialog in the OS, notifying the user about a runtime error.
+		/// </summary>
+		/// <param name="message">The string that the message box should display.</param>
+		/// <returns>Whether to restart the game by launching a new instance, or proceed to exit.</returns>
+		static bool ShowAbortMessageBox(const std::string &message);
+
+		/// <summary>
+		/// Pops up the assert message box dialog in the OS, notifying the user about a runtime error.
+		/// </summary>
+		/// <param name="message">The string that the message box should display.</param>
+		/// <returns>Whether to abort, or ignore the assert and continue execution.</returns>
+		static bool ShowAssertMessageBox(const std::string &message);
+
+		/// <summary>
+		/// Saves the current frame to a file.
+		/// </summary>
+		/// <returns>Whether the file was saved successfully.<returns>
+		static bool DumpAbortScreen();
+
+		/// <summary>
+		/// Attempts to save the current running Activity, so the player can hopefully resume where they were.
+		/// </summary>
+		/// <returns>Whether the Activity was saved successfully.</returns>
+		static bool DumpAbortSave();
 	};
 
 #define RTEAbort(description) \
-	if (!RTEError::s_CurrentlyAborting) {						\
-		RTEError::AbortFunc(description, __FILE__, __LINE__);	\
+	if (!RTEError::s_CurrentlyAborting) {										\
+		RTEError::AbortFunc(description, std::source_location::current());		\
 	}
 
 #define RTEAssert(expression, description) \
-	if (!(expression)) {										\
-		RTEError::AssertFunc(description, __FILE__, __LINE__);	\
+	if (!(expression)) {														\
+		RTEError::AssertFunc(description, std::source_location::current());		\
 	}
 }
 #endif

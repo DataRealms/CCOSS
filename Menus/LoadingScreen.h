@@ -34,6 +34,12 @@ namespace RTE {
 		void Create(AllegroScreen *guiScreen, GUIInputWrapper *guiInput, bool progressReportDisabled);
 
 		/// <summary>
+		/// Creates the loading splash screen and draws the composed frame to the LoadingSplashBitmap.
+		/// </summary>
+		/// <param name="xOffset">Horizontal offset of the loading splash screen.</param>
+		void CreateLoadingSplash(int xOffset = 0);
+
+		/// <summary>
 		/// Creates the GUIListBox that the progress report will be drawn to, if not disabled through the settings file to speed up loading times.
 		/// As it turned out, a massive amount of time is spent updating the GUI control and flipping the frame buffers.
 		/// </summary>
@@ -55,12 +61,18 @@ namespace RTE {
 		/// <param name="reportString">The string to print in the report and log.</param>
 		/// <param name="newItem">Whether to start a new line in the log writer and to scroll the bitmap.</param>
 		static void LoadingSplashProgressReport(const std::string &reportString, bool newItem = false);
+
+		/// <summary>
+		/// Draws the loading splash to the screen.
+		/// </summary>
+		void DrawLoadingSplash();
 #pragma endregion
 
 	private:
 
 		std::unique_ptr<Writer> m_LoadingLogWriter; //!< The Writer that generates the loading log.
 
+		BITMAP *m_LoadingSplashBitmap; //!< BITMAP that is used for drawing the splash screen.
 		BITMAP *m_ProgressListboxBitmap; //!< BITMAP that the progress report will be drawn into.
 		int m_ProgressListboxPosX; //!< Position of the progress report box on X axis.
 		int m_ProgressListboxPosY; //!< Position of the progress report box on Y axis.

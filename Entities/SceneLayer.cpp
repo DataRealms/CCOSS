@@ -200,28 +200,37 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	template <bool TRACK_DRAWINGS>
-	int SceneLayerImpl<TRACK_DRAWINGS>::SaveData(const std::string &bitmapPath) {
+	int SceneLayerImpl<TRACK_DRAWINGS>::SaveData(const std::string &bitmapPath, bool doAsyncSaves) {
 		if (bitmapPath.empty()) {
 			return -1;
 		}
-		g_ActivityMan.IncrementSavingThreadCount();
+		if (doAsyncSaves) {
+			g_ActivityMan.IncrementSavingThreadCount();
+		}
 		if (m_MainBitmap) {
 			// Make a copy of the bitmap to pass to the thread because the bitmap may be offloaded mid thread and everything will be on fire.
 			BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_MainBitmap), m_MainBitmap->w, m_MainBitmap->h);
 			blit(m_MainBitmap, outputBitmap, 0, 0, 0, 0, m_MainBitmap->w, m_MainBitmap->h);
 
-			auto saveLayerBitmap = [bitmapPath](BITMAP *bitmapToSave) {
+			auto saveLayerBitmap = [bitmapPath, doAsyncSaves](BITMAP *bitmapToSave) {
 				PALETTE palette;
 				get_palette(palette);
 				if (save_png(bitmapPath.c_str(), bitmapToSave, palette) != 0) {
 					RTEAbort(std::string("Failed to save SceneLayerImpl bitmap to path and name: " + bitmapPath));
 				}
 				destroy_bitmap(bitmapToSave);
-				g_ActivityMan.DecrementSavingThreadCount();
+				if (doAsyncSaves) {
+					g_ActivityMan.DecrementSavingThreadCount();
+				}
 			};
-			std::thread saveThread(saveLayerBitmap, outputBitmap);
+
 			m_BitmapFile.SetDataPath(bitmapPath);
-			saveThread.detach();
+			if (doAsyncSaves) {
+				std::thread saveThread(saveLayerBitmap, outputBitmap);
+				saveThread.detach();
+			} else {
+				saveLayerBitmap(outputBitmap);
+			}
 		}
 		return 0;
 	}

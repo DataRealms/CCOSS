@@ -69,10 +69,12 @@ namespace RTE {
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("Sounds", &m_SoundChannelGroup) : audioSystemSetupResult;
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("MobileSounds", &m_MobileSoundChannelGroup) : audioSystemSetupResult;
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("ImmobileSounds", &m_ImmobileSoundChannelGroup) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("MenuSounds", &m_MenuSoundChannelGroup) : audioSystemSetupResult;
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addGroup(m_MusicChannelGroup) : audioSystemSetupResult;
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addGroup(m_SoundChannelGroup) : audioSystemSetupResult;
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_SoundChannelGroup->addGroup(m_MobileSoundChannelGroup) : audioSystemSetupResult;
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_SoundChannelGroup->addGroup(m_ImmobileSoundChannelGroup) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_SoundChannelGroup->addGroup(m_MenuSoundChannelGroup) : audioSystemSetupResult;
 
 		m_AudioEnabled = audioSystemSetupResult == FMOD_OK;
 
@@ -244,7 +246,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void AudioMan::FinishAllLoopingSounds() {
+    void AudioMan::FinishIngameLoopingSounds() {
 		if (m_AudioEnabled) {
 			int numberOfPlayingChannels;
 			FMOD::Channel *soundChannel;
@@ -575,7 +577,14 @@ namespace RTE {
 			g_ConsoleMan.PrintString("Unable to select new sounds to play for SoundContainer " + soundContainer->GetPresetName());
 			return false;
 		}
-		FMOD::ChannelGroup *channelGroupToPlayIn = soundContainer->IsImmobile() ? m_ImmobileSoundChannelGroup : m_MobileSoundChannelGroup;
+
+		FMOD::ChannelGroup *channelGroupToPlayIn;
+		if (g_ActivityMan.ActivityRunning()) {
+			channelGroupToPlayIn = soundContainer->IsImmobile() ? m_ImmobileSoundChannelGroup : m_MobileSoundChannelGroup;
+		} else {
+			channelGroupToPlayIn = m_MenuSoundChannelGroup;
+		}
+
 		FMOD::Channel *channel;
 		int channelIndex;
 		std::vector<const SoundSet::SoundData *> selectedSoundData;

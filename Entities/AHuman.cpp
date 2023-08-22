@@ -3582,13 +3582,20 @@ void AHuman::Update()
 			}
 			bool climbing = m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND];
 
+			if (m_StrideSound) {
+				m_StrideSound->SetPosition(m_Pos);
+				if (m_StrideSound->GetLoopSetting() < 0) {
+					if (!m_StrideSound->IsBeingPlayed()) { m_StrideSound->Play(); }
+				} else if (restarted && !climbing) {
+					m_StrideSound->Play();
+				}
+			}
 			if (restarted) {
-				if (!climbing) {
-					if (m_StrideSound) { m_StrideSound->Play(m_Pos); }
-					RunScriptedFunctionInAppropriateScripts("OnStride");
-				} else {
+				if (climbing) {
 					m_WalkAngle[FGROUND] = Matrix();
 					m_WalkAngle[BGROUND] = Matrix();
+				} else {
+					RunScriptedFunctionInAppropriateScripts("OnStride");
 				}
 			}
 
@@ -3732,6 +3739,9 @@ void AHuman::Update()
 
         if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel * m_pBGLeg->GetJointStiffness(), m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
 	}
+    if (m_MoveState != WALK && m_StrideSound && m_StrideSound->GetLoopSetting() < 0) {
+        m_StrideSound->Stop();
+    }
 
     /////////////////////////////////
     // Manage Attachables
@@ -4048,7 +4058,7 @@ void AHuman::DrawThrowingReticle(BITMAP *targetBitmap, const Vector &targetPos, 
 void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     Actor::Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
 
-    DrawMode realMode = (mode == g_DrawColor && m_FlashWhiteMS) ? g_DrawWhite : mode;
+    DrawMode realMode = (mode == g_DrawColor && !m_FlashWhiteTimer.IsPastRealTimeLimit()) ? g_DrawWhite : mode;
     // Note: For some reason the ordering of the attachables list can get messed up. The most important thing here is that the FGArm is on top of everything else.
     if (m_pHead && m_pHead->IsDrawnAfterParent()) { m_pHead->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }
     if (m_pFGArm) { m_pFGArm->Draw(pTargetBitmap, targetPos, realMode, onlyPhysical); }

@@ -139,13 +139,15 @@ namespace RTE {
 	}
 
 	void PostProcessMan::LazyInitBitmap(BITMAP *bitmap) {
-		glGenTextures(1, &m_BitmapTextures[m_BitmapTexturesSize]);
-		bitmap->extra = reinterpret_cast<void *>(&m_BitmapTextures[m_BitmapTexturesSize]);
+		m_BitmapTextures.emplace_back(new GLBitmapInfo);
+		glGenTextures(1, &m_BitmapTextures.back()->m_Texture);
+		bitmap->extra = reinterpret_cast<void *>(m_BitmapTextures.back().get());
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, *reinterpret_cast<GLuint *>(bitmap->extra));
+		glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLBitmapInfo*>(bitmap->extra)->m_Texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap->w, bitmap->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap->line[0]);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glGenerateMipmap(GL_TEXTURE_2D);
 
 		m_BitmapTexturesSize++;
 		if (m_BitmapTexturesSize >= m_BitmapTextures.size()) {

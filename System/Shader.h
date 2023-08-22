@@ -225,7 +225,6 @@ namespace RTE {
 
 #pragma endregion
 	private:
-		static constexpr std::string c_ClassName = "Shader"; //!< A string with the friendly-formatted type name of this object.
 		uint32_t m_ProgramID;
 
 		bool compileShader(uint32_t shaderID, const std::string &data, std::string &error);

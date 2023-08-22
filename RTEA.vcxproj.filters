@@ -37,6 +37,9 @@
     <Filter Include="System\StackWalker">
       <UniqueIdentifier>{a8668dc1-51c5-418d-91bf-7ee92f008cb1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="System\glad">
+      <UniqueIdentifier>{a92cf676-7096-4641-ae98-d02861c1acde}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\Box.h">
@@ -591,6 +594,12 @@
     <ClInclude Include="System\RTEStackTrace.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="System\Shader.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\GLCheck.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1138,6 +1147,15 @@
       <Filter>System\StackWalker</Filter>
     </ClCompile>
     <ClCompile Include="System\RTEStackTrace.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Shader.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\glad\gl.c">
+      <Filter>System\glad</Filter>
+    </ClCompile>
+    <ClCompile Include="System\GLCheck.cpp">
       <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>

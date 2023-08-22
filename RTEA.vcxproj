@@ -626,6 +626,7 @@
     <ClInclude Include="System\Entity.h" />
     <ClInclude Include="System\GameVersion.h" />
     <ClInclude Include="System\GenericSavedData.h" />
+    <ClInclude Include="System\GLCheck.h" />
     <ClInclude Include="System\InputMapping.h" />
     <ClInclude Include="System\InputScheme.h" />
     <ClInclude Include="System\NetworkMessages.h" />
@@ -635,6 +636,7 @@
     <ClInclude Include="System\PieQuadrant.h" />
     <ClInclude Include="System\Semver200\semver200.h" />
     <ClInclude Include="System\Semver200\version.h" />
+    <ClInclude Include="System\Shader.h" />
     <ClInclude Include="System\SpatialPartitionGrid.h" />
     <ClInclude Include="System\RTEStackTrace.h" />
     <ClInclude Include="System\StackWalker\StackWalker.h" />
@@ -859,6 +861,25 @@
     <ClCompile Include="System\Controller.cpp" />
     <ClCompile Include="System\Entity.cpp" />
     <ClCompile Include="System\GenericSavedData.cpp" />
+    <ClCompile Include="System\glad\gl.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Final|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">NotUsing</PrecompiledHeader>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Release|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Final|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Full|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Release|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Final|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Minimal|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug Full|x64'">CompileAsCpp</CompileAs>
+    </ClCompile>
+    <ClCompile Include="System\GLCheck.cpp" />
     <ClCompile Include="System\InputMapping.cpp" />
     <ClCompile Include="System\InputScheme.cpp" />
     <ClCompile Include="System\GraphicalPrimitive.cpp" />
@@ -867,6 +888,7 @@
     <ClCompile Include="System\Semver200\Semver200_modifier.cpp" />
     <ClCompile Include="System\Semver200\Semver200_parser.cpp" />
     <ClCompile Include="System\Serializable.cpp" />
+    <ClCompile Include="System\Shader.cpp" />
     <ClCompile Include="System\SpatialPartitionGrid.cpp" />
     <ClCompile Include="System\RTEStackTrace.cpp" />
     <ClCompile Include="System\StackWalker\StackWalker.cpp" />

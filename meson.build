@@ -2,6 +2,7 @@ project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'extern
 
 #### Build environment Setup ####
 
+compiler = meson.get_compiler('cpp')
 deps=[]
 if host_machine.system() in ['linux','darwin']
   deps = [
@@ -27,11 +28,12 @@ elif host_machine.system() == 'windows'
   minizip_dep = dependency('minizip')
   libpng = subproject('libpng-1.6.40')
   libpng_dep = dependency('libpng')
-  deps += [sdl2_dep, luajit_dep, zlib_dep, minizip_dep, libpng_dep]
+  # Windows Libraries
+  opengl = compiler.find_library('opengl32')
+  deps += [sdl2_dep, luajit_dep, zlib_dep, minizip_dep, libpng_dep, opengl]
 endif
 
 elfname = 'CortexCommand'
-compiler = meson.get_compiler('cpp')
 build_rpath = ''
 link_args=[]
 extra_args=[]

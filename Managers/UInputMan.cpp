@@ -125,8 +125,8 @@ namespace RTE {
 		m_PlayerScreenMouseBounds = {
 			0,
 			0,
-			g_FrameMan.GetPlayerFrameBufferWidth(Players::NoPlayer) * g_WindowMan.GetResMultiplier(),
-			g_FrameMan.GetPlayerFrameBufferHeight(Players::NoPlayer) * g_WindowMan.GetResMultiplier()
+			static_cast<int>(g_FrameMan.GetPlayerFrameBufferWidth(Players::NoPlayer) * g_WindowMan.GetResMultiplier()),
+			static_cast<int>(g_FrameMan.GetPlayerFrameBufferHeight(Players::NoPlayer) * g_WindowMan.GetResMultiplier())
 		};
 
 		return 0;
@@ -456,7 +456,7 @@ namespace RTE {
 			}
 		} else {
 			// Set the mouse bounds to the whole window so ForceMouseWithinBox is not stuck being relative to some player screen, because it can still bind the mouse even if this doesn't.
-			m_PlayerScreenMouseBounds = { 0, 0, g_WindowMan.GetResX() * resMultiplier, g_WindowMan.GetResY() * resMultiplier };
+			m_PlayerScreenMouseBounds = { 0, 0, static_cast<int>(g_WindowMan.GetResX() * resMultiplier), static_cast<int>(g_WindowMan.GetResY() * resMultiplier) };
 			SDL_SetWindowMouseRect(g_WindowMan.GetWindow(), nullptr);
 		}
 	}

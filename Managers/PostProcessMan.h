@@ -12,6 +12,14 @@
 
 namespace RTE {
 	class ScreenShader;
+
+	/// <summary>
+	/// Struct for storing GL information in the BITMAP->extra field.
+	/// </summary>
+	struct GLBitmapInfo {
+		GLuint m_Texture;
+	};
+
 	/// <summary>
 	/// Structure for storing a post-process screen effect to be applied at the last stage of 32bpp rendering.
 	/// </summary>
@@ -211,7 +219,7 @@ namespace RTE {
 		GLuint m_BackBuffer8;
 		GLuint m_BackBuffer32;
 		GLuint m_Palette8Texture;
-		std::vector<GLuint> m_BitmapTextures;
+		std::vector<std::unique_ptr<GLBitmapInfo>> m_BitmapTextures;
 		size_t m_BitmapTexturesSize;
 		GLuint m_BlitFramebuffer;
 		GLuint m_PostProcessFramebuffer;

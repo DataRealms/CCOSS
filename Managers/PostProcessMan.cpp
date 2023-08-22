@@ -33,7 +33,7 @@ namespace RTE {
 		m_Palette8Texture = 0;
 		m_PostProcessFramebuffer = 0;
 		m_PostProcessDepthBuffer = 0;
-		m_BitmapTextures.resize(128);
+		m_BitmapTextures.clear();
 		m_BitmapTexturesSize = 0;
 		m_VertexBuffer = 0;
 		m_VertexArray = 0;
@@ -98,7 +98,9 @@ namespace RTE {
 		glDeleteTextures(1, &m_BackBuffer32);
 		glDeleteTextures(1, &m_Palette8Texture);
 		glDeleteFramebuffers(1, &m_BlitFramebuffer);
-		glDeleteTextures(m_BitmapTextures.size(), m_BitmapTextures.data());
+		for (auto &bitmapTexture: m_BitmapTextures) {
+			glDeleteTextures(1, &bitmapTexture->m_Texture);
+		}
 		glDeleteFramebuffers(1, &m_PostProcessFramebuffer);
 		glDeleteTextures(1, &m_PostProcessDepthBuffer);
 		glDeleteVertexArrays(1, &m_VertexArray);
@@ -149,10 +151,6 @@ namespace RTE {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		m_BitmapTexturesSize++;
-		if (m_BitmapTexturesSize >= m_BitmapTextures.size()) {
-			m_BitmapTextures.resize(m_BitmapTextures.size() * 2);
-		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -454,7 +452,7 @@ namespace RTE {
 
 		GL_CHECK(glBindVertexArray(m_VertexArray));
 		GL_CHECK(glActiveTexture(GL_TEXTURE0));
-		GL_CHECK(glBindTexture(GL_TEXTURE_2D, *reinterpret_cast<GLuint*>(m_YellowGlow->extra)));
+		GL_CHECK(glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLBitmapInfo*>(m_YellowGlow->extra)->m_Texture));
 
 		// Randomly sample the entire backbuffer, looking for pixels to put a glow on.
 		for (const Box &glowBox : m_PostScreenGlowBoxes) {
@@ -532,7 +530,7 @@ namespace RTE {
 				transformMatrix = glm::scale(transformMatrix, glm::vec3(effectBitmap->w * 0.5f, effectBitmap->h * 0.5f, 1.0));
 				transformMatrix = glm::rotate(transformMatrix, glm::radians(postEffect.m_Angle), glm::vec3(0, 0, 1));
 
-				glBindTexture(GL_TEXTURE_2D, *reinterpret_cast<GLuint*>(postEffect.m_Bitmap->extra));
+				glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLBitmapInfo*>(postEffect.m_Bitmap->extra)->m_Texture);
 				m_PostProcessShader->SetMatrix4f(m_PostProcessShader->GetTransformUniform(), transformMatrix);
 
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

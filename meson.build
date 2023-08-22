@@ -189,7 +189,7 @@ subdir('Resources')
 #### Target Definitions ####
 cccpelf = executable(
   elfname, ['Main.cpp', sources], include_directories:[source_inc_dirs, external_inc_dirs], cpp_pch:pch, # Sources options
-  link_with:[external_libs, source_libs, imgui], objects:[external_objects], dependencies:deps,                                # Link options
+  link_with:[external_libs, source_libs], objects:[external_objects], dependencies:deps,                                # Link options
   cpp_args:[extra_args, preprocessor_flags], link_args:[link_args], build_rpath:build_rpath,               # Compiler setup
   name_suffix:suffix,   # Executable name options
   build_by_default:true, # Meson options

@@ -33,21 +33,6 @@ sources += files(
 'SpatialPartitionGrid.cpp',
 )
 
-imgui_sources = files(
-'imgui/imgui.cpp',
-'imgui/imgui_demo.cpp',
-'imgui/imgui_draw.cpp',
-'imgui/imgui_impl_opengl3.cpp',
-'imgui/imgui_impl_sdl2.cpp',
-'imgui/imgui_impl_sdlrenderer2.cpp',
-'imgui/imgui_tables.cpp',
-'imgui/imgui_widgets.cpp',
-)
-
-imugui_include_dirs = include_directories('.', 'imgui')
-
-imgui = static_library('imgui', imgui_sources, dependencies: deps, include_directories:imugui_include_dirs)
-
 if host_machine.system() == 'windows'
   sources += files(
 	'StackWalker/StackWalker.cpp',

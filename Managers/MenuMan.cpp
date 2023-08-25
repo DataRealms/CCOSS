@@ -113,7 +113,6 @@ namespace RTE {
 			if (g_ActivityMan.SkipPauseMenuWhenPausingActivity()) {
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
 			} else {
-				m_PauseMenu->StoreFrameForUseAsBackdrop();
 				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
 			}
 		} else if (!g_ActivityMan.ActivitySetToRestart()) {
@@ -125,7 +124,6 @@ namespace RTE {
 					if (activity->IsOver() || g_ActivityMan.SkipPauseMenuWhenPausingActivity()) {
 						m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
 					} else {
-						m_PauseMenu->StoreFrameForUseAsBackdrop();
 						m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
 					}
 				}

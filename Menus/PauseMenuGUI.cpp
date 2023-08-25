@@ -83,6 +83,8 @@ namespace RTE {
 		}
 		const BITMAP *backbuffer = g_FrameMan.GetBackBuffer32();
 		m_BackdropBitmap = create_bitmap_ex(FrameMan::c_BPP, backbuffer->w, backbuffer->h);
+		unsigned int halfTransBlack = makeacol32(0, 0, 0, 96);
+		clear_to_color(m_BackdropBitmap, halfTransBlack);
 
 		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput, true);
 		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput, true);
@@ -157,15 +159,6 @@ namespace RTE {
 		}
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void PauseMenuGUI::StoreFrameForUseAsBackdrop() {
-		BITMAP *backbuffer = g_FrameMan.GetBackBuffer32();
-		blit(backbuffer, m_BackdropBitmap, 0, 0, 0, 0, backbuffer->w, backbuffer->h);
-
-		set_trans_blender(96, 96, 96, 96);
-		draw_trans_sprite(m_BackdropBitmap, g_FrameMan.GetOverlayBitmap32(), 0, 0);
-	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -301,7 +294,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PauseMenuGUI::Draw() {
-		blit(m_BackdropBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, 0, 0, m_BackdropBitmap->w, m_BackdropBitmap->h);
+		g_WindowMan.DrawPostProcessBuffer();
+		SetTrueAlphaBlender();
+		draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_BackdropBitmap, 0, 0);
+		//blit(m_BackdropBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, 0, 0, m_BackdropBitmap->w, m_BackdropBitmap->h);
 
 		switch (m_ActiveMenuScreen) {
 			case PauseMenuScreen::SettingsScreen:
@@ -315,7 +311,7 @@ namespace RTE {
 				break;
 		}
 		if (m_ActiveDialogBox) {
-			set_trans_blender(128, 128, 128, 128);
+			SetTrueAlphaBlender();
 			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), g_FrameMan.GetOverlayBitmap32(), 0, 0);
 			// Whatever this box may be at this point it's already been drawn by the owning GUIControlManager, but we need to draw it again on top of the overlay so it's not affected by it.
 			m_ActiveDialogBox->Draw(m_GUIControlManager->GetScreen());

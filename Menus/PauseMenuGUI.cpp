@@ -295,9 +295,7 @@ namespace RTE {
 
 	void PauseMenuGUI::Draw() {
 		g_WindowMan.DrawPostProcessBuffer();
-		SetTrueAlphaBlender();
-		draw_trans_sprite(g_FrameMan.GetBackBuffer32(), m_BackdropBitmap, 0, 0);
-		//blit(m_BackdropBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, 0, 0, m_BackdropBitmap->w, m_BackdropBitmap->h);
+		blit(m_BackdropBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, 0, 0, m_BackdropBitmap->w, m_BackdropBitmap->h);
 
 		switch (m_ActiveMenuScreen) {
 			case PauseMenuScreen::SettingsScreen:

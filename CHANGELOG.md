@@ -32,10 +32,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 <details><summary><b>Fixed</b></summary>
 
-- Camera wrapping now works correctly on scenes which are both X and Y wrapped.
-
-
 - Fixed music resuming from incorrect position when unpausing.
+
+- Camera wrapping now works correctly on scenes which are both X and Y wrapped.
 
 </details>
 

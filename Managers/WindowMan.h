@@ -216,6 +216,11 @@ namespace RTE {
 		void ClearRenderer();
 
 		/// <summary>
+		/// Set this Frame to draw the game. To be set before UploadFrame. Resets on ClearRenderer.
+		/// </summary>
+		void DrawPostProcessBuffer() { m_DrawPostProcessBuffer = true; }
+
+		/// <summary>
 		/// Copies the BackBuffer32 content to GPU and shows it on screen.
 		/// </summary>
 		void UploadFrame();
@@ -264,6 +269,8 @@ namespace RTE {
 
 		bool m_EnableVSync; //!< Whether vertical synchronization is enabled.
 		bool m_IgnoreMultiDisplays; //!< Whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
+
+		bool m_DrawPostProcessBuffer; //!< Whether to draw the PostProcessBuffer while not in Activity. Resets on Frame Clear.
 
 #pragma region Initialize Breakdown
 		/// <summary>

@@ -600,6 +600,7 @@ namespace RTE {
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, 0);
+		m_DrawPostProcessBuffer = false;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -613,14 +614,13 @@ namespace RTE {
 		SDL_GL_GetDrawableSize(m_PrimaryWindow.get(), &windowW, &windowH);
 		GL_CHECK(glViewport(0, 0, windowW, windowH));
 
-		glDisable(GL_BLEND);
-		if (g_ActivityMan.IsInActivity()) {
+		glEnable(GL_BLEND);
+		if (m_DrawPostProcessBuffer) {
 			GL_CHECK(glBindTexture(GL_TEXTURE_2D, g_PostProcessMan.GetPostProcessColorBuffer()));
 			GL_CHECK(glActiveTexture(GL_TEXTURE1));
 			GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture));
 			GL_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]));
 		} else {
-			glDisable(GL_BLEND);
 			glBindTexture(GL_TEXTURE_2D, 0);
 			GL_CHECK(glActiveTexture(GL_TEXTURE1));
 			GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture));

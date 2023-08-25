@@ -2447,8 +2447,15 @@ void ACrab::Update()
 
 			// Reset the right-side walking stride if it's taking longer than it should.
 			if (m_StrideTimer[RIGHTSIDE].IsPastSimMS(static_cast<double>(m_Paths[RIGHTSIDE][FGROUND][WALK].GetTotalPathTime() * 1.1F))) { m_StrideStart[RIGHTSIDE] = true; }
-
-			if (restarted && m_StrideSound) { m_StrideSound->Play(m_Pos); }
+            
+			if (m_StrideSound) {
+				m_StrideSound->SetPosition(m_Pos);
+				if (m_StrideSound->GetLoopSetting() < 0) {
+					if (!m_StrideSound->IsBeingPlayed()) { m_StrideSound->Play(); }
+				} else if (restarted) {
+					m_StrideSound->Play();
+				}
+			}
 		} else if (m_pLFGLeg || m_pLBGLeg || m_pRFGLeg || m_pRBGLeg) {
 			if (m_MoveState == JUMP) {
 				// TODO: Utilize jump paths in an intuitive way?
@@ -2498,6 +2505,9 @@ void ACrab::Update()
 
 		if (m_pRBGLeg) { m_pRBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRBGLeg->GetParentOffset()), m_pRBGLeg->GetMaxLength(), m_PrevVel * m_pRBGLeg->GetJointStiffness(), m_AngularVel, m_pRBGLeg->GetMass(), deltaTime); }
 	}
+    if (m_MoveState != WALK && m_StrideSound && m_StrideSound->GetLoopSetting() < 0) {
+        m_StrideSound->Stop();
+    }
 
     /////////////////////////////////
     // Manage Attachable:s

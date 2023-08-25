@@ -290,18 +290,18 @@ namespace RTE {
 
 		int MouseX;
 		int MouseY;
-		bool MouseButtonPressed[MAX_MOUSE_BUTTONS];
-		bool MouseButtonReleased[MAX_MOUSE_BUTTONS];
-		bool MouseButtonHeld[MAX_MOUSE_BUTTONS];
+		bool padMouse1[MAX_MOUSE_BUTTONS]; //< Backwards compatibility with pre5-5.1
+		bool padMouse2[MAX_MOUSE_BUTTONS];
+		bool MouseButtonState[MAX_MOUSE_BUTTONS];
 		bool ResetActivityVote;
 		bool RestartActivityVote;
 
 
 		int MouseWheelMoved;
 
-		unsigned int InputElementPressed;
-		unsigned int InputElementReleased;
-		unsigned int InputElementHeld;
+		unsigned int padElement3;
+		unsigned int padElement4;
+		unsigned int InputElementState;
 	};
 
 // Disables the previously set pack pragma.

@@ -7,6 +7,8 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 
+#include "GameVersion.h"
+
 #include "GUI.h"
 #include "AllegroScreen.h"
 #include "GUIInputWrapper.h"
@@ -114,7 +116,7 @@ namespace RTE {
 		}
 
 		m_VersionLabel = dynamic_cast<GUILabel *>(m_MainMenuScreenGUIControlManager->GetControl("VersionLabel"));
-		m_VersionLabel->SetText("Community Project\n" + std::string(c_MajorGameVersion) + std::string(c_MinorGameVersion));
+		m_VersionLabel->SetText("Community Project\nv" + c_GameVersion.str());
 		m_VersionLabel->SetPositionAbs(10, g_WindowMan.GetResY() - m_VersionLabel->GetTextHeight() - 5);
 	}
 

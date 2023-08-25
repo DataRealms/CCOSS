@@ -122,7 +122,8 @@ namespace RTE {
 		/// Writes the entire console buffer to a file.
 		/// </summary>
 		/// <param name="filePath">The filename of the file to write to.</param>
-		void SaveAllText(const std::string &filePath);
+		/// <returns>Whether writing to the file was successful.</returns>
+		bool SaveAllText(const std::string &filePath);
 
 		/// <summary>
 		/// Clears all previous input.

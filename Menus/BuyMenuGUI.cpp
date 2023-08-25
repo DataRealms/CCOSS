@@ -408,7 +408,7 @@ bool BuyMenuGUI::LoadAllLoadoutsFromFile()
     if (m_MetaPlayer != Players::NoPlayer)
     {
         // Start loading any additional stuff from the custom user file
-        std::snprintf(loadoutPath, sizeof(loadoutPath), "%s%s - LoadoutsMP%d.ini", (System::GetUserdataDirectory() + c_UserConquestSavesModuleName).c_str(), g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
+        std::snprintf(loadoutPath, sizeof(loadoutPath), "%s%s - LoadoutsMP%d.ini", (System::GetUserdataDirectory() + c_UserConquestSavesModuleName + "/").c_str(), g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
 
         if (!System::PathExistsCaseSensitive(loadoutPath))
         {
@@ -521,9 +521,9 @@ bool BuyMenuGUI::SaveAllLoadoutsToFile()
         // Since the players of a new game are likely to have different techs and therefore different default loadouts
         // So we should start fresh with new loadouts loaded from tech defaults for each player
         if (g_MetaMan.GetGameName() == DEFAULTGAMENAME)
-            std::snprintf(loadoutPath, sizeof(loadoutPath), "%s%s - LoadoutsMP%d.ini", (System::GetUserdataDirectory() + c_UserConquestSavesModuleName).c_str(), AUTOSAVENAME, m_MetaPlayer + 1);
+            std::snprintf(loadoutPath, sizeof(loadoutPath), "%s%s - LoadoutsMP%d.ini", (System::GetUserdataDirectory() + c_UserConquestSavesModuleName + "/").c_str(), AUTOSAVENAME, m_MetaPlayer + 1);
         else
-            std::snprintf(loadoutPath, sizeof(loadoutPath), "%s%s - LoadoutsMP%d.ini", (System::GetUserdataDirectory() + c_UserConquestSavesModuleName).c_str(), g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
+            std::snprintf(loadoutPath, sizeof(loadoutPath), "%s%s - LoadoutsMP%d.ini", (System::GetUserdataDirectory() + c_UserConquestSavesModuleName + "/").c_str(), g_MetaMan.GetGameName().c_str(), m_MetaPlayer + 1);
     }
     else
         std::snprintf(loadoutPath, sizeof(loadoutPath), "%sLoadoutsP%d.ini", System::GetUserdataDirectory().c_str(), m_pController->GetPlayer() + 1);

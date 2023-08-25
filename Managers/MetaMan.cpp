@@ -370,7 +370,7 @@ int MetaMan::Save(Writer &writer) const {
 	for (const Scene *metaScene : m_Scenes) {
 		// Save the scene data to a good unique prefix for the Scene's layers' bitmap files as they are saved
 		// This should be handled separately from any .ini writing
-		//(*sItr)->SaveData(writer.GetFolderPath() + m_GameName + " - " + (*sItr)->GetPresetName());
+		//(*sItr)->SaveData(writer.GetFolderPath() + m_GameName + " - " + (*sItr)->GetPresetName(), false);
 		writer.NewPropertyWithValue("AddScene", metaScene);
 	}
 
@@ -403,7 +403,7 @@ int MetaMan::SaveSceneData(std::string pathBase)
         if ((*sItr)->IsRevealed() && (*sItr)->GetTerrain() && (*sItr)->GetTerrain()->IsLoadedFromDisk())
         {
             // Save the scene data to a good unique prefix for the Scene's layers' bitmap files as they are saved
-            if ((*sItr)->SaveData(pathBase + " - " + (*sItr)->GetPresetName()) < 0)
+            if ((*sItr)->SaveData(pathBase + " - " + (*sItr)->GetPresetName(), false) < 0)
                 return -1;
         }
     }

@@ -98,7 +98,7 @@ namespace RTE {
 		glDeleteTextures(1, &m_BackBuffer32);
 		glDeleteTextures(1, &m_Palette8Texture);
 		glDeleteFramebuffers(1, &m_BlitFramebuffer);
-		for (auto &bitmapTexture: m_BitmapTextures) {
+		for (auto &bitmapTexture : m_BitmapTextures) {
 			glDeleteTextures(1, &bitmapTexture->m_Texture);
 		}
 		glDeleteFramebuffers(1, &m_PostProcessFramebuffer);
@@ -156,7 +156,7 @@ namespace RTE {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PostProcessMan::Destroy() {
-		for (std::pair<int, BITMAP *> tempBitmapEntry: m_TempEffectBitmaps) {
+		for (std::pair<int, BITMAP *> tempBitmapEntry : m_TempEffectBitmaps) {
 			destroy_bitmap(tempBitmapEntry.second);
 		}
 		DestroyGLPointers();
@@ -179,14 +179,14 @@ namespace RTE {
 		}
 
 		// Adjust for the player screen's position on the final buffer
-		for (const PostEffect &postEffect: screenRelativeEffectsList) {
+		for (const PostEffect &postEffect : screenRelativeEffectsList) {
 			// Make sure we won't be adding any effects to a part of the screen that is occluded by menus and such
 			if (postEffect.m_Pos.GetFloorIntX() > screenOcclusionOffsetX && postEffect.m_Pos.GetFloorIntY() > screenOcclusionOffsetY && postEffect.m_Pos.GetFloorIntX() < occludedOffsetX && postEffect.m_Pos.GetFloorIntY() < occludedOffsetY) {
 				g_PostProcessMan.GetPostScreenEffectsList()->push_back(PostEffect(postEffect.m_Pos + targetBitmapOffset, postEffect.m_Bitmap, postEffect.m_BitmapHash, postEffect.m_Strength, postEffect.m_Angle));
 			}
 		}
 		// Adjust glow areas for the player screen's position on the final buffer
-		for (const Box &glowBox: screenRelativeGlowBoxesList) {
+		for (const Box &glowBox :screenRelativeGlowBoxesList) {
 			g_PostProcessMan.GetPostScreenGlowBoxesList()->push_back(glowBox);
 			// Adjust each added glow area for the player screen's position on the final buffer
 			g_PostProcessMan.GetPostScreenGlowBoxesList()->back().m_Corner += targetBitmapOffset;
@@ -201,6 +201,7 @@ namespace RTE {
 		if (effect && !effect->extra) {
 			LazyInitBitmap(effect);
 		}
+		
 		if (effect && g_TimerMan.SimUpdatesSinceDrawn() >= 0) {
 			m_PostSceneEffects.push_back(PostEffect(effectPos, effect, hash, strength, angle));
 		}
@@ -273,15 +274,15 @@ namespace RTE {
 		// Account for wrapping in any registered glow IntRects, as well as on the box we're testing against
 		std::list<IntRect> wrappedGlowRects;
 
-		for (const IntRect &glowArea: m_GlowAreas) {
+		for (const IntRect &glowArea : m_GlowAreas) {
 			g_SceneMan.WrapRect(glowArea, wrappedGlowRects);
 		}
 		std::list<IntRect> wrappedTestRects;
 		g_SceneMan.WrapRect(IntRect(boxPos.GetFloorIntX(), boxPos.GetFloorIntY(), boxPos.GetFloorIntX() + boxWidth, boxPos.GetFloorIntY() + boxHeight), wrappedTestRects);
 
 		// Check for intersections. If any are found, cut down the intersecting IntRect to the bounds of the IntRect we're testing against, then make and store a Box out of it
-		for (IntRect &wrappedTestRect: wrappedTestRects) {
-			for (const IntRect &wrappedGlowRect: wrappedGlowRects) {
+		for (IntRect &wrappedTestRect : wrappedTestRects) {
+			for (const IntRect &wrappedGlowRect : wrappedGlowRects) {
 				if (wrappedTestRect.Intersects(wrappedGlowRect)) {
 					IntRect cutRect(wrappedGlowRect);
 					cutRect.IntersectionCut(wrappedTestRect);
@@ -299,7 +300,7 @@ namespace RTE {
 	void PostProcessMan::GetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> &outputList) {
 		ScreenRelativeEffectsMutex.at(whichScreen).lock();
 		outputList.clear();
-		for (const PostEffect &postEffect: m_ScreenRelativeEffects.at(whichScreen)) {
+		for (const PostEffect &postEffect : m_ScreenRelativeEffects.at(whichScreen)) {
 			outputList.push_back(PostEffect(postEffect.m_Pos, postEffect.m_Bitmap, postEffect.m_BitmapHash, postEffect.m_Strength, postEffect.m_Angle));
 		}
 		ScreenRelativeEffectsMutex.at(whichScreen).unlock();
@@ -310,7 +311,7 @@ namespace RTE {
 	void PostProcessMan::SetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> &inputList) {
 		ScreenRelativeEffectsMutex.at(whichScreen).lock();
 		m_ScreenRelativeEffects.at(whichScreen).clear();
-		for (const PostEffect &postEffect: inputList) {
+		for (const PostEffect &postEffect : inputList) {
 			m_ScreenRelativeEffects.at(whichScreen).push_back(PostEffect(postEffect.m_Pos, postEffect.m_Bitmap, postEffect.m_BitmapHash, postEffect.m_Strength, postEffect.m_Angle));
 		}
 		ScreenRelativeEffectsMutex.at(whichScreen).unlock();
@@ -344,7 +345,7 @@ namespace RTE {
 		bool unseen = false;
 		Vector postEffectPosRelativeToBox;
 
-		for (PostEffect &scenePostEffect: m_PostSceneEffects) {
+		for (PostEffect &scenePostEffect : m_PostSceneEffects) {
 			if (team != Activity::NoTeam) {
 				unseen = g_SceneMan.IsUnseen(scenePostEffect.m_Pos.GetFloorIntX(), scenePostEffect.m_Pos.GetFloorIntY(), team);
 			}
@@ -360,7 +361,7 @@ namespace RTE {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	BITMAP *PostProcessMan::GetDotGlowEffect(DotGlowColor whichColor) const {
+	BITMAP * PostProcessMan::GetDotGlowEffect(DotGlowColor whichColor) const {
 		switch (whichColor) {
 			case NoDot:
 				return nullptr;

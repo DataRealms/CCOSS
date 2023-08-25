@@ -269,7 +269,7 @@ namespace RTE {
 			    return left.second.x < right.second.x;
 		    });
 
-		for (const auto &[displayIndex, displayBounds]: m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
+		for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
 			// Translate display offsets to backbuffer offsets, where the top left corner is (0,0) to figure out if the display arrangement is unreasonable garbage, i.e not top or bottom edge aligned.
 			// If any of the translated offsets ends up negative, or over-positive for the Y offset, disallow going into multi-display fullscreen
 			// because we'll just end up with an access violation when trying to read from the backbuffer pixel array during rendering.
@@ -282,7 +282,7 @@ namespace RTE {
 			}
 		}
 
-		for (const auto &[displayIndex, displayBounds]: m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
+		for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
 #if SDL_VERSION_ATLEAST(2, 24, 0)
 			m_DisplayArrangmentLeftMostDisplayIndex = SDL_GetRectDisplayIndex(&displayBounds);
 			if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
@@ -442,7 +442,7 @@ namespace RTE {
 
 		bool errorSettingFullscreen = false;
 
-		for (const auto &[displayIndex, displayBounds]: m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
+		for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
 			int displayOffsetX = displayBounds.x;
 			int displayOffsetY = displayBounds.y;
 			int displayWidth = displayBounds.w;
@@ -491,7 +491,7 @@ namespace RTE {
 		g_UInputMan.DisableKeys(false);
 
 		if (!m_MultiDisplayWindows.empty()) {
-			for (const auto &window: m_MultiDisplayWindows) {
+			for (const auto &window : m_MultiDisplayWindows) {
 				SDL_RaiseWindow(window.get());
 			}
 			SDL_RaiseWindow(windowThatShouldTakeInputFocus);
@@ -547,7 +547,7 @@ namespace RTE {
 			switch (windowEvent.window.event) {
 				case SDL_WINDOWEVENT_ENTER:
 					if (SDL_GetWindowID(SDL_GetMouseFocus()) > 0 && m_AnyWindowHasFocus && FullyCoversAllDisplays()) {
-						for (const auto &window: m_MultiDisplayWindows) {
+						for (const auto &window : m_MultiDisplayWindows) {
 							SDL_RaiseWindow(window.get());
 						}
 						SDL_RaiseWindow(SDL_GetWindowFromID(windowID));

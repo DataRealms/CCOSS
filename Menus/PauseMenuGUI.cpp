@@ -310,7 +310,6 @@ namespace RTE {
 		}
 		if (m_ActiveDialogBox) {
 			SetTrueAlphaBlender();
-			draw_trans_sprite(g_FrameMan.GetBackBuffer32(), g_FrameMan.GetOverlayBitmap32(), 0, 0);
 			// Whatever this box may be at this point it's already been drawn by the owning GUIControlManager, but we need to draw it again on top of the overlay so it's not affected by it.
 			m_ActiveDialogBox->Draw(m_GUIControlManager->GetScreen());
 		}

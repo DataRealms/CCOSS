@@ -31,6 +31,8 @@ namespace RTE {
 		RTEAssert(loadingScreenManager.Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "LoadingScreenSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/LoadingScreenSkin.ini");
 		loadingScreenManager.Load("Base.rte/GUIs/LoadingGUI.ini");
 
+		g_WindowMan.ClearRenderer();
+
 		int loadingSplashOffset = 0;
 		if (!progressReportDisabled) {
 			CreateProgressReportListbox(&loadingScreenManager);
@@ -46,7 +48,6 @@ namespace RTE {
 			CreateLoadingSplash();
 		}
 
-		g_WindowMan.ClearRenderer();
 		g_WindowMan.UploadFrame();
 
 		if (!m_LoadingLogWriter) {

@@ -591,6 +591,7 @@
     <ClInclude Include="System\RTEStackTrace.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="Menus\SaveLoadMenuGUI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1140,6 +1141,7 @@
     <ClCompile Include="System\RTEStackTrace.cpp">
       <Filter>System</Filter>
     </ClCompile>
+    <ClCompile Include="Menus\SaveLoadMenuGUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\ccicon.ico">

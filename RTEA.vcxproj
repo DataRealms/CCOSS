@@ -608,6 +608,7 @@
     <ClInclude Include="Menus\LoadingScreen.h" />
     <ClInclude Include="Menus\ModManagerGUI.h" />
     <ClInclude Include="Menus\PauseMenuGUI.h" />
+    <ClInclude Include="Menus\SaveLoadMenuGUI.h" />
     <ClInclude Include="Menus\ScenarioActivityConfigGUI.h" />
     <ClInclude Include="Menus\SettingsAudioGUI.h" />
     <ClInclude Include="Menus\SettingsGameplayGUI.h" />
@@ -621,6 +622,7 @@
     <ClInclude Include="Resources\Credits.h" />
     <ClInclude Include="Resources\resource.h" />
     <ClInclude Include="System\Atom.h" />
+    <ClInclude Include="System\Base64\base64.h" />
     <ClInclude Include="System\Constants.h" />
     <ClInclude Include="System\Controller.h" />
     <ClInclude Include="System\Entity.h" />
@@ -844,6 +846,7 @@
     <ClCompile Include="Menus\LoadingScreen.cpp" />
     <ClCompile Include="Menus\ModManagerGUI.cpp" />
     <ClCompile Include="Menus\PauseMenuGUI.cpp" />
+    <ClCompile Include="Menus\SaveLoadMenuGUI.cpp" />
     <ClCompile Include="Menus\ScenarioActivityConfigGUI.cpp" />
     <ClCompile Include="Menus\SettingsAudioGUI.cpp" />
     <ClCompile Include="Menus\SettingsGameplayGUI.cpp" />
@@ -856,6 +859,7 @@
     <ClCompile Include="Menus\TitleScreen.cpp" />
     <ClCompile Include="Menus\InventoryMenuGUI.cpp" />
     <ClCompile Include="System\Atom.cpp" />
+    <ClCompile Include="System\Base64\base64.cpp" />
     <ClCompile Include="System\Controller.cpp" />
     <ClCompile Include="System\Entity.cpp" />
     <ClCompile Include="System\GenericSavedData.cpp" />

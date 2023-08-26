@@ -405,7 +405,7 @@ namespace RTE {
 
 	bool RTEError::DumpAbortSave() {
 		bool success = false;
-		if (g_ActivityMan.GetActivityAllowsSaving()) {
+		if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->CanBeUserSaved()) {
 			success = g_ActivityMan.SaveCurrentGame("AbortSave");
 		}
 		return success;

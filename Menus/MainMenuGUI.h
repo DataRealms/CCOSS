@@ -2,6 +2,8 @@
 #define _RTEMAINMENUGUI_
 
 #include "Controller.h"
+
+#include "SaveLoadMenuGUI.h"
 #include "SettingsGUI.h"
 #include "ModManagerGUI.h"
 
@@ -73,6 +75,7 @@ namespace RTE {
 		enum MenuScreen {
 			MainScreen,
 			MetaGameNoticeScreen,
+			SaveOrLoadGameScreen,
 			SettingsScreen,
 			ModManagerScreen,
 			EditorScreen,
@@ -88,6 +91,7 @@ namespace RTE {
 			MetaGameButton,
 			ScenarioButton,
 			MultiplayerButton,
+			SaveOrLoadGameButton,
 			SettingsButton,
 			ModManagerButton,
 			EditorsButton,
@@ -122,13 +126,14 @@ namespace RTE {
 		Timer m_ResumeButtonBlinkTimer; //!< Activity resume button blink timer.
 		Timer m_CreditsScrollTimer; //!< Credits scrolling timer.
 
+		std::unique_ptr<SaveLoadMenuGUI> m_SaveLoadMenu; //!< The save/load menu screen.
 		std::unique_ptr<SettingsGUI> m_SettingsMenu; //!< The settings menu screen.
 		std::unique_ptr<ModManagerGUI> m_ModManagerMenu; //!< The mod manager menu screen.
 
 		// TODO: Rework this hacky garbage implementation when setting button font at runtime without loading a different skin is fixed. Would eliminate the need for a second GUIControlManager as well.
 		// Right now the way this works is the font graphic has different character visuals for uppercase and lowercase and the visual change happens by applying the appropriate case string when hovering/unhovering.
-		std::array<std::string, 9> m_MainScreenButtonHoveredText; //!< Array containing uppercase strings of the main screen buttons text that are used to display the larger font when a button is hovered over.
-		std::array<std::string, 9> m_MainScreenButtonUnhoveredText; //!< Array containing lowercase strings of the main menu screen buttons text that are used to display the smaller font when a button is not hovered over.
+		std::array<std::string, MenuButton::ResumeButton + 1> m_MainScreenButtonHoveredText; //!< Array containing uppercase strings of the main screen buttons text that are used to display the larger font when a button is hovered over.
+		std::array<std::string, MenuButton::ResumeButton + 1> m_MainScreenButtonUnhoveredText; //!< Array containing lowercase strings of the main menu screen buttons text that are used to display the smaller font when a button is not hovered over.
 		GUIButton *m_MainScreenHoveredButton; //!< The currently hovered main screen button.
 		int m_MainScreenPrevHoveredButtonIndex; //!< The index of the previously hovered main screen button in the main menu button array.
 

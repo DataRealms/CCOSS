@@ -3,6 +3,7 @@
 #include "MovableMan.h"
 #include "MovableObject.h"
 #include "MOSRotating.h"
+#include "MOPixel.h"
 #include "PresetMan.h"
 #include "Actor.h"
 
@@ -890,15 +891,33 @@ namespace RTE {
 						// Undo scene wrapping, if necessary
 						g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
-						// TODO: improve sticky logic!
 						// Check if particle is sticky and should adhere to where it collided
-						if (m_Material->GetStickiness() >= RandomNum() && velocity.MagnitudeIsGreaterThan(0.5F)) {
-							// SPLAT, so update position, apply to terrain and delete, and stop traveling
-							m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
-							m_OwnerMO->DrawToTerrain(g_SceneMan.GetTerrain());
-							m_OwnerMO->SetToDelete(true);
-							m_LastHit.Terminate[HITOR] = hit[dom] = hit[sub] = true;
-							break;
+						if (velocity.MagnitudeIsGreaterThan(1.0F)) {
+							MOPixel *ownerMOAsPixel = dynamic_cast<MOPixel *>(m_OwnerMO);
+							if (RandomNum() < std::max(m_Material->GetStickiness(), ownerMOAsPixel ? ownerMOAsPixel->GetStaininess() : 0.0f)) {
+								// Weighted random select between stickiness or staininess
+								const float randomChoice = RandomNum(0.0f, m_Material->GetStickiness() + (ownerMOAsPixel ? ownerMOAsPixel->GetStaininess() : 0.0f));
+								if (randomChoice <= m_Material->GetStickiness()) {
+									m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
+									m_OwnerMO->DrawToTerrain(g_SceneMan.GetTerrain());
+									m_OwnerMO->SetToDelete(true);
+									m_LastHit.Terminate[HITOR] = hit[dom] = hit[sub] = true;
+									break;
+								} else if (MOPixel *ownerMOAsPixel = dynamic_cast<MOPixel *>(m_OwnerMO); ownerMOAsPixel && randomChoice <= m_Material->GetStickiness() + ownerMOAsPixel->GetStaininess()) {
+									Vector stickPos(intPos[X], intPos[Y]);
+									stickPos += velocity * (c_PPM * g_TimerMan.GetDeltaTimeSecs()) * RandomNum();
+									int terrainMaterialID = g_SceneMan.GetTerrain()->GetMaterialPixel(stickPos.GetFloorIntX(), stickPos.GetFloorIntY());
+									if (terrainMaterialID != g_MaterialAir && terrainMaterialID != g_MaterialDoor) {
+										m_OwnerMO->SetPos(Vector(stickPos.GetRoundIntX(), stickPos.GetRoundIntY()));
+									} else {
+										m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
+									}
+									m_OwnerMO->DrawToTerrain(g_SceneMan.GetTerrain());
+									m_OwnerMO->SetToDelete(true);
+									m_LastHit.Terminate[HITOR] = hit[dom] = hit[sub] = true;
+									break;
+								}
+							}
 						}
 
 						// Check for and react upon a collision in the dominant direction of travel.

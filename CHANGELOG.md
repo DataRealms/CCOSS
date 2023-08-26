@@ -10,6 +10,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added in-game pause menu when pressing `Esc`. Pressing `Shift + Esc` will skip this menu and pause into scenario/conquest menu. 
 
+- New 'Activity' INI and Lua (R/W) property 'AllowsUserSaving', which can be used to enable/disable manual user saving/loading. This defaults to true for all `GAScripted` with an `OnSave()` function, but false otherwise. Lua `ActivityMan::SaveGame()` function now forces a save even if `AllowsUserSaving` is disabled. This allows mods and scripted gamemodes to handle saving in their own way (for example, only allowing saving at set points).
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -25,11 +27,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   Mods published for any development builds must match that development version exactly.
 
+
+- `CameraMan::SetScrollTarget()` function has had the `targetWrapped` parameter removed, as it's not necessary. The camera will always focus taking the shortest path regardless now. The new full function signature is `CameraMan::SetScrollTarget(target, speed, screenId)`, where speed defaults to 0.1 and screenId defaults to 0.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
 
 - Fixed music resuming from incorrect position when unpausing.
+
+- Camera wrapping now works correctly on scenes which are both X and Y wrapped.
 
 </details>
 
@@ -416,7 +423,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	```
 	The `Activity` start function now looks like `function activityName:StartActivity(isNewGame)`. The new `isNewGame` parameter is true if a game is beingly newly started (or restarted), and false if it's being loaded.  
 
-	Scripts on `Activities` now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved. This function must exist for the `Activity` to be saveable!  
+	Scripts on `Activities` now have a new callback function `OnSave` (in addition to `Create`, `Update`, etc), which is called whenever a scene is saved.
+
 	To support saving and loading, `Activity` now has several Lua convenience functions to for dealing with script variables:
 	```lua
 	Activity:SaveNumber(stringKey, floatValue) -- Saves a float value which can later be retrieved using stringKey.
@@ -844,7 +852,7 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 	GetScreenOcclusion(screenId);
 	SetScreenOcclusion(occlusionVector, screenId);
 	GetScrollTarget(screenId);
-	SetScrollTarget(targetPosition, screenId);
+	SetScrollTarget(targetPosition, speed, screenId);
 	TargetDistanceScalar(point);
 	CheckOffset(screenId);
 	SetScroll(center, screenId);

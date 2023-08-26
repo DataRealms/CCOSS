@@ -7,6 +7,7 @@
 #include "UInputMan.h"
 #include "SettingsMan.h"
 
+#include "SaveLoadMenuGUI.h"
 #include "SettingsGUI.h"
 #include "ModManagerGUI.h"
 
@@ -30,6 +31,7 @@ namespace RTE {
 		m_UpdateResult = PauseMenuUpdateResult::NoEvent;
 		m_ResumeButtonBlinkTimer.Reset();
 
+		m_SaveLoadMenu = nullptr;
 		m_SettingsMenu = nullptr;
 		m_ModManagerMenu = nullptr;
 
@@ -60,8 +62,7 @@ namespace RTE {
 		m_PauseMenuBox->CenterInParent(true, true);
 
 		m_PauseMenuButtons[PauseMenuButton::BackToMainButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMain"));
-		m_PauseMenuButtons[PauseMenuButton::SaveGameButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonSaveGame"));
-		m_PauseMenuButtons[PauseMenuButton::LoadLastSaveButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonLoadLastSave"));
+		m_PauseMenuButtons[PauseMenuButton::SaveOrLoadGameButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonSaveOrLoadGame"));
 		m_PauseMenuButtons[PauseMenuButton::SettingsButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonSettings"));
 		m_PauseMenuButtons[PauseMenuButton::ModManagerButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonModManager"));
 		m_PauseMenuButtons[PauseMenuButton::ResumeButton] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonResume"));
@@ -86,6 +87,7 @@ namespace RTE {
 		unsigned int halfTransBlack = makeacol32(0, 0, 0, 96);
 		clear_to_color(m_BackdropBitmap, halfTransBlack);
 
+		m_SaveLoadMenu = std::make_unique<SaveLoadMenuGUI>(guiScreen, guiInput, true);
 		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput, true);
 		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput, true);
 	}
@@ -110,29 +112,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PauseMenuGUI::EnableOrDisablePauseMenuFeatures() {
-		bool disableSaving = true;
 		bool disableModManager = true;
 
 		if (const Activity *activity = g_ActivityMan.GetActivity(); activity) {
-			disableSaving = !activity->ActivityCanBeSaved();
 			disableModManager = activity->GetClassName() != "GAScripted";
 		}
-
-		if (m_SavingButtonsDisabled != disableSaving) {
-			int yOffset = 0;
-
-			for (size_t pauseMenuButton = PauseMenuButton::SaveGameButton; pauseMenuButton < PauseMenuButton::SettingsButton; ++pauseMenuButton) {
-				m_PauseMenuButtons[pauseMenuButton]->SetEnabled(!disableSaving);
-				m_PauseMenuButtons[pauseMenuButton]->SetVisible(!disableSaving);
-				yOffset += m_PauseMenuButtons[pauseMenuButton]->GetHeight();
-			}
-
-			for (size_t pauseMenuButton = PauseMenuButton::SettingsButton; pauseMenuButton < PauseMenuButton::ButtonCount; ++pauseMenuButton) {
-				m_PauseMenuButtons[pauseMenuButton]->MoveRelative(0, yOffset * (disableSaving ? -1 : 1));
-			}
-			m_PauseMenuBox->MoveRelative(0, yOffset / 2 * (disableSaving ? 1 : -1));
-		}
-		m_SavingButtonsDisabled = disableSaving;
 
 		if (m_ModManagerButtonDisabled != disableModManager) {
 			GUIButton *modManagerButton = m_PauseMenuButtons[PauseMenuButton::ModManagerButton];
@@ -143,9 +127,10 @@ namespace RTE {
 			int yOffset = m_PauseMenuButtons[PauseMenuButton::ModManagerButton]->GetHeight();
 
 			m_PauseMenuButtons[PauseMenuButton::ResumeButton]->MoveRelative(0, yOffset * (disableModManager ? -1 : 1));
-			m_PauseMenuBox->MoveRelative(0, yOffset / 2 * (disableSaving ? 1 : -1));
+			m_PauseMenuBox->MoveRelative(0, yOffset / 2 * -1);
+
+			m_ModManagerButtonDisabled = disableModManager;
 		}
-		m_ModManagerButtonDisabled = disableModManager;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,12 +138,21 @@ namespace RTE {
 	void PauseMenuGUI::SetActiveMenuScreen(PauseMenuScreen screenToShow, bool playButtonPressSound) {
 		if (screenToShow != m_ActiveMenuScreen) {
 			m_ActiveMenuScreen = screenToShow;
+			if (screenToShow == PauseMenuScreen::SaveOrLoadGameScreen) {
+				m_SaveLoadMenu->Refresh();
+			}
 			if (playButtonPressSound) {
 				g_GUISound.ButtonPressSound()->Play();
 			}
 		}
 	}
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PauseMenuGUI::ClearBackdrop() {
+		clear_bitmap(m_BackdropBitmap);
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -175,6 +169,9 @@ namespace RTE {
 			case PauseMenuScreen::MainScreen:
 				backToMainScreen = HandleInputEvents();
 				BlinkResumeButton();
+				break;
+			case PauseMenuScreen::SaveOrLoadGameScreen:
+				backToMainScreen = m_SaveLoadMenu->HandleInputEvents(this);
 				break;
 			case PauseMenuScreen::SettingsScreen:
 				backToMainScreen = m_SettingsMenu->HandleInputEvents();
@@ -229,20 +226,8 @@ namespace RTE {
 			if (guiEvent.GetType() == GUIEvent::Command) {
 				if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::ResumeButton]) {
 					return true;
-				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::SaveGameButton]) {
-					if (g_ActivityMan.GetActivityAllowsSaving() && g_ActivityMan.SaveCurrentGame("QuickSave")) {
-						g_GUISound.ConfirmSound()->Play();
-						return true;
-					} else {
-						g_GUISound.UserErrorSound()->Play();
-					}
-				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::LoadLastSaveButton]) {
-					if (g_ActivityMan.LoadAndLaunchGame("QuickSave")) {
-						g_GUISound.ConfirmSound()->Play();
-						return true;
-					} else {
-						g_GUISound.UserErrorSound()->Play();
-					}
+				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::SaveOrLoadGameButton]) {
+					SetActiveMenuScreen(PauseMenuScreen::SaveOrLoadGameScreen);
 				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::SettingsButton]) {
 					SetActiveMenuScreen(PauseMenuScreen::SettingsScreen);
 				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::ModManagerButton]) {
@@ -298,6 +283,9 @@ namespace RTE {
 		blit(m_BackdropBitmap, g_FrameMan.GetBackBuffer32(), 0, 0, 0, 0, m_BackdropBitmap->w, m_BackdropBitmap->h);
 
 		switch (m_ActiveMenuScreen) {
+			case PauseMenuScreen::SaveOrLoadGameScreen:
+				m_SaveLoadMenu->Draw();
+				break;
 			case PauseMenuScreen::SettingsScreen:
 				m_SettingsMenu->Draw();
 				break;

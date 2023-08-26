@@ -146,12 +146,6 @@ ClassInfoGetters;
 
 	const std::string & GetLuaClassName() const { return m_LuaClassName; }
 
-	/// <summary>
-	/// Gets whether or not this GAScripted can be saved. For this to be true, the GAScripted's Lua script must have an OnSave function, and the Scene must not be MetagameInternal.
-	/// </summary>
-	/// <returns>Whether or not this GAScripted can be saved.</returns>
-	bool ActivityCanBeSaved() const override;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SceneIsCompatible
@@ -294,6 +288,12 @@ protected:
 // Private member variable and method declarations
 
 private:
+
+	/// <summary>
+	/// Returns whether this GAScripted has an OnSave function, to act as a default for whether saving is allowed or not.
+	/// </summary>
+	/// <returns>Whether this GAScripted has an OnSave function</returns>
+	bool HasSaveFunction() const;
 
 	/// <summary>
 	/// Adds this GAScripted's PieSlices, and any active GlobalScripts' PieSlices, to any active PieMenus.

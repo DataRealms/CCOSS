@@ -112,7 +112,7 @@ namespace RTE {
 		bool disableModManager = true;
 
 		if (const Activity *activity = g_ActivityMan.GetActivity(); activity) {
-			disableSaving = !activity->ActivityCanBeSaved();
+			disableSaving = !activity->GetAllowsUserSaving();
 			disableModManager = activity->GetClassName() != "GAScripted";
 		}
 
@@ -237,7 +237,7 @@ namespace RTE {
 				if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::ResumeButton]) {
 					return true;
 				} else if (guiEvent.GetControl() == m_PauseMenuButtons[PauseMenuButton::SaveGameButton]) {
-					if (g_ActivityMan.GetActivityAllowsSaving() && g_ActivityMan.SaveCurrentGame("QuickSave")) {
+					if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->GetAllowsUserSaving() && g_ActivityMan.SaveCurrentGame("QuickSave")) {
 						g_GUISound.ConfirmSound()->Play();
 						return true;
 					} else {

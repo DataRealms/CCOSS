@@ -316,6 +316,12 @@ namespace RTE {
 		/// <summary>
 		/// Updates this Controller. Supposed to be done every frame.
 		/// </summary>
+		/// <param name="scriptsToRun">Whether to update single-threaded, multi-threaded, or both types of AI scripts.</param>
+		void UpdateAI(ThreadScriptsToRun scriptsToRun);
+
+		/// <summary>
+		/// Updates this Controller. Supposed to be done every frame.
+		/// </summary>
 		void Update();
 #pragma endregion
 
@@ -326,6 +332,15 @@ namespace RTE {
 		/// <param name="rhs">A Controller reference.</param>
 		/// <returns>A reference to the changed Controller.</returns>
 		Controller & operator=(const Controller &rhs);
+#pragma endregion
+
+#pragma region Misc
+		/// <summary>
+		/// Overrides this controller, setting it to match another controller. This is useful for multithreading, where the Lua script can use a copied controller in a multi-threaded context, before overriding the controller in a single-threaded context.
+		/// This is exposed to Lua API to be clear, whereas ownership relies on operator overloading is rather temperamental :)
+		/// </summary>
+		/// <param="otherController">The other controller's state to copy. Ownership is not transferred</returns>
+		void Override(const Controller& otherController);
 #pragma endregion
 
 	protected:
@@ -398,10 +413,7 @@ namespace RTE {
 		/// </summary>
 		void GetInputFromPlayer();
 
-		/// <summary>
-		/// Requests and applies input from the AI.
-		/// </summary>
-		void GetInputFromAI();
+		bool ShouldUpdateAIThisFrame() const;
 #pragma endregion
 
 		/// <summary>

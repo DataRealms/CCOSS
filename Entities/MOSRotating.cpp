@@ -1584,11 +1584,10 @@ void MOSRotating::Update() {
         m_Rotation += radsToGo * m_OrientToVel * velInfluence;
     }
 
-    AEmitter *wound = nullptr;
-    for (std::list<AEmitter *>::iterator woundIterator = m_Wounds.begin(); woundIterator != m_Wounds.end(); ) {
-        wound = *woundIterator;
+    for (auto woundItr = m_Wounds.begin(); woundItr != m_Wounds.end(); ) {
+        AEmitter* wound = *woundItr;
+        ++woundItr;
         RTEAssert(wound && wound->IsAttachedTo(this), "Broken wound AEmitter in Update");
-        ++woundIterator;
         wound->Update();
 
         if (wound->IsSetToDelete() || (wound->GetLifetime() > 0 && wound->GetAge() > wound->GetLifetime())) {
@@ -1597,27 +1596,26 @@ void MOSRotating::Update() {
             delete wound;
         } else {
             Vector totalImpulseForce;
-            for (const std::pair<Vector, Vector> &impulseForce : wound->GetImpulses()) {
+            for (const std::pair<Vector, Vector>& impulseForce : wound->GetImpulses()) {
                 totalImpulseForce += impulseForce.first;
             }
             totalImpulseForce *= wound->GetJointStiffness();
 
-            if (!totalImpulseForce.IsZero()) { AddImpulseForce(totalImpulseForce, wound->GetApplyTransferredForcesAtOffset() ? wound->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
+            if (!totalImpulseForce.IsZero()) {
+                AddImpulseForce(totalImpulseForce, wound->GetApplyTransferredForcesAtOffset() ? wound->GetParentOffset() * m_Rotation * c_MPP : Vector());
+            }
 
             wound->ClearImpulseForces();
         }
     }
 
-    Attachable *attachable = nullptr;
-    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
-        attachable = *attachableIterator;
+    for (auto attachableItr = m_Attachables.begin(); attachableItr != m_Attachables.end(); ) {
+        Attachable* attachable = *attachableItr;
+        ++attachableItr;
         RTEAssert(attachable, "Broken Attachable in Update!");
         RTEAssert(attachable->IsAttached(), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
         RTEAssert(attachable->IsAttachedTo(this), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with another parent (" + attachable->GetParent()->GetModuleAndPresetName() + "), this should never happen!");
-        ++attachableIterator;
-
         attachable->Update();
-        RTEAssert(attachable, "Broken Attachable after Updating it!");
 
         if (attachable->IsAttachedTo(this) && attachable->IsSetToDelete()) {
             RemoveAttachable(attachable, true, true);

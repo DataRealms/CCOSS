@@ -38,6 +38,7 @@
 #include "PresetMan.h"
 #include "UInputMan.h"
 #include "PerformanceMan.h"
+#include "FrameMan.h"
 #include "MetaMan.h"
 #include "WindowMan.h"
 #include "NetworkServer.h"
@@ -291,9 +292,7 @@ namespace RTE {
 				}
 				g_FrameMan.Update();
 				g_LuaMan.Update();
-				g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActivityUpdate);
 				g_ActivityMan.Update();
-				g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActivityUpdate);
 				g_MovableMan.Update();
 				g_AudioMan.Update();
 
@@ -417,7 +416,10 @@ int main(int argc, char **argv) {
 			if (std::filesystem::exists(System::GetWorkingDirectory() + "LogLoadingWarning.txt")) { std::remove("LogLoadingWarning.txt"); }
 		}
 
-		if (!g_ActivityMan.Initialize()) { RunMenuLoop(); }
+		if (!g_ActivityMan.Initialize()) {
+			RunMenuLoop();
+		}
+
 		RunGameLoop();
 	}
 

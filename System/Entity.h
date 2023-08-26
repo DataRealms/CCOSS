@@ -214,6 +214,7 @@ namespace RTE {
 			int m_PoolAllocBlockCount; //!< The number of instances to fill up the pool of this type with each time it runs dry.
 			int m_InstancesInUse; //!< The number of allocated instances passed out from the pool.
 
+			std::mutex m_Mutex; //!< Mutex to ensure multiple things aren't grabbing/deallocating memory at the same time
 
 			// Forbidding copying
 			ClassInfo(const ClassInfo &reference) = delete;

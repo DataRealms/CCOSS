@@ -4,6 +4,8 @@
 #include "Singleton.h"
 #include "Timer.h"
 
+#include <atomic>
+
 #define g_PerformanceMan PerformanceMan::Instance()
 
 namespace RTE {
@@ -23,12 +25,13 @@ namespace RTE {
 		/// </summary>
 		enum PerformanceCounters {
 			SimTotal = 0,
-			ActorsAIUpdate,
+			ActorsAI,
 			ActorsTravel,
 			ActorsUpdate,
 			ParticlesTravel,
 			ParticlesUpdate,
 			ActivityUpdate,
+			ScriptsUpdate,
 			PerfCounterCount
 		};
 
@@ -177,9 +180,7 @@ namespace RTE {
 		int m_CurrentPing; //!< Current ping value to display on screen.
 
 		std::array<std::array<int, c_MaxSamples>, PerformanceCounters::PerfCounterCount> m_PerfPercentages; //!< Array to store percentages from SimTotal.
-		std::array<std::array<uint64_t, c_MaxSamples>, PerformanceCounters::PerfCounterCount> m_PerfData; //!< Array to store performance measurements in microseconds.
-		std::array<uint64_t, PerformanceCounters::PerfCounterCount> m_PerfMeasureStart; //!< Current measurement start time in microseconds.
-		std::array<uint64_t, PerformanceCounters::PerfCounterCount> m_PerfMeasureStop; //!< Current measurement stop time in microseconds.
+		std::array<std::array<std::atomic_uint64_t, c_MaxSamples>, PerformanceCounters::PerfCounterCount> m_PerfData; //!< Array to store performance measurements in microseconds.
 
 	private:
 

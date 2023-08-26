@@ -85,13 +85,13 @@ namespace RTE {
 		m_CustomResolutionWidthTextBox->SetNumericOnly(true);
 		m_CustomResolutionWidthTextBox->SetMaxNumericValue(g_WindowMan.GetMaxResX());
 		m_CustomResolutionWidthTextBox->SetMaxTextLength(4);
-		m_CustomResolutionWidthTextBox->SetText(std::to_string(m_NewResX * g_WindowMan.GetResMultiplier()));
+		m_CustomResolutionWidthTextBox->SetText(std::to_string(static_cast<int>(m_NewResX * g_WindowMan.GetResMultiplier())));
 
 		m_CustomResolutionHeightTextBox = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("TextboxCustomHeight"));
 		m_CustomResolutionHeightTextBox->SetNumericOnly(true);
 		m_CustomResolutionHeightTextBox->SetMaxNumericValue(g_WindowMan.GetMaxResY());
 		m_CustomResolutionHeightTextBox->SetMaxTextLength(4);
-		m_CustomResolutionHeightTextBox->SetText(std::to_string(m_NewResY * g_WindowMan.GetResMultiplier()));
+		m_CustomResolutionHeightTextBox->SetText(std::to_string(static_cast<int>(m_NewResY * g_WindowMan.GetResMultiplier())));
 
 		m_CustomResolutionUpscaledCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxCustomUpscaled"));
 		m_CustomResolutionUpscaledCheckbox->SetCheck(m_NewResUpscaled);

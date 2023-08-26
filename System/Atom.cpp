@@ -10,6 +10,7 @@
 namespace RTE {
 
 	const std::string Atom::c_ClassName = "Atom";
+	std::mutex Atom::s_MemoryPoolMutex;
 	std::vector<void *> Atom::s_AllocatedPool;
 	int Atom::s_PoolAllocBlockCount = 200;
 	int Atom::s_InstancesInUse = 0;
@@ -27,7 +28,7 @@ namespace RTE {
 		m_SubgroupID = 0;
 		m_MOHitsDisabled = false;
 		m_TerrainHitsDisabled = false;
-		m_OwnerMO = 0;
+		m_OwnerMO = nullptr;
 		m_IgnoreMOID = g_NoMOID;
 		m_IgnoreMOIDs.clear();
 		m_MOIDHit = g_NoMOID;
@@ -86,7 +87,7 @@ namespace RTE {
 		m_TrailLengthVariation = reference.m_TrailLengthVariation;
 
 		// These need to be set manually by the new owner.
-		m_OwnerMO = 0;
+		m_OwnerMO = nullptr;
 		m_IgnoreMOIDsByGroup = 0;
 
 		return 0;
@@ -135,6 +136,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void * Atom::GetPoolMemory() {
+		std::lock_guard<std::mutex> guard(s_MemoryPoolMutex);
+
 		// If the pool is empty, then fill it up again with as many instances as we are set to
 		if (s_AllocatedPool.empty()) { FillPool((s_PoolAllocBlockCount > 0) ? s_PoolAllocBlockCount : 10); }
 
@@ -171,6 +174,8 @@ namespace RTE {
 		if (!returnedMemory) {
 			return false;
 		}
+
+		std::lock_guard<std::mutex> guard(s_MemoryPoolMutex);
 		s_AllocatedPool.push_back(returnedMemory);
 
 		// Keep track of the number of instances passed in

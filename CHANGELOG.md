@@ -12,6 +12,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New 'Activity' INI and Lua (R/W) property 'AllowsUserSaving', which can be used to enable/disable manual user saving/loading. This defaults to true for all `GAScripted` with an `OnSave()` function, but false otherwise. Lua `ActivityMan::SaveGame()` function now forces a save even if `AllowsUserSaving` is disabled. This allows mods and scripted gamemodes to handle saving in their own way (for example, only allowing saving at set points).
 
+- New `Settings.ini` property `EnableMultithreadedLua`, which can be used to enable multithreaded Lua scripts and AI, for any lua script with the `--[[MULTITHREAD]]--` tag. Defaults to on.
+
+- New Lua event function `SyncedUpdate()`, which will be called in a thread-safe synchronized manner and allows multithreaded scripts to modify game state in a safe and consistent way.
+
+- Multithreaded asynchronous pathfinding, which dramatically improves performance on large maps and improves AI responsiveness.
+	New `Actor` Lua property (R) `IsWaitingOnNewMovePath`, which returns true while the actor is currently calculating a new path.  
+	New Lua `SceneMan` function `CalculatePathAsync` for asynchronous pathfinding. This function has no return value, and is used as follows:
+	```lua
+	SceneMan.Scene:CalculatePathAsync(
+		function(pathRequest) -- Callback function that is run when the path has finished calculating, passing in the pathRequest object.
+			pathRequest.Path; -- A list of Vectors that make up the calculated path.
+			pathRequest.PathLength -- The number of points in the calculated path.
+			pathRequest.Status; -- The enum status of the path, the options are PathRequest.Solved, PathRequest.NoSolution, and PathRequest.StartEndSame.
+			pathRequest.TotalCost; -- The total cost of path.
+		end,
+		-- All other arguments are the same as Scene:CalculatePath():
+		startPos, -- The start position of the path to calculate.
+		endPos,  -- The end position of the path to calculate.
+		movePathToGround,  -- Whether or not to move the points in the calculated path to ground level.
+		digStrength, -- The dig strength to use when calculating the path.
+		team -- The team to use when calculating the path, allowing the path to ignore that team's doors. If not specified, it will default to `Activity.NOTEAM`, and no doors will be ignored.
+	);
+	```
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -27,6 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
   Mods published for any development builds must match that development version exactly.
 
+- Lua `Scene.ScenePath` property has been changed to a function `Scene:GetScenePath()`. This was done for thread-safety with multithreading, but can be used in the same way.
 
 - `CameraMan::SetScrollTarget()` function has had the `targetWrapped` parameter removed, as it's not necessary. The camera will always focus taking the shortest path regardless now. The new full function signature is `CameraMan::SetScrollTarget(target, speed, screenId)`, where speed defaults to 0.1 and screenId defaults to 0.
 
@@ -416,6 +441,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	vector:MagnitudeIsLessThan(floatValue) -- Note that you can use (not vector:MagnitudeIsLessThan(floatValue)) in place of (vector.SqrMagnitude >= (floatValue * floatValue)).
 	```
 
+- New `PresetMan` Lua function `ReloadEntityPreset(presetName, className, optionalDefinedInModule)` that allows hot-reloading `Entity` INI presets (along with all other entity presets referenced in the reloaded entity preset).  
+	If the `optionalDefinedInModule` argument is not specified, the game will look through every `DataModule` to find an `Entity` preset that matches the name and type.  
+	Once an `Entity` preset has been reloaded via the function, the key combination `Ctrl + F2` can be used to quickly reload it as many times as necessary.  
+	Note that any changes made to the `Entity` preset will not be reflected in existing copies of the `Entity`, only in new ones created after the reload.  
+	Also note that visual changes to previously loaded sprites cannot be and will not be reflected by reloading. It is, however, possible to reload with a different set of loaded sprites, or entirely new ones.
+
+- Added `MOSRotating` INI property `DetachAttachablesBeforeGibbingFromWounds` that makes `Attachables` fall off before the `MOSRotating` gibs from having too many wounds, for nice visuals. Defaults to true.
+
 - The game now supports saving and loading. The easiest way to do this is to quick-save with `F5`, and quick-load with `F9`. Console clearing is now done with `F10`.
 	```lua
 	ActivityMan:SaveGame(fileName) -- Saves the currently playing Scene and Activity. The save result will be printed to the console.
@@ -664,6 +697,8 @@ This can be accessed via the new Lua (R/W) `SettingsMan` property `AIUpdateInter
 - Added `Leg` Lua (R/W) property `MoveSpeed`, which lets you get and set the `Leg`'s `MoveSpeed` scalar, similar to `Arm`s. 1 means instant movement and 0 means no movement.
 
 - Added `LuaMan` Lua function `FileExists`, which lets you check whether a specified file exists. Like with `FileOpen`, the file must be inside a folder ending in `.rte`.
+
+- New `Actor` Lua (R) property `DigStrength`, that gets the calculated dig strength of the given `Actor`, based on whether or not they have any digging tools.
 
 </details>
 

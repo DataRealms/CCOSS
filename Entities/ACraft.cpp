@@ -12,6 +12,7 @@
 // Inclusions of header files
 
 #include "ACraft.h"
+
 #include "AtomGroup.h"
 #include "Leg.h"
 #include "Controller.h"
@@ -22,6 +23,7 @@
 #include "SceneMan.h"
 #include "Scene.h"
 #include "SettingsMan.h"
+#include "FrameMan.h"
 
 #include "GUI.h"
 #include "AllegroBitmap.h"
@@ -562,7 +564,6 @@ bool ACraft::HandlePieCommand(PieSlice::SliceType pieSliceIndex) {
         } else {
             return Actor::HandlePieCommand(pieSliceIndex);
         }
-        m_StuckTimer.Reset();
     }
     return false;
 }
@@ -835,11 +836,7 @@ void ACraft::ResetAllTimers() {
 
 void ACraft::Update()
 {
-    /////////////////////////////////////////////////
-    // Update MovableObject, adds on the forces etc
-
     Actor::Update();
-
 
     ////////////////////////////////////
     // Update viewpoint

@@ -429,7 +429,7 @@ void AssemblyEditorGUI::Update()
             // Set the list order to be at the end so new objects are added there
             m_ObjectListOrder = -1;
             // Update the object
-            m_pCurrentObject->Update();
+            m_pCurrentObject->FullUpdate();
             // Update the path to the brain, or clear it if there's none
             UpdateBrainPath();
 
@@ -507,7 +507,7 @@ void AssemblyEditorGUI::Update()
             {
                 // Set and update the cursor object
                 if (SetCurrentObject(dynamic_cast<SceneObject *>(pNewObject->Clone())))
-                    m_pCurrentObject->Update();
+                    m_pCurrentObject->FullUpdate();
             }
         }
         else if (m_pController->IsState(SCROLL_DOWN) || m_pController->IsState(ControlState::ACTOR_PREV))
@@ -518,7 +518,7 @@ void AssemblyEditorGUI::Update()
             {
                 // Set and update the object
                 if (SetCurrentObject(dynamic_cast<SceneObject *>(pNewObject->Clone())))
-                    m_pCurrentObject->Update();
+                    m_pCurrentObject->FullUpdate();
             }
         }
 
@@ -624,7 +624,7 @@ void AssemblyEditorGUI::Update()
         // Only place if the picker and pie menus are completely out of view, to avoid immediate placing after picking
         else if (m_pCurrentObject && m_pController->IsState(RELEASE_PRIMARY) && !m_pPicker->IsVisible())
         {
-            m_pCurrentObject->Update();
+            m_pCurrentObject->FullUpdate();
 			//If true we need to place object in the end, if false, then it was already given to an actor
 			bool toPlace = true;
 
@@ -950,7 +950,7 @@ void AssemblyEditorGUI::Update()
             pCurrentActor->SetStatus(Actor::INACTIVE);
             pCurrentActor->GetController()->SetDisabled(true);
         }
-        m_pCurrentObject->Update();
+        m_pCurrentObject->FullUpdate();
     }
 }
 

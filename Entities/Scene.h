@@ -1163,6 +1163,16 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:          BlockUntilAllPathingRequestsComplete
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Blocks this thread until all pathing requests are completed.
+// Arguments:       None.
+// Return value:    None.
+
+    void BlockUntilAllPathingRequestsComplete();
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          UpdatePathFinding
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Recalculates only the areas of the pathfinding data that have been
@@ -1196,7 +1206,18 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Return value:    The total minimum difficulty cost calculated between the two points on
 //                  the scene.
 
-    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength = 1.0F, Activity::Teams team = Activity::Teams::NoTeam);
+    float CalculatePath(const Vector &start, const Vector &end, std::list<Vector> &pathResult, float digStrength = c_PathFindingDefaultDigStrength, Activity::Teams team = Activity::Teams::NoTeam);
+    
+	/// <summary>
+	/// Asynchronously calculates the least difficult path between two points on the current Scene. Takes both distance and materials into account.
+	/// When pathing using the NoTeam pathFinder, no doors are considered passable.
+	/// </summary>
+	/// <param name="start">Start position of the pathfinding request.</param>
+	/// <param name="end">End position of the pathfinding request.</param>
+	/// <param name="digStrength">The maximum material strength any actor traveling along the path can dig through.</param>
+	/// <param name="team">The team we're pathing for (doors for this team will be considered passable)</param>
+    /// <returns>A shared pointer to the volatile PathRequest to be used to track whehter the asynchrnous path calculation has been completed, and check its results.</returns>
+    std::shared_ptr<volatile PathRequest> CalculatePathAsync(const Vector &start, const Vector &end, float digStrength = c_PathFindingDefaultDigStrength, Activity::Teams team = Activity::Teams::NoTeam, PathCompleteCallback callback = nullptr);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1206,7 +1227,9 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 // Arguments:       None.
 // Return value:    The number of waypoints in the ScenePath.
 
-	int GetScenePathSize() const { return m_ScenePath.size(); }
+    int GetScenePathSize() const;
+
+    std::list<Vector>& GetScenePath();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1301,8 +1324,6 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
 	BITMAP * GetPreviewBitmap() const { return m_pPreviewBitmap; };
 
-    // Holds the path calculated by CalculateScenePath
-    std::list<Vector> m_ScenePath;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

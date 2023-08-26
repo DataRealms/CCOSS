@@ -21,7 +21,6 @@
 #include "LuabindObjectWrapper.h"
 #include "Material.h"
 #include "MovableMan.h"
-#include "FrameMan.h"
 
 struct BITMAP;
 
@@ -45,6 +44,7 @@ struct HitData;
 class MOSRotating;
 class PieMenu;
 class SLTerrain;
+class LuaStateWrapper;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Abstract class:  MovableObject
@@ -63,7 +63,7 @@ friend struct EntityLuaBindings;
 
 public:
 
-	ScriptFunctionNames("Create", "Destroy", "Update", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen", "OnGameSave");
+	ScriptFunctionNames("Create", "Destroy", "Update", "SyncedUpdate", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen", "OnGameSave");
 	SerializableOverrideMethods;
 	ClassInfoGetters;
 
@@ -224,7 +224,7 @@ enum MOType
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
+    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>(), ThreadScriptsToRun scriptsToRun = ThreadScriptsToRun::Both);
 #pragma endregion
 
 
@@ -1060,7 +1060,7 @@ enum MOType
 //                  MovableObject and affect its path next Update(). In N or kg * m/s^2.
 //                  A Vector with the offset, in METERS, of where the force is being
 //                  applied relative to the center of this MovableObject.
-// Return value:    None.
+// Return value:    None.A
 
     void AddForce(const Vector &force, const Vector &offset = Vector())
         { m_Forces.push_back(std::make_pair(force, offset)); }
@@ -1076,8 +1076,7 @@ enum MOType
 //                  force is being applied to the center of this MovableObject.
 // Return value:    None.
 
-    void AddAbsForce(const Vector &force, const Vector &absPos)
-        { m_Forces.push_back(std::make_pair(force, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP)); }
+    void AddAbsForce(const Vector &force, const Vector &absPos);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1113,14 +1112,7 @@ enum MOType
 //                  force is being applied to the center of this MovableObject.
 // Return value:    None.
 
-	void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos) {
-
-#ifndef RELEASE_BUILD
-		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
-#endif
-
-		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP));
-	}
+	void AddAbsImpulseForce(const Vector &impulse, const Vector &absPos);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1515,17 +1507,12 @@ enum MOType
 
     void Draw(BITMAP* pTargetBitmap, const Vector& targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateScript
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MovableObject's Lua scripts. Supposed to be done every
-//                  frame after the rest of the hardcoded C++ update is done.
-// Arguments:       None.
-// Return value:    An error return value signaling sucess or any particular failure.
-//                  Anything below 0 is an error signal.
-
-	int UpdateScripts();
+    /// <summary>
+	/// Updates this MovableObject's Lua scripts.
+	/// </summary>
+    /// <param name="scriptsToRun">Whether to run this objects single-threaded or multi-threaded scripts.</params>
+    /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+	virtual int UpdateScripts(ThreadScriptsToRun scriptsToRun);
 
 	/// <summary>
 	/// Event listener to be run while this MovableObject's PieMenu is opened.
@@ -1722,7 +1709,7 @@ enum MOType
 // Return value:    The ID of the non-ignored MO, if any, that this object's Atom or AtomGroup is now
 //                  intersecting because of the last Travel taken.
 
-	MOID HitWhatMOID() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_MOIDHit; else return g_NoMOID; }
+	MOID HitWhatMOID() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1735,7 +1722,7 @@ enum MOType
 //                  intersecting because of the last Travel taken.
 // Return value:    None.
 
-	void SetHitWhatMOID(MOID id) { m_MOIDHit = id;  m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber(); }
+	void SetHitWhatMOID(MOID id);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1745,7 +1732,7 @@ enum MOType
 // Arguments:       None.
 // Return value:    Unique ID of the particle hit at the previously taken Travel
 
-	long int HitWhatParticleUniqueID() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_ParticleUniqueIDHit; else return 0; }
+	long int HitWhatParticleUniqueID() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1755,7 +1742,7 @@ enum MOType
 // Arguments:       Unique ID of the particle hit at the previously taken Travel.
 // Return value:    None.
 
-	void SetHitWhatParticleUniqueID(long int id) { m_ParticleUniqueIDHit = id; m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber(); }
+	void SetHitWhatParticleUniqueID(long int id);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1766,7 +1753,7 @@ enum MOType
 // Arguments:       None.
 // Return value:    The ID of the material, if any, that this MO hit during the last Travel.
 
-	unsigned char HitWhatTerrMaterial() const { if (m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber()) return m_TerrainMatHit; else return g_MaterialAir; }
+	unsigned char HitWhatTerrMaterial() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1798,6 +1785,12 @@ enum MOType
 	bool DrawToTerrain(SLTerrain *terrain);
 
 	/// <summary>
+	/// Used to get the Lua state that handles our multithread-safe scripts.
+	/// </summary>
+    /// <returns>Our lua state. Can potentially be nullptr.</returns>
+    LuaStateWrapper* GetLuaState() { return m_ThreadedLuaState; }
+
+	/// <summary>
 	/// Method to be run when the game is saved via ActivityMan::SaveCurrentGame. Not currently used in metagame or editor saving.
 	/// </summary>
 	virtual void OnGameSave() { RunScriptedFunctionInAppropriateScripts("OnGameSave"); }
@@ -1821,7 +1814,7 @@ protected:
 	/// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
 	/// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
 	/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-	int RunFunctionOfScript(const std::string &scriptPath, const std::string &functionName, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>()) const;
+	int RunFunctionOfScript(const std::string &scriptPath, const std::string &functionName, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  UpdateChildMOIDs
@@ -1947,6 +1940,9 @@ protected:
 
 	bool m_IsTraveling; //!< Prevents self-intersection while traveling.
 
+    LuaStateWrapper *m_ThreadedLuaState; //!< The lua state that will runs our multithreaded lua scripts.
+    bool m_HasSinglethreadedScripts; //!< Whether or not we have any single-threaded scripts attached to us.
+
     std::string m_ScriptObjectName; //!< The name of this object for script usage.
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
     std::unordered_map<std::string, std::vector<std::unique_ptr<LuabindObjectWrapper>>> m_FunctionsAndScripts; //!< A map of function names to vectors of LuabindObjectWrappers that hold Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.
@@ -2002,7 +1998,7 @@ protected:
 	unsigned char m_TerrainMatHit;
 	// Unique ID of particle hit this MO
 	long int m_ParticleUniqueIDHit;
-	// Number of sim update frame when last collision was detcted
+	// Number of sim update frame when last collision was detected
 	unsigned int m_LastCollisionSimFrameNumber;
     int m_SimUpdatesBetweenScriptedUpdates; //!< The number of Sim updates between each scripted update for this MovableObject.
     int m_SimUpdatesSinceLastScriptedUpdate; //!< The counter for the current number of Sim updates since this MovableObject last ran a scripted update.
@@ -2021,6 +2017,13 @@ private:
 // Return value:    None.
 
     void Clear();
+
+    /// <summary>
+    /// Returns the script state to use for a given script path.
+    /// This will be locked to our thread and safe to use - ensure that it'll be unlocked after use!
+    /// </summary>
+    /// <returns>A script state.</returns>
+    LuaStateWrapper & GetAndLockStateForScript(const std::string& scriptPath);
 
 	// Disallow the use of some implicit methods.
 	MovableObject(const MovableObject &reference) = delete;

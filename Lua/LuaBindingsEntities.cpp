@@ -240,10 +240,12 @@ namespace RTE {
 		.property("MaxInventoryMass", &Actor::GetMaxInventoryMass)
 		.property("MovePathSize", &Actor::GetMovePathSize)
 		.property("MovePathEnd", &Actor::GetMovePathEnd)
+		.property("IsWaitingOnNewMovePath", &Actor::IsWaitingOnNewMovePath)
 		.property("AimDistance", &Actor::GetAimDistance, &Actor::SetAimDistance)
 		.property("SightDistance", &Actor::GetSightDistance, &Actor::SetSightDistance)
 		.property("PieMenu", &Actor::GetPieMenu, &LuaAdaptersPropertyOwnershipSafetyFaker::ActorSetPieMenu)
 		.property("AIBaseDigStrength", &Actor::GetAIBaseDigStrength, &Actor::SetAIBaseDigStrength)
+		.property("DigStrength", &Actor::EstimateDigStrength)
 		.property("SceneWaypoints", &LuaAdaptersActor::GetSceneWaypoints, luabind::adopt(luabind::return_value) + luabind::return_stl_iterator)
 		.property("LimbPushForcesAndCollisionsDisabled", &Actor::GetLimbPushForcesAndCollisionsDisabled, &Actor::SetLimbPushForcesAndCollisionsDisabled)
 
@@ -1224,11 +1226,11 @@ namespace RTE {
 		.property("GlobalAcc", &Scene::GetGlobalAcc, &Scene::SetGlobalAcc)
 		.property("ScenePathSize", &Scene::GetScenePathSize)
 
-		.def_readwrite("ScenePath", &Scene::m_ScenePath, luabind::return_stl_iterator)
 		.def_readwrite("Deployments", &Scene::m_Deployments, luabind::return_stl_iterator)
 
 		.def_readonly("BackgroundLayers", &Scene::m_BackLayerList, luabind::return_stl_iterator)
 
+		.def("GetScenePath", &Scene::GetScenePath, luabind::return_stl_iterator)
 		.def("GetBuildBudget", &Scene::GetBuildBudget)
 		.def("SetBuildBudget", &Scene::SetBuildBudget)
 		.def("IsScanScheduled", &Scene::IsScanScheduled)
@@ -1250,6 +1252,8 @@ namespace RTE {
 		.def("PathFindingUpdated", &Scene::PathFindingUpdated)
 		.def("CalculatePath", &LuaAdaptersScene::CalculatePath1)
 		.def("CalculatePath", &LuaAdaptersScene::CalculatePath2)
+		.def("CalculatePathAsync", &LuaAdaptersScene::CalculatePathAsync1)
+		.def("CalculatePathAsync", &LuaAdaptersScene::CalculatePathAsync2)
 
 		.enum_("PlacedObjectSets")[
 			luabind::value("PLACEONLOAD", Scene::PlacedObjectSets::PLACEONLOAD),

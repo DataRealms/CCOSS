@@ -420,25 +420,13 @@ int FirearmActivationDelay() const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateMovePath
+// Virtual method:  PreControllerUpdate
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the path to move along to the currently set movetarget.
+// Description:     Update called prior to controller update. Ugly hack. Supposed to be done every frame.
 // Arguments:       None.
 // Return value:    None.
 
-	bool UpdateMovePath() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateAI
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' AI state. Supposed to be done every frame that this has
-//                  a CAI controller controlling it.
-// Arguments:       None.
-// Return value:    None.
-
-	void UpdateAI() override;
-
+	void PreControllerUpdate() override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -572,6 +560,11 @@ int FirearmActivationDelay() const;
 
 protected:
 
+    /// <summary>
+    /// Function that is called when we get a new movepath.
+	/// This processes and cleans up the movepath.
+    /// </summary>
+    void OnNewMovePath() override;
 
 	// Member variables
 	static Entity::ClassInfo m_sClass;

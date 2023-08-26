@@ -72,6 +72,7 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(DataModule);
 		LuaBindingRegisterFunctionDeclarationForType(Timer);
 		LuaBindingRegisterFunctionDeclarationForType(Vector);
+		LuaBindingRegisterFunctionDeclarationForType(PathRequest);
 	};
 
 	/// <summary>

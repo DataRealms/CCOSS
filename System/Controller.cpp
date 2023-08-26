@@ -170,7 +170,10 @@ namespace RTE {
 				GetInputFromPlayer();
 				break;
 			case InputMode::CIM_AI:
-				GetInputFromAI();
+				if (ShouldUpdateAIThisFrame()) {
+					// AI will be updated in separate UpdateAI call, but we need to clear the command state for them
+					ResetCommandState();
+				}
 				break;
 			default:
 				ResetCommandState();
@@ -202,20 +205,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void Controller::GetInputFromAI() {
+	bool Controller::ShouldUpdateAIThisFrame() const
+	{
 		// Throttle the AI to only update every X sim updates.
 		// We want to spread the updates around (so, half the actors on odd frames, the other half on even frames, etc), so we check their contiguous ID against the frame number.
 		const int simTicksPerUpdate = g_SettingsMan.GetAIUpdateInterval();
 		if (m_ControlledActor && g_MovableMan.GetContiguousActorID(m_ControlledActor) % simTicksPerUpdate != g_TimerMan.GetSimUpdateCount() % simTicksPerUpdate) {
-			// Don't reset our command state, so we give the same input as last frame.
+			return false;
+		}
+
+		return true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void Controller::UpdateAI(ThreadScriptsToRun scriptsToRun) {
+		if (m_InputMode != InputMode::CIM_AI || !ShouldUpdateAIThisFrame()) {
 			return;
 		}
 
-		ResetCommandState();
-
-		// Try to run the scripted AI for the controlled Actor. If it doesn't work, fall back on the legacy C++ implementation.
-		if (m_ControlledActor && m_ControlledActor->ObjectScriptsInitialized() && !m_ControlledActor->UpdateAIScripted()) {
-			m_ControlledActor->UpdateAI();
+		// Run the scripted AI for the controlled Actor
+		if (m_ControlledActor && m_ControlledActor->ObjectScriptsInitialized()) {
+			m_ControlledActor->UpdateAIScripted(scriptsToRun);
 		}
 	}
 
@@ -229,6 +240,14 @@ namespace RTE {
 		Create(rhs);
 		return *this;
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void Controller::Override(const Controller &otherController)
+    {
+		RTEAssert(otherController.m_ControlledActor == m_ControlledActor, "Overriding a controller with a mismatched controlled actor!");
+		*this = otherController;
+    }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

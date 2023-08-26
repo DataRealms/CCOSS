@@ -11,6 +11,7 @@ sources += files(
 'ModManagerGUI.cpp',
 'ObjectPickerGUI.cpp',
 'PauseMenuGUI.cpp',
+'SaveLoadMenuGUI.cpp',
 'ScenarioActivityConfigGUI.cpp',
 'ScenarioGUI.cpp',
 'SceneEditorGUI.cpp',

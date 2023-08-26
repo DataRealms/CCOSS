@@ -139,6 +139,18 @@ namespace RTE {
 		/// </summary>
 		/// <param name="trailLength">The new max length, in pixels. If 0, no trail is drawn.</param>
 		void SetTrailLength(int trailLength);
+
+		/// <summary>
+		/// TODO description
+		/// </summary>
+		/// <param name="staininess">TODO</param>
+		void SetStaininess(float staininess) { m_Staininess = staininess; }
+
+		/// <summary>
+		/// TODO description
+		/// </summary>
+		/// <returns>TODO</returns>
+		float GetStaininess() const { return m_Staininess; }
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -200,6 +212,8 @@ namespace RTE {
 		float m_MinLethalRange; //!< Lower bound multiplier for setting LethalRange at random. By default, 1.0 equals one screen.
 		float m_MaxLethalRange; //!< Upper bound multiplier for setting LethalRange at random. By default, 1.0 equals one screen.
 		float m_LethalSharpness; //!< When Sharpness has decreased below this threshold the MO becomes m_HitsMOs = false. Default is Sharpness * 0.5.
+	
+		float m_Staininess; //!< TODO description and maybe a better name
 
 	private:
 

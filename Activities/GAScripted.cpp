@@ -20,8 +20,6 @@
 #include "ConsoleMan.h"
 #include "AudioMan.h"
 #include "SettingsMan.h"
-#include "MetaMan.h"
-#include "NetworkClient.h"
 #include "AHuman.h"
 #include "ACrab.h"
 #include "ACraft.h"
@@ -77,6 +75,9 @@ int GAScripted::Create() {
 
     // Scan the script file for any mentions/uses of Areas.
     CollectRequiredAreas();
+
+    // If the GAScripted has a OnSave() function, we assume it can be saved by default
+    m_AllowsUserSaving = HasSaveFunction();
 
     return 0;
 }
@@ -209,13 +210,7 @@ int GAScripted::ReloadScripts() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool GAScripted::ActivityCanBeSaved() const {
-	if (const Scene *scene = g_SceneMan.GetScene(); (scene && scene->IsMetagameInternal()) || g_MetaMan.GameInProgress()) {
-		return false;
-	}
-	if (g_NetworkClient.IsConnectedAndRegistered()) {
-		return false;
-	}
+bool GAScripted::HasSaveFunction() const {
 	//TODO this method is complicated and manually parsing lua like this sucks. It should be replaceable with a simple check if the function exists in Lua, but it wasn't working when I tried so I just copied this from SceneIsCompatible.
 	std::ifstream scriptInputFileStream(m_ScriptPath);
 	if (scriptInputFileStream.good()) {

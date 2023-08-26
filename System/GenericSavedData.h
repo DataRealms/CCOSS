@@ -11,6 +11,34 @@ namespace RTE {
 	class GenericSavedData : public Serializable {
 
 		/// <summary>
+		/// Helper class to save generic encoded string data, that can safely include newlines and = and other characters INI doesn't like.
+		/// </summary>
+		class GenericSavedEncodedStrings : public Serializable {
+
+		public:
+
+			SerializableClassNameGetter;
+			SerializableOverrideMethods;
+
+			/// <summary>
+			/// Constructor method used to instantiate a GenericSavedStrings object in system memory and make it ready for use.
+			/// </summary>
+			GenericSavedEncodedStrings() = default;
+
+			/// <summary>
+			///	Constructor method used to instantiate a GenericSavedEncodedStrings object to be identical to another, by deep copy, and make it ready for use.
+			/// </summary>
+			/// <param name="reference">A reference to the GenericSavedEncodedStrings to deep copy.</param>
+			GenericSavedEncodedStrings(const GenericSavedEncodedStrings &reference) = default;
+
+			std::unordered_map<std::string, std::string> m_Data; //!< Stored string data.
+
+		private:
+
+			static const std::string c_ClassName; //!< A string with the friendly formatted type name of this object.
+		};
+
+		/// <summary>
 		/// Helper class to save generic string data.
 		/// </summary>
 		class GenericSavedStrings : public Serializable {
@@ -82,8 +110,15 @@ namespace RTE {
 		/// <param name="reference">A reference to the GenericSavedData to deep copy.</param>
 		GenericSavedData(const GenericSavedData &reference) = default;
 
-		GenericSavedStrings m_SavedStrings; //!< Stored string data.
-		GenericSavedNumbers m_SavedNumbers; //!< Stored number data.
+		void SaveString(const std::string &key, const std::string &value);
+		const std::string& LoadString(const std::string &key);
+
+		void SaveNumber(const std::string &key, float value) { m_SavedNumbers.m_Data[key] = value; };
+		float LoadNumber(const std::string &key) { return m_SavedNumbers.m_Data[key]; };
+
+		GenericSavedEncodedStrings 	m_SavedEncodedStrings; //!< Stored encoded string data.
+		GenericSavedStrings 		m_SavedStrings; //!< Stored string data.
+		GenericSavedNumbers 		m_SavedNumbers; //!< Stored number data.
 
 	private:
 

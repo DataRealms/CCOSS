@@ -278,6 +278,9 @@ namespace RTE {
 		/// </summary>
 		void CreatePrimaryWindow();
 
+		/// <summary>
+		/// Initializes all opengl objects (textures, vbo, vao, and fbo).
+		/// </summary>
 		void InitializeOpenGL();
 
 		/// <summary>

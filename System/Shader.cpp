@@ -30,7 +30,7 @@ namespace RTE {
 		bool result{false};
 
 		std::string error;
-		result = compileShader(vertexShader, vertexPath, error) && compileShader(fragmentShader, fragPath, error);
+		result = CompileShader(vertexShader, vertexPath, error) && CompileShader(fragmentShader, fragPath, error);
 		if (result) {
 			GL_CHECK(glBindAttribLocation(m_ProgramID, 0, "rteVertexPosition"));
 			GL_CHECK(glBindAttribLocation(m_ProgramID, 1, "rteVertexTexUV"));
@@ -88,7 +88,7 @@ namespace RTE {
 
 	void Shader::SetVector4f(int32_t uniformLoc, const glm::vec4 &value) { GL_CHECK(glUniform4fv(uniformLoc, 1, glm::value_ptr(value))); }
 
-	bool Shader::compileShader(GLuint shaderID, const std::string &filename, std::string &error) {
+	bool Shader::CompileShader(GLuint shaderID, const std::string &filename, std::string &error) {
 		if (!System::PathExistsCaseSensitive(filename)) {
 			error += "File " + filename + " doesn't exist.";
 			return false;

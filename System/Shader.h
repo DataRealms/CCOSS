@@ -7,10 +7,37 @@
 namespace RTE {
 	class Shader {
 	public:
+
+		/// <summary> 
+		/// Constructs an empty shader program, which can be initialized using `Shader::Compile`
+		/// </summary>
 		Shader();
+		
+		/// <summary> 
+		/// Constructs a Shader from vertex shader file and fragment shader file.
+		/// </summary>
+		/// <param name="vertexFilename">
+		/// Filepath to the vertex shader file.
+		/// </param>
+		/// <param name="fragPath">
+		/// Filepath to the fragment shader file. 
+		/// </param>
 		Shader(const std::string &vertexFilename, const std::string &fragPath);
+		
+		/// <summary>
+		/// Destructor.
+		/// </summary>
 		virtual ~Shader();
 
+		/// <summary>
+		/// Create this shader from a vertex shader file and a fragment shader file.
+		/// </summary>
+		/// <param name="vertexFilename">
+		/// Filepath to the vertex shader.
+		/// </param>
+		/// <param name="fragPath">
+		/// Filepath to the fragment shader
+		/// </param>
 		bool Compile(const std::string &vertexFilename, const std::string &fragPath);
 
 		void Use();
@@ -187,7 +214,7 @@ namespace RTE {
 		/// Get the location of the texture sampler uniform.
 		/// </summary>
 		/// <returns>
-		/// The location of the texture uniform. This may be -1 if the shader doesn't use textures, in which case the value must not be set.
+		/// The location of the texture uniform. This may be -1 if the shader doesn't use textures, in which case the value will be ignored.
 		/// </returns>
 		int GetTextureUniform() { return m_TextureUniform; }
 
@@ -195,7 +222,7 @@ namespace RTE {
 		/// Get the location of the color modifier uniform.
 		/// </summary>
 		/// <returns>
-		/// The location of the color modifier uniform. This may be -1 if the shader doesn't use the color mod, in which case the value must not be set.
+		/// The location of the color modifier uniform. This may be -1 if the shader doesn't use the color mod, in which case the value will  be ignored.
 		/// </returns>
 		int GetColorUniform() { return m_ColorUniform; }
 
@@ -203,7 +230,7 @@ namespace RTE {
 		/// Get the location of the transformation matrix uniform.
 		/// </summary>
 		/// <returns>
-		/// The location of the transformation matrix uniform. This may be -1 if the shader doesn't use transforms, in which case the value must not be set.
+		/// The location of the transformation matrix uniform. This may be -1 if the shader doesn't use transforms, in which case the value will be ignored.
 		/// </returns>
 		int GetTransformUniform() { return m_TransformUniform; }
 
@@ -211,7 +238,7 @@ namespace RTE {
 		/// Get the location of the transformation matrix uniform.
 		/// </summary>
 		/// <returns>
-		/// The location of the UV transformation matrix uniform. This may be -1 if the shader doesn't use UV transforms, in which case the value must not be set.
+		/// The location of the UV transformation matrix uniform. This may be -1 if the shader doesn't use UV transforms, in which case the value will be ignored.
 		/// </returns>
 		int GetUVTransformUniform() { return m_UVTransformUniform; }
 
@@ -219,7 +246,7 @@ namespace RTE {
 		/// Get the location of the projection matrix uniform.
 		/// </summary>
 		/// <returns>
-		/// The location of the color modifier uniform. This may be -1 if the shader doesn't apply projection, in which case the value must not be set.
+		/// The location of the color modifier uniform. This may be -1 if the shader doesn't apply projection, in which case the value will be ignored.
 		/// </returns>
 		int GetProjectionUniform() { return m_ProjectionUniform; }
 
@@ -227,12 +254,41 @@ namespace RTE {
 	private:
 		uint32_t m_ProgramID;
 
-		bool compileShader(uint32_t shaderID, const std::string &data, std::string &error);
+		/// <summary>
+		/// Compiles a shader component from a data string.
+		/// </summary>
+		/// <param name="shaderID">
+		/// ID of the shader component to compile.
+		/// </param>
+		/// <param name="data">
+		/// The shader code string.
+		/// </param>
+		/// <param name="error">
+		/// String to contain error data returned by opengl during compilation.
+		/// </param>
+		/// <returns>
+		/// Whether compilation was successful.
+		/// </returns>
+		bool CompileShader(uint32_t shaderID, const std::string &data, std::string &error);
+
+		/// <summary> 
+		/// Links a shader program from a vertex and fragment shader.
+		/// </summary>
+		/// <param name="vtxShader">
+		/// The compiled vertex shader.
+		/// </param>
+		/// <param name="fragShader">
+		/// The compiled fragment shader.
+		/// </param>
+		/// <returns>
+		/// Whether linking was successful.
+		/// </returns>
 		bool Link(uint32_t vtxShader, uint32_t fragShader);
+
+		/// <summary>
+		/// Sets default values for the shader uniforms (may not persist across frames!)
+		/// </summary>
 		void ApplyDefaultUniforms();
-		std::string m_ShaderName;
-		std::string m_VertexShader;
-		std::string m_FragmentShader;
 
 		int m_TextureUniform; //!< Location of the texture uniform (sampler2d rteTexture).
 		int m_ColorUniform; //!< Location of the colormod uniform (vec4 rteColor).

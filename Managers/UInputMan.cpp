@@ -1012,8 +1012,8 @@ namespace RTE {
 		int mousePlayer = MouseUsedByPlayer();
 		// TODO: Figure out a less shit solution to updating the mouse in GUIs when there are no mouse players configured, i.e. no player input scheme is using mouse+keyboard. For not just check if we're out of Activity.
 		if (!g_ActivityMan.IsInActivity() || mousePlayer != Players::NoPlayer) {
-			m_AnalogMouseData.m_X += m_RawMouseMovement.m_X;
-			m_AnalogMouseData.m_Y += m_RawMouseMovement.m_Y;
+			m_AnalogMouseData.m_X += m_RawMouseMovement.m_X * 3;
+			m_AnalogMouseData.m_Y += m_RawMouseMovement.m_Y * 3;
 			m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius);
 
 			// Only mess with the mouse pos if the original mouse position is not above the screen and may be grabbing the title bar of the game window

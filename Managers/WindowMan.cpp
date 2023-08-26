@@ -567,22 +567,6 @@ namespace RTE {
 					m_FocusEventsDispatchedByDisplaySwitchIn = false;
 					m_FocusEventsDispatchedByMovingBetweenWindows = false;
 					break;
-				case SDL_WINDOWEVENT_SIZE_CHANGED:
-				{
-					double aspectRatio = 16.0/9.0;
-					double inverseRatio = 9.0/16.0;
-					double newRatio = (static_cast<double>(windowEvent.window.data1) / static_cast<double>(windowEvent.window.data2));
-					if (glm::epsilonNotEqual<double>(aspectRatio, newRatio, glm::epsilon<double>())) {
-						if (newRatio > aspectRatio){
-							SDL_SetWindowSize(m_PrimaryWindow.get(), windowEvent.window.data1, windowEvent.window.data1 * inverseRatio);
-							m_ResMultiplier = static_cast<float>(windowEvent.window.data1) / static_cast<float>(m_ResX);
-						} else {
-							SDL_SetWindowSize(m_PrimaryWindow.get(), aspectRatio * windowEvent.window.data2, windowEvent.window.data2);
-							m_ResMultiplier = static_cast<float>(windowEvent.window.data2) / static_cast<float>(m_ResY);
-						}
-					}
-					break;
-				}
 				default:
 					break;
 			}

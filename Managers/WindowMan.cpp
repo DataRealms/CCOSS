@@ -30,9 +30,11 @@ namespace RTE {
 		m_FocusEventsDispatchedByMovingBetweenWindows = false;
 		m_FocusEventsDispatchedByDisplaySwitchIn = false;
 
-		// m_PrimaryTexture.reset();
-		// m_PrimaryRenderer.reset();
 		m_PrimaryWindow.reset();
+		m_BackBuffer32Texture = 0;
+		m_PrimaryWindowProjection = glm::mat4(1);
+		m_ScreenVAO = 0;
+		m_ScreenVBO = 0;
 		ClearMultiDisplayData();
 
 		m_AnyWindowHasFocus = false;
@@ -54,7 +56,7 @@ namespace RTE {
 		m_ResY = c_DefaultResY;
 		m_ResMultiplier = 1;
 		m_EnableVSync = true;
-		m_IgnoreMultiDisplays = false;
+		m_IgnoreMultiDisplays = true;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

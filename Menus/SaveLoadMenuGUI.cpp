@@ -213,7 +213,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SaveLoadMenuGUI::UpdateButtonEnabledStates() {
-		bool allowSave = g_ActivityMan.GetActivityAllowsSaving() && m_SaveGameName->GetText() != "";
+		bool allowSave = g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->GetAllowsUserSaving() && m_SaveGameName->GetText() != "";
 
 		int existingSaveItemIndex = -1;
 		for (int i = 0; i < m_SaveGamesListBox->GetItemList()->size(); ++i) {
@@ -240,7 +240,7 @@ namespace RTE {
 		m_LoadButton->SetEnabled(saveExists);
 		m_DeleteButton->SetEnabled(saveExists);
 
-		m_ActivityCannotBeSavedLabel->SetVisible(g_ActivityMan.GetActivity() && !g_ActivityMan.GetActivityAllowsSaving());
+		m_ActivityCannotBeSavedLabel->SetVisible(g_ActivityMan.GetActivity() && !g_ActivityMan.GetActivity()->GetAllowsUserSaving());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

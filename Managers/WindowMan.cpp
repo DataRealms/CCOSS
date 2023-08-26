@@ -312,8 +312,8 @@ namespace RTE {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::ValidateResolution(int &resX, int &resY, float &resMultiplier) const {
-		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY || resMultiplier < 1 || resMultiplier > 8) {
-			resMultiplier = std::clamp<float>(resMultiplier, 1, 8);
+		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY || resMultiplier < 1) {
+			resMultiplier = std::max<float>(resMultiplier, 1.0f);
 			resX = std::min<float>(resX, m_MaxResX / resMultiplier);
 			resY = std::min<float>(resY, m_MaxResY / resMultiplier);
 			RTEError::ShowMessageBox("Resolution too high to fit display, overriding to fit!");

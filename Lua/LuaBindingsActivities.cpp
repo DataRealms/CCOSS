@@ -14,6 +14,7 @@ namespace RTE {
 		.property("Description", &Activity::GetDescription)
 		.property("InCampaignStage", &Activity::GetInCampaignStage, &Activity::SetInCampaignStage)
 		.property("ActivityState", &Activity::GetActivityState, &Activity::SetActivityState)
+		.property("AllowsUserSaving", &Activity::GetAllowsUserSaving, &Activity::SetAllowsUserSaving)
 		.property("SceneName", &Activity::GetSceneName, &Activity::SetSceneName)
 		.property("PlayerCount", &Activity::GetPlayerCount)
 		.property("HumanCount", &Activity::GetHumanCount)

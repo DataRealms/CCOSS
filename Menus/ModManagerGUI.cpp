@@ -18,7 +18,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	ModManagerGUI::ModManagerGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput) {
+	ModManagerGUI::ModManagerGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput, bool createForPauseMenu) {
 		m_GUIControlManager = std::make_unique<GUIControlManager>();
 		RTEAssert(m_GUIControlManager->Create(guiScreen, guiInput, "Base.rte/GUIs/Skins/Menus", "MainMenuSubMenuSkin.ini"), "Failed to create GUI Control Manager and load it from Base.rte/GUIs/Skins/Menus/MainMenuSubMenuSkin.ini");
 		m_GUIControlManager->Load("Base.rte/GUIs/ModManagerGUI.ini");
@@ -33,6 +33,11 @@ namespace RTE {
 		modManagerMenuBox->SetPositionAbs(modManagerMenuBox->GetXPos(), (rootBox->GetHeight() < 540) ? modManagerMenuBox->GetYPos() - 15 : 140);
 
 		m_BackToMainButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonBackToMainMenu"));
+
+		if (createForPauseMenu) {
+			m_BackToMainButton->SetSize(120, 20);
+			m_BackToMainButton->SetText("Back to Pause Menu");
+		}
 		m_BackToMainButton->SetPositionAbs((rootBox->GetWidth() - m_BackToMainButton->GetWidth()) / 2, modManagerMenuBox->GetYPos() + modManagerMenuBox->GetHeight() + 10);
 
 		m_ModsListBox = dynamic_cast<GUIListBox *>(m_GUIControlManager->GetControl("ListBoxMods"));

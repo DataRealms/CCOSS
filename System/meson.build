@@ -1,4 +1,5 @@
 sources += files(
+'Base64/base64.cpp',
 'MicroPather/micropather.cpp',
 #'glad/gl.c',
 'Semver200/Semver200_comparator.cpp',
@@ -31,3 +32,10 @@ sources += files(
 #'GLCheck.cpp',
 'SpatialPartitionGrid.cpp',
 )
+
+if host_machine.system() == 'windows'
+  sources += files(
+	'StackWalker/StackWalker.cpp',
+    'RTEStackTrace.cpp',
+  )
+endif

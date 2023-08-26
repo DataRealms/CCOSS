@@ -22,6 +22,7 @@
 #include "Controller.h"
 #include "DataModule.h"
 #include "GraphicalPrimitive.h"
+#include "PathFinder.h"
 
 #include "GUIBanner.h"
 #include "BuyMenuGUI.h"
@@ -73,6 +74,8 @@
 #include "Turret.h"
 #include "PieMenu.h"
 #include "PieSlice.h"
+
+#include "System/MicroPather/micropather.h"
 
 #ifndef _MSC_VER
 #pragma GCC diagnostic push
@@ -307,6 +310,9 @@ namespace RTE {
 	struct LuaAdaptersScene {
 		static int CalculatePath1(Scene *luaSelfObject, const Vector &start, const Vector &end, bool movePathToGround, float digStrength) { return CalculatePath2(luaSelfObject, start, end, movePathToGround, digStrength, Activity::Teams::NoTeam); }
 		static int CalculatePath2(Scene *luaSelfObject, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team);
+
+		static void CalculatePathAsync1(Scene *luaSelfObject, const luabind::object &callback, const Vector &start, const Vector &end, bool movePathToGround, float digStrength) { return CalculatePathAsync2(luaSelfObject, callback, start, end, movePathToGround, digStrength, Activity::Teams::NoTeam); }
+		static void CalculatePathAsync2(Scene *luaSelfObject, const luabind::object &callback, const Vector &start, const Vector &end, bool movePathToGround, float digStrength, Activity::Teams team);
 	};
 #pragma endregion
 
@@ -581,25 +587,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A float describing the default pathfinder penetration value.</returns>
 		static float GetPathFindingDefaultDigStrength();
-
-		/// <summary>
-		/// Gets a random number between -1 and 1.
-		/// </summary>
-		/// <returns>A random number between -1 and 1.</returns>
-		static double NormalRand();
-
-		/// <summary>
-		/// Gets a random number between 0 and 1.
-		/// </summary>
-		/// <returns>A random number between 0 and 1.</returns>
-		static double PosRand();
-
-		/// <summary>
-		/// Gets a random number between 1 and the passed in upper limit number. The limits are included in the available random range.
-		/// </summary>
-		/// <param name="upperLimitInclusive">The upper limit for the random number.</param>
-		/// <returns>A random number between 1 and the passed in number.</returns>
-		static double LuaRand(double upperLimitInclusive);
 
 		/// <summary>
 		/// Explicit deletion of any Entity instance that Lua owns. It will probably be handled by the GC, but this makes it instantaneous.

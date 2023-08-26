@@ -68,7 +68,7 @@ jobs:
           CC: "gcc"
           CXX: "g++"
         run: |
-          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} build
+          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} -Db_lto=true build
 
       - name: Configure for AppImage
         if: ${{inputs.upload_artefacts}}
@@ -126,14 +126,14 @@ jobs:
       - name: Install Dependencies
         run: |
           brew install pkg-config tbb sdl2 minizip lz4 flac luajit lua@5.1 libpng gcc@12 ninja meson
-          
+
       - name: Build
         env:
           CC: "gcc-12"
           CXX: "g++-12"
           LDFLAGS: "-static-libgcc -static-libstdc++"
         run: |
-          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}}  build
+          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} -Db_lto=false build
           meson compile -C build
 
       - name: Artifact Deploy
@@ -145,3 +145,23 @@ jobs:
             build/CortexCommand
             build/CortexCommand_debug
           if-no-files-found: error
+
+  build-windows:
+    runs-on: windows-latest
+    name: Windows Build
+    
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+      
+      - name: Install Dependencies
+        run: |
+          pip install meson
+      
+      - name: Setup
+        run: |
+          meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} --vsenv build
+      
+      - name: Build
+        run: |
+          meson compile -Cbuild

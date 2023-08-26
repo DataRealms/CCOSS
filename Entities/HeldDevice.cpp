@@ -25,6 +25,7 @@
 #include "AllegroBitmap.h"
 
 #include "SettingsMan.h"
+#include "FrameMan.h"
 
 namespace RTE {
 
@@ -369,21 +370,6 @@ void HeldDevice::Deactivate()
 {
     m_Activated = false;
 }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnMOHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits another MO.
-//                  This is called by the owned Atom/AtomGroup of this MovableObject during
-//                  travel.
-
-bool HeldDevice::OnMOHit(MovableObject *pOtherMO)
-{
-    // Don't terminate, continue on
-    return false;
-}
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

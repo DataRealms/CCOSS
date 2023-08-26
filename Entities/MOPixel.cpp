@@ -2,6 +2,7 @@
 
 #include "Atom.h"
 #include "PostProcessMan.h"
+#include "FrameMan.h"
 
 namespace RTE {
 
@@ -16,6 +17,7 @@ namespace RTE {
 		m_MinLethalRange = 1;
 		m_MaxLethalRange = 1;
 		m_LethalSharpness = 1;
+		m_Staininess = 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,6 +59,7 @@ namespace RTE {
 		m_MinLethalRange = reference.m_MinLethalRange;
 		m_MaxLethalRange = reference.m_MaxLethalRange;
 		m_LethalSharpness = reference.m_LethalSharpness;
+		m_Staininess = reference.m_Staininess;
 
 		return 0;
 	}
@@ -74,6 +77,8 @@ namespace RTE {
 			reader >> m_MinLethalRange;
 		} else if (propName == "MaxLethalRange") {
 			reader >> m_MaxLethalRange;
+		} else if (propName == "Staininess") {
+			reader >> m_Staininess;
 		} else {
 			return MovableObject::ReadProperty(propName, reader);
 		}
@@ -93,6 +98,8 @@ namespace RTE {
 		writer << m_MinLethalRange;
 		writer.NewProperty("MaxLethalRange");
 		writer << m_MaxLethalRange;
+		writer.NewProperty("Staininess");
+		writer << m_Staininess;
 
 		return 0;
 	}

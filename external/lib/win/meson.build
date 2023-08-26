@@ -5,13 +5,9 @@ if host_machine.cpu_family() == 'x86_64'
   if get_option('debug')
     fmod = declare_dependency(dependencies: compiler.find_library('fmod_vc', dirs: meson.current_source_dir()))
     lz4 = declare_dependency(dependencies: compiler.find_library('lz4_debug_static', dirs: meson.current_source_dir()))
-    libpng = declare_dependency(dependencies: compiler.find_library('png16_static', dirs: meson.current_source_dir()), include_directories: external_inc_dirs)
-    zlib = declare_dependency(dependencies: compiler.find_library('zlibstat', dirs: meson.current_source_dir()))
   else
     fmod = declare_dependency(dependencies: compiler.find_library('fmod_vc', dirs: meson.current_source_dir()))
     lz4 = declare_dependency(dependencies: compiler.find_library('lz4_release_static', dirs: meson.current_source_dir()))
-    libpng = declare_dependency(dependencies: compiler.find_library('png16_static', dirs: meson.current_source_dir()), include_directories: external_inc_dirs)
-    zlib = declare_dependency(dependencies: compiler.find_library('zlibstat', dirs: meson.current_source_dir()))
   endif
 else
 message('using x86 libs')
@@ -19,14 +15,9 @@ message('using x86 libs')
   message('using debug libs')
     fmod = declare_dependency(dependencies: compiler.find_library('fmodL_vc', dirs: meson.current_source_dir()/'x86'))
     lz4 = declare_dependency(dependencies: compiler.find_library('lz4_debug_static', dirs: meson.current_source_dir()/'x86'))
-    libpng = declare_dependency(dependencies: compiler.find_library('png16_static', dirs: meson.current_source_dir()/'x86'), include_directories: external_inc_dirs)
-    zlib = declare_dependency(dependencies: compiler.find_library('zlibstat', dirs: meson.current_source_dir()/'x86'))
   else
     fmod = declare_dependency(dependencies: compiler.find_library('fmodL_vc', dirs: meson.current_source_dir()/'x86'))
     lz4 = declare_dependency(dependencies: compiler.find_library('lz4_debug_static', dirs: meson.current_source_dir()/'x86'))
-    libpng = declare_dependency(dependencies: compiler.find_library('png16_static', dirs: meson.current_source_dir()/'x86'), include_directories: external_inc_dirs)
-    zlib = declare_dependency(dependencies: compiler.find_library('zlibstat', dirs: meson.current_source_dir()/'x86'))
   endif
 endif
-meson.override_dependency('libpng', libpng)
-deps += [fmod, lz4, libpng, zlib]
+deps += [fmod, lz4]

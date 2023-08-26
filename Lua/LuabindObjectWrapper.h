@@ -27,6 +27,8 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Destruction
+		static void ApplyQueuedDeletions();
+
 		/// <summary>
 		/// Destructor method used to clean up a LuabindObjectWrapper object before deletion from system memory.
 		/// </summary>

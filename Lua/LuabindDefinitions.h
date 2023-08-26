@@ -3,6 +3,9 @@
 
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS 1
 
+// Todo - figure out luabind error callbacks and blah-de-blah
+//#define LUABIND_NO_EXCEPTIONS
+
 #include "lua.hpp"
 #include "luabind.hpp"
 #include "luabind/object.hpp"

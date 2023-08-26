@@ -1,0 +1,4 @@
+CMakeFiles/
+
+_Bin/*
+!_Bin/*.lib

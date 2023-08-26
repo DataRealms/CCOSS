@@ -1,4 +1,4 @@
-project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'external/sources', default_options:['cpp_std=c++20', 'buildtype=release', 'b_lto=true', 'default_library=static'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
+project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'external/sources', default_options:['cpp_std=c++20', 'buildtype=release', 'default_library=static'], version:'0.1.0-Pre-4.1', meson_version:'>=0.60')
 
 #### Build environment Setup ####
 
@@ -20,7 +20,13 @@ elif host_machine.system() == 'windows'
   sdl2_dep = dependency('sdl2')
   luajit = subproject('LuaJIT-2.1')
   luajit_dep = dependency('luajit')
-  deps += [sdl2_dep, luajit_dep]
+  zlib = subproject('zlib-ng-2.1.3')
+  zlib_dep = dependency('zlib')
+  minizip = subproject('minizip-ng-4.0.0')
+  minizip_dep = dependency('minizip')
+  libpng = subproject('libpng-1.6.40')
+  libpng_dep = dependency('libpng')
+  deps += [sdl2_dep, luajit_dep, zlib_dep, minizip_dep, libpng_dep]
 endif
 
 elfname = 'CortexCommand'
@@ -34,6 +40,14 @@ suffix=''
 
 if compiler.get_id() == 'clang'
   error('LLVM clang is not supported due to missing features of the clang standard library. (std::execution)')
+endif
+
+if host_machine.system() == 'darwin' and get_option('b_lto')
+  error('LTO is currently unsupported on macos. Please disable with meson configure -Db_lto=false')
+endif
+
+if get_option('debug') and get_option('b_lto')
+  warning('Link time optimization enabled in debug mode, debug symbols may not be fully available. Disable b_lto with "meson configure -Db_lto=false".')
 endif
 
 if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
@@ -64,7 +78,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
 
     debug_type = get_option('debug_type')
     if debug_type == 'release'
-      preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
+      preprocessor_flags += ['-DRELEASE_BUILD'] # enable minimal debug features
     elif debug_type == 'minimal'
       preprocessor_flags += ['-DMIN_DEBUG_BUILD', '-DDEBUGMODE'] # enable some debug features
     elif debug_type == 'full'
@@ -82,7 +96,7 @@ elif compiler.get_argument_syntax()== 'msvc'
   message('cl detected')
   elfname = 'Cortex Command'
   extra_args += ['-D_HAS_ITERATOR_DEBUGGING=0', '-D_HAS_AUTO_PTR_ETC=1', '-bigobj']
-  add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib'], language:'cpp')
+  add_project_link_arguments(['winmm.lib', 'ws2_32.lib', 'dinput8.lib', 'ddraw.lib', 'dxguid.lib', 'dsound.lib', 'dbghelp.lib'], language:'cpp')
   if host_machine.cpu_family() == 'x86'
     elfname += ' x86'
   endif
@@ -128,7 +142,7 @@ else
   conf_data.set('EXEPATH', prefix/get_option('bindir'))
 endif
 
-#### External Libraries ####
+#### Platform Common External Libraries ####
 external_objects = []
 external_libs = []
 subdir('external')
@@ -182,9 +196,6 @@ cccpelf = executable(
   win_subsystem:'windows', # Windows mark as GUI app
 )
 
-if get_option('debug') and get_option('b_lto')
-  warning('Link time optimization enabled in debug mode, debug symbols may not be fully available. Disable b_lto with "meson configure -Db_lto=false".')
-endif
 
 #### Installing #####
 base_exclude_files = [

@@ -295,7 +295,7 @@ namespace RTE {
 	void SceneLayerImpl<TRACK_DRAWINGS>::ClearBitmap(ColorKeys clearTo) {
 		RTEAssert(m_MainBitmapOwned, "Bitmap not owned! We shouldn't be clearing this!");
 
-		std::scoped_lock<std::mutex> bitmapClearLock(m_BitmapClearMutex);
+		m_BitmapClearMutex.lock();
 
 		if (m_LastClearColor != clearTo) {
 			// Note: We're clearing to a different color than expected, which is expensive! We should always aim to clear to the same color to avoid it as much as possible.
@@ -305,14 +305,23 @@ namespace RTE {
 
 		std::swap(m_MainBitmap, m_BackBitmap);
 
+		// Okay, this is tricky. In extremely CPU-saturated environments, this thread can be delayed from starting (and thus locking the mutex) until this ClearBitmap has been called again
+		// So we need to ensure that the other thread has actually acquired the lock before we can continue
+		// Apparently there's no good way to transfer locks to other threads, so we do this instead
+		volatile bool hasTransferredLock = false;
+
 		// Start a new thread to clear the backbuffer bitmap asynchronously.
-		std::thread clearBackBitmapThread([this, clearTo](BITMAP *bitmap, std::vector<IntRect> drawings) {
+		std::thread clearBackBitmapThread([this, clearTo, &hasTransferredLock](BITMAP *bitmap, std::vector<IntRect> drawings) {
 			this->m_BitmapClearMutex.lock();
+			hasTransferredLock = true;
 			ClearDrawings(bitmap, drawings, clearTo);
 			this->m_BitmapClearMutex.unlock();
 		}, m_BackBitmap, m_Drawings);
 
 		clearBackBitmapThread.detach();
+
+		m_BitmapClearMutex.unlock();
+		while (!hasTransferredLock) {};
 
 		m_Drawings.clear(); // This was copied into the new thread, so can be safely deleted.
 	}

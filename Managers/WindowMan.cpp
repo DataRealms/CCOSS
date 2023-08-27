@@ -149,7 +149,6 @@ namespace RTE {
 				RTEAbort("Failed to create window because:\n" + std::string(SDL_GetError()));
 			}
 		}
-		SDL_SetWindowMinimumSize(m_PrimaryWindow.get(), c_DefaultResX, c_DefaultResY);
 	}
 
 	void WindowMan::InitializeOpenGL() {

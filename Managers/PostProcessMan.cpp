@@ -529,7 +529,7 @@ namespace RTE {
 				transformMatrix = glm::translate(transformMatrix, glm::vec3(effectPosX, effectPosY, 0));
 				transformMatrix = glm::translate(transformMatrix, glm::vec3(-0.5f, -0.5f, 0.0f));
 				transformMatrix = glm::scale(transformMatrix, glm::vec3(effectBitmap->w * 0.5f, effectBitmap->h * 0.5f, 1.0));
-				transformMatrix = glm::rotate(transformMatrix, glm::radians(postEffect.m_Angle), glm::vec3(0, 0, 1));
+				transformMatrix = glm::rotate(transformMatrix, -postEffect.m_Angle, glm::vec3(0, 0, 1));
 
 				glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLBitmapInfo*>(postEffect.m_Bitmap->extra)->m_Texture);
 				m_PostProcessShader->SetMatrix4f(m_PostProcessShader->GetTransformUniform(), transformMatrix);

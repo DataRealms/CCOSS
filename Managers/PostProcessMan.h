@@ -26,7 +26,7 @@ namespace RTE {
 	struct PostEffect {
 		BITMAP *m_Bitmap = nullptr; //!< The bitmap to blend, not owned.
 		size_t m_BitmapHash = 0; //!< Hash used to transmit glow events over the network.
-		float m_Angle = 0; // Post effect angle.
+		float m_Angle = 0; // Post effect angle in radians.
 		int m_Strength = 128; //!< Scalar float for how hard to blend it in, 0 - 255.
 		Vector m_Pos; //!< Post effect position. Can be relative to the scene, or to the screen, depending on context.
 
@@ -111,7 +111,7 @@ namespace RTE {
 		/// <param name="effect">A 32bpp BITMAP screen should be drawn centered on the above scene location in the final frame buffer. Ownership is NOT transferred!</param>
 		/// <param name="hash">Hash value of the effect for transmitting over the network.</param>
 		/// <param name="strength">The intensity level this effect should have when blended in post. 0 - 255.</param>
-		/// <param name="angle">The angle this effect should be rotated at.</param>
+		/// <param name="angle">The angle this effect should be rotated at in radians.</param>
 		void RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, int strength = 255, float angle = 0);
 
 		/// <summary>

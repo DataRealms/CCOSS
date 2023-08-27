@@ -15,7 +15,7 @@ if host_machine.system() in ['linux','darwin']
     dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2', 'lua51', 'lua5.1', 'lua-5.1']),
     dependency('tbb'),
   ]
-  if host_machine.system == 'linux'
+  if host_machine.system() == 'linux'
     deps += dependency('SDL2_image')
   endif
 elif host_machine.system() == 'windows'

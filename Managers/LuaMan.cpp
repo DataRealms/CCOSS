@@ -472,6 +472,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	const std::unordered_map<std::string, PerformanceMan::ScriptTiming> & LuaMan::GetScriptTimings() const {
+		return m_ScriptTimings;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int LuaStateWrapper::RunScriptFunctionString(const std::string &functionName, const std::string &selfObjectName, const std::vector<std::string_view> &variablesToSafetyCheck, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
 		std::stringstream scriptString;
 		if (!variablesToSafetyCheck.empty()) {
@@ -581,6 +587,7 @@ namespace RTE {
 			}
 		}
 
+		std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 		if (lua_pcall(m_State, argumentCount, LUA_MULTRET, -argumentCount - 2) > 0) {
 			m_LastError = lua_tostring(m_State, -1);
 			lua_pop(m_State, 1);
@@ -588,6 +595,12 @@ namespace RTE {
 			ClearErrors();
 			status = -1;
 		}
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+		const std::string &path = functionObject->GetFilePath();
+		m_ScriptTimings[path].m_Time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+		m_ScriptTimings[path].m_CallCount++;
+
 		lua_pop(m_State, 1);
 
 		return status;
@@ -950,6 +963,12 @@ namespace RTE {
 
 		// Apply all deletions queued from lua
     	LuabindObjectWrapper::ApplyQueuedDeletions();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaMan::ClearScriptTimings() {
+		m_ScriptTimings.clear();
 	}
 
 }

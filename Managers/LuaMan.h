@@ -4,6 +4,7 @@
 #include "Singleton.h"
 #include "Entity.h"
 #include "RTETools.h"
+#include "PerformanceMan.h"
 
 #define g_LuaMan LuaMan::Instance()
 
@@ -75,6 +76,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>This LuaStateWrapper's internal lua state.</returns>
 		lua_State* GetLuaState() { return m_State; };
+		
+		/// <summary>
+		/// Gets m_ScriptTimings.
+		/// </summary>
+		/// <returns>m_ScriptTimings.</returns>
+		const std::unordered_map<std::string, PerformanceMan::ScriptTiming> & GetScriptTimings() const;
 #pragma endregion
 
 #pragma region Script Execution Handling
@@ -429,6 +436,11 @@ namespace RTE {
 		void Update();
 #pragma endregion
 
+		/// <summary>
+		/// Clears m_ScriptTimings.
+		/// </summary>
+		void ClearScriptTimings();
+
 	private:
 
 		static constexpr int c_MaxOpenFiles = 10; //!< The maximum number of files that can be opened with FileOpen at runtime.
@@ -445,6 +457,8 @@ namespace RTE {
 		std::mutex m_ScriptCallbacksMutex; //!< Mutex to ensure multiple threads aren't modifying the script callback vector at the same time.
 
 		int m_LastAssignedLuaState = 0;
+
+		std::unordered_map<std::string, PerformanceMan::ScriptTiming> m_ScriptTimings; //!< Internal map of script timings.
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

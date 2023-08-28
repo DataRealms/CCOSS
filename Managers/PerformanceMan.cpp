@@ -160,7 +160,20 @@ namespace RTE {
 			if (int totalPlayingChannelCount = 0, realPlayingChannelCount = 0; g_AudioMan.GetPlayingChannelCount(&totalPlayingChannelCount, &realPlayingChannelCount)) {
 				std::snprintf(str, sizeof(str), "Sound Channels: %d / %d Real | %d / %d Virtual", realPlayingChannelCount, g_AudioMan.GetTotalRealChannelCount(), totalPlayingChannelCount - realPlayingChannelCount, g_AudioMan.GetTotalVirtualChannelCount());
 			}
-			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 110, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 90, str, GUIFont::Left);
+
+			if (!m_SortedScriptTimings.empty()) {
+				std::snprintf(str, sizeof(str), "Lua scripts taking the most time to call Update() this frame:");
+				guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 110, str, GUIFont::Left);
+
+				for (int i = 0; i < std::min((size_t)3, m_SortedScriptTimings.size()); i++)
+				{
+					std::pair<std::string, ScriptTiming> scriptTiming = m_SortedScriptTimings.at(i);
+
+					std::snprintf(str, sizeof(str), "%.1fms total with %i calls in %s", scriptTiming.second.m_Time / 1000.0, scriptTiming.second.m_CallCount, scriptTiming.first.c_str());
+					guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 120 + i * 10, str, GUIFont::Left);
+				}
+			}
 
 			if (m_AdvancedPerfStats) {
 				DrawPeformanceGraphs(drawBitmap);
@@ -221,5 +234,18 @@ namespace RTE {
 	void PerformanceMan::DrawCurrentPing() const {
 		AllegroBitmap allegroBitmap(g_FrameMan.GetBackBuffer8());
 		g_FrameMan.GetLargeFont()->DrawAligned(&allegroBitmap, g_FrameMan.GetBackBuffer8()->w - 25, g_FrameMan.GetBackBuffer8()->h - 14, "PING: " + std::to_string(m_CurrentPing), GUIFont::Right);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PerformanceMan::UpdateSortedScriptTimings(const std::unordered_map<std::string, ScriptTiming> &scriptTimings) {
+		std::vector<std::pair<std::string, ScriptTiming>> sortedScriptTimings;
+		for (auto it = scriptTimings.begin(); it != scriptTimings.end(); it++) {
+			sortedScriptTimings.push_back(*it);
+		}
+
+		std::sort(sortedScriptTimings.begin(), sortedScriptTimings.end(), [](const auto& l, const auto& r) { return l.second.m_Time > r.second.m_Time; });
+
+		g_PerformanceMan.m_SortedScriptTimings = sortedScriptTimings;
 	}
 }

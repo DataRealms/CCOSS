@@ -446,12 +446,6 @@ enum MOType
     /// <returns>Whether or not this MovableObject has ever been added to MovableMan.</returns>
     bool HasEverBeenAddedToMovableMan() const { return m_HasEverBeenAddedToMovableMan; }
 
-	/// <summary>
-	/// Returns whether or not this MovableObject exists in MovableMan, accounting for removal from MovableMan.
-	/// </summary>
-	/// <returns>Whether or not this MovableObject currently exists in MovableMan.</returns>
-	bool ExistsInMovableMan() const { return m_ExistsInMovableMan; }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetSharpness
@@ -789,7 +783,7 @@ enum MOType
     /// Sets this MovableObject as having been added to MovableMan. Should only really be done in MovableMan::Add/Remove Actor/Item/Particle.
     /// </summary>
 	/// <param name="addedToMovableMan">Whether or not this MovableObject has been added to MovableMan.</param>
-	void SetAsAddedToMovableMan(bool addedToMovableMan = true) { if (addedToMovableMan) { m_HasEverBeenAddedToMovableMan = true; } m_ExistsInMovableMan = addedToMovableMan; }
+	void SetAsAddedToMovableMan(bool addedToMovableMan = true) { if (addedToMovableMan) { m_HasEverBeenAddedToMovableMan = true; } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1926,7 +1920,6 @@ protected:
     int m_MOIDFootprint;
     // Whether or not this object has ever been added to MovableMan. Does not take into account the object being removed from MovableMan, though in practice it usually will, cause objects are usually only removed when they're deleted.
     bool m_HasEverBeenAddedToMovableMan;
-	bool m_ExistsInMovableMan; //<! Whether or not this object currently exists in MovableMan. Takes into account the object being removed from MovableMan.
     // A set of ID:s of MO:s that already have collided with this MO during this frame.
     std::set<MOID> m_AlreadyHitBy;
 	int m_VelOscillations; //!< A counter for oscillations in translational velocity, in order to detect settling.

@@ -16,5 +16,7 @@
 	<string>CortexCommand</string>
 	<key>CFBundleShortVersionString</key>
 	<string>5.1.0</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
 </dict>
 </plist>

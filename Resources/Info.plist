@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>org.cortex-command-community.cccp</string>
+	<key>CFBundleIconFile</key>
+	<string>ccicon.icns</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleName</key>
+	<string>CortexCommand</string>
+	<key>CFBundleDisplayName</key>
+	<string>Cortex Command</string>
+	<key>CFBundleExecutable</key>
+	<string>CortexCommand</string>
+	<key>CFBundleShortVersionString</key>
+	<string>5.1.0</string>
+</dict>
+</plist>

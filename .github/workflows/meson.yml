@@ -156,6 +156,11 @@ jobs:
         run: |
           meson compile -C build
 
+      - name: Create App Bundle
+        if: ${{inputs.upload_artefacts}}
+        run: |
+          DESTDIR="/tmp/Cortex Command.app" meson install -C build
+  
       - name: Artifact Deploy
         if: ${{inputs.upload_artefacts}}
         uses: actions/upload-artifact@v3

@@ -127,13 +127,33 @@ jobs:
         run: |
           brew install pkg-config tbb sdl2 minizip lz4 flac luajit lua@5.1 libpng gcc@12 ninja meson
 
-      - name: Build
+      - name: Setup Meson
         env:
           CC: "gcc-12"
           CXX: "g++-12"
           LDFLAGS: "-static-libgcc -static-libstdc++"
         run: |
           meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} -Db_lto=false build
+
+      - name: Configure for AppImage
+        if: ${{inputs.upload_artefacts}}
+        env:
+          CC: "gcc-12"
+          CXX: "g++-12"
+          LDFLAGS: "-static-libgcc -static-libstdc++"
+        run: |
+          meson configure \
+          -Dinstall_data=false -Dinstall_runner=false -Dfmod_dir=Contents/Frameworks \
+          --bindir=Contents/MacOS \
+          --prefix="/tmp/Cortex Command.app" \
+          build
+          
+      - name: Build
+        env:
+          CC: "gcc-12"
+          CXX: "g++-12"
+          LDFLAGS: "-static-libgcc -static-libstdc++"
+        run: |
           meson compile -C build
 
       - name: Artifact Deploy
@@ -142,8 +162,8 @@ jobs:
         with:
           name: CortexCommand (macOS)
           path: |
-            build/CortexCommand
-            build/CortexCommand_debug
+            /tmp/Cortex Command.app
+            /tmp/Cortex Command.app
           if-no-files-found: error
 
   build-windows:

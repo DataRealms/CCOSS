@@ -135,7 +135,7 @@ jobs:
         run: |
           meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} -Db_lto=false build
 
-      - name: Configure for AppImage
+      - name: Configure for App Bundle
         if: ${{inputs.upload_artefacts}}
         env:
           CC: "gcc-12"

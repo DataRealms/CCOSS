@@ -12,4 +12,5 @@ elif host_machine.system() == 'windows'
 elif host_machine.system() == 'darwin'
     install_data('ccicon.icns', install_dir : 'Contents/Resources')
     install_data('Info.plist', install_dir : 'Contents')
+    meson.add_install_script('bundle_dylibs.sh', elfname)
 endif

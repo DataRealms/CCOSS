@@ -466,17 +466,17 @@ void SceneEditorGUI::Update()
 	m_PieMenu->Update();
 
     // Show the pie menu only when the secondary button is held down
-    if (m_pController->IsState(PRESS_SECONDARY) && m_EditorGUIMode != INACTIVE && m_EditorGUIMode != PICKINGOBJECT) {
-		m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
-		m_PieMenu->SetEnabled(true);
+    if (m_pController->IsState(PIE_MENU_ACTIVE) && m_EditorGUIMode != INACTIVE && m_EditorGUIMode != PICKINGOBJECT) {
+        m_PieMenu->SetEnabled(true);
+        m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
 
-		std::array<PieSlice *, 2> infrontAndBehindPieSlices = { m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorInFront), m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorBehind) };
-		for (PieSlice *pieSlice : infrontAndBehindPieSlices) {
-			if (pieSlice) { pieSlice->SetEnabled(m_EditorGUIMode == ADDINGOBJECT); }
-		}
+        std::array<PieSlice*, 2> infrontAndBehindPieSlices = { m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorInFront), m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorBehind) };
+        for (PieSlice* pieSlice : infrontAndBehindPieSlices) {
+            if (pieSlice) { pieSlice->SetEnabled(m_EditorGUIMode == ADDINGOBJECT); }
+        }
+    } else {
+        m_PieMenu->SetEnabled(false); 
     }
-
-	if (!m_pController->IsState(PIE_MENU_ACTIVE) || m_EditorGUIMode == INACTIVE || m_EditorGUIMode == PICKINGOBJECT) { m_PieMenu->SetEnabled(false); }
 
     ///////////////////////////////////////
     // Handle pie menu selections

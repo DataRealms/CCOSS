@@ -107,6 +107,27 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 
     void Destroy(bool notInherited = false) override;
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  GetReloadEndOffsetSeconds
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets reload end offset, in seconds. This is how early the ReloadEnd
+//					sound is played compared to actual end of reload.
+// Arguments:       None.
+// Return value:    The reload end offset, in seconds.
+
+	int GetReloadEndOffsetSeconds() const { return m_ReloadEndOffsetSeconds; }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  SetReloadEndOffsetSeconds
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets reload end offset, in seconds. This is how early the ReloadEnd
+//					sound is played compared to actual end of reload.
+// Arguments:       The new reload end offset, in seconds.
+// Return value:    None.
+
+	void SetReloadEndOffsetSeconds(int newRate) { m_ReloadEndOffsetSeconds = newRate; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  GetRateOfFire

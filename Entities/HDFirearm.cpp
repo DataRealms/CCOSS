@@ -986,7 +986,7 @@ void HDFirearm::Update()
     }
 
     if (m_Reloading && m_ReloadEndSound) {
-        float offsetSeconds = m_ReloadEndOffsetSeconds == -1.0F ? m_ReloadEndSound->GetLength(SoundContainer::LengthOfSoundType::NextPlayed) : m_ReloadEndOffsetSeconds;
+        float offsetSeconds = m_ReloadEndOffsetSeconds == -1.0F ? m_ReloadEndSound->GetLength(SoundContainer::LengthOfSoundType::NextPlayed)/2 : m_ReloadEndOffsetSeconds;
         bool shouldPlay = !m_HasPlayedEndReloadSound && m_ReloadTmr.LeftTillSimTimeLimitS() <= offsetSeconds;
         if (shouldPlay) {
             m_ReloadEndSound->Play(m_Pos);

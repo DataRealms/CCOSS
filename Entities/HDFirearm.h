@@ -895,6 +895,10 @@ protected:
     // The audio of this FireArm being reloaded.
     SoundContainer *m_ReloadStartSound;
     SoundContainer *m_ReloadEndSound;
+	// The offset of how long before the reload finishes the sound plays
+	float m_ReloadEndOffsetSeconds;
+	// Whether or not the end-of-relaod sound has already been played or not.
+	bool m_HasPlayedEndReloadSound;
 
     // Rate of fire, in rounds per min.
     // If 0, firearm is semi-automatic (ie only one discharge per activation).

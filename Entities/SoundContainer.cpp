@@ -153,6 +153,28 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	float SoundContainer::GetLength(LengthOfSoundType type) const {
+		if (!m_SoundPropertiesUpToDate) {
+			// Todo - use a post-load fixup stage instead of lazily initializing shit everywhere... Eugh.
+			const_cast<SoundContainer *>(this)->UpdateSoundProperties();
+			const_cast<SoundContainer*>(this)->m_TopLevelSoundSet.SelectNextSounds();
+		}
+
+		std::vector<const SoundSet::SoundData*> flattenedSoundData;
+		m_TopLevelSoundSet.GetFlattenedSoundData(flattenedSoundData, type == LengthOfSoundType::NextPlayed);
+
+		float lengthSeconds = 0.0f;
+		for (const SoundSet::SoundData *selectedSoundData : flattenedSoundData) {
+			unsigned int length;
+			selectedSoundData->SoundObject->getLength(&length, FMOD_TIMEUNIT_MS);
+			lengthSeconds = std::max(lengthSeconds, static_cast<float>(length) / 1000.0f);
+		}
+
+		return lengthSeconds;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	std::vector<std::size_t> SoundContainer::GetSelectedSoundHashes() const {
 		std::vector<size_t> soundHashes;
 		std::vector<const SoundSet::SoundData *> flattenedSoundData;

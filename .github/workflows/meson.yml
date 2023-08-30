@@ -163,7 +163,6 @@ jobs:
           name: CortexCommand (macOS)
           path: |
             /tmp/Cortex Command.app
-            /tmp/Cortex Command.app
           if-no-files-found: error
 
   build-windows:

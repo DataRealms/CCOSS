@@ -116,7 +116,7 @@ jobs:
           if-no-files-found: error
 
   build-macos:
-    runs-on: macos-latest
+    runs-on: macos-11
     name: MacOS Build
 
     steps:

@@ -677,7 +677,7 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, HDFirearm) {
 		return ConcreteTypeLuaClassDefinition(HDFirearm, HeldDevice)
 
-		.property("ReloadEndOffsetSeconds", &HDFirearm::GetReloadEndOffsetSeconds, &HDFirearm::SetReloadEndOffsetSeconds)
+		.property("ReloadEndOffset", &HDFirearm::GetReloadEndOffset, &HDFirearm::SetReloadEndOffset)
 		.property("RateOfFire", &HDFirearm::GetRateOfFire, &HDFirearm::SetRateOfFire)
 		.property("MSPerRound", &HDFirearm::GetMSPerRound)
 		.property("FullAuto", &HDFirearm::IsFullAuto, &HDFirearm::SetFullAuto)

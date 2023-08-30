@@ -108,25 +108,25 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
     void Destroy(bool notInherited = false) override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  GetReloadEndOffsetSeconds
+// Method:  GetReloadEndOffset
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets reload end offset, in seconds. This is how early the ReloadEnd
+// Description:     Gets reload end offset, in ms. This is how early the ReloadEnd
 //					sound is played compared to actual end of reload.
 // Arguments:       None.
-// Return value:    The reload end offset, in seconds.
+// Return value:    The reload end offset, in ms.
 
-	int GetReloadEndOffsetSeconds() const { return m_ReloadEndOffsetSeconds; }
+	int GetReloadEndOffset() const { return m_ReloadEndOffset; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:  SetReloadEndOffsetSeconds
+// Method:  SetReloadEndOffset
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets reload end offset, in seconds. This is how early the ReloadEnd
+// Description:     Sets reload end offset, in ms. This is how early the ReloadEnd
 //					sound is played compared to actual end of reload.
-// Arguments:       The new reload end offset, in seconds.
+// Arguments:       The new reload end offset, in ms
 // Return value:    None.
 
-	void SetReloadEndOffsetSeconds(int newRate) { m_ReloadEndOffsetSeconds = newRate; }
+	void SetReloadEndOffset(int newRate) { m_ReloadEndOffset = newRate; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -917,7 +917,7 @@ protected:
     SoundContainer *m_ReloadStartSound;
     SoundContainer *m_ReloadEndSound;
 	// The offset of how long before the reload finishes the sound plays
-	float m_ReloadEndOffsetSeconds;
+	float m_ReloadEndOffset;
 	// Whether or not the end-of-relaod sound has already been played or not.
 	bool m_HasPlayedEndReloadSound;
 

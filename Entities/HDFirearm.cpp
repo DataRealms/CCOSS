@@ -987,8 +987,8 @@ void HDFirearm::Update()
 
     if (m_Reloading && m_ReloadEndSound) {
         // x0.5 the sound length generally just lines up better and leaves less dead air assuming a normal attempt at a ReloadEnd sound
-        float offsetSeconds = m_ReloadEndOffset == -1.0F ? m_ReloadEndSound->GetLength(SoundContainer::LengthOfSoundType::NextPlayed) * 0.5f : m_ReloadEndOffset;
-        bool shouldPlay = !m_HasPlayedEndReloadSound && m_ReloadTmr.LeftTillSimTimeLimitS() <= offsetSeconds;
+        float offsetMilliseconds = m_ReloadEndOffset == -1.0F ? m_ReloadEndSound->GetLength(SoundContainer::LengthOfSoundType::NextPlayed) * 0.5f : m_ReloadEndOffset;
+        bool shouldPlay = !m_HasPlayedEndReloadSound && m_ReloadTmr.LeftTillSimTimeLimitMS() <= offsetMilliseconds;
         if (shouldPlay) {
             m_ReloadEndSound->Play(m_Pos);
             m_HasPlayedEndReloadSound = true;

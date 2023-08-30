@@ -123,7 +123,7 @@ AddScriptFunctionNames(HeldDevice, "OnFire", "OnReload");
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Sets reload end offset, in ms. This is how early the ReloadEnd
 //					sound is played compared to actual end of reload.
-// Arguments:       The new reload end offset, in ms
+// Arguments:       The new reload end offset, in ms.
 // Return value:    None.
 
 	void SetReloadEndOffset(int newRate) { m_ReloadEndOffset = newRate; }

@@ -163,14 +163,14 @@ namespace RTE {
 		std::vector<const SoundSet::SoundData*> flattenedSoundData;
 		m_TopLevelSoundSet.GetFlattenedSoundData(flattenedSoundData, type == LengthOfSoundType::NextPlayed);
 
-		float lengthSeconds = 0.0f;
+		float lengthMilliseconds = 0.0f;
 		for (const SoundSet::SoundData *selectedSoundData : flattenedSoundData) {
 			unsigned int length;
 			selectedSoundData->SoundObject->getLength(&length, FMOD_TIMEUNIT_MS);
-			lengthSeconds = std::max(lengthSeconds, static_cast<float>(length) / 1000.0f);
+			lengthMilliseconds = std::max(lengthMilliseconds, static_cast<float>(length));
 		}
 
-		return lengthSeconds;
+		return lengthMilliseconds;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

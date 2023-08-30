@@ -91,7 +91,7 @@ namespace RTE {
 		/// Gets the length of the sound in this sound container.
 		/// </summary>
 		/// <param name="type">Whether to get the length of the next played sound, or the maximum length of any sound in this container.</param>
-		/// <returns>The length of this sound, in seconds.</returns>
+		/// <returns>The length of this sound, in ms.</returns>
 		float GetLength(LengthOfSoundType type) const;
 
 		/// <summary>

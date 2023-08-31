@@ -406,6 +406,20 @@ namespace RTE {
 		}
     }
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::unordered_map<std::string, PerformanceMan::ScriptTiming> LuaMan::GetScriptTimings() const {
+		std::unordered_map<std::string, PerformanceMan::ScriptTiming> timings = m_MasterScriptState.GetScriptTimings();
+		for (const LuaStateWrapper &luaState : m_ScriptStates) {
+			for (auto&& [functionName, timing] : luaState.GetScriptTimings()) {
+				auto& existing = timings[functionName];
+				existing.m_CallCount += timing.m_CallCount;
+				existing.m_Time = std::max(existing.m_Time, timing.m_Time);
+			}
+		}
+		return timings;
+	}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::Destroy() {
@@ -472,7 +486,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	const std::unordered_map<std::string, PerformanceMan::ScriptTiming> & LuaMan::GetScriptTimings() const {
+	const std::unordered_map<std::string, PerformanceMan::ScriptTiming> & LuaStateWrapper::GetScriptTimings() const {
 		return m_ScriptTimings;
 	}
 
@@ -676,8 +690,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool LuaStateWrapper::ExpressionIsTrue(const std::string &expression, bool consoleErrors)
-    {
+	void LuaStateWrapper::ClearScriptTimings() {
+		m_ScriptTimings.clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bool LuaStateWrapper::ExpressionIsTrue(const std::string &expression, bool consoleErrors) {
         if (expression.empty()) {
 			return false;
 		}
@@ -968,7 +987,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::ClearScriptTimings() {
-		m_ScriptTimings.clear();
+		m_MasterScriptState.ClearScriptTimings();
+		for (LuaStateWrapper& luaState : m_ScriptStates) {
+			luaState.ClearScriptTimings();
+		}
 	}
 
 }

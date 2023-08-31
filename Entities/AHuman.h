@@ -795,6 +795,13 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	void SetWalkAngle(AHuman::Layer whichLayer, float angle) { m_WalkAngle[whichLayer] = Matrix(angle); }
 
 	/// <summary>
+	/// Gets whether this AHuman has just taken a stride this frame.
+	/// </summary>
+	/// <returns>Whether this AHuman has taken a stride this frame or not.</returns>
+
+    bool StrideFrame() const { return m_StrideFrame; }
+
+	/// <summary>
 	/// Gets whether this AHuman is currently attempting to climb something, using arms.
 	/// </summary>
 	/// <returns>Whether this AHuman is currently climbing or not.</returns>
@@ -1036,6 +1043,8 @@ protected:
     bool m_Aiming;
     // Whether the BG Arm is helping with locomotion or not.
     bool m_ArmClimbing[2];
+    // Whether a stride was taken this frame or not.
+    bool m_StrideFrame = false;
     // Controls the start of leg synch.
     bool m_StrideStart;
     // Times the stride to see if it is taking too long and needs restart

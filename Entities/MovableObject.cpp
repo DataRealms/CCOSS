@@ -1054,7 +1054,7 @@ int MovableObject::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
         // I wonder if we can do some SFINAE magic to make the luabindings automagically do a no-op with const objects, to avoid writing the bindings twice
         if (status >= 0 && scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
             // If we're in a SingleThreaded context, we run the MultiThreaded scripts synced updates:
-            status = RunScriptedFunctionInAppropriateScripts("SyncedUpdate", false, true, {}, {}, ThreadScriptsToRun::MultiThreaded); // This isn't a typo!
+            status = RunScriptedFunctionInAppropriateScripts("SyncedUpdate", false, true, {}, {}, ThreadScriptsToRun::Both);
         }
 	}
 

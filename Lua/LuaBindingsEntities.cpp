@@ -1002,6 +1002,7 @@ namespace RTE {
 		.property("IgnoresTeamHits", &MovableObject::IgnoresTeamHits, &MovableObject::SetIgnoresTeamHits)
 		.property("IgnoresWhichTeam", &MovableObject::IgnoresWhichTeam)
 		.property("IgnoreTerrain", &MovableObject::IgnoreTerrain, &MovableObject::SetIgnoreTerrain)
+		.property("IgnoresActorHits", &MovableObject::GetIgnoresActorHits, &MovableObject::SetIgnoresActorHits)
 		.property("ToSettle", &MovableObject::ToSettle, &MovableObject::SetToSettle)
 		.property("ToDelete", &MovableObject::ToDelete, &MovableObject::SetToDelete)
 		.property("MissionCritical", &MovableObject::IsMissionCritical, &MovableObject::SetMissionCritical)

@@ -617,6 +617,17 @@ enum MOType
 
 	void SetIgnoreTerrain(bool ignores) { m_IgnoreTerrain = ignores; }
 
+    /// <summary>
+    /// Gets whether this MO ignores collisions with actors.
+    /// </summary>
+    /// <returns>Whether this MO ignores collisions with actors.</returns>
+    bool GetIgnoresActorHits() const { return m_IgnoresActorHits; }
+
+    /// <summary>
+    /// Sets whether this MO ignores collisions with actors.
+    /// </summary>
+    /// <param name="value">Whether this MO will ignore collisions with actors.</returns>
+    void SetIgnoresActorHits(bool value) { m_IgnoresActorHits = value; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Pure V. method:  GetMaterial
@@ -1899,6 +1910,8 @@ protected:
     // This will flip the IgnoreAtomGroupHits on or off depending on whether this MO is travelling slower than the threshold here, in m/s
     // This is disabled if set to negative value, and 0 means AG hits are never ignored
     float m_IgnoresAGHitsWhenSlowerThan;
+    // Wehther this ignores collisions with actors
+    bool m_IgnoresActorHits;
     // This is mission critical, which means it should NEVER be settled or destroyed by gibbing
     bool m_MissionCritical;
     // Whether this can be destroyed by being squished into the terrain

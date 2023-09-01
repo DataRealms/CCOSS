@@ -354,6 +354,23 @@ ClassInfoGetters;
     /// <param name="gripStrengthMultiplier">The new grip strength multiplier for this HeldDevice.</param>
     void SetGripStrengthMultiplier(float gripStrengthMultiplier) { m_GripStrengthMultiplier = gripStrengthMultiplier; }
 
+    /// <summary>
+    /// Gets whether this can get hit by MOs when held.
+    /// </summary>
+    /// <returns>Whether this can get hit by MOs when held.</returns>
+    bool GetsHitByMOsWhenHeld() const { return m_GetsHitByMOsWhenHeld; }
+
+    /// <summary>
+    /// Sets whether this can get hit by MOs when held.
+    /// </summary>
+    /// <param name="value">Whether this can get hit by MOs when held.</param>
+    void SetGetsHitByMOsWhenHeld(bool value) { m_GetsHitByMOsWhenHeld = value; }
+
+    /// <summary>
+    /// Gets whether this HeldDevice is currently being held or not.
+    /// </summary>
+    /// <returns>Whether this HeldDevice is currently being held or not.</returns>
+    bool IsBeingHeld() const;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetSharpAim
@@ -648,6 +665,8 @@ protected:
     float m_Loudness;
     // If this weapon belongs to the "Explosive Weapons" group or not
     bool m_IsExplosiveWeapon;
+    // If this device can be hit by MOs whenever it's held
+    bool m_GetsHitByMOsWhenHeld;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

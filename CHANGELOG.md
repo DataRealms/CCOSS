@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added in-game pause menu when pressing `Esc`. Pressing `Shift + Esc` will skip this menu and pause into scenario/conquest menu. 
 
-- New 'Activity' INI and Lua (R/W) property 'AllowsUserSaving', which can be used to enable/disable manual user saving/loading. This defaults to true for all `GAScripted` with an `OnSave()` function, but false otherwise. Lua `ActivityMan::SaveGame()` function now forces a save even if `AllowsUserSaving` is disabled. This allows mods and scripted gamemodes to handle saving in their own way (for example, only allowing saving at set points).
+- New `Activity` INI and Lua (R/W) property `AllowsUserSaving`, which can be used to enable/disable manual user saving/loading. This defaults to true for all `GAScripted` with an `OnSave()` function, but false otherwise. Lua `ActivityMan::SaveGame()` function now forces a save even if `AllowsUserSaving` is disabled. This allows mods and scripted gamemodes to handle saving in their own way (for example, only allowing saving at set points).
 
 - New `Settings.ini` property `EnableMultithreadedLua`, which can be used to enable multithreaded Lua scripts and AI, for any lua script with the `--[[MULTITHREAD]]--` tag. Defaults to on.
 
@@ -35,6 +35,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 		team -- The team to use when calculating the path, allowing the path to ignore that team's doors. If not specified, it will default to `Activity.NOTEAM`, and no doors will be ignored.
 	);
 	```
+
+- New `HeldDevice` Lua (R) function `IsBeingHeld`, which returns whether or not the `HeldDevice` is currently being held.
+
+- New `HeldDevice` INI and Lua (R/W) property `GetsHitByMOsWhenHeld`, which determines whether this `HeldDevice` can be hit by MOs while equipped and held by an actor. Defaults to true.
+	
+- New `MovableObject` INI and Lua (R/W) property `IgnoresActorHits`, which determines whether this `MovableObject` should ignore collisions with actors. Defaults to false.
 
 </details>
 

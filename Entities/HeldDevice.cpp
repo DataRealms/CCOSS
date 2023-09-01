@@ -40,7 +40,6 @@ ConcreteClassInfo(HeldDevice, Attachable, 50);
 void HeldDevice::Clear()
 {
     m_HeldDeviceType = WEAPON;
-    m_IsExplosiveWeapon = false;
     m_Activated = false;
     m_ActivationTimer.Reset();
     m_OneHanded = false;
@@ -60,6 +59,8 @@ void HeldDevice::Clear()
     m_BlinkTimer.Reset();
 	m_BlinkTimer.SetSimTimeLimitMS(1000);
     m_Loudness = -1;
+    m_IsExplosiveWeapon = false;
+    m_GetsHitByMOsWhenHeld = false;
 
     // NOTE: This special override of a parent class member variable avoids needing an extra variable to avoid overwriting INI values.
     m_CollidesWithTerrainWhileAttached = false;
@@ -160,6 +161,8 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_Supported = reference.m_Supported;
 	m_SupportAvailable = reference.m_SupportAvailable;
     m_Loudness = reference.m_Loudness;
+    m_IsExplosiveWeapon = reference.m_IsExplosiveWeapon;
+    m_GetsHitByMOsWhenHeld = reference.m_GetsHitByMOsWhenHeld;
 
     return 0;
 }
@@ -215,6 +218,8 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_MaxSharpLength;
     else if (propName == "Loudness") {
         reader >> m_Loudness;
+    } else if (propName == "GetsHitByMOsWhenHeld") {
+        reader >> m_GetsHitByMOsWhenHeld;
 	} else if (propName == "SpecialBehaviour_Activated") {
 		reader >> m_Activated;
 	} else if (propName == "SpecialBehaviour_ActivationTimerElapsedSimTimeMS") {
@@ -258,6 +263,8 @@ int HeldDevice::Save(Writer &writer) const
     writer << m_MaxSharpLength;
     writer.NewProperty("Loudness");
     writer << m_Loudness;
+    writer.NewProperty("GetsHitByMOsWhenHeld");
+    writer << m_GetsHitByMOsWhenHeld;
 
     return 0;
 }
@@ -327,6 +334,12 @@ Vector HeldDevice::GetMagazinePos() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+bool HeldDevice::IsBeingHeld() const {
+    return dynamic_cast<const Arm*>(m_Parent);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void HeldDevice::RemovePickupableByPresetName(const std::string &actorPresetName) {
     std::unordered_set<std::string>::iterator pickupableByPresetNameEntry = m_PickupableByPresetNames.find(actorPresetName);
     if (pickupableByPresetNameEntry != m_PickupableByPresetNames.end()) { m_PickupableByPresetNames.erase(pickupableByPresetNameEntry); }
@@ -344,6 +357,10 @@ void HeldDevice::RemovePickupableByPresetName(const std::string &actorPresetName
 
 bool HeldDevice::CollideAtPoint(HitData &hd)
 {
+    if (!m_GetsHitByMOsWhenHeld && IsBeingHeld()) {
+        return false;
+    }
+
     return Attachable::CollideAtPoint(hd);
 }
 

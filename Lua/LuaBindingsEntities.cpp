@@ -744,7 +744,9 @@ namespace RTE {
 		.property("UnPickupable", &HeldDevice::IsUnPickupable, &HeldDevice::SetUnPickupable)
 		.property("GripStrengthMultiplier", &HeldDevice::GetGripStrengthMultiplier, &HeldDevice::SetGripStrengthMultiplier)
 		.property("Supported", &HeldDevice::GetSupported, &HeldDevice::SetSupported)
+		.property("GetsHitByMOsWhenHeld", &HeldDevice::GetsHitByMOsWhenHeld, &HeldDevice::SetGetsHitByMOsWhenHeld)
 
+		.def("IsBeingHeld", &HeldDevice::IsBeingHeld)
 		.def("IsWeapon", &HeldDevice::IsWeapon)
 		.def("IsTool", &HeldDevice::IsTool)
 		.def("IsShield", &HeldDevice::IsShield)

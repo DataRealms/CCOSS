@@ -740,6 +740,7 @@ namespace RTE {
 		.property("SharpLength", &HeldDevice::GetSharpLength, &HeldDevice::SetSharpLength)
 		.property("Supportable", &HeldDevice::IsSupportable, &HeldDevice::SetSupportable)
 		.property("SupportOffset", &HeldDevice::GetSupportOffset, &HeldDevice::SetSupportOffset)
+		.property("UseSupportOffsetWhileReloading", &HeldDevice::GetUseSupportOffsetWhileReloading, &HeldDevice::SetUseSupportOffsetWhileReloading)
 		.property("HasPickupLimitations", &HeldDevice::HasPickupLimitations)
 		.property("UnPickupable", &HeldDevice::IsUnPickupable, &HeldDevice::SetUnPickupable)
 		.property("GripStrengthMultiplier", &HeldDevice::GetGripStrengthMultiplier, &HeldDevice::SetGripStrengthMultiplier)

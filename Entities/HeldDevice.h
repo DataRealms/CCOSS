@@ -284,6 +284,17 @@ ClassInfoGetters;
 	/// <param name="supported">Whether this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).</param>
 	void SetSupportAvailable(bool supportAvailable) { m_SupportAvailable = m_Supportable && supportAvailable; }
 
+	/// <summary>
+	/// Gets whether this HeldDevice while be held at the support offset with the off-hand when reloading.
+	/// </summary>
+	/// <returns>Whether this HeldDevice while be held at the support offset with the off-hand when reloading.</returns>
+	bool GetUseSupportOffsetWhileReloading() const { return m_UseSupportOffsetWhileReloading; }
+
+	/// <summary>
+	/// Sets whether this HeldDevice while be held at the support offset with the off-hand when reloading.
+	/// </summary>
+	/// <param name="value">Whether this HeldDevice while be held at the support offset with the off-hand when reloading.</param>
+	void SetUseSupportOffsetWhileReloading(bool value) { m_UseSupportOffsetWhileReloading = value; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetSupportOffset
@@ -659,6 +670,8 @@ protected:
     // The point at which the other arm of the holder can support this HeldDevice.
     // Relative to the m_Pos. This is like a seconday handle position.
     Vector m_SupportOffset;
+    // Whether the actor using this gun should keep hold of the support offset when reloading, instead of using their ReloadOffset/HolsterOffset
+    bool m_UseSupportOffsetWhileReloading;
     // The degree as to this is being aimed carefully. 0 means no sharp aim, and 1.0 means best aim.
     float m_SharpAim;
     // How much farther the player can see when aiming this sharply.

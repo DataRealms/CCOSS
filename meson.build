@@ -7,7 +7,7 @@ if host_machine.system() in ['linux','darwin']
   deps = [
     dependency(['sdl2']),
     dependency('flac'),
-    dependency('minizip'),
+    dependency('minizip', version:'<1.3', not_found_message:'The correct version (1.2.x) of minizip might be packaged as minizip-compat.'),
     dependency('luajit'),
     dependency('threads'),
     dependency('liblz4'),

@@ -61,6 +61,7 @@ void HeldDevice::Clear()
     m_Loudness = -1;
     m_IsExplosiveWeapon = false;
     m_GetsHitByMOsWhenHeld = false;
+    m_VisualRecoilMultiplier = 1.0F;
 
     // NOTE: This special override of a parent class member variable avoids needing an extra variable to avoid overwriting INI values.
     m_CollidesWithTerrainWhileAttached = false;
@@ -163,6 +164,7 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_Loudness = reference.m_Loudness;
     m_IsExplosiveWeapon = reference.m_IsExplosiveWeapon;
     m_GetsHitByMOsWhenHeld = reference.m_GetsHitByMOsWhenHeld;
+    m_VisualRecoilMultiplier = reference.m_VisualRecoilMultiplier;
 
     return 0;
 }
@@ -220,6 +222,8 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_Loudness;
     } else if (propName == "GetsHitByMOsWhenHeld") {
         reader >> m_GetsHitByMOsWhenHeld;
+    } else if (propName == "VisualRecoilMultiplier") {
+		reader >> m_VisualRecoilMultiplier;
 	} else if (propName == "SpecialBehaviour_Activated") {
 		reader >> m_Activated;
 	} else if (propName == "SpecialBehaviour_ActivationTimerElapsedSimTimeMS") {
@@ -265,6 +269,8 @@ int HeldDevice::Save(Writer &writer) const
     writer << m_Loudness;
     writer.NewProperty("GetsHitByMOsWhenHeld");
     writer << m_GetsHitByMOsWhenHeld;
+    writer.NewProperty("VisualRecoilMultiplier");
+    writer << m_VisualRecoilMultiplier;
 
     return 0;
 }

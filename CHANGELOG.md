@@ -42,6 +42,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	
 - New `MovableObject` INI and Lua (R/W) property `IgnoresActorHits`, which determines whether this `MovableObject` should ignore collisions with actors. Defaults to false.
 
+- New `HeldDevices` INI and Lua (R/W) property `VisualRecoilMultiplier`. Which determines how much the recoil animation should be scaled for this weapon, without affecting SharpAim. Defaults to 1.0.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

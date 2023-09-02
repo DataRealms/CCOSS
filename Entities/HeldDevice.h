@@ -372,6 +372,18 @@ ClassInfoGetters;
     /// <returns>Whether this HeldDevice is currently being held or not.</returns>
     bool IsBeingHeld() const;
 
+    /// <summary>
+	/// Gets the visual recoil multiplier.
+	/// </summary>
+	/// <returns>A float with the scalar value.</returns>
+	float GetVisualRecoilMultiplier() const { return m_VisualRecoilMultiplier; }
+
+	/// <summary>
+	/// Sets the visual recoil multiplier.
+	/// </summary>
+	/// <param name="value">The new recoil multiplier scalar.</param>
+	void SetVisualRecoilMultiplier(float value) { m_VisualRecoilMultiplier = value; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetSharpAim
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -667,6 +679,8 @@ protected:
     bool m_IsExplosiveWeapon;
     // If this device can be hit by MOs whenever it's held
     bool m_GetsHitByMOsWhenHeld;
+    /// The multiplier for visual recoil
+	float m_VisualRecoilMultiplier;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

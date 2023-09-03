@@ -13,9 +13,9 @@
 	<key>CFBundleDisplayName</key>
 	<string>Cortex Command</string>
 	<key>CFBundleExecutable</key>
-	<string>CortexCommand</string>
+	<string>@EXENAME@</string>
 	<key>CFBundleShortVersionString</key>
-	<string>5.1.0</string>
+	<string>@game_version@</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 </dict>

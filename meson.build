@@ -128,6 +128,8 @@ conf_data = configuration_data()
 prefix = get_option('prefix')
 
 conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'))
+conf_data.set('game_version', meson.project_version())
+
 if suffix==''
   suffix=[]
   conf_data.set('EXENAME', elfname)

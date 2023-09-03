@@ -65,6 +65,10 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     link_args += ['-Wl,--enable-new-dtags'] # Set RUNPATH instead of RPATH
   endif
 
+  if host_machine.system()=='darwin'
+    link_args += ['-framework', 'CoreFoundation'] # Set RUNPATH instead of RPATH
+  endif
+
   # Set preprocessor flags and cpp arguments according to build options
   buildtype_debug = get_option('debug')
   if buildtype_debug

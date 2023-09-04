@@ -161,13 +161,16 @@ jobs:
         run: |
           DESTDIR="/tmp/Cortex Command.app" meson install -C build
   
+      - name: Tar files
+        run: tar -cvf CortexCommand.tar "/tmp/Cortex Command.app"
+      
       - name: Artifact Deploy
         if: ${{inputs.upload_artefacts}}
         uses: actions/upload-artifact@v3
         with:
           name: CortexCommand (macOS)
           path: |
-            /tmp/Cortex Command.app
+            CortexCommand.tar
           if-no-files-found: error
 
   build-windows:

@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.7.34018.315
+# Visual Studio Version 16
+VisualStudioVersion = 16
 MinimumVisualStudioVersion = 16.0
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RTEA", "RTEA.vcxproj", "{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}"
 EndProject
@@ -22,8 +22,8 @@ Global
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Full|x64.Build.0 = Debug Full|x64
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Full|x86.ActiveCfg = Debug Full|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Full|x86.Build.0 = Debug Full|Win32
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Minimal|x64.ActiveCfg = Final|x64
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Minimal|x64.Build.0 = Final|x64
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Minimal|x64.ActiveCfg = Debug Minimal|x64
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Minimal|x64.Build.0 = Debug Minimal|x64
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Minimal|x86.ActiveCfg = Debug Minimal|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Minimal|x86.Build.0 = Debug Minimal|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Release|x64.ActiveCfg = Debug Release|x64

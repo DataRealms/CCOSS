@@ -5,6 +5,7 @@
 #include "ConsoleMan.h"
 
 #include "SDL.h"
+#include "tracy/Tracy.hpp"
 
 namespace RTE {
 
@@ -627,6 +628,8 @@ namespace RTE {
 				SDL_RenderPresent(m_MultiDisplayRenderers[i].get());
 			}
 		}
+
+		FrameMark;
 	}
 
 }

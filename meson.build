@@ -143,13 +143,17 @@ else
 endif
 
 if get_option('tracy_enable')
-  preprocessor_flags += ['-DTRACY_ENABLE']
+  add_global_arguments('-DTRACY_ENABLE', language:'cpp')
 endif
 if get_option('tracy_callstack')
-  preprocessor_flags += ['-DTRACY_CALLSTACK=10']
+  add_global_arguments('-DTRACY_CALLSTACK=10', language:'cpp')
 endif
 if get_option('tracy_on_demand')
-  preprocessor_flags += ['-DTRACY_ON_DEMAND']
+  add_global_arguments('-DTRACY_ON_DEMAND', language:'cpp')
+endif
+if get_option('tracy_debuginfod')
+  add_project_dependencies(dependency('libdebuginfod'), language:'cpp')
+  add_global_arguments('-DTRACY_DEBUGINFOD', language:'cpp')
 endif
 
 #### Platform Common External Libraries ####

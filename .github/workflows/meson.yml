@@ -144,7 +144,7 @@ jobs:
           meson configure \
           -Dinstall_data=false -Dinstall_runner=false -Dfmod_dir=Contents/Frameworks \
           --bindir=Contents/MacOS \
-          --prefix="/tmp/Cortex Command.app" \
+          --prefix="/" \
           build
 
       - name: Build

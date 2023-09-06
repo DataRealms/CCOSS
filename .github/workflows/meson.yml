@@ -162,12 +162,13 @@ jobs:
 
       - name: Tar files
         if: ${{inputs.upload_artefacts}}
-        run: tar -cvf CortexCommand.tar "Cortex Command.app"
-        working-directory: /tmp/
+        run: |
+          cd /tmp/
+          tar -cvf CortexCommand.tar "Cortex Command.app"
 
       - name: Move artefact
         if: ${{inputs.upload_artefacts}}
-        run: cp -r /tmp/CortexCommand.tar .
+        run: cp /tmp/CortexCommand.tar .
 
       - name: Artifact Deploy
         if: ${{inputs.upload_artefacts}}

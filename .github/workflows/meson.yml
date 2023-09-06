@@ -163,6 +163,7 @@ jobs:
       - name: Tar files
         if: ${{inputs.upload_artefacts}}
         run: |
+          tree /tmp/
           cd /tmp/
           tar -cvf CortexCommand.tar "Cortex Command.app"
 

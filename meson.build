@@ -152,7 +152,7 @@ if get_option('tracy_on_demand')
   add_global_arguments('-DTRACY_ON_DEMAND', language:'cpp')
 endif
 if get_option('tracy_debuginfod')
-  add_project_dependencies(dependency('libdebuginfod'), language:'cpp')
+  deps += [dependency('libdebuginfod')]
   add_global_arguments('-DTRACY_DEBUGINFOD', language:'cpp')
 endif
 

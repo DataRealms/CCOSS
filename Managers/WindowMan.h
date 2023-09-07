@@ -116,6 +116,8 @@ namespace RTE {
 		/// <param name="enable">Whether to enable VSync.</param>
 		void SetVSyncEnabled(bool enable);
 
+		bool IsFullscreen() { return m_Fullscreen; }
+
 		/// <summary>
 		/// Gets whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
 		/// </summary>
@@ -185,12 +187,12 @@ namespace RTE {
 		/// <param name="newResY">New height to resize to.</param>
 		/// <param name="upscaled">Whether the new resolution should be upscaled.</param>
 		/// <param name="displaysAlreadyMapped">Whether to skip mapping displays because they were already mapped elsewhere.</param>
-		void ChangeResolution(int newResX, int newResY, bool upscaled, bool displaysAlreadyMapped = false);
+		void ChangeResolution(int newResX, int newResY, float newResMultiplier = 1.0f, bool fullscreen = false, bool displaysAlreadyMapped = false);
 
 		/// <summary>
-		/// Switches to a new resolution multiplier.
+		/// Toggles between 1x and 2x resolution multiplier.
 		/// </summary>
-		void ChangeResolutionMultiplier();
+		void ToggleResolutionMultiplier();
 
 		/// <summary>
 		/// Completes the resolution change by resetting the flag.
@@ -267,6 +269,8 @@ namespace RTE {
 		int m_ResY; //!< Game window height.
 		float m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
 
+		bool m_Fullscreen; //!< Whether the game window is currently in fullscreen.
+
 		bool m_EnableVSync; //!< Whether vertical synchronization is enabled.
 		bool m_IgnoreMultiDisplays; //!< Whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
 
@@ -321,7 +325,7 @@ namespace RTE {
 		/// </summary>
 		/// <param name="resMultiplier">Requested resolution multiplier.</param>
 		/// <returns>Whether all displays were created successfully.</returns>
-		bool ChangeResolutionToMultiDisplayFullscreen(int resMultiplier);
+		bool ChangeResolutionToMultiDisplayFullscreen(float resMultiplier);
 #pragma endregion
 
 #pragma region Display Switch Handling

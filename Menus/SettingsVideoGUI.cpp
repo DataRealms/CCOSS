@@ -37,6 +37,9 @@ namespace RTE {
 		m_EnableVSyncCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxEnableVSync"));
 		m_EnableVSyncCheckbox->SetCheck(g_WindowMan.GetVSyncEnabled());
 
+		m_FullscreenCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxFullscreen"));
+		m_FullscreenCheckbox->SetCheck(g_WindowMan.IsFullscreen());
+
 		m_IgnoreMultiDisplaysCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxIgnoreMultiDisplays"));
 		m_IgnoreMultiDisplaysCheckbox->SetCheck(g_WindowMan.GetIgnoreMultiDisplays());
 		m_IgnoreMultiDisplaysCheckbox->SetVisible(m_IgnoreMultiDisplaysCheckbox->GetVisible() && SDL_GetNumVideoDisplays() > 1);
@@ -133,7 +136,7 @@ namespace RTE {
 	bool SettingsVideoGUI::IsSupportedResolution(int width, int height) const {
 		if ((width >= c_MinResX && height >= c_MinResY) && (width <= g_WindowMan.GetMaxResX() && height <= g_WindowMan.GetMaxResY())) {
 			// Filter wacky resolutions that are taller than wide and some other dumb ones.
-			if ((height > width) || (width == 1152 && height == 864) || (width == 1176 && height == 664)) {
+			if ((height > width)) {
 				return false;
 			}
 			return true;

@@ -121,6 +121,8 @@ namespace RTE {
 			reader >> g_WindowMan.m_ResMultiplier;
 		} else if (propName == "EnableVSync") {
 			reader >> g_WindowMan.m_EnableVSync;
+		} else if (propName == "Fullscreen") {
+			reader >> g_WindowMan.m_Fullscreen;
 		} else if (propName == "IgnoreMultiDisplays") {
 			reader >> g_WindowMan.m_IgnoreMultiDisplays;
 		} else if (propName == "TwoPlayerSplitscreenVertSplit") {

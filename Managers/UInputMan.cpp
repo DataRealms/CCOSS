@@ -949,7 +949,7 @@ namespace RTE {
 				ContentFile::ReloadAllBitmaps();
 			// Alt+Enter to switch resolution multiplier
 			} else if (KeyPressed(SDLK_RETURN)) {
-				g_WindowMan.ChangeResolutionMultiplier();
+				g_WindowMan.ToggleResolutionMultiplier();
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(SDLK_w)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");

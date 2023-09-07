@@ -55,6 +55,7 @@ namespace RTE {
 		m_ResX = c_DefaultResX;
 		m_ResY = c_DefaultResY;
 		m_ResMultiplier = 1;
+		m_Fullscreen = false;
 		m_EnableVSync = true;
 		m_IgnoreMultiDisplays = true;
 	}
@@ -131,7 +132,7 @@ namespace RTE {
 		int windowPosY = SDL_WINDOWPOS_CENTERED;
 		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
 
-		if (FullyCoversPrimaryWindowDisplayOnly()) {
+		if (m_Fullscreen) {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
@@ -356,14 +357,13 @@ namespace RTE {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::ChangeResolution(int newResX, int newResY, bool upscaled, bool displaysAlreadyMapped) {
-		float newResMultiplier = upscaled ? 2 : 1;
+	void WindowMan::ChangeResolution(int newResX, int newResY, float newResMultiplier, bool fullscreen, bool displaysAlreadyMapped) {
 
 		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier) {
 			return;
 		}
 
-		bool onlyResMultiplierChange = (m_ResX == newResX) && (m_ResY == newResY) && (m_ResMultiplier != newResMultiplier);
+		bool onlyResMultiplierChange = (m_ResX == newResX) && (m_ResY == newResY) && (glm::epsilonNotEqual(m_ResMultiplier, newResMultiplier, glm::epsilon<float>()));
 
 		ClearMultiDisplayData();
 
@@ -413,8 +413,9 @@ namespace RTE {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::ChangeResolutionMultiplier() {
-		int newResMultiplier = (m_ResMultiplier == 1) ? 2 : 1;
+	void WindowMan::ToggleResolutionMultiplier() {
+		float newResMultiplier = (m_ResMultiplier == 1) ? 2 : 1;
+		bool fullscreen = (newResMultiplier * m_ResX == m_PrimaryWindowDisplayWidth) && (newResMultiplier * m_ResY == m_PrimaryWindowDisplayHeight);
 
 		MapDisplays();
 
@@ -422,12 +423,12 @@ namespace RTE {
 			RTEError::ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
 			return;
 		}
-		ChangeResolution(m_ResX, m_ResY, newResMultiplier > 1, true);
+		ChangeResolution(m_ResX, m_ResY, newResMultiplier, fullscreen, true);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool WindowMan::ChangeResolutionToMultiDisplayFullscreen(int resMultiplier) {
+	bool WindowMan::ChangeResolutionToMultiDisplayFullscreen(float resMultiplier) {
 		if (!m_CanMultiDisplayFullscreen) {
 			return false;
 		}

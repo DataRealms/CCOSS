@@ -66,7 +66,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
   endif
 
   if host_machine.system()=='darwin'
-    link_args += ['-framework', 'CoreFoundation'] # Set RUNPATH instead of RPATH
+    deps += dependency('appleframeworks', modules: ['foundation'])  
   endif
 
   # Set preprocessor flags and cpp arguments according to build options

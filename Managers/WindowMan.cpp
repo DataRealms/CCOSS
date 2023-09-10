@@ -380,7 +380,7 @@ namespace RTE {
 
 	void WindowMan::ChangeResolution(int newResX, int newResY, float newResMultiplier, bool fullscreen, bool displaysAlreadyMapped) {
 
-		if (m_ResX == newResX && m_ResY == newResY && m_ResMultiplier == newResMultiplier) {
+		if (m_ResX == newResX && m_ResY == newResY && glm::epsilonEqual(m_ResMultiplier, newResMultiplier, glm::epsilon<float>())) {
 			return;
 		}
 

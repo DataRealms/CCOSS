@@ -110,7 +110,8 @@ namespace RTE {
 
 		int m_NewResX; //!< The new resolution width to use when changing resolution.
 		int m_NewResY; //!< The new resolution height to use when changing resolution.
-		bool m_NewResUpscaled; //!< Whether the new resolution should be upscaled when changing resolution.
+		float m_NewResMultiplier; //!< Whether the new resolution should be upscaled when changing resolution.
+		bool m_NewFullscreen;
 
 		/// <summary>
 		/// GUI elements that compose the video settings menu screen.
@@ -130,7 +131,7 @@ namespace RTE {
 		GUICollectionBox *m_CustomResolutionBox;
 		GUITextBox *m_CustomResolutionWidthTextBox;
 		GUITextBox *m_CustomResolutionHeightTextBox;
-		GUICheckbox *m_CustomResolutionUpscaledCheckbox;
+		GUIComboBox *m_CustomResolutionMultiplier;
 		GUILabel *m_CustomResolutionMessageLabel;
 		GUIButton *m_CustomResolutionApplyButton;
 		GUICollectionBox *m_ResolutionChangeDialogBox;
@@ -163,6 +164,11 @@ namespace RTE {
 		/// Fills the PresetResolutions list with all valid PresetResolutionRecords, then fills the PresetResolutionComboBox using it and selects the currently selected preset resolution, if any.
 		/// </summary>
 		void PopulateResolutionsComboBox();
+
+		/// <summary>
+		/// Creates Resolution multipliers down to c_DefaultRes.
+		/// </summary>
+		void PopulateResMultplierComboBox();
 
 		/// <summary>
 		/// Remaps the displays to get the new maximum resolution values to update the numeric limits on the custom resolution textboxes.

@@ -74,6 +74,7 @@ The Linux build uses the meson build system, and builds against system libraries
 * `lz4>=1.9.0`
 * `libpng`
 * [`meson`](https://www.mesonbuild.com)`>= 1.0.0` (`pip install meson` if your distro doesn't include a recent version)
+* `dylibbundler` (required only if installing on macOS)
 
 For unspecified versions assume compatibility with the latest ubuntu LTS release.
 
@@ -115,7 +116,7 @@ If you want to change the buildtype afterwards, you can use `meson configure --b
 - `Xcode` or `Command Line Tools for Xcode` (if you need to, you can also generate an xcode project from meson using the `--backend=xcode` option on setup)
 
 **Homebrew (macOS):**  
-`brew install pkg-config sdl2 minizip lz4 flac luajit lua libpng tbb gcc@12 ninja meson`
+`brew install pkg-config sdl2 minizip lz4 flac luajit lua libpng tbb gcc@12 ninja meson dylibbundler`
 
 **Arch Linux:**  
 `sudo pacman -S sdl2 sdl2_image tbb flac luajit lua minizip lz4 libpng meson ninja base-devel`  

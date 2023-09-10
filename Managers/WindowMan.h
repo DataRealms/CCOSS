@@ -238,6 +238,7 @@ namespace RTE {
 		std::shared_ptr<SDL_Window> m_PrimaryWindow; //!< The main window.
 		GLuint m_BackBuffer32Texture; //!< The main window renderer's drawing surface.
 		glm::mat4 m_PrimaryWindowProjection;
+		std::unique_ptr<SDL_Rect> m_PrimaryWindowViewport;
 
 		std::vector<std::shared_ptr<SDL_Window>> m_MultiDisplayWindows; //!< Additional windows for multi-display fullscreen.
 		std::vector<glm::mat4> m_MultiDisplayTextureOffsets; //!< Texture offsets for multi-display fullscreen.
@@ -294,6 +295,8 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Resolution Handling
+		void SetViewportLetterboxed();
+
 		/// <summary>
 		/// Updates the stored info of the display the primary window is currently positioned at.
 		/// </summary>

@@ -109,6 +109,7 @@ namespace RTE {
 		if (FullyCoversAllDisplays()) {
 			ChangeResolutionToMultiDisplayFullscreen(m_ResMultiplier);
 		}
+		SetViewportLetterboxed();
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,7 +131,7 @@ namespace RTE {
 
 		int windowPosX = (m_ResX * m_ResMultiplier <= m_PrimaryWindowDisplayWidth) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
 		int windowPosY = SDL_WINDOWPOS_CENTERED;
-		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
+		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI|SDL_WINDOW_RESIZABLE;
 
 		if (m_Fullscreen) {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -150,6 +151,7 @@ namespace RTE {
 				RTEAbort("Failed to create window because:\n" + std::string(SDL_GetError()));
 			}
 		}
+		SetViewportLetterboxed();
 	}
 
 	void WindowMan::InitializeOpenGL() {
@@ -321,6 +323,25 @@ namespace RTE {
 		}
 	}
 
+	void WindowMan::SetViewportLetterboxed() {
+		int windowW, windowH;
+		SDL_GL_GetDrawableSize(m_PrimaryWindow.get(), &windowW, &windowH);
+		double aspectRatio = m_ResX / static_cast<double>(m_ResY);
+		int width = windowW;
+		int height = (windowW / aspectRatio) + 0.5F;
+
+		if (height > windowH) {
+			height = windowH;
+			width = (height * aspectRatio) + 0.5F;
+		}
+
+		m_ResMultiplier = width / static_cast<float>(m_ResX);
+
+		int offsetX = (windowW / 2) - (width / 2);
+		int offsetY = (windowH / 2) - (height / 2);
+		m_PrimaryWindowViewport = std::make_unique<SDL_Rect>(offsetX, windowH - offsetY - height, width, height);
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::AttemptToRevertToPreviousResolution(bool revertToDefaults) {
@@ -372,16 +393,15 @@ namespace RTE {
 		}
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
-		bool newResFullyCoversPrimaryWindowDisplay = (newResX * newResMultiplier == m_PrimaryWindowDisplayWidth) && (newResY * newResMultiplier == m_PrimaryWindowDisplayHeight);
-		bool newResFullyCoversAllDisplays = m_CanMultiDisplayFullscreen && (m_NumDisplays > 1) && (newResX * newResMultiplier == m_MaxResX) && (newResY * newResMultiplier == m_MaxResY);
+		bool newResFullyCoversAllDisplays = fullscreen && m_CanMultiDisplayFullscreen && (m_NumDisplays > 1);
 
 		bool recoveredToPreviousSettings = false;
 
-		if ((newResFullyCoversAllDisplays && !ChangeResolutionToMultiDisplayFullscreen(newResMultiplier)) || (newResFullyCoversPrimaryWindowDisplay && SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
+		if ((newResFullyCoversAllDisplays && !ChangeResolutionToMultiDisplayFullscreen(newResMultiplier)) || (fullscreen && SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP) != 0)) {
 			RTEError::ShowMessageBox("Failed to switch to new resolution!\nAttempting to revert to previous settings!");
 			AttemptToRevertToPreviousResolution();
 			recoveredToPreviousSettings = true;
-		} else if (!newResFullyCoversPrimaryWindowDisplay && !newResFullyCoversAllDisplays) {
+		} else if (!fullscreen && !newResFullyCoversAllDisplays) {
 			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
 			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 			SDL_RestoreWindow(m_PrimaryWindow.get());
@@ -392,12 +412,14 @@ namespace RTE {
 			m_ResX = newResX;
 			m_ResY = newResY;
 			m_ResMultiplier = newResMultiplier;
+			m_Fullscreen = fullscreen;
 
 			g_SettingsMan.UpdateSettingsFile();
 		}
 
 		if (onlyResMultiplierChange) {
 			if (!newResFullyCoversAllDisplays) {
+				SetViewportLetterboxed();
 				CreateBackBufferTexture();
 			}
 			g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
@@ -405,6 +427,7 @@ namespace RTE {
 			m_ResolutionChanged = true;
 			g_FrameMan.CreateBackBuffers();
 			g_PostProcessMan.CreateGLBackBuffers();
+			SetViewportLetterboxed();
 			CreateBackBufferTexture();
 		}
 
@@ -569,6 +592,10 @@ namespace RTE {
 					m_FocusEventsDispatchedByDisplaySwitchIn = false;
 					m_FocusEventsDispatchedByMovingBetweenWindows = false;
 					break;
+				case SDL_WINDOWEVENT_RESIZED:
+				case SDL_WINDOW_MAXIMIZED:
+					SetViewportLetterboxed();
+					break;
 				default:
 					break;
 			}
@@ -618,6 +645,7 @@ namespace RTE {
 		m_ScreenBlitShader->SetInt(m_ScreenBlitShader->GetTextureUniform(), 0);
 		m_ScreenBlitShader->SetInt(m_ScreenBlitShader->GetUniformLocation("rteGUITexture"), 1);
 		if (m_MultiDisplayWindows.empty()) {
+			glViewport(m_PrimaryWindowViewport->x, m_PrimaryWindowViewport->y, m_PrimaryWindowViewport->w, m_PrimaryWindowViewport->h);
 			m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), glm::mat4(1.0f));
 			m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), glm::mat4(1.0f));
 			GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
@@ -625,7 +653,7 @@ namespace RTE {
 			for (size_t i = 0; i < m_MultiDisplayWindows.size(); ++i) {
 				SDL_GL_MakeCurrent(m_MultiDisplayWindows.at(i).get(), m_GLContext.get());
 				int windowW, windowH;
-				SDL_GL_GetDrawableSize(m_PrimaryWindow.get(), &windowW, &windowH);
+				SDL_GL_GetDrawableSize(m_MultiDisplayWindows.at(i).get(), &windowW, &windowH);
 				GL_CHECK(glViewport(0, 0, windowW, windowH));
 				glm::mat4 viewportMatrix = glm::ortho<float>(0, windowW, windowH, 0, -1.0, 1.0);
 				m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), viewportMatrix);

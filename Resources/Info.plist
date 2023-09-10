@@ -18,5 +18,7 @@
 	<string>@game_version@</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>NSHighResolutionCapable</key>
+	<string>True</string>
 </dict>
 </plist>

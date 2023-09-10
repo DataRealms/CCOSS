@@ -72,7 +72,6 @@ void MovableObject::Clear()
     m_MOID = g_NoMOID;
     m_RootMOID = g_NoMOID;
     m_HasEverBeenAddedToMovableMan = false;
-	m_ExistsInMovableMan = false;
     m_MOIDFootprint = 0;
     m_AlreadyHitBy.clear();
 	m_VelOscillations = 0;
@@ -1053,9 +1052,9 @@ int MovableObject::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
         // TODO - in future, enforce that everything in MultiThreaded Update() is const, so non-const actions must be performed in SyncedUpdate
         // This would require a bunch of Lua binding fuckery, but eventually maybe it'd be possible.
         // I wonder if we can do some SFINAE magic to make the luabindings automagically do a no-op with const objects, to avoid writing the bindings twice
-        if (status >= 0 && scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
+        if (status >= -1 && scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
             // If we're in a SingleThreaded context, we run the MultiThreaded scripts synced updates:
-            status = RunScriptedFunctionInAppropriateScripts("SyncedUpdate", false, true, {}, {}, ThreadScriptsToRun::MultiThreaded); // This isn't a typo!
+            status = RunScriptedFunctionInAppropriateScripts("SyncedUpdate", false, true, {}, {}, ThreadScriptsToRun::Both);
         }
 	}
 

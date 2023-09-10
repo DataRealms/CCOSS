@@ -15,6 +15,11 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/epsilon.hpp"
 
+#ifdef __linux__
+#include "Resources/cccp.xpm"
+#include "SDL2/SDL_image.h"
+#endif
+
 namespace RTE {
 
 	void SDLWindowDeleter::operator()(SDL_Window *window) const { SDL_DestroyWindow(window); }
@@ -149,6 +154,14 @@ namespace RTE {
 				RTEAbort("Failed to create window because:\n" + std::string(SDL_GetError()));
 			}
 		}
+
+#ifdef __linux__
+		SDL_Surface *iconSurface = IMG_ReadXPMFromArray(ccicon);
+		if (iconSurface) {
+			SDL_SetWindowIcon(m_PrimaryWindow.get(), iconSurface);
+			SDL_FreeSurface(iconSurface);
+		}
+#endif
 	}
 
 	void WindowMan::InitializeOpenGL() {

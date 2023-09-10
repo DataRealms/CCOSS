@@ -8,7 +8,7 @@ if host_machine.system() in ['linux','darwin']
   deps = [
     dependency(['sdl2']),
     dependency('flac'),
-    dependency('minizip', version:'<1.3', not_found_message:'The correct version (1.2.x) of minizip might be packaged as minizip-compat.'),
+    dependency('minizip'),
     dependency('luajit'),
     dependency('threads'),
     dependency('liblz4'),
@@ -17,6 +17,9 @@ if host_machine.system() in ['linux','darwin']
     dependency('tbb'),
     dependency('gl')
   ]
+  if host_machine.system() == 'linux'
+    deps += dependency('SDL2_image')
+  endif
 elif host_machine.system() == 'windows'
   sdl2 = subproject('SDL2-2.26.3')
   sdl2_dep = dependency('sdl2')

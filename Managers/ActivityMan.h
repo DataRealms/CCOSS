@@ -165,6 +165,12 @@ namespace RTE {
 
 #pragma region Saving and Loading
 		/// <summary>
+		/// A utility function we can call in the debugger quickwatch window to force an abort save to occur (great for force-saving the game when it crashes)
+		/// </summary>
+		/// <returns>Whether the game was successfully saved.</returns>
+		bool ForceAbortSave();
+
+		/// <summary>
 		/// Saves the currently running Scene and Activity to a savegame file. Note this only works for GAScripted activities.
 		/// </summary>
 		/// <param name="fileName">Path to the file.</param>

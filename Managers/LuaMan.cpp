@@ -58,14 +58,14 @@ namespace RTE {
 				.def("RangeRand", &LuaStateWrapper::RangeRand)
 				.def("PosRand", &LuaStateWrapper::PosRand)
 				.def("NormalRand", &LuaStateWrapper::NormalRand)
-				.def("GetDirectoryList", &LuaMan::DirectoryList, luabind::return_stl_iterator)
-				.def("GetFileList", &LuaMan::FileList, luabind::return_stl_iterator)
-				.def("FileExists", &LuaMan::FileExists)
-				.def("FileOpen", &LuaMan::FileOpen)
-				.def("FileClose", &LuaMan::FileClose)
-				.def("FileReadLine", &LuaMan::FileReadLine)
-				.def("FileWriteLine", &LuaMan::FileWriteLine)
-				.def("FileEOF", &LuaMan::FileEOF),
+				.def("GetDirectoryList", &LuaStateWrapper::DirectoryList, luabind::return_stl_iterator)
+				.def("GetFileList", &LuaStateWrapper::FileList, luabind::return_stl_iterator)
+				.def("FileExists", &LuaStateWrapper::FileExists)
+				.def("FileOpen", &LuaStateWrapper::FileOpen)
+				.def("FileClose", &LuaStateWrapper::FileClose)
+				.def("FileReadLine", &LuaStateWrapper::FileReadLine)
+				.def("FileWriteLine", &LuaStateWrapper::FileWriteLine)
+				.def("FileEOF", &LuaStateWrapper::FileEOF),
 
 			luabind::def("DeleteEntity", &LuaAdaptersUtility::DeleteEntity, luabind::adopt(_1)), // NOT a member function, so adopting _1 instead of the _2 for the first param, since there's no "this" pointer!!
 			luabind::def("LERP", &LERP),
@@ -255,6 +255,19 @@ namespace RTE {
 	double LuaStateWrapper::PosRand() {
 		return m_RandomGenerator.RandomNum<double>();
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// Passthrough LuaMan Functions
+	const std::vector<std::string>& LuaStateWrapper::DirectoryList(const std::string& relativeDirectory) { return g_LuaMan.DirectoryList(relativeDirectory); }
+	const std::vector<std::string>& LuaStateWrapper::FileList(const std::string& relativeDirectory) { return g_LuaMan.FileList(relativeDirectory); }
+	bool LuaStateWrapper::FileExists(const std::string &fileName) { return g_LuaMan.FileExists(fileName); }
+	int LuaStateWrapper::FileOpen(const std::string& fileName, const std::string& accessMode) { return g_LuaMan.FileOpen(fileName, accessMode); }
+	void LuaStateWrapper::FileClose(int fileIndex) { return g_LuaMan.FileClose(fileIndex); }
+	void LuaStateWrapper::FileCloseAll() { return g_LuaMan.FileCloseAll(); }
+	std::string LuaStateWrapper::FileReadLine(int fileIndex) { return g_LuaMan.FileReadLine(fileIndex); }
+	void LuaStateWrapper::FileWriteLine(int fileIndex, const std::string& line) { return g_LuaMan.FileWriteLine(fileIndex, line); }
+	bool LuaStateWrapper::FileEOF(int fileIndex) { return g_LuaMan.FileEOF(fileIndex); }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

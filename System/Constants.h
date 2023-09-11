@@ -37,8 +37,11 @@ namespace RTE {
 	static constexpr int c_DefaultResX = 960; //!< Default game window width.
 	static constexpr int c_DefaultResY = 540; //!< Default game window height.
 
-	static constexpr int c_MinResX = 640; //!< Minimum game window width.
-	static constexpr int c_MinResY = 384; //!< Minimum game window height.
+	static constexpr int c_MinResX = 640; //!< Minimum reasonable game window width.
+	static constexpr int c_MinResY = 360; //!< Minimum reasonable game window height.
+
+	static constexpr int c_DangerResX = 384; //!< Minimum game window width for the danger zone.
+	static constexpr int c_DangerResY = 216; //!< Minimum game window height for the danger zone.
 
 	static constexpr int c_ScenePreviewWidth = 170; //< Width of the scene preview bitmap.
 	static constexpr int c_ScenePreviewHeight = 80; //< Height of the scene preview bitmap.

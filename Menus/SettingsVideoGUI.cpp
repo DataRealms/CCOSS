@@ -61,7 +61,7 @@ namespace RTE {
 		CreatePresetResolutionBox();
 		CreateCustomResolutionBox();
 
-		if (m_PresetResolutionComboBox->GetSelectedIndex() < 0) {
+		if (m_PresetResolutionComboBox->GetSelectedIndex() < 0 && m_CustomResolutionRadioButton->IsEnabled()) {
 			m_CustomResolutionRadioButton->SetCheck(true);
 			m_PresetResolutionBox->SetVisible(false);
 			m_CustomResolutionBox->SetVisible(true);

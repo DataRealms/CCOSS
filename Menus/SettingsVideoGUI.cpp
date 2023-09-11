@@ -14,6 +14,7 @@
 #include "GUITextBox.h"
 
 #include "SDL_video.h"
+#include <format>
 
 namespace RTE {
 
@@ -98,7 +99,11 @@ namespace RTE {
 		m_CustomResolutionHeightTextBox->SetText(std::to_string(static_cast<int>(m_NewResY * g_WindowMan.GetResMultiplier())));
 
 		m_CustomResolutionMultiplier = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboboxResolutionMultiplier"));
+#if __cpp_lib_format >= 201907L
+		m_CustomResolutionMultiplier->SetText(std::format("{:.3g}x", m_NewResMultiplier));
+#else
 		m_CustomResolutionMultiplier->SetText(std::to_string(m_NewResMultiplier));
+#endif
 		PopulateResMultplierComboBox();
 
 		m_CustomResolutionApplyButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonApplyCustomResolution"));
@@ -204,10 +209,14 @@ namespace RTE {
 		float maxResX = g_WindowMan.GetIgnoreMultiDisplays() ? g_WindowMan.GetPrimaryWindowDisplayWidth() : g_WindowMan.GetMaxResX();
 		float maxResY = g_WindowMan.GetIgnoreMultiDisplays() ? g_WindowMan.GetPrimaryWindowDisplayHeight() : g_WindowMan.GetMaxResY();
 
-		float maximumResMultiplier = std::floor((std::min<float>(maxResX / c_DefaultResX, maxResY / c_DefaultResY) * 2.f) + 0.5f) / 2.0f;
+		float maximumResMultiplier = std::floor((std::min<float>(maxResX / c_MinResX, maxResY / c_MinResY) * 2.f) + 0.5f) / 2.0f;
 
 		for (float resMultiplier = 1.0f; resMultiplier <= maximumResMultiplier; resMultiplier += 0.5) {
+#if __cpp_lib_format >= 201907L
+			m_CustomResolutionMultiplier->AddItem(std::format("{:.3g}x", resMultiplier));
+#else
 			m_CustomResolutionMultiplier->AddItem(std::to_string(resMultiplier));
+#endif
 		}
 	}
 

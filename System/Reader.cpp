@@ -28,6 +28,21 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	Reader::Reader(const std::string &fileName, bool overwrites, const ProgressCallback &progressCallback, bool failOK, bool nonModulePath) {
+		Clear();
+		m_NonModulePath = nonModulePath;
+		Create(fileName, overwrites, progressCallback, failOK);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Reader::Reader(std::unique_ptr<std::istream> &&stream, bool overwrites, const ProgressCallback &progressCallback, bool failOK) {
+		Clear();
+		Create(std::move(stream), overwrites, progressCallback, failOK);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	int Reader::Create(const std::string &fileName, bool overwrites, const ProgressCallback &progressCallback, bool failOK) {
 		if (fileName.empty()) {
 			return -1;
@@ -47,16 +62,27 @@ namespace RTE {
 			m_DataModuleID = g_PresetMan.GetModuleID(m_DataModuleName);
 		}
 
+		return Create(std::make_unique<std::ifstream>(m_FilePath), overwrites, progressCallback, failOK);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int Reader::Create(std::unique_ptr<std::istream> &&stream, bool overwrites, const ProgressCallback &progressCallback, bool failOK) {
 		m_CanFail = failOK;
 
-		m_Stream = std::make_unique<std::ifstream>(fileName);
-		if (!m_CanFail) { RTEAssert(System::PathExistsCaseSensitive(fileName) && m_Stream->good(), "Failed to open data file \"" + m_FilePath + "\"!"); }
+		m_Stream = std::move(stream);
+
+		if (!m_CanFail) { 
+			RTEAssert(System::PathExistsCaseSensitive(m_FilePath) && m_Stream->good(), "Failed to open data file \"" + m_FilePath + "\"!"); 
+		}
 
 		m_OverwriteExisting = overwrites;
 
 		// Report that we're starting a new file
 		m_ReportProgress = progressCallback;
-		if (m_ReportProgress && m_Stream->good()) { m_ReportProgress("\t" + m_FileName + " on line " + std::to_string(m_CurrentLine), true); }
+		if (m_ReportProgress && m_Stream->good()) {
+			m_ReportProgress("\t" + m_FileName + " on line " + std::to_string(m_CurrentLine), true); 
+		}
 
 		return m_Stream->good() ? 0 : -1;
 	}
@@ -126,7 +152,11 @@ namespace RTE {
 				EndIncludeFile();
 				break;
 			}
-			if (!m_Stream->good() || temp == -1) { ReportError("Stream failed for some reason"); }
+			if (!m_Stream->good() || temp == -1) { 
+				ReportError("Stream failed for some reason");
+				EndIncludeFile(); 
+				break; 
+			}
 			retString.append(1, temp);
 		}
 		// Trim the string of whitespace
@@ -311,7 +341,7 @@ namespace RTE {
 
 		if (m_Stream->fail() || !System::PathExistsCaseSensitive(includeFilePath)) {
 			// Backpedal and set up to read the next property in the old stream
-			m_Stream.reset(m_StreamStack.top().Stream); // Destructs the current m_Stream and takes back ownership and management of the raw StreamInfo std::ifstream pointer.
+			m_Stream.reset(m_StreamStack.top().Stream); // Destructs the current m_Stream and takes back ownership and management of the raw StreamInfo std::istream pointer.
 			m_FilePath = m_StreamStack.top().FilePath;
 			m_CurrentLine = m_StreamStack.top().CurrentLine;
 			m_PreviousIndent = m_StreamStack.top().PreviousIndent;

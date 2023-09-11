@@ -71,10 +71,10 @@ namespace RTE {
 		void SetIndex(unsigned char newIndex) { m_Index = newIndex; }
 
 		/// <summary>
-		/// Gets the drawing priority of this Material. The higher the number, the higher chances that a pixel of this material will be drawn on top of others.
+		/// Gets the drawing priority of this Material. The higher the number, the higher chances that a pixel of this material will be drawn on top of others. Will default to Integrity if no Priority has been defined.
 		/// </summary>
 		/// <returns>The drawing priority of this Material.</returns>
-		int GetPriority() const { return m_Priority; }
+		int GetPriority() const { return m_Priority < 0 ? static_cast<int>(std::ceil(m_Integrity)) : m_Priority; }
 
 		/// <summary>
 		/// Gets the amount of times a dislodged pixel of this Material will attempt to relocate to an open position.
@@ -169,7 +169,7 @@ namespace RTE {
 		float m_Integrity; //!< The impulse force that a particle needs to knock loose a terrain pixel of this material. In kg * m/s.
 		float m_Restitution; //!< A scalar value that defines the restitution (elasticity). 1.0 = no kinetic energy is lost in a collision, 0.0 = all energy is lost (plastic).
 		float m_Friction; //!< A scalar value that defines the friction coefficient. 1.0 = will snag onto everything, 0.0 = will glide with no friction.
-		float m_Stickiness; //!< A scalar value that defines the stickiness coefficient (no sticky 0.0 - 1.0 max). Determines the likelihood of something of this material sticking when a collision occurs.
+		float m_Stickiness; //!< A scalar value that defines the stickiness coefficient (no sticky 0.0 - 1.0 max). Determines the likelihood of something of this material sticking to terrain when a collision occurs.
 
 		float m_VolumeDensity; //!< Density in Kg/L.
 		float m_PixelDensity; //!< Density in kg/pixel, usually calculated from the KG per Volume L property.

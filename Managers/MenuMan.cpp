@@ -15,6 +15,7 @@
 #include "TitleScreen.h"
 #include "MainMenuGUI.h"
 #include "ScenarioGUI.h"
+#include "PauseMenuGUI.h"
 #include "MetagameGUI.h"
 #include "LoadingScreen.h"
 
@@ -33,6 +34,7 @@ namespace RTE {
 		m_TitleScreen = std::make_unique<TitleScreen>(m_GUIScreen.get());
 		m_MainMenu = std::make_unique<MainMenuGUI>(m_GUIScreen.get(), m_GUIInput.get());
 		m_ScenarioMenu = std::make_unique<ScenarioGUI>(m_GUIScreen.get(), m_GUIInput.get());
+		m_PauseMenu = std::make_unique<PauseMenuGUI>(m_GUIScreen.get(), m_GUIInput.get());
 
 		// TODO: MetaGameGUI doesn't seem to actually do anything with the Controller but removing conflicts with the second Create() method so that needs to be sorted out sometime in the year 3000.
 		m_MenuController = std::make_unique<Controller>(Controller::CIM_PLAYER);
@@ -44,6 +46,7 @@ namespace RTE {
 	void MenuMan::Reinitialize() {
 		g_MetaMan.GetGUI()->Destroy();
 
+		m_PauseMenu.reset();
 		m_ScenarioMenu.reset();
 		m_MainMenu.reset();
 		m_TitleScreen.reset();
@@ -68,6 +71,9 @@ namespace RTE {
 			case TitleScreen::TitleTransition::MetaGameMenu:
 				newActiveMenu = ActiveMenu::MetaGameMenuActive;
 				break;
+			case TitleScreen::TitleTransition::PauseMenu:
+				newActiveMenu = ActiveMenu::PauseMenuActive;
+				break;
 			default:
 				break;
 		}
@@ -82,8 +88,49 @@ namespace RTE {
 					g_MetaMan.GetGUI()->SetPlanetInfo(m_TitleScreen->GetPlanetPos(), m_TitleScreen->GetPlanetRadius());
 					g_MetaMan.GetGUI()->SetEnabled();
 					break;
+				case ActiveMenu::PauseMenuActive:
+					m_PauseMenu->EnableOrDisablePauseMenuFeatures();
+					if (g_MetaMan.GameInProgress()) {
+						m_PauseMenu->SetBackButtonTargetName("Conquest");
+					} else {
+						if (const Activity *activity = g_ActivityMan.GetActivity(); activity && activity->GetPresetName() == "None") {
+							m_PauseMenu->SetBackButtonTargetName("Main");
+						} else {
+							m_PauseMenu->SetBackButtonTargetName("Scenario");
+						}
+					}
+					break;
 				default:
 					break;
+			}
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MenuMan::HandleTransitionIntoMenuLoop() {
+		if (g_MetaMan.GameInProgress()) {
+			if (g_ActivityMan.SkipPauseMenuWhenPausingActivity()) {
+				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
+			} else {
+				m_PauseMenu->StoreFrameForUseAsBackdrop();
+				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
+			}
+		} else if (!g_ActivityMan.ActivitySetToRestart()) {
+			if (const Activity *activity = g_ActivityMan.GetActivity(); activity) {
+				if (activity->GetPresetName() == "None") {
+					// If we're in the editors or in online multiplayer then return to main menu instead of scenario menu.
+					m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
+				} else {
+					if (activity->IsOver() || g_ActivityMan.SkipPauseMenuWhenPausingActivity()) {
+						m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
+					} else {
+						m_PauseMenu->StoreFrameForUseAsBackdrop();
+						m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::PauseMenu);
+					}
+				}
+			} else {
+				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
 			}
 		}
 	}
@@ -105,6 +152,9 @@ namespace RTE {
 				break;
 			case ActiveMenu::MetaGameMenuActive:
 				quitResult = UpdateMetaGameMenu();
+				break;
+			case ActiveMenu::PauseMenuActive:
+				UpdatePauseMenu();
 				break;
 			default:
 				break;
@@ -197,6 +247,22 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void MenuMan::UpdatePauseMenu() const {
+		switch (m_PauseMenu->Update()) {
+			case PauseMenuGUI::PauseMenuUpdateResult::ActivityResumed:
+				m_TitleScreen->SetTitleTransitionState(TitleScreen::TitleTransition::TransitionEnd);
+				g_ActivityMan.SetResumeActivity(true);
+				break;
+			case PauseMenuGUI::PauseMenuUpdateResult::BackToMain:
+				m_TitleScreen->SetTitleTransitionState(g_MetaMan.GameInProgress() ? TitleScreen::TitleTransition::MetaGameFadeIn : TitleScreen::TitleTransition::ScenarioFadeIn);
+				break;
+			default:
+				break;
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void MenuMan::Draw() const {
 		g_FrameMan.ClearBackBuffer32();
 
@@ -205,19 +271,24 @@ namespace RTE {
 			return;
 		}
 
-		m_TitleScreen->Draw();
-
 		switch (m_ActiveMenu) {
 			case ActiveMenu::MainMenuActive:
+				m_TitleScreen->Draw();
 				m_MainMenu->Draw();
 				break;
 			case ActiveMenu::ScenarioMenuActive:
+				m_TitleScreen->Draw();
 				m_ScenarioMenu->Draw();
 				break;
 			case ActiveMenu::MetaGameMenuActive:
+				m_TitleScreen->Draw();
 				g_MetaMan.Draw(g_FrameMan.GetBackBuffer32());
 				break;
+			case ActiveMenu::PauseMenuActive:
+				m_PauseMenu->Draw();
+				break;
 			default:
+				m_TitleScreen->Draw();
 				break;
 		}
 		if (m_ActiveMenu != ActiveMenu::MenusDisabled && g_UInputMan.GetJoystickCount() > 0) {

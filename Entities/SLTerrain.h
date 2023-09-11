@@ -77,8 +77,9 @@ namespace RTE {
 		/// Saves bitmap data currently in memory to disk.
 		/// </summary>
 		/// <param name="pathBase">The filepath base to the where to save the Bitmap data. This means everything up to the extension. "FG" and "Mat" etc will be added.</param>
+		/// <param name="doAsyncSaves">Whether or not to save asynchronously.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int SaveData(const std::string &pathBase) override;
+		int SaveData(const std::string &pathBase, bool doAsyncSaves = true) override;
 
 		/// <summary>
 		/// Clears out any previously loaded bitmap data from memory.

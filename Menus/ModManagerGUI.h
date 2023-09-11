@@ -23,7 +23,8 @@ namespace RTE {
 		/// </summary>
 		/// <param name="guiScreen">Pointer to a GUIScreen interface that will be used by this ModManagerGUI's GUIControlManager. Ownership is NOT transferred!</param>
 		/// <param name="guiInput">Pointer to a GUIInput interface that will be used by this ModManagerGUI's GUIControlManager. Ownership is NOT transferred!</param>
-		ModManagerGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput);
+		/// <param name="createForPauseMenu">Whether this SettingsGUI is part of ModManagerGUI and should have a slightly different layout.</param>
+		ModManagerGUI(AllegroScreen *guiScreen, GUIInputWrapper *guiInput, bool createForPauseMenu = false);
 #pragma endregion
 
 #pragma region Concrete Methods

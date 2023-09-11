@@ -89,6 +89,8 @@ void MOSRotating::Clear()
     m_LoudnessOnGib = 1;
 	m_DamageMultiplier = 0;
     m_NoSetDamageMultiplier = true;
+	m_FlashWhiteTimer.Reset();
+	m_FlashWhiteTimer.SetRealTimeLimitMS(0);
     m_StringValueMap.clear();
     m_NumberValueMap.clear();
     m_ObjectValueMap.clear();
@@ -1154,11 +1156,18 @@ void MOSRotating::CreateGibsWhenGibbing(const Vector &impactImpulse, MovableObje
 
 				gibParticleClone->SetPos(m_Pos + rotatedGibOffset);
 				gibParticleClone->SetHFlipped(m_HFlipped);
-				Vector gibVelocity = rotatedGibOffset.IsZero() ? Vector(minVelocity + RandomNum(0.0F, velocityRange), 0.0F) : rotatedGibOffset.SetMagnitude(minVelocity + RandomNum(0.0F, velocityRange));
+				Vector gibVelocity = Vector(minVelocity + RandomNum(0.0F, velocityRange), 0.0F);
+				
 				// TODO: Figure out how much the magnitude of an offset should affect spread
 				float gibSpread = (rotatedGibOffset.IsZero() && spread == 0.1F) ? c_PI : spread;
-
-				gibVelocity.RadRotate(gibSettingsObject.InheritsVelocity() > 0 ? impactImpulse.GetAbsRadAngle() : m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
+				// Determine the primary direction of the gib particles.
+				if (gibSettingsObject.InheritsVelocity() > 0 && !impactImpulse.IsZero()) {
+					gibVelocity.RadRotate(impactImpulse.GetAbsRadAngle());
+				} else if (!rotatedGibOffset.IsZero()) {
+					gibVelocity.RadRotate(rotatedGibOffset.GetAbsRadAngle());
+				} else {
+					gibVelocity.RadRotate(m_Rotation.GetRadAngle() + (m_HFlipped ? c_PI : 0));
+				}
 				// The "Even" spread will spread all gib particles evenly in an arc, while maintaining a randomized velocity magnitude.
 				if (gibSettingsObject.GetSpreadMode() == Gib::SpreadMode::SpreadEven) {
 					gibVelocity.RadRotate(gibSpread - (gibSpread * 2.0F * static_cast<float>(i) / static_cast<float>(count)));
@@ -1586,11 +1595,10 @@ void MOSRotating::Update() {
         m_Rotation += radsToGo * m_OrientToVel * velInfluence;
     }
 
-    AEmitter *wound = nullptr;
-    for (std::list<AEmitter *>::iterator woundIterator = m_Wounds.begin(); woundIterator != m_Wounds.end(); ) {
-        wound = *woundIterator;
+    for (auto woundItr = m_Wounds.begin(); woundItr != m_Wounds.end(); ) {
+        AEmitter* wound = *woundItr;
+        ++woundItr;
         RTEAssert(wound && wound->IsAttachedTo(this), "Broken wound AEmitter in Update");
-        ++woundIterator;
         wound->Update();
 
         if (wound->IsSetToDelete() || (wound->GetLifetime() > 0 && wound->GetAge() > wound->GetLifetime())) {
@@ -1599,27 +1607,26 @@ void MOSRotating::Update() {
             delete wound;
         } else {
             Vector totalImpulseForce;
-            for (const std::pair<Vector, Vector> &impulseForce : wound->GetImpulses()) {
+            for (const std::pair<Vector, Vector>& impulseForce : wound->GetImpulses()) {
                 totalImpulseForce += impulseForce.first;
             }
             totalImpulseForce *= wound->GetJointStiffness();
 
-            if (!totalImpulseForce.IsZero()) { AddImpulseForce(totalImpulseForce, wound->GetApplyTransferredForcesAtOffset() ? wound->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
+            if (!totalImpulseForce.IsZero()) {
+                AddImpulseForce(totalImpulseForce, wound->GetApplyTransferredForcesAtOffset() ? wound->GetParentOffset() * m_Rotation * c_MPP : Vector());
+            }
 
             wound->ClearImpulseForces();
         }
     }
 
-    Attachable *attachable = nullptr;
-    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
-        attachable = *attachableIterator;
+    for (auto attachableItr = m_Attachables.begin(); attachableItr != m_Attachables.end(); ) {
+        Attachable* attachable = *attachableItr;
+        ++attachableItr;
         RTEAssert(attachable, "Broken Attachable in Update!");
         RTEAssert(attachable->IsAttached(), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with no parent, this should never happen!");
         RTEAssert(attachable->IsAttachedTo(this), "Found Attachable on " + GetModuleAndPresetName() + " (" + attachable->GetModuleAndPresetName() + ") with another parent (" + attachable->GetParent()->GetModuleAndPresetName() + "), this should never happen!");
-        ++attachableIterator;
-
         attachable->Update();
-        RTEAssert(attachable, "Broken Attachable after Updating it!");
 
         if (attachable->IsAttachedTo(this) && attachable->IsSetToDelete()) {
             RemoveAttachable(attachable, true, true);
@@ -1825,6 +1832,8 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode 
     if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
         return;
     }
+
+	if (mode == g_DrawColor && !m_FlashWhiteTimer.IsPastRealTimeLimit()) { mode = g_DrawWhite; }
 
     // Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
     // Only draw attachables and emitters which are not drawn after parent, so we draw them before

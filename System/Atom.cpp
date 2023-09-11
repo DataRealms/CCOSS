@@ -3,12 +3,14 @@
 #include "MovableMan.h"
 #include "MovableObject.h"
 #include "MOSRotating.h"
+#include "MOPixel.h"
 #include "PresetMan.h"
 #include "Actor.h"
 
 namespace RTE {
 
 	const std::string Atom::c_ClassName = "Atom";
+	std::mutex Atom::s_MemoryPoolMutex;
 	std::vector<void *> Atom::s_AllocatedPool;
 	int Atom::s_PoolAllocBlockCount = 200;
 	int Atom::s_InstancesInUse = 0;
@@ -26,7 +28,7 @@ namespace RTE {
 		m_SubgroupID = 0;
 		m_MOHitsDisabled = false;
 		m_TerrainHitsDisabled = false;
-		m_OwnerMO = 0;
+		m_OwnerMO = nullptr;
 		m_IgnoreMOID = g_NoMOID;
 		m_IgnoreMOIDs.clear();
 		m_MOIDHit = g_NoMOID;
@@ -85,7 +87,7 @@ namespace RTE {
 		m_TrailLengthVariation = reference.m_TrailLengthVariation;
 
 		// These need to be set manually by the new owner.
-		m_OwnerMO = 0;
+		m_OwnerMO = nullptr;
 		m_IgnoreMOIDsByGroup = 0;
 
 		return 0;
@@ -134,6 +136,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void * Atom::GetPoolMemory() {
+		std::lock_guard<std::mutex> guard(s_MemoryPoolMutex);
+
 		// If the pool is empty, then fill it up again with as many instances as we are set to
 		if (s_AllocatedPool.empty()) { FillPool((s_PoolAllocBlockCount > 0) ? s_PoolAllocBlockCount : 10); }
 
@@ -170,6 +174,8 @@ namespace RTE {
 		if (!returnedMemory) {
 			return false;
 		}
+
+		std::lock_guard<std::mutex> guard(s_MemoryPoolMutex);
 		s_AllocatedPool.push_back(returnedMemory);
 
 		// Keep track of the number of instances passed in
@@ -849,8 +855,8 @@ namespace RTE {
 					// Report the hit to both MO's in collision
 					m_LastHit.RootBody[HITOR] = m_LastHit.Body[HITOR]->GetRootParent();
 					m_LastHit.RootBody[HITEE] = m_LastHit.Body[HITEE]->GetRootParent();
-					m_LastHit.RootBody[HITOR]->OnMOHit(m_LastHit.RootBody[HITEE]);
-					m_LastHit.RootBody[HITEE]->OnMOHit(m_LastHit.RootBody[HITOR]);
+					m_LastHit.RootBody[HITOR]->OnMOHit(m_LastHit);
+					m_LastHit.RootBody[HITEE]->OnMOHit(m_LastHit);
 				}
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -890,15 +896,33 @@ namespace RTE {
 						// Undo scene wrapping, if necessary
 						g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
-						// TODO: improve sticky logic!
 						// Check if particle is sticky and should adhere to where it collided
-						if (m_Material->GetStickiness() >= RandomNum() && velocity.MagnitudeIsGreaterThan(0.5F)) {
-							// SPLAT, so update position, apply to terrain and delete, and stop traveling
-							m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
-							m_OwnerMO->DrawToTerrain(g_SceneMan.GetTerrain());
-							m_OwnerMO->SetToDelete(true);
-							m_LastHit.Terminate[HITOR] = hit[dom] = hit[sub] = true;
-							break;
+						if (velocity.MagnitudeIsGreaterThan(1.0F)) {
+							MOPixel *ownerMOAsPixel = dynamic_cast<MOPixel *>(m_OwnerMO);
+							if (RandomNum() < std::max(m_Material->GetStickiness(), ownerMOAsPixel ? ownerMOAsPixel->GetStaininess() : 0.0f)) {
+								// Weighted random select between stickiness or staininess
+								const float randomChoice = RandomNum(0.0f, m_Material->GetStickiness() + (ownerMOAsPixel ? ownerMOAsPixel->GetStaininess() : 0.0f));
+								if (randomChoice <= m_Material->GetStickiness()) {
+									m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
+									m_OwnerMO->DrawToTerrain(g_SceneMan.GetTerrain());
+									m_OwnerMO->SetToDelete(true);
+									m_LastHit.Terminate[HITOR] = hit[dom] = hit[sub] = true;
+									break;
+								} else if (MOPixel *ownerMOAsPixel = dynamic_cast<MOPixel *>(m_OwnerMO); ownerMOAsPixel && randomChoice <= m_Material->GetStickiness() + ownerMOAsPixel->GetStaininess()) {
+									Vector stickPos(intPos[X], intPos[Y]);
+									stickPos += velocity * (c_PPM * g_TimerMan.GetDeltaTimeSecs()) * RandomNum();
+									int terrainMaterialID = g_SceneMan.GetTerrain()->GetMaterialPixel(stickPos.GetFloorIntX(), stickPos.GetFloorIntY());
+									if (terrainMaterialID != g_MaterialAir && terrainMaterialID != g_MaterialDoor) {
+										m_OwnerMO->SetPos(Vector(stickPos.GetRoundIntX(), stickPos.GetRoundIntY()));
+									} else {
+										m_OwnerMO->SetPos(Vector(intPos[X], intPos[Y]));
+									}
+									m_OwnerMO->DrawToTerrain(g_SceneMan.GetTerrain());
+									m_OwnerMO->SetToDelete(true);
+									m_LastHit.Terminate[HITOR] = hit[dom] = hit[sub] = true;
+									break;
+								}
+							}
 						}
 
 						// Check for and react upon a collision in the dominant direction of travel.

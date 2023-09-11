@@ -16,6 +16,7 @@
 
 #include "MOSRotating.h"
 #include "PieMenu.h"
+#include "PathFinder.h"
 
 namespace RTE
 {
@@ -75,7 +76,7 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(Actor);
-AddScriptFunctionNames(MOSRotating, "UpdateAI", "OnControllerInputModeChange");
+AddScriptFunctionNames(MOSRotating, "UpdateAI", "SyncedUpdateAI", "OnControllerInputModeChange");
 SerializableOverrideMethods;
 ClassInfoGetters;
 
@@ -602,16 +603,6 @@ ClassInfoGetters;
     /// <returns>Whether or not the activated PieSlice SliceType was able to be handled.</returns>
     virtual bool HandlePieCommand(PieSlice::SliceType pieSliceType) { return false; }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ResetAI
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Resets the AI states for this.
-// Arguments:       None.
-// Return value:    None.
-
-    void ResetAI() { m_AIMode; }
-*/
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetAIMode
@@ -1004,17 +995,6 @@ ClassInfoGetters;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          FlashWhite
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Tells to make this and all children get drawn as completely white, but
-//                  only for a specified amount of time.
-// Arguments:       For how long to flash the whiteness, in MS.
-// Return value:    None.
-
-    void FlashWhite(int howLongMS = 32) { m_FlashWhiteMS = howLongMS; m_WhiteFlashTimer.Reset(); }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          DrawWaypoints
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Makes this draw its current waypoints and related data on the scene in
@@ -1063,20 +1043,6 @@ ClassInfoGetters;
 
 	bool ParticlePenetration(HitData &hd) override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnMOHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits another MO.
-//                  This is called by the owned Atom/AtomGroup of this MovableObject during
-//                  travel.
-// Arguments:       The other MO hit. Ownership is not transferred.
-// Return value:    Wheter the MovableObject should immediately halt any travel going on
-//                  after this hit.
-
-	bool OnMOHit(MovableObject *pOtherMO) override;
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  PreTravel
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1108,20 +1074,16 @@ ClassInfoGetters;
 
 	int GetMovePathSize() const { return m_MovePath.size(); }
 
+    /// <summary>
+    /// Starts updating this Actor's movepath.
+    /// </summary>
+    virtual void UpdateMovePath();
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateMovePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' move path RIGHT NOW. Will update the path to the
-//                  current waypoint, if any. CAVEAT: this only actually updates if a queue
-//                  index number passed in is sufficiently close to 0 to allow this to
-//                  compute, based on an internal global assessment of how often this very
-//                  expensive computation is allowed to run.
-// Arguments:       The queue number this was given the last time
-// Return value:    Whether the update was performed, or if it should be tried again next
-//                  frame.
-
-    virtual bool UpdateMovePath();
+    /// <summary>
+    /// Returns whether we're waiting on a new pending movepath.
+    /// </summary>
+    /// <returns>Whether we're waiting on a new pending movepath.</returns>
+    bool IsWaitingOnNewMovePath() const { return m_PathRequest != nullptr; }
 
     /// <summary>
     /// Estimates what material strength this actor can penetrate.
@@ -1150,19 +1112,17 @@ ClassInfoGetters;
 // Return value:    Whether there was an AI Update function defined for this in its script,
 //                  and if it was executed successfully.
 
-	bool UpdateAIScripted();
+	void UpdateAIScripted(ThreadScriptsToRun scriptsToRun);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateAI
+// Virtual method:  PreControllerUpdate
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' AI state. Supposed to be done every frame that this has
-//                  a CAI controller controlling it.
+// Description:     Update called prior to controller update. Ugly hack. Supposed to be done every frame.
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void UpdateAI();
-
+	virtual void PreControllerUpdate();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -1173,6 +1133,14 @@ ClassInfoGetters;
 
 	void Update() override;
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Virtual method:  FullUpdate
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Updates the full state of this object in one call. (PreControllerUpdate(), Controller::Update(), and Update())
+// Arguments:       None.
+// Return value:    None.
+
+    virtual void FullUpdate() override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  SetDeploymentID
@@ -1211,20 +1179,6 @@ ClassInfoGetters;
 // Return value:    None.
 
 	void SetSightDistance(float newValue) { m_SightDistance = newValue; }
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Draw
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Draws this Actor's current graphical representation to a
-//                  BITMAP of choice.
-// Arguments:       A pointer to a BITMAP to draw on.
-//                  The absolute position of the target bitmap's upper left corner in the Scene.
-//                  In which mode to draw in. See the DrawMode enumeration for the modes.
-//                  Whether to not draw any extra 'ghost' items of this MovableObject,
-//                  indicator arrows or hovering HUD text and so on.
-// Return value:    None.
-
-    void Draw(BITMAP *pTargetBitmap, const Vector &targetPos = Vector(), DrawMode mode = g_DrawColor, bool onlyPhysical = false) const override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1409,6 +1363,12 @@ ClassInfoGetters;
 
 protected:
 
+    /// <summary>
+    /// Function that is called when we get a new movepath.
+    /// This processes and cleans up the movepath.
+    /// </summary>
+    virtual void OnNewMovePath();
+
     // Member variables
     static Entity::ClassInfo m_sClass;
 
@@ -1524,10 +1484,6 @@ protected:
     HeldDevice *m_pItemInReach;
     // HUD positioning aid
     int m_HUDStack;
-    // For how much longer to draw this as white. 0 means don't draw as white
-    int m_FlashWhiteMS;
-    // The timer that measures and deducts past time from the remaining white flash time
-    Timer m_WhiteFlashTimer;
 	// ID of deployment which spawned this actor
 	unsigned int m_DeploymentID;
     // How many passenger slots this actor will take in a craft
@@ -1588,29 +1544,12 @@ protected:
     Vector m_MoveVector;
     // The calculated path to get to that move-to target
     std::list<Vector> m_MovePath;
+    // The current pathfinding request
+    std::shared_ptr<volatile PathRequest> m_PathRequest;
     // Whether it's time to update the path
     bool m_UpdateMovePath;
     // The minimum range to consider having reached a move target is considered
     float m_MoveProximityLimit;
-    // Whether the AI is trying to progress to the right, left, or stand still
-    LateralMoveState m_LateralMoveState;
-    // Timer for how long to keep going before switching directions when moving along a path
-    Timer m_MoveOvershootTimer;
-    // Whether the AI is in the process of proceeding, backstepping to get out of being stuck, or jumping over stuff
-    ObstacleState m_ObstacleState;
-    // Teammate is in the way of whatever we are doing; stop until he moves
-    TeamBlockState m_TeamBlockState;
-    // Times how long after an obstruction is cleared to start proceeding again
-    Timer m_BlockTimer;
-    // The closest the actor has ever come to the current waypoint it's going for, squared. Used to checking if we shuold re-update the movepath
-    // It's useful for when the path seems to be broken or unreachable
-    float m_BestTargetProximitySqr;
-    // Timer used to check on larger movement progress toward the goal
-    Timer m_ProgressTimer;
-    // Timer used to time how long we've been stuck in the same spot.
-    Timer m_StuckTimer;
-    // Timer for measuring interval between height checks
-    Timer m_FallTimer;
 
 	bool m_Organic; //!< Flag for whether or not this Actor is organic. Useful for lua purposes and mod support.
 	bool m_Mechanical; //!< Flag for whether or not this Actor is robotic. Useful for lua purposes and mod support.

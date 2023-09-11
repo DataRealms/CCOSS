@@ -295,7 +295,13 @@ namespace RTE {
 		/// <summary>
 		/// Makes all sounds that are looping stop looping, allowing them to play once more then be finished.
 		/// </summary>
-		void FinishAllLoopingSounds();
+		void FinishIngameLoopingSounds();
+
+		/// <summary>
+		/// Pauses all ingame sounds.
+		/// <param name="pause">Whether to pause sounds or resume them.</param>
+		/// </summary>
+		void PauseIngameSounds(bool pause = true) { if (m_AudioEnabled) { m_MobileSoundChannelGroup->setPaused(pause); m_ImmobileSoundChannelGroup->setPaused(pause); } }
 #pragma endregion
 
 #pragma region Music Playback and Handling
@@ -334,14 +340,6 @@ namespace RTE {
 		/// Clears the music queue.
 		/// </summary>
 		void ClearMusicQueue() { m_MusicPlayList.clear(); }
-#pragma endregion
-
-#pragma region Mobile Sound Playback and Handling
-		/// <summary>
-		/// Pauses all sound playback.
-		/// <param name="pause">Whether to pause sounds or resume them.</param>
-		/// </summary>
-		void PauseAllMobileSounds(bool pause = true) { if (m_AudioEnabled) { m_MobileSoundChannelGroup->setPaused(pause); } }
 #pragma endregion
 
 #pragma region Lua Sound File Playing
@@ -440,6 +438,7 @@ namespace RTE {
 		FMOD::ChannelGroup *m_SoundChannelGroup; //!< The FMOD ChannelGroup for sounds.
 		FMOD::ChannelGroup *m_MobileSoundChannelGroup; //!< The FMOD ChannelGroup for mobile sounds.
 		FMOD::ChannelGroup *m_ImmobileSoundChannelGroup; //!< The FMOD ChannelGroup for immobile sounds.
+		FMOD::ChannelGroup *m_MenuSoundChannelGroup; //!< The FMOD ChannelGroup for immobile sounds.
 
 		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
 		std::vector<std::unique_ptr<const Vector>> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.

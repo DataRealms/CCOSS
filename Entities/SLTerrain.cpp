@@ -257,13 +257,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int SLTerrain::SaveData(const std::string &pathBase) {
+	int SLTerrain::SaveData(const std::string &pathBase, bool doAsyncSaves) {
 		if (pathBase.empty()) {
 			return -1;
 		}
-		SceneLayer::SaveData(pathBase + " Mat.png");
-		m_FGColorLayer->SaveData(pathBase + " FG.png");
-		m_BGColorLayer->SaveData(pathBase + " BG.png");
+		SceneLayer::SaveData(pathBase + " Mat.png", doAsyncSaves);
+		m_FGColorLayer->SaveData(pathBase + " FG.png", doAsyncSaves);
+		m_BGColorLayer->SaveData(pathBase + " BG.png", doAsyncSaves);
 		return 0;
 	}
 

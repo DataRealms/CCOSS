@@ -183,14 +183,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void ConsoleMan::SaveAllText(const std::string &filePath) {
+	bool ConsoleMan::SaveAllText(const std::string &filePath) {
 		Writer logWriter(filePath.c_str());
 		if (logWriter.WriterOK()) {
 			for (const std::string &loggedString : m_OutputLog) {
 				logWriter << loggedString;
 			}
+			logWriter.EndWrite();
 			PrintString("SYSTEM: Entire console contents saved to " + filePath);
+			return true;
 		}
+		return false;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -208,7 +211,9 @@ namespace RTE {
 		std::scoped_lock<std::mutex> printStringLock(printStringMutex);
 
 		m_OutputLog.emplace_back("\n" + stringToPrint);
-		if (System::IsLoggingToCLI()) { System::PrintToCLI(stringToPrint); }
+		if (System::IsLoggingToCLI()) { 
+			System::PrintToCLI(stringToPrint); 
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -216,28 +221,31 @@ namespace RTE {
 	void ConsoleMan::ShowShortcuts() {
 		if (!IsEnabled()) { SetEnabled(); }
 
-		PrintString("--- SHORTCUTS ---");
-		PrintString("CTRL + ~ - Console in read-only mode without input capture");
-		PrintString("CTRL + DOWN / UP - Increase/decrease console size (Only while console is open)");
-		PrintString("CTRL + S - Make continuous screenshots while the keys are held");
-		PrintString("CTRL + W - Make a screenshot of the entire level");
-		PrintString("ALT  + W - Make a miniature preview image of the entire level");
-		PrintString("CTRL + P - Show performance stats");
-		PrintString("ALT  + P - Show advanced performance stats (Only while performance stats are visible)");
-		PrintString("CTRL + R - Reset activity");
-		PrintString("CTRL + M - Switch display mode: Draw -> Material -> MO");
-		PrintString("CTRL + O - Toggle one sim update per frame");
-		PrintString("----------------");
-		PrintString("F2 - Reload all Lua scripts");
-		PrintString("ALT  + F2 - Reload all sprites");
-		PrintString("CTRL + F2 - Quick reload Entity preset previously reloaded with PresetMan:ReloadEntityPreset");
-		PrintString("F3 - Save console log");
-		PrintString("F4 - Save console user input log");
-		PrintString("F5 - Quick save");
-		PrintString("F9 - Load latest quick-save");
-		PrintString("CTRL + F9 - Load latest auto-save");
-		PrintString("F10 - Clear Console log");
-		PrintString("F12 - Make a single screenshot");
+		PrintString(
+			"\n--- SHORTCUTS ---\n"
+			"CTRL + ~ - Console in read-only mode without input capture\n"
+			"CTRL + DOWN / UP - Increase/decrease console size (Only while console is open)\n"
+			"CTRL + S - Make continuous screenshots while the keys are held\n"
+			"CTRL + W - Make a screenshot of the entire level\n"
+			"ALT  + W - Make a miniature preview image of the entire level\n"
+			"CTRL + P - Show performance stats\n"
+			"ALT  + P - Show advanced performance stats (Only while performance stats are visible)\n"
+			"CTRL + R - Reset activity\n"
+			"CTRL + M - Switch display mode: Draw -> Material -> MO\n"
+			"CTRL + O - Toggle one sim update per frame\n"
+			"SHIFT + ESC - Skip pause menu when pausing activity (straight to scenario/conquest menu)\n"
+			"----------------\n"
+			"F2 - Reload all Lua scripts\n"
+			"ALT  + F2 - Reload all sprites\n"
+			"CTRL + F2 - Quick reload Entity preset previously reloaded with PresetMan:ReloadEntityPreset\n"
+			"F3 - Save console log\n"
+			"F4 - Save console user input log\n"
+			"F5 - Quick save\n"
+			"F9 - Load latest quick-save\n"
+			"CTRL + F9 - Load latest auto-save\n"
+			"F10 - Clear Console log\n"
+			"F12 - Make a single screenshot"
+		);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -358,11 +366,11 @@ namespace RTE {
 
 			if (!feedEmptyString) {
 				if (!line.empty() && line != "\r") {
-					g_LuaMan.ClearErrors();
+					g_LuaMan.GetMasterScriptState().ClearErrors();
 					m_OutputLog.emplace_back("\n" + line);
-					g_LuaMan.RunScriptString(line, false);
+					g_LuaMan.GetMasterScriptState().RunScriptString(line, false);
 
-					if (g_LuaMan.ErrorExists()) { m_OutputLog.emplace_back("\nERROR: " + g_LuaMan.GetLastError()); }
+					if (g_LuaMan.GetMasterScriptState().ErrorExists()) { m_OutputLog.emplace_back("\nERROR: " + g_LuaMan.GetMasterScriptState().GetLastError()); }
 					if (m_InputLog.empty() || m_InputLog.front() != line) { m_InputLog.push_front(line); }
 
 					m_InputLogPosition = m_InputLog.begin();

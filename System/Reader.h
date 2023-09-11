@@ -26,7 +26,16 @@ namespace RTE {
 		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this Reader's reading.</param>
 		/// <param name="failOK">Whether it's ok for the file to not be there, ie we're only trying to open, and if it's not there, then fail silently.</param>
 		/// <param name="nonModulePath">Whether this Reader is reading from path that is not a DataModule and should just read it as provided.</param>
-		Reader(const std::string &fileName, bool overwrites = false, const ProgressCallback &progressCallback = nullptr, bool failOK = false, bool nonModulePath = false) { Clear(); m_NonModulePath = nonModulePath; Create(fileName, overwrites, progressCallback, failOK); }
+		Reader(const std::string &fileName, bool overwrites = false, const ProgressCallback &progressCallback = nullptr, bool failOK = false, bool nonModulePath = false);
+
+		/// <summary>
+		/// Constructor method used to instantiate a Reader object in system memory and make it ready for reading from the passed in file path.
+		/// </summary>
+		/// <param name="stream">Stream to read from.</param>
+		/// <param name="overwrites">Whether object definitions read here overwrite existing ones with the same names.</param>
+		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this Reader's reading.</param>
+		/// <param name="failOK">Whether it's ok for the file to not be there, ie we're only trying to open, and if it's not there, then fail silently.</param>
+		Reader(std::unique_ptr<std::istream> &&stream, bool overwrites = false, const ProgressCallback &progressCallback = nullptr, bool failOK = false);
 
 		/// <summary>
 		/// Makes the Reader object ready for use.
@@ -37,6 +46,16 @@ namespace RTE {
 		/// <param name="failOK">Whether it's ok for the file to not be there, ie we're only trying to open, and if it's not there, then fail silently.</param>
 		/// <returns>An error return value signaling success or any particular failure.  Anything below 0 is an error signal.</returns>
 		int Create(const std::string &fileName, bool overwrites = false, const ProgressCallback &progressCallback = nullptr, bool failOK = false);
+
+		/// <summary>
+		/// Makes the Reader object ready for use.
+		/// </summary>
+		/// <param name="stream">Stream to read from.</param>
+		/// <param name="overwrites"> Whether object definitions read here overwrite existing ones with the same names.</param>
+		/// <param name="progressCallback">A function pointer to a function that will be called and sent a string with information about the progress of this Reader's reading.</param>
+		/// <param name="failOK">Whether it's ok for the file to not be there, ie we're only trying to open, and if it's not there, then fail silently.</param>
+		/// <returns>An error return value signaling success or any particular failure.  Anything below 0 is an error signal.</returns>
+		int Create(std::unique_ptr<std::istream> &&stream, bool overwrites = false, const ProgressCallback &progressCallback = nullptr, bool failOK = false);
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -91,7 +110,7 @@ namespace RTE {
 		/// <summary>
 		/// Set whether this reader should skip included files.
 		/// </summary>
-		/// <param name="skip>To make reader skip included files pass true, pass false otherwise.</param>
+		/// <param name="skip">To make reader skip included files pass true, pass false otherwise.</param>
 		void SetSkipIncludes(bool skip) { m_SkipIncludes = skip; };
 #pragma endregion
 
@@ -152,7 +171,7 @@ namespace RTE {
 		/// Shows whether this is still OK to read from. If file isn't present, etc, this will return false.
 		/// </summary>
 		/// <returns>Whether this Reader's stream is OK or not.</returns>
-		bool ReaderOK() const { return m_Stream.get() && !m_Stream->fail() && m_Stream->is_open(); }
+		bool ReaderOK() const { return m_Stream.get() && m_Stream->good(); }
 
 		/// <summary>
 		/// Makes an error message box pop up for the user that tells them something went wrong with the reading, and where.
@@ -192,16 +211,16 @@ namespace RTE {
 			/// <summary>
 			/// Constructor method used to instantiate a StreamInfo object in system memory.
 			/// </summary>
-			StreamInfo(std::ifstream *stream, const std::string &filePath, int currentLine, int prevIndent) : Stream(stream), FilePath(filePath), CurrentLine(currentLine), PreviousIndent(prevIndent) {}
+			StreamInfo(std::istream *stream, const std::string &filePath, int currentLine, int prevIndent) : Stream(stream), FilePath(filePath), CurrentLine(currentLine), PreviousIndent(prevIndent) {}
 
 			// NOTE: These members are owned by the reader that owns this struct, so are not deleted when this is destroyed.
-			std::ifstream *Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
+			std::istream *Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
 			std::string FilePath; //!< Currently used stream's filepath.
 			int CurrentLine; //!< The line number the stream is on.
 			int PreviousIndent; //!< Count of tabs encountered on the last line DiscardEmptySpace() discarded.
 		};
 
-		std::unique_ptr<std::ifstream> m_Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
+		std::unique_ptr<std::istream> m_Stream; //!< Currently used stream, is not on the StreamStack until a new stream is opened.
 		std::stack<StreamInfo> m_StreamStack; //!< Stack of open streams in this Reader, each one representing a file opened to read from within another.
 		bool m_EndOfStreams; //!< All streams have been depleted.
 

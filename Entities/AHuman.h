@@ -774,17 +774,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
     void ResetAllTimers() override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateMovePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the path to move along to the currently set movetarget.
-// Arguments:       None.
-// Return value:    None.
-
-	bool UpdateMovePath() override;
-
-
 	/// <summary>
 	/// Detects slopes in terrain and updates the walk path rotation for the corresponding Layer accordingly.
 	/// </summary>
@@ -811,16 +800,14 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// <returns>Whether this AHuman is currently climbing or not.</returns>
 	bool IsClimbing() const { return m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]; }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateAI
+// Virtual method:  PreControllerUpdate
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' AI state. Supposed to be done every frame that this has
-//                  a CAI controller controlling it.
+// Description:     Update called prior to controller update. Ugly hack. Supposed to be done every frame.
 // Arguments:       None.
 // Return value:    None.
 
-	void UpdateAI() override;
+    void PreControllerUpdate() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -979,6 +966,11 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 protected:
 
+    /// <summary>
+    /// Function that is called when we get a new movepath.
+    /// This processes and cleans up the movepath.
+    /// </summary>
+    void OnNewMovePath() override;
 
 	/// <summary>
 	/// Draws an aiming aid in front of this AHuman for throwing.

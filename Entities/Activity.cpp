@@ -7,6 +7,8 @@
 #include "WindowMan.h"
 #include "FrameMan.h"
 #include "MetaMan.h"
+#include "SceneMan.h"
+#include "NetworkClient.h"
 
 #include "ACraft.h"
 
@@ -23,6 +25,7 @@ namespace RTE {
 void Activity::Clear() {
 		m_ActivityState = ActivityState::NotStarted;
 		m_Paused = false;
+		m_AllowsUserSaving = false;
 		m_Description.clear();
 		m_SceneName.clear();
 		m_MaxPlayerSupport = Players::MaxPlayerCount;
@@ -84,6 +87,7 @@ void Activity::Clear() {
 
 		m_ActivityState = reference.m_ActivityState;
 		m_Paused = reference.m_Paused;
+		m_AllowsUserSaving = reference.m_AllowsUserSaving;
 		m_Description = reference.m_Description;
 		m_MaxPlayerSupport = reference.m_MaxPlayerSupport;
 		m_MinTeamsRequired = reference.m_MinTeamsRequired;
@@ -142,6 +146,8 @@ void Activity::Clear() {
 			reader >> m_InCampaignStage;
 		} else if (propName == "ActivityState") {
 			m_ActivityState = static_cast<ActivityState>(std::stoi(reader.ReadPropValue()));
+		} else if (propName == "AllowsUserSaving") {
+			reader >> m_AllowsUserSaving;
 		} else if (propName == "TeamOfPlayer1" || propName == "TeamOfPlayer2" || propName == "TeamOfPlayer3" || propName == "TeamOfPlayer4") {
 			for (int playerTeam = Teams::TeamOne; playerTeam < Teams::MaxTeamCount; playerTeam++) {
 				std::string playerTeamNum = std::to_string(playerTeam + 1);
@@ -238,6 +244,8 @@ void Activity::Clear() {
 		writer << m_InCampaignStage;
 		writer.NewProperty("ActivityState");
 		writer << m_ActivityState;
+		writer.NewProperty("AllowsUserSaving");
+		writer << m_AllowsUserSaving;
 
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 			std::string playerNum = std::to_string(player + 1);
@@ -281,7 +289,6 @@ void Activity::Clear() {
 			m_ActivityState = ActivityState::Running;
 		}
 		m_Paused = false;
-		g_ActivityMan.SetActivityAllowsSaving(ActivityCanBeSaved());
 
 		// Reset the mouse moving so that it won't trap the mouse if the window isn't in focus (common after loading)
 		if (!g_FrameMan.IsInMultiplayerMode()) {
@@ -333,7 +340,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Activity::End() {
-		g_AudioMan.FinishAllLoopingSounds();
+		g_AudioMan.FinishIngameLoopingSounds();
 		// Actor control is automatically disabled when players are set to observation mode, so no need to do anything directly.
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			m_ViewState[player] = ViewState::Observe;
@@ -632,7 +639,7 @@ void Activity::Clear() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::string Activity::GetDifficultyString(int difficulty) {
-		if (difficulty < DifficultySetting::CakeDifficulty) {
+		if (difficulty <= DifficultySetting::CakeDifficulty) {
 			return "Cake";
 		} else if (difficulty <= DifficultySetting::EasyDifficulty) {
 			return "Easy";
@@ -804,24 +811,29 @@ void Activity::Clear() {
 		}
 
 		float totalValue = orbitedCraft->GetTotalValue(0, foreignCostMult, nativeCostMult);
-		std::snprintf(messageString, sizeof(messageString), "Returned Craft + Cargo added %.0f oz to Funds!", totalValue);
 
+		std::string craftText = "Returned craft";
+		if (!orbitedCraft->IsInventoryEmpty()) { 
+			craftText += " + cargo";
+		}
+		if (totalValue > 0.0F) {
+			m_TeamFunds[orbitedCraftTeam] += totalValue;
+			std::snprintf(messageString, sizeof(messageString), "%s added %.0f oz to funds!", craftText.c_str(), totalValue);
+		}
 		for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
 			if (m_IsActive[player]) {
 				if (brainOnBoard && orbitedCraft == GetPlayerBrain(static_cast<Players>(player))) {
 					m_BrainEvacuated[player] = true;
-					std::snprintf(messageString, sizeof(messageString), "YOUR BRAIN HAS BEEN EVACUATED BACK INTO ORBIT!");
-				}
-
-				if (m_Team[player] == orbitedCraftTeam) {
-					g_FrameMan.ClearScreenText(ScreenOfPlayer(ScreenOfPlayer(static_cast<Players>(player))));
+					g_FrameMan.ClearScreenText(ScreenOfPlayer(static_cast<Players>(player)));
+					g_FrameMan.SetScreenText("YOUR BRAIN HAS BEEN EVACUATED BACK INTO ORBIT!", ScreenOfPlayer(static_cast<Players>(player)), 0, 3500);
+				} else if (m_Team[player] == orbitedCraftTeam && totalValue > 0.0F) {
+					g_FrameMan.ClearScreenText(ScreenOfPlayer(static_cast<Players>(player)));
 					g_FrameMan.SetScreenText(messageString, ScreenOfPlayer(static_cast<Players>(player)), 0, 3500);
 					m_MessageTimer[player].Reset();
 				}
 			}
 		}
 
-		m_TeamFunds[orbitedCraftTeam] += totalValue;
 		orbitedCraft->SetGoldCarried(0);
 		orbitedCraft->SetHealth(orbitedCraft->GetMaxHealth());
 
@@ -886,5 +898,19 @@ void Activity::Clear() {
 			if (m_MessageTimer[player].IsPastSimMS(5000)) { g_FrameMan.ClearScreenText(ScreenOfPlayer(player)); }
 			if (m_IsActive[player]) { m_PlayerController[player].Update(); }
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool Activity::CanBeUserSaved() const {
+		if (const Scene *scene = g_SceneMan.GetScene(); (scene && scene->IsMetagameInternal()) || g_MetaMan.GameInProgress()) {
+			return false;
+		}
+
+		if (g_NetworkClient.IsConnectedAndRegistered()) {
+			return false;
+		}
+
+		return m_AllowsUserSaving;
 	}
 }

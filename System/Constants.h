@@ -9,11 +9,6 @@ namespace RTE {
 	typedef int MID; //!< Distinctive type definition for Material IDs.
 #pragma endregion
 
-#pragma region Game Version
-	static constexpr const char *c_MajorGameVersion = "Pre-Release 5";
-	static constexpr const char *c_MinorGameVersion = ".1";
-#pragma endregion
-
 #pragma region Userdata Constants
 	static const std::string c_UserScenesModuleName = "UserScenes.rte"; //!< Module name where user created Scenes are saved.
 	static const std::string c_UserScriptedSavesModuleName = "UserSavedGames.rte"; //!< Module name where user scripted Activity saves are saved.
@@ -329,6 +324,15 @@ namespace RTE {
 		{Directions::Down, c_OneAndAHalfPI},
 		{Directions::Left, c_PI},
 		{Directions::Right, 0.0F}
+	};
+
+	/// <summary>
+	/// Enum of thread script types to run.
+	/// </summary>
+	enum class ThreadScriptsToRun {
+		SingleThreaded,
+		MultiThreaded,
+		Both
 	};
 #pragma endregion
 

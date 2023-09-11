@@ -58,6 +58,7 @@ namespace RTE {
 		.def("IsGamepadControlled", &Controller::IsGamepadControlled)
 		.def("SetState", &Controller::SetState)
 		.def("IsState", &Controller::IsState)
+		.def("Override", &Controller::Override)
 
 		.enum_("ControlState")[
 			luabind::value("PRIMARY_ACTION", ControlState::PRIMARY_ACTION),
@@ -232,5 +233,23 @@ namespace RTE {
 		.def("GetDegRotatedCopy", &Vector::GetDegRotatedCopy)
 		.def("AbsRotateTo", &Vector::AbsRotateTo)
 		.def("SetXY", &Vector::SetXY);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(SystemLuaBindings, PathRequest) {
+		using namespace micropather;
+		return luabind::class_<PathRequest>("PathRequest")
+
+		.def_readonly("Path", &PathRequest::path, luabind::return_stl_iterator)
+		.def_readonly("PathLength", &PathRequest::pathLength)
+		.def_readonly("Status", &PathRequest::status)
+		.def_readonly("TotalCost", &PathRequest::totalCost)
+
+		.enum_("Status")[
+			luabind::value("Solved", micropather::MicroPather::SOLVED),
+			luabind::value("NoSolution", micropather::MicroPather::NO_SOLUTION),
+			luabind::value("StartEndSame", micropather::MicroPather::START_END_SAME)
+		];
 	}
 }

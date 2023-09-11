@@ -29,10 +29,10 @@ namespace RTE {
 		/// <returns>A reference to the sole instance of this Singleton.</returns>
 		static Type & Instance() {
 			if (!s_Instance) {
-				try {
+				static std::mutex mut;
+				std::lock_guard<std::mutex> guard(mut);
+				if (!s_Instance) { // double-check locking
 					s_Instance = new Type();
-				} catch (std::bad_alloc &catchResult) {
-					RTEAbort("Failed to instantiate Singleton because: " + std::string(catchResult.what()));
 				}
 			}
 			return *s_Instance;

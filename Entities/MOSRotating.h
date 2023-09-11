@@ -900,6 +900,12 @@ ClassInfoGetters;
 	/// <param name="newValue">New scalar value.</param>
 	void SetOrientToVel(float newValue) { m_OrientToVel = newValue; }
 
+	/// <summary>
+	/// Sets this MOSRotating and all its children to drawn white for a specified amount of time.
+	/// </summary>
+	/// <param name="durationMS">Duration of flash in real time MS.</param>
+	void FlashWhite(int durationMS = 32) { m_FlashWhiteTimer.SetRealTimeLimitMS(durationMS); m_FlashWhiteTimer.Reset(); }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTravelImpulse
@@ -1045,6 +1051,8 @@ protected:
 
 	float m_DamageMultiplier; //!< Damage multiplier for this MOSRotating.
     bool m_NoSetDamageMultiplier; //!< Whether or not the damage multiplier for this MOSRotating was set.
+
+	Timer m_FlashWhiteTimer; //!< The timer for timing white draw mode duration.
 
     // Intermediary drawing bitmap used to flip rotating bitmaps. Owned!
     BITMAP *m_pFlipBitmap;

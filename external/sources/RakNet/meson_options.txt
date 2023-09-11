@@ -1,0 +1,2 @@
+
+option('use_prebuilt_libraries', type: 'boolean', value: true, yield: true, description: 'On windows use the prebuilt libraries')

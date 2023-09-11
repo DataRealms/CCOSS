@@ -7,6 +7,8 @@
 #include "SettingsMan.h"
 #include "ConsoleMan.h"
 
+#include "GameVersion.h"
+
 #include "GUI.h"
 #include "AllegroScreen.h"
 #include "GUIInputWrapper.h"
@@ -36,6 +38,7 @@ namespace RTE {
 		m_ResumeButtonBlinkTimer.Reset();
 		m_CreditsScrollTimer.Reset();
 
+		m_SaveLoadMenu = nullptr;
 		m_SettingsMenu = nullptr;
 		m_ModManagerMenu = nullptr;
 
@@ -79,6 +82,7 @@ namespace RTE {
 		CreateCreditsScreen();
 		CreateQuitScreen();
 
+		m_SaveLoadMenu = std::make_unique<SaveLoadMenuGUI>(guiScreen, guiInput);
 		m_SettingsMenu = std::make_unique<SettingsGUI>(guiScreen, guiInput);
 		m_ModManagerMenu = std::make_unique<ModManagerGUI>(guiScreen, guiInput);
 
@@ -95,6 +99,7 @@ namespace RTE {
 		m_MainMenuButtons[MenuButton::MetaGameButton] = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToMetaGame"));
 		m_MainMenuButtons[MenuButton::ScenarioButton] = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToSkirmish"));
 		m_MainMenuButtons[MenuButton::MultiplayerButton] = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToMultiplayer"));
+		m_MainMenuButtons[MenuButton::SaveOrLoadGameButton] = dynamic_cast<GUIButton*>(m_MainMenuScreenGUIControlManager->GetControl("ButtonSaveOrLoadGame"));
 		m_MainMenuButtons[MenuButton::SettingsButton] = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToOptions"));
 		m_MainMenuButtons[MenuButton::ModManagerButton] = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToModManager"));
 		m_MainMenuButtons[MenuButton::EditorsButton] = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonMainToEditor"));
@@ -102,7 +107,7 @@ namespace RTE {
 		m_MainMenuButtons[MenuButton::QuitButton] = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonQuit"));
 		m_MainMenuButtons[MenuButton::ResumeButton] = dynamic_cast<GUIButton *>(m_MainMenuScreenGUIControlManager->GetControl("ButtonResume"));
 
-		for (int mainScreenButton = 0; mainScreenButton < 9; ++mainScreenButton) {
+		for (int mainScreenButton = MenuButton::MetaGameButton; mainScreenButton <= MenuButton::ResumeButton; ++mainScreenButton) {
 			m_MainMenuButtons.at(mainScreenButton)->CenterInParent(true, false);
 			std::string buttonText = m_MainMenuButtons.at(mainScreenButton)->GetText();
 			std::transform(buttonText.begin(), buttonText.end(), buttonText.begin(), ::toupper);
@@ -114,7 +119,7 @@ namespace RTE {
 		}
 
 		m_VersionLabel = dynamic_cast<GUILabel *>(m_MainMenuScreenGUIControlManager->GetControl("VersionLabel"));
-		m_VersionLabel->SetText("Community Project\n" + std::string(c_MajorGameVersion) + std::string(c_MinorGameVersion));
+		m_VersionLabel->SetText("Community Project\nv" + c_GameVersion.str());
 		m_VersionLabel->SetPositionAbs(10, g_WindowMan.GetResY() - m_VersionLabel->GetTextHeight() - 5);
 	}
 
@@ -196,7 +201,13 @@ namespace RTE {
 			m_ActiveGUIControlManager = (m_ActiveMenuScreen == MenuScreen::MainScreen) ? m_MainMenuScreenGUIControlManager.get() : m_SubMenuScreenGUIControlManager.get();
 			m_MenuScreenChange = true;
 
-			if (playButtonPressSound) { g_GUISound.ButtonPressSound()->Play(); }
+			if (screenToShow == MenuScreen::SaveOrLoadGameScreen) {
+				m_SaveLoadMenu->Refresh();
+			}
+
+			if (playButtonPressSound) { 
+				g_GUISound.ButtonPressSound()->Play(); 
+			}
 		}
 	}
 
@@ -334,6 +345,9 @@ namespace RTE {
 				if (m_MenuScreenChange) { ShowMetaGameNoticeScreen(); }
 				backToMainMenu = HandleInputEvents();
 				break;
+			case MenuScreen::SaveOrLoadGameScreen:
+				backToMainMenu = m_SaveLoadMenu->HandleInputEvents();
+				break;
 			case MenuScreen::SettingsScreen:
 				backToMainMenu = m_SettingsMenu->HandleInputEvents();
 				m_ActiveDialogBox = m_SettingsMenu->GetActiveDialogBox();
@@ -438,6 +452,8 @@ namespace RTE {
 			m_UpdateResult = MainMenuUpdateResult::ActivityStarted;
 			g_GUISound.BackButtonPressSound()->Play();
 			g_ActivityMan.SetStartMultiplayerActivity();
+		} else if (guiEventControl == m_MainMenuButtons[MenuButton::SaveOrLoadGameButton]) {
+			SetActiveMenuScreen(MenuScreen::SaveOrLoadGameScreen);
 		} else if (guiEventControl == m_MainMenuButtons[MenuButton::SettingsButton]) {
 			SetActiveMenuScreen(MenuScreen::SettingsScreen);
 		} else if (guiEventControl == m_MainMenuButtons[MenuButton::EditorsButton]) {
@@ -506,7 +522,7 @@ namespace RTE {
 	void MainMenuGUI::UpdateMainScreenHoveredButton(const GUIButton *hoveredButton) {
 		int hoveredButtonIndex = -1;
 		if (hoveredButton) {
-			hoveredButtonIndex = std::distance(m_MainMenuButtons.begin(), std::find(m_MainMenuButtons.begin(), m_MainMenuButtons.begin() + 8, hoveredButton));
+			hoveredButtonIndex = std::distance(m_MainMenuButtons.begin(), std::find(m_MainMenuButtons.begin(), m_MainMenuButtons.end(), hoveredButton));
 			if (hoveredButton != m_MainScreenHoveredButton) { m_MainMenuButtons.at(hoveredButtonIndex)->SetText(m_MainScreenButtonHoveredText.at(hoveredButtonIndex)); }
 			m_MainScreenHoveredButton = m_MainMenuButtons.at(hoveredButtonIndex);
 		}
@@ -527,6 +543,9 @@ namespace RTE {
 			return;
 		}
 		switch (m_ActiveMenuScreen) {
+			case MenuScreen::SaveOrLoadGameScreen:
+				m_SaveLoadMenu->Draw();
+				break;
 			case MenuScreen::SettingsScreen:
 				m_SettingsMenu->Draw();
 				break;

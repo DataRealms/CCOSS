@@ -98,9 +98,9 @@ namespace RTE {
 		m_CustomResolutionHeightTextBox->SetMaxTextLength(4);
 		m_CustomResolutionHeightTextBox->SetText(std::to_string(static_cast<int>(m_NewResY * g_WindowMan.GetResMultiplier())));
 
-		m_CustomResolutionMultiplier = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboboxResolutionMultiplier"));
+		m_CustomResolutionMultiplierComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboboxResolutionMultiplier"));
 #if __cpp_lib_format >= 201907L
-		m_CustomResolutionMultiplier->SetText(std::format("{:.3g}x", m_NewResMultiplier));
+		m_CustomResolutionMultiplierComboBox->SetText(std::format("{:.3g}x", m_NewResMultiplier));
 #else
 		m_CustomResolutionMultiplier->SetText(std::to_string(m_NewResMultiplier));
 #endif
@@ -213,7 +213,7 @@ namespace RTE {
 
 		for (float resMultiplier = 1.0f; resMultiplier <= maximumResMultiplier; resMultiplier += 0.5) {
 #if __cpp_lib_format >= 201907L
-			m_CustomResolutionMultiplier->AddItem(std::format("{:.3g}x", resMultiplier));
+			m_CustomResolutionMultiplierComboBox->AddItem(std::format("{:.3g}x", resMultiplier));
 #else
 			m_CustomResolutionMultiplier->AddItem(std::to_string(resMultiplier));
 #endif
@@ -306,7 +306,7 @@ namespace RTE {
 		m_NewFullscreen = m_FullscreenCheckbox->GetCheck();
 
 		float newResMultiplier(.0f);
-		int exitCode = sscanf(m_CustomResolutionMultiplier->GetText().c_str(), "%f%*s", &newResMultiplier);
+		int exitCode = sscanf(m_CustomResolutionMultiplierComboBox->GetText().c_str(), "%f%*s", &newResMultiplier);
 
 		if (exitCode == EOF || newResMultiplier == 0) {
 			m_CustomResolutionMessageLabel->SetText("Resolution Multiplier is not a valid number!");
@@ -395,7 +395,15 @@ namespace RTE {
 				if (guiEvent.GetMsg() == GUIComboBox::Dropped) {
 					m_PresetResolutionBox->Resize(m_PresetResolutionBox->GetWidth(), 165);
 				} else if (guiEvent.GetMsg() == GUIComboBox::Closed) {
-					m_PresetResolutionBox->Resize(m_PresetResolutionBox->GetWidth(), 60);
+					m_PresetResolutionBox->Resize(m_PresetResolutionBox->GetWidth(), 40);
+				}
+			}
+
+			if (guiEvent.GetControl() == m_CustomResolutionMultiplierComboBox) {
+				if (guiEvent.GetMsg() == GUIComboBox::Dropped) {
+					m_CustomResolutionBox->Resize(m_CustomResolutionBox->GetWidth(), 165);
+				} else if (guiEvent.GetMsg() == GUIComboBox::Closed) {
+					m_CustomResolutionBox->Resize(m_CustomResolutionBox->GetWidth(), 40);
 				}
 			}
 
@@ -420,6 +428,7 @@ namespace RTE {
 				} else if (guiEvent.GetControl() == m_CustomResolutionRadioButton) {
 					g_GUISound.ButtonPressSound()->Play();
 					m_PresetResolutionBox->SetVisible(false);
+					CreateCustomResolutionBox();
 					m_CustomResolutionBox->SetVisible(true);
 				}
 			}

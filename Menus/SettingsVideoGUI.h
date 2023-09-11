@@ -131,7 +131,7 @@ namespace RTE {
 		GUICollectionBox *m_CustomResolutionBox;
 		GUITextBox *m_CustomResolutionWidthTextBox;
 		GUITextBox *m_CustomResolutionHeightTextBox;
-		GUIComboBox *m_CustomResolutionMultiplier;
+		GUIComboBox *m_CustomResolutionMultiplierComboBox;
 		GUILabel *m_CustomResolutionMessageLabel;
 		GUIButton *m_CustomResolutionApplyButton;
 		GUICollectionBox *m_ResolutionChangeDialogBox;

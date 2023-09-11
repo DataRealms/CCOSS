@@ -706,11 +706,13 @@ namespace RTE {
 			GL_CHECK(glBindTexture(GL_TEXTURE_2D, g_PostProcessMan.GetPostProcessColorBuffer()));
 			GL_CHECK(glActiveTexture(GL_TEXTURE1));
 			GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture));
+			GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
 			GL_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]));
 		} else {
 			glBindTexture(GL_TEXTURE_2D, 0);
 			GL_CHECK(glActiveTexture(GL_TEXTURE1));
 			GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture));
+			GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
 			GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]));
 		}
 

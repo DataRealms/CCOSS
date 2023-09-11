@@ -308,8 +308,8 @@ namespace RTE {
 		float newResMultiplier(.0f);
 		int exitCode = sscanf(m_CustomResolutionMultiplier->GetText().c_str(), "%f%*s", &newResMultiplier);
 
-		if (exitCode == EOF) {
-			m_CustomResolutionMessageLabel->SetText("Resolution Multiplier is not a number");
+		if (exitCode == EOF || newResMultiplier == 0) {
+			m_CustomResolutionMessageLabel->SetText("Resolution Multiplier is not a valid number!");
 			m_CustomResolutionMessageLabel->SetVisible(true);
 			return;
 		}
@@ -338,6 +338,13 @@ namespace RTE {
 
 		if (m_NewResX * m_NewResMultiplier < c_MinResX || m_NewResY * m_NewResMultiplier < c_MinResY) {
 			m_CustomResolutionMessageLabel->SetText("Resolution width or height lower than the minimum (" + std::to_string(c_MinResX) + "x" + std::to_string(c_MinResY) + ") is not supported.");
+			invalidResolution = true;
+		}
+		if (newResX < c_DangerResX || newResY < c_DangerResY ) {
+			m_CustomResolutionMessageLabel->SetText("Resolution is dangerously low!");
+			invalidResolution = true;
+		} else if (m_NewResX < c_DangerResX || m_NewResY < c_DangerResY) {
+			m_CustomResolutionMessageLabel->SetText("Resolution multiplier is too high for the specified resolution.");
 			invalidResolution = true;
 		}
 		g_GUISound.ButtonPressSound()->Play();

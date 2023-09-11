@@ -144,13 +144,13 @@ namespace RTE {
 		m_BitmapTextures.emplace_back(new GLBitmapInfo);
 		glGenTextures(1, &m_BitmapTextures.back()->m_Texture);
 		bitmap->extra = reinterpret_cast<void *>(m_BitmapTextures.back().get());
+		glPixelStorei(GL_UNPACK_ALIGNMENT, bitmap_color_depth(bitmap) == 8 ? 1 : 4);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, reinterpret_cast<GLBitmapInfo*>(bitmap->extra)->m_Texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap->w, bitmap->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap->line[0]);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glGenerateMipmap(GL_TEXTURE_2D);
-
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -404,6 +404,7 @@ namespace RTE {
 		GL_CHECK(glDisable(GL_BLEND));
 		GL_CHECK(glActiveTexture(GL_TEXTURE0));
 		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_BackBuffer8));
+		GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 1));
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h, 0, GL_RED, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer8()->line[0]);
 		GL_CHECK(glActiveTexture(GL_TEXTURE1));
 		GL_CHECK(glBindTexture(GL_TEXTURE_1D, m_Palette8Texture));

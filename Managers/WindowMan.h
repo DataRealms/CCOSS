@@ -307,6 +307,10 @@ namespace RTE {
 		/// </summary>
 		void UpdatePrimaryDisplayInfo();
 
+		SDL_Rect GetUsableBoundsWithDecorations(int display);
+
+		bool IsResolutionMaximized(int resX, int resY, float resMultiplier);
+
 		/// <summary>
 		/// Checks whether the passed in resolution settings make sense. If not, overrides them to prevent crashes or unexpected behavior.
 		/// </summary>

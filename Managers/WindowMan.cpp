@@ -131,7 +131,7 @@ namespace RTE {
 
 		int windowPosX = (m_ResX * m_ResMultiplier <= m_PrimaryWindowDisplayWidth) ? SDL_WINDOWPOS_CENTERED : (m_MaxResX - (m_ResX * m_ResMultiplier)) / 2;
 		int windowPosY = SDL_WINDOWPOS_CENTERED;
-		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI|SDL_WINDOW_RESIZABLE;
+		int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE;
 
 		if (m_Fullscreen) {
 			windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -150,6 +150,13 @@ namespace RTE {
 			if (!m_PrimaryWindow) {
 				RTEAbort("Failed to create window because:\n" + std::string(SDL_GetError()));
 			}
+		}
+
+		SDL_GL_SwapWindow(m_PrimaryWindow.get());
+		SDL_SetCursor(NULL);
+
+		if (!m_Fullscreen && IsResolutionMaximized(m_ResX, m_ResY, m_ResMultiplier)) {
+			SDL_MaximizeWindow(m_PrimaryWindow.get());
 		}
 		SetViewportLetterboxed();
 	}
@@ -231,6 +238,34 @@ namespace RTE {
 
 		m_PrimaryWindowDisplayWidth = currentDisplayBounds.w;
 		m_PrimaryWindowDisplayHeight = currentDisplayBounds.h;
+	}
+
+	SDL_Rect WindowMan::GetUsableBoundsWithDecorations(int display) {
+		if(m_Fullscreen) {
+			SDL_Rect displayBounds;
+			SDL_GetDisplayBounds(display, &displayBounds);
+			return displayBounds;
+		}
+		SDL_Rect displayBounds;
+		SDL_GetDisplayUsableBounds(display, &displayBounds);
+	
+		int top, left, bottom, right;
+		SDL_GetWindowBordersSize(m_PrimaryWindow.get(), &top, &left, &bottom, &right);
+		displayBounds.x += left;
+		displayBounds.y += top;
+		displayBounds.w -= left + right;
+		displayBounds.h -= top + bottom;
+		return displayBounds;
+	}
+
+	bool WindowMan::IsResolutionMaximized(int resX, int resY, float resMultiplier) {
+		SDL_Rect displayBounds = GetUsableBoundsWithDecorations(m_PrimaryWindowDisplayIndex);
+		if (resMultiplier == 1) {
+			return (resX == displayBounds.w) && (resY == displayBounds.h);
+		} else {
+			return glm::epsilonEqual<float>(resX * resMultiplier, displayBounds.w, resMultiplier) 
+				&& glm::epsilonEqual<float>(resY * resMultiplier, displayBounds.h, resMultiplier);
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -415,7 +450,7 @@ namespace RTE {
 
 	void WindowMan::ChangeResolution(int newResX, int newResY, float newResMultiplier, bool fullscreen, bool displaysAlreadyMapped) {
 
-		if (m_ResX == newResX && m_ResY == newResY && glm::epsilonEqual(m_ResMultiplier, newResMultiplier, glm::epsilon<float>())) {
+		if (m_ResX == newResX && m_ResY == newResY && glm::epsilonEqual(m_ResMultiplier, newResMultiplier, glm::epsilon<float>()) && m_Fullscreen == fullscreen) {
 			return;
 		}
 
@@ -438,8 +473,13 @@ namespace RTE {
 			recoveredToPreviousSettings = true;
 		} else if (!fullscreen && !newResFullyCoversAllDisplays) {
 			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
+			if (IsResolutionMaximized(newResX, newResY, newResMultiplier)) {
+				SDL_MaximizeWindow(m_PrimaryWindow.get());
+			} else {
+				SDL_RestoreWindow(m_PrimaryWindow.get());
+				SDL_GL_SwapWindow(m_PrimaryWindow.get());
+			}
 			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
-			SDL_RestoreWindow(m_PrimaryWindow.get());
 			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_TRUE);
 			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex));
 		}
@@ -448,7 +488,6 @@ namespace RTE {
 			m_ResY = newResY;
 			m_ResMultiplier = newResMultiplier;
 			m_Fullscreen = fullscreen;
-
 			g_SettingsMan.UpdateSettingsFile();
 		}
 

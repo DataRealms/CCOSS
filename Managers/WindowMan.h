@@ -98,6 +98,10 @@ namespace RTE {
 		/// <returns>The vertical resolution the game is currently sized at, in pixels.</returns>
 		int GetResY() const { return m_ResY; }
 
+		int GetWindowResX();
+
+		int GetWindowResY();
+
 		/// <summary>
 		/// Gets how many times the game resolution is currently being multiplied and the backbuffer stretched across for better readability.
 		/// </summary>

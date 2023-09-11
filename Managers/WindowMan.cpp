@@ -218,6 +218,7 @@ namespace RTE {
 		auto setSingleDisplayMode = [this](const std::string &errorMsg = "") {
 			m_MaxResX = m_PrimaryWindowDisplayWidth;
 			m_MaxResY = m_PrimaryWindowDisplayHeight;
+			m_MaxResMultiplier = std::min<float>(m_MaxResX / static_cast<float>(c_DangerResX), m_MaxResY / static_cast<float>(c_DangerResY));
 			m_NumDisplays = 1;
 			m_DisplayArrangementLeftMostOffset = -1;
 			m_DisplayArrangementTopMostOffset = -1;
@@ -303,6 +304,7 @@ namespace RTE {
 		if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
 			m_MaxResX = totalWidth;
 			m_MaxResY = maxHeight;
+			m_MaxResMultiplier = std::min<float>(m_MaxResX / static_cast<float>(c_DangerResX), m_MaxResY / static_cast<float>(c_DangerResY));
 			m_DisplayArrangementLeftMostOffset = leftMostOffset;
 			m_DisplayArrangementTopMostOffset = topMostOffset;
 			m_CanMultiDisplayFullscreen = true;
@@ -315,10 +317,22 @@ namespace RTE {
 
 	void WindowMan::ValidateResolution(int &resX, int &resY, float &resMultiplier) const {
 		if (resX * resMultiplier > m_MaxResX || resY * resMultiplier > m_MaxResY || resMultiplier < 1) {
-			resMultiplier = std::max<float>(resMultiplier, 1.0f);
+			resMultiplier = std::clamp<float>(resMultiplier, 1.0f, m_MaxResMultiplier);
 			resX = std::min<float>(resX, m_MaxResX / resMultiplier);
 			resY = std::min<float>(resY, m_MaxResY / resMultiplier);
 			RTEError::ShowMessageBox("Resolution too high to fit display, overriding to fit!");
+			g_SettingsMan.SetSettingsNeedOverwrite();
+		}
+		else if (resX < c_DangerResX || resY < c_DangerResY) {
+			resX = c_MinResX;
+			resY = c_MinResY;
+			resMultiplier = 1.0f;
+			RTEError::ShowMessageBox("Resolution dangerously low, overriding to avoid crash!");
+			g_SettingsMan.SetSettingsNeedOverwrite();
+		}
+		else if (resMultiplier > m_MaxResMultiplier) {
+			resMultiplier = 1.0f;
+			RTEError::ShowMessageBox("Resolution multiplier too high, overriding to fit!");
 			g_SettingsMan.SetSettingsNeedOverwrite();
 		}
 	}

@@ -269,6 +269,7 @@ namespace RTE {
 		int m_ResX; //!< Game window width.
 		int m_ResY; //!< Game window height.
 		float m_ResMultiplier; //!< The number of times the game window and image should be multiplied and stretched across for better visibility.
+		float m_MaxResMultiplier; //!< The maximum resolution multiplier before the game starts breaking.
 
 		bool m_Fullscreen; //!< Whether the game window is currently in fullscreen.
 

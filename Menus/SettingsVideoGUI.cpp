@@ -14,7 +14,9 @@
 #include "GUITextBox.h"
 
 #include "SDL_video.h"
+#if __cpp_lib_format >= 201907L
 #include <format>
+#endif
 
 namespace RTE {
 

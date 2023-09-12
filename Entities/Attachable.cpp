@@ -240,9 +240,6 @@ namespace RTE {
 
 		if (gibImpulseLimitValueToUse > 0.0F && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
 			Vector gibImpulse = totalImpulseForce;
-			if (gibImpulse.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse * 2)) {
-				gibImpulse.SetMagnitude(gibImpulseLimitValueToUse * 2);
-			}
 			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
 			GibThis(gibImpulse);
 			return false;

@@ -547,7 +547,7 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
 				RemoveAttachable(attachableToDetach, true, true);
 			} else {
 				// TODO: Don't hardcode the blast strength!
-				GibThis(Vector(5.0F, 0).RadRotate(woundToAdd->GetEmitAngle()));
+				GibThis(Vector(-5.0F, 0).RadRotate(woundToAdd->GetEmitAngle()));
 				delete woundToAdd;
 				return;
 			}
@@ -1050,7 +1050,8 @@ void MOSRotating::GibThis(const Vector &impactImpulse, MovableObject *movableObj
     if (impactImpulse.MagnitudeIsGreaterThan(GetGibImpulseLimit())) {
         float impactMagnitude = impactImpulse.GetMagnitude();
         float counterForceMagnitude = GetGibImpulseLimit();
-        Vector counterForce = Vector(impactImpulse.GetX(), impactImpulse.GetY()).SetMagnitude(counterForceMagnitude);
+        float excessForce = std::max(impactMagnitude - counterForceMagnitude, 0.0F);
+        Vector counterForce = Vector(impactImpulse.GetX(), impactImpulse.GetY()).SetMagnitude(counterForceMagnitude + excessForce);
         m_ImpulseForces.emplace_back(-counterForce, Vector());
         MOSprite::ApplyImpulses();
     }
@@ -1260,9 +1261,6 @@ void MOSRotating::ApplyImpulses(float velScalar) {
 			impulseLimit *= 1.0F - (static_cast<float>(m_Wounds.size()) / static_cast<float>(m_GibWoundLimit)) * m_WoundCountAffectsImpulseLimitRatio;
 		}
 		if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) {
-            if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit * 2)) {
-                totalImpulse.SetMagnitude(impulseLimit * 2);
-            }
 			DetachAttachablesFromImpulse(totalImpulse);
 			// Use the remainder of the impulses left over from detaching to gib the parent object.
 			if (totalImpulse.MagnitudeIsGreaterThan(impulseLimit)) { GibThis(totalImpulse); }

@@ -1050,8 +1050,7 @@ void MOSRotating::GibThis(const Vector &impactImpulse, MovableObject *movableObj
     if (impactImpulse.MagnitudeIsGreaterThan(GetGibImpulseLimit())) {
         float impactMagnitude = impactImpulse.GetMagnitude();
         float counterForceMagnitude = GetGibImpulseLimit();
-        float excessForce = std::max(impactMagnitude - counterForceMagnitude, 0.0F);
-        Vector counterForce = Vector(impactImpulse.GetX(), impactImpulse.GetY()).SetMagnitude(counterForceMagnitude + excessForce);
+        Vector counterForce = Vector(impactImpulse.GetX(), impactImpulse.GetY()).SetMagnitude(counterForceMagnitude);
         m_ImpulseForces.emplace_back(-counterForce, Vector());
         MOSprite::ApplyImpulses();
     }

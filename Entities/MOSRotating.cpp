@@ -1241,7 +1241,7 @@ void MOSRotating::ApplyForces() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MOSRotating::ApplyImpulses(float velScalar) {
+void MOSRotating::ApplyImpulses() {
 	for (const auto &[impulseForceVector, impulseForceOffset] : m_ImpulseForces) {
 		if (!impulseForceOffset.IsZero()) { m_AngularVel += impulseForceOffset.GetPerpendicular().Dot(impulseForceVector) / m_pAtomGroup->GetMomentOfInertia(); }
 	}

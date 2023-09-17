@@ -1338,7 +1338,7 @@ enum MOType
 // Arguments:       None.
 // Return value:    None.
 
-    virtual void ApplyImpulses(float velScalar = 1.0F);
+    virtual void ApplyImpulses();
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

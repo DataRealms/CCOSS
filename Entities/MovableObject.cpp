@@ -897,7 +897,7 @@ void MovableObject::ApplyForces()
 //                  out the impulse list.Note that this does NOT apply the accumulated
 //                  regular forces (non-impulse forces)!
 
-void MovableObject::ApplyImpulses(float velScalar)
+void MovableObject::ApplyImpulses()
 {
     // Don't apply forces to pinned objects
     if (m_PinStrength > 0)
@@ -912,7 +912,7 @@ void MovableObject::ApplyImpulses(float velScalar)
     for (auto iItr = m_ImpulseForces.begin(); iItr != m_ImpulseForces.end(); ++iItr) {
         // Impulse force application to the transformational velocity of this MO.
         // Don't timescale these because they're already in kg * m/s (as opposed to kg * m/s^2).
-        m_Vel += (((*iItr).first / (GetMass() != 0 ? GetMass() : 0.0001F))) * velScalar;
+        m_Vel += (((*iItr).first / (GetMass() != 0 ? GetMass() : 0.0001F)));
     }
 
     // Clear out the impulses list

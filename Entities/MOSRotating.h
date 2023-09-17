@@ -408,7 +408,7 @@ ClassInfoGetters;
 	/// <summary>
 	/// Gathers, clears and applies this MOSRotating's accumulated impulse forces, gibbing if appropriate.
 	/// </summary>
-	void ApplyImpulses(float velScalar = 1.0F) override;
+	void ApplyImpulses() override;
 
 	/// <summary>
 	/// Gets the list of Attachables on this MOSRotating.

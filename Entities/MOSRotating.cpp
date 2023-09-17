@@ -1048,6 +1048,7 @@ void MOSRotating::GibThis(const Vector &impactImpulse, MovableObject *movableObj
     }
 
     if (impactImpulse.MagnitudeIsGreaterThan(GetGibImpulseLimit())) {
+        // Add a counterforce equal to GibImpulseLimit to the impulse list in order to simulate the force spent on breaking the object apart
         float impactMagnitude = impactImpulse.GetMagnitude();
         float counterForceMagnitude = GetGibImpulseLimit();
         Vector counterForce = Vector(impactImpulse.GetX(), impactImpulse.GetY()).SetMagnitude(counterForceMagnitude);
@@ -1203,7 +1204,7 @@ void MOSRotating::RemoveAttachablesWhenGibbing(const Vector &impactImpulse, Mova
             float attachableGibBlastStrength = (attachable->GetParentGibBlastStrengthMultiplier() * m_GibBlastStrength) / (1 + attachable->GetMass());
             attachable->SetAngularVel((attachable->GetAngularVel() * 0.5F) + (attachable->GetAngularVel() * 0.5F * attachableGibBlastStrength * RandomNormalNum()));
             Vector gibBlastVel = Vector(attachable->GetParentOffset()).SetMagnitude(attachableGibBlastStrength * 0.5F + (attachableGibBlastStrength * RandomNum()));
-            attachable->SetVel(m_Vel + gibBlastVel);
+            attachable->SetVel(m_Vel + gibBlastVel); // Attachables have already had their velocity updated by ApplyImpulses(), no need to add impactImpulse again
 
             if (movableObjectToIgnore) { attachable->SetWhichMOToNotHit(movableObjectToIgnore); }
         }

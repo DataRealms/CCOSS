@@ -105,7 +105,7 @@ namespace RTE {
 #if __cpp_lib_format >= 201907L
 		m_CustomResolutionMultiplierComboBox->SetText(std::format("{:.3g}x", m_NewResMultiplier));
 #else
-		m_CustomResolutionMultiplier->SetText(std::to_string(m_NewResMultiplier));
+		m_CustomResolutionMultiplierComboBox->SetText(std::to_string(m_NewResMultiplier));
 #endif
 
 		m_CustomResolutionApplyButton = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonApplyCustomResolution"));
@@ -125,7 +125,7 @@ namespace RTE {
 #if __cpp_lib_format >= 201907L
 		m_CustomResolutionMultiplierComboBox->SetText(std::format("{:.3g}x", m_NewResMultiplier));
 #else
-		m_CustomResolutionMultiplier->SetText(std::to_string(m_NewResMultiplier));
+		m_CustomResolutionMultiplierComboBox->SetText(std::to_string(m_NewResMultiplier));
 #endif
 		}
 	}
@@ -225,7 +225,7 @@ namespace RTE {
 #if __cpp_lib_format >= 201907L
 			m_CustomResolutionMultiplierComboBox->AddItem(std::format("{:.3g}x", resMultiplier));
 #else
-			m_CustomResolutionMultiplier->AddItem(std::to_string(resMultiplier));
+			m_CustomResolutionMultiplierComboBox->AddItem(std::to_string(resMultiplier));
 #endif
 		}
 	}
@@ -258,6 +258,7 @@ namespace RTE {
 			m_ResolutionChangeDialogBox->SetVisible(false);
 			m_VideoSettingsBox->SetEnabled(true);
 			g_WindowMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResMultiplier, m_NewFullscreen, displaysWereMapped);
+			m_FullscreenCheckbox->SetCheck(g_WindowMan.IsFullscreen());
 		}
 	}
 

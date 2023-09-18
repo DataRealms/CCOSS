@@ -1049,9 +1049,8 @@ void MOSRotating::GibThis(const Vector &impactImpulse, MovableObject *movableObj
 
     if (impactImpulse.MagnitudeIsGreaterThan(GetGibImpulseLimit())) {
         // Add a counterforce equal to GibImpulseLimit to the impulse list in order to simulate the force spent on breaking the object apart
-        float impactMagnitude = impactImpulse.GetMagnitude();
-        float counterForceMagnitude = GetGibImpulseLimit();
-        Vector counterForce = Vector(impactImpulse.GetX(), impactImpulse.GetY()).SetMagnitude(counterForceMagnitude);
+        Vector counterForce = impactImpulse;
+        counterForce.SetMagnitude(GetGibImpulseLimit());
         m_ImpulseForces.emplace_back(-counterForce, Vector());
         MOSprite::ApplyImpulses();
     }

@@ -298,7 +298,7 @@ namespace RTE {
 		/// Returns the current text input.
 		/// </summary>
 		/// <returns>The current text input.</returns>
-		std::string GetTextInput() {return m_TextInput; }
+		const std::string& GetTextInput() const {return m_TextInput; }
 #pragma endregion
 
 #pragma region Mouse Handling

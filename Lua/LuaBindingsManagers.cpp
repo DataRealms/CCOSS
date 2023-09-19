@@ -433,7 +433,7 @@ namespace RTE {
 		.def("AnyPress", &UInputMan::AnyPress)
 		.def("AnyStartPress", &UInputMan::AnyStartPress)
 		.def("HasTextInput", &UInputMan::HasTextInput)
-		.def("GetTextInput", &UInputMan::GetTextInput)
+		.def("GetTextInput", (const std::string& (UInputMan::*)() const) &UInputMan::GetTextInput)
 
 		.def("MouseButtonPressed", &LuaAdaptersUInputMan::MouseButtonPressed)
 		.def("MouseButtonReleased", &LuaAdaptersUInputMan::MouseButtonReleased)

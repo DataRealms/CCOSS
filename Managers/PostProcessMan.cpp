@@ -522,13 +522,12 @@ namespace RTE {
 			if (postEffect.m_Bitmap) {
 				effectBitmap = postEffect.m_Bitmap;
 				effectStrength = postEffect.m_Strength / 255.f;
-				effectPosX = postEffect.m_Pos.GetFloorIntX();
-				effectPosY = postEffect.m_Pos.GetFloorIntY();
+				effectPosX = postEffect.m_Pos.m_X;
+				effectPosY = postEffect.m_Pos.m_Y;
 				m_PostProcessShader->SetVector4f(m_PostProcessShader->GetColorUniform(), glm::vec4(effectStrength));
 
 				glm::mat4 transformMatrix(1);
 				transformMatrix = glm::translate(transformMatrix, glm::vec3(effectPosX, effectPosY, 0));
-				transformMatrix = glm::translate(transformMatrix, glm::vec3(-0.5f, -0.5f, 0.0f));
 				transformMatrix = glm::scale(transformMatrix, glm::vec3(effectBitmap->w * 0.5f, effectBitmap->h * 0.5f, 1.0));
 				transformMatrix = glm::rotate(transformMatrix, -postEffect.m_Angle, glm::vec3(0, 0, 1));
 

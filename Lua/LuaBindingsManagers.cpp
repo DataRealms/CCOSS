@@ -432,6 +432,8 @@ namespace RTE {
 		.def("AnyInput", &UInputMan::AnyKeyOrJoyInput)
 		.def("AnyPress", &UInputMan::AnyPress)
 		.def("AnyStartPress", &UInputMan::AnyStartPress)
+		.def("HasTextInput", &UInputMan::HasTextInput)
+		.def("GetTextInput", &UInputMan::GetTextInput)
 
 		.def("MouseButtonPressed", &LuaAdaptersUInputMan::MouseButtonPressed)
 		.def("MouseButtonReleased", &LuaAdaptersUInputMan::MouseButtonReleased)

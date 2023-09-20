@@ -44,7 +44,7 @@ namespace RTE {
 		m_ShowForeignItems = true;
 		m_ShowMetaScenes = false;
 
-		m_EnableMultithreadedLua = false;
+		m_EnableMultithreadedLua = true;
 		m_DisableLuaJIT = false;
 		m_RecommendedMOIDCount = 512;
 		m_SimplifiedCollisionDetection = false;

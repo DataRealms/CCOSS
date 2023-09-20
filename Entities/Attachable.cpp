@@ -1,7 +1,9 @@
 #include "Attachable.h"
+
 #include "AtomGroup.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "PerformanceMan.h"
 #include "AEmitter.h"
 #include "Actor.h"
 
@@ -236,19 +238,20 @@ namespace RTE {
 			}
 		}
 
-		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
+		if (gibImpulseLimitValueToUse > 0.0F && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
+			Vector gibImpulse = totalImpulseForce;
 			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
-			GibThis();
+			GibThis(gibImpulse);
 			return false;
-		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {
+		} else if (jointStrengthValueToUse > 0.0F && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(jointStrengthValueToUse);
+			m_ImpulseForces.emplace_back(-totalImpulseForce, Vector());
 			m_Parent->RemoveAttachable(this, true, true);
 			return false;
-		} else {
-			jointImpulses += totalImpulseForce;
 		}
 
 		m_ImpulseForces.clear();
+		jointImpulses += totalImpulseForce;
 		return true;
 	}
 
@@ -347,12 +350,33 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	int Attachable::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
+		if (m_Parent && !m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
+			RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, { }, scriptsToRun);
+		}
+
+		return MOSRotating::UpdateScripts(scriptsToRun);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void Attachable::Update() {
-		if (!m_PreUpdateHasRunThisFrame) { PreUpdate(); }
+		if (!m_PreUpdateHasRunThisFrame) { 
+			PreUpdate(); 
+		}
+
+		UpdatePositionAndJointPositionBasedOnOffsets();
+
 		if (m_Parent) {
-			UpdatePositionAndJointPositionBasedOnOffsets();
-			if (m_ParentOffset != m_PrevParentOffset || m_JointOffset != m_PrevJointOffset) { m_Parent->HandlePotentialRadiusAffectingAttachable(this); }
-			SetVel(m_Parent->GetVel());
+			if (m_ParentOffset != m_PrevParentOffset || m_JointOffset != m_PrevJointOffset) { 
+				m_PrevParentOffset = m_ParentOffset;
+				m_PrevJointOffset = m_JointOffset;
+				m_Parent->HandlePotentialRadiusAffectingAttachable(this); 
+			}
+
+			m_PrevVel = m_Vel;
+			m_Vel = m_Parent->GetVel();
+
 			m_Team = m_Parent->GetTeam();
 
 			MOSRotating *rootParentAsMOSR = dynamic_cast<MOSRotating *>(GetRootParent());
@@ -371,28 +395,25 @@ namespace RTE {
 			}
 			m_DeepCheck = false;
 			m_PrevRotAngleOffset = currentRotAngleOffset;
-		} else {
-			UpdatePositionAndJointPositionBasedOnOffsets();
 		}
 
 		MOSRotating::Update();
 
-		if (m_Parent && m_InheritsFrame) { SetFrame(m_Parent->GetFrame()); }
+		if (m_Parent && m_InheritsFrame) {
+			SetFrame(m_Parent->GetFrame());
+		}
 
 		// If we're attached to something, MovableMan doesn't own us, and therefore isn't calling our UpdateScripts method (and neither is our parent), so we should here.
+		// We run our single-threaded scripts here, so that single-threaded behaviour is unchanged from prior to the multithreaded lua implementation
 		if (m_Parent && GetRootParent()->HasEverBeenAddedToMovableMan()) {
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 			if (!m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
-				RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent });
+				RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, { }, ThreadScriptsToRun::SingleThreaded);
 			}
-			UpdateScripts();
+			UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 		}
 
-		if (m_Parent) {
-			m_PrevPos = m_Pos;
-			m_PrevVel = m_Vel;
-			m_PrevParentOffset = m_ParentOffset;
-			m_PrevJointOffset = m_JointOffset;
-		}
 		m_PreUpdateHasRunThisFrame = false;
 	}
 
@@ -534,6 +555,7 @@ namespace RTE {
 	void Attachable::UpdatePositionAndJointPositionBasedOnOffsets() {
 		if (m_Parent) {
 			m_JointPos = m_Parent->GetPos() + m_Parent->RotateOffset(GetParentOffset());
+			m_PrevPos = m_Pos;
 			m_Pos = m_JointPos - RotateOffset(m_JointOffset);
 		} else {
 			m_JointPos = m_Pos + RotateOffset(m_JointOffset);

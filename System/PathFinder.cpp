@@ -6,6 +6,26 @@
 
 namespace RTE {
 
+	// One pathfinder per thread, lazily initialized. Shouldn't access this directly, use GetPather() instead.
+	struct MicroPatherWrapper {
+		MicroPatherWrapper() {
+			m_Instance = nullptr;
+		}
+
+		~MicroPatherWrapper() {
+			delete m_Instance;
+		}
+
+		MicroPather *m_Instance;
+	};
+
+	thread_local MicroPatherWrapper s_Pather;
+
+	// What material strength the search is capable of digging through.
+	// Needs to be thread-local because of how it's passed around, unfortunately it doesn't seem we can give userdata for a path agent in MicroPather.
+	// TODO: Enhance MicroPather to add that capability (or write our own pather)!
+	thread_local float s_DigStrength = 0.0F;
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	PathNode::PathNode(const Vector &pos) : Pos(pos) {
@@ -21,13 +41,11 @@ namespace RTE {
 	void PathFinder::Clear() {
 		m_NodeGrid.clear();
 		m_NodeDimension = 20;
-		m_DigStrength = 1;
-		m_Pather = nullptr;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int PathFinder::Create(int nodeDimension, unsigned int allocate) {
+	int PathFinder::Create(int nodeDimension) {
 		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when creating PathFinder!");
 
 		m_NodeDimension = nodeDimension;
@@ -85,9 +103,6 @@ namespace RTE {
 			}
 		}
 
-		// Create and allocate the pather class which will do the work.
-		m_Pather = new MicroPather(this, allocate, PathNode::c_MaxAdjacentNodeCount, false);
-
 		RecalculateAllCosts();
 
 		return 0;
@@ -96,15 +111,32 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PathFinder::Destroy() {
-		delete m_Pather;
 		Clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int PathFinder::CalculatePath(Vector start, Vector end, std::list<Vector> &pathResult, float &totalCostResult, float digStrength) {
-		RTEAssert(m_Pather, "No pather exists, can't calculate the path!");
+	MicroPather * PathFinder::GetPather() {
+		// TODO: cache a collection of pathers. For async pathfinding right now we create a new pather for every thread!
+		if (!s_Pather.m_Instance || s_Pather.m_Instance->GetGraph() != this) {
+			// First time this thread has asked for a pather, let's initialize it
+			delete s_Pather.m_Instance; // Might be reinitialized and Graph ptrs mismatch, in that case delete the old one
+			
+			// TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
+			//int sceneArea = m_GridWidth * m_GridHeight;
+			//unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (m_NodeDimension * m_NodeDimension));
+			unsigned int numberOfBlocksToAllocate = 4000;
+			s_Pather.m_Instance = new MicroPather(this, numberOfBlocksToAllocate, PathNode::c_MaxAdjacentNodeCount, false);
+		}
 
+		return s_Pather.m_Instance;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int PathFinder::CalculatePath(Vector start, Vector end, std::list<Vector> &pathResult, float &totalCostResult, float digStrength) {
+		++m_CurrentPathingRequests;
+		
 		// Make sure start and end are within scene bounds.
 		g_SceneMan.ForceBounds(start);
 		g_SceneMan.ForceBounds(end);
@@ -118,19 +150,19 @@ namespace RTE {
 		// Clear out the results if it happens to contain anything
 		pathResult.clear();
 
-		if (m_DigStrength != digStrength) {
-			// Unfortunately, DigStrength-aware pathing means that we're adjusting node transition costs, so we need to reset our path cache on every call.
-			// In future we'll potentially store a different pather for different mobility bands, and reuse pathing costs.
-			// But then again it's probably more fruitful to optimize the graph node to make searches faster, instead.
-			m_Pather->Reset();
-		}
+		// Due to different actors having different dig strengths, node costs aren't consistent, so reset on every path.
+		GetPather()->Reset();
 
-		// Actors capable of digging can use m_DigStrength to modify the node adjacency cost.
-		m_DigStrength = digStrength;
+		// Actors capable of digging can use s_DigStrength to modify the node adjacency cost.
+		s_DigStrength = digStrength;
 
 		// Do the actual pathfinding, fetch out the list of states that comprise the best path.
 		std::vector<void *> statePath;
-		int result = m_Pather->Solve(static_cast<void *>(GetPathNodeAtGridCoords(startNodeX, startNodeY)), static_cast<void *>(GetPathNodeAtGridCoords(endNodeX, endNodeY)), &statePath, &totalCostResult);
+		int result = GetPather()->Solve(static_cast<void *>(GetPathNodeAtGridCoords(startNodeX, startNodeY)), static_cast<void *>(GetPathNodeAtGridCoords(endNodeX, endNodeY)), &statePath, &totalCostResult);
+		if (result == MicroPather::NO_SOLUTION) {
+			// Otherwise micropather inits it to zero :)
+			totalCostResult = std::numeric_limits<float>::max();
+		}
 
 		if (!statePath.empty()) {
 			// Replace the approximate first point from the pathfound path with the exact starting point.
@@ -153,14 +185,44 @@ namespace RTE {
 			pathResult.push_back(start);
 			pathResult.push_back(end);
 		}
+
+		--m_CurrentPathingRequests;
+
 		// TODO: Clean up the path, remove series of nodes in the same direction etc?
 		return result;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PathFinder::RecalculateAllCosts() {
-		RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
+	std::shared_ptr<volatile PathRequest> PathFinder::CalculatePathAsync(Vector start, Vector end, float digStrength, PathCompleteCallback callback) {
+		std::shared_ptr<volatile PathRequest> pathRequest = std::make_shared<PathRequest>();
+
+		std::thread pathThread([this, start, end, digStrength, callback](std::shared_ptr<volatile PathRequest> volRequest) {
+			// Cast away the volatile-ness - only matters outside (and complicates the API otherwise)
+			PathRequest &request = const_cast<PathRequest &>(*volRequest);
+
+			int status = this->CalculatePath(start, end, request.path, request.totalCost, digStrength);
+			
+			request.status = status;
+			request.pathLength = request.path.size();
+			request.complete = true;
+
+			if (callback) {
+				callback(volRequest);
+			}
+		}, pathRequest);
+
+		pathThread.detach();
+		return pathRequest;
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void PathFinder::RecalculateAllCosts() {
+        RTEAssert(g_SceneMan.GetScene(), "Scene doesn't exist or isn't loaded when recalculating PathFinder!");
+
+		// Deadlock until all path requests are complete
+		while (m_CurrentPathingRequests.load() != 0) { };
 
 		// I hate this copy, but fuck it.
 		std::vector<int> pathNodesIdsVec;
@@ -170,8 +232,7 @@ namespace RTE {
 		}
 
 		UpdateNodeList(pathNodesIdsVec);
-		m_Pather->Reset();
-	}
+    }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -273,7 +334,7 @@ namespace RTE {
 	float PathFinder::GetMaterialTransitionCost(const Material &material) const {
 		float strength = material.GetIntegrity();
 		// Always treat doors as diggable.
-		if (strength > m_DigStrength && material.GetIndex() != MaterialColorKeys::g_MaterialDoor) {
+		if (strength > s_DigStrength && material.GetIndex() != MaterialColorKeys::g_MaterialDoor) {
 			strength *= 1000.0F;
 		}
 		return strength;
@@ -408,8 +469,6 @@ namespace RTE {
 					if (node->RightDown) { node->RightDown->LeftUpMaterial = node->RightDownMaterial; }
 				}
 			);
-
-			m_Pather->Reset();
 		}
 
 		return anyChange;

@@ -7,7 +7,7 @@ if host_machine.system() in ['linux','darwin']
   deps = [
     dependency(['sdl2']),
     dependency('flac'),
-    dependency('minizip', version:'<1.3', not_found_message:'The correct version (1.2.x) of minizip might be packaged as minizip-compat.'),
+    dependency('minizip'),
     dependency('luajit'),
     dependency('threads'),
     dependency('liblz4'),
@@ -15,6 +15,9 @@ if host_machine.system() in ['linux','darwin']
     dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2', 'lua51', 'lua5.1', 'lua-5.1']),
     dependency('tbb'),
   ]
+  if host_machine.system() == 'linux'
+    deps += dependency('SDL2_image')
+  endif
 elif host_machine.system() == 'windows'
   sdl2 = subproject('SDL2-2.26.3')
   sdl2_dep = dependency('sdl2')
@@ -142,6 +145,20 @@ else
   conf_data.set('EXEPATH', prefix/get_option('bindir'))
 endif
 
+if get_option('tracy_enable')
+  add_global_arguments('-DTRACY_ENABLE', language:'cpp')
+endif
+if get_option('tracy_callstack')
+  add_global_arguments('-DTRACY_CALLSTACK=10', language:'cpp')
+endif
+if get_option('tracy_on_demand')
+  add_global_arguments('-DTRACY_ON_DEMAND', language:'cpp')
+endif
+if get_option('tracy_debuginfod')
+  deps += [dependency('libdebuginfod')]
+  add_global_arguments('-DTRACY_DEBUGINFOD', language:'cpp')
+endif
+
 #### Platform Common External Libraries ####
 external_objects = []
 external_libs = []
@@ -157,7 +174,9 @@ luabind_proj = subproject('luabind-0.7.1')
 luabind_dep = dependency('luabind')
 raknet_proj = subproject('RakNet')
 raknet_dep = dependency('RakNet')
-deps += [allegro_dep, loadpng_dep, raknet_dep, boost_dep]
+tracy_proj = subproject('tracy')
+tracy_dep = dependency('tracy')
+deps += [allegro_dep, loadpng_dep, raknet_dep, boost_dep, tracy_dep]
 
 #### Sources Setup ####
 pch = meson.current_source_dir()/'System/StandardIncludes.h'

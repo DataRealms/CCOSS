@@ -10,7 +10,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void MOSParticle::Clear() {
-		m_Atom = 0;
+		m_Atom = nullptr;
 		m_SpriteAnimMode = OVERLIFETIME;
 	}
 
@@ -85,6 +85,7 @@ namespace RTE {
 	void MOSParticle::SetAtom(Atom *newAtom) {
 		delete m_Atom;
 		m_Atom = newAtom;
+		m_Atom->SetOwner(this);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +123,9 @@ namespace RTE {
 		}
 		// Do static particle bounce calculations.
 		int hitCount = 0;
-		if (!IsTooFast()) { m_Atom->Travel(g_TimerMan.GetDeltaTimeSecs(), true, g_SceneMan.SceneIsLocked()); }
+		if (!IsTooFast()) { 
+			m_Atom->Travel(g_TimerMan.GetDeltaTimeSecs(), true, g_SceneMan.SceneIsLocked()); 
+		}
 
 		m_Atom->ClearMOIDIgnoreList();
 

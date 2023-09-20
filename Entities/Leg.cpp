@@ -166,11 +166,11 @@ namespace RTE {
 		}
 		int groupCenterOffsetY = (atomTopMostOffset + atomBottomMostOffset) / 2;
 
-		std::list<Atom *> filteredAtomList;
+		std::vector<Atom *> filteredAtomList;
 
 		// We want the FootGroup to end up with an "L" shape, so filter all the top and right Atoms while taking into account the heel might be slant and the sole might not be flat. The extra Atoms are not necessary and might (further) screw up some walking physics.
 		// Start from the bottom so we can filter any Atom that might be above the bottom-most one on the same X offset.
-		for (std::list<Atom *>::const_reverse_iterator atomItr = footGroup->GetAtomList().crbegin(); atomItr != footGroup->GetAtomList().crend(); ++atomItr) {
+		for (auto atomItr = footGroup->GetAtomList().crbegin(); atomItr != footGroup->GetAtomList().crend(); ++atomItr) {
 			int atomOffsetX = (*atomItr)->GetOriginalOffset().GetFloorIntX();
 			int atomOffsetY = (*atomItr)->GetOriginalOffset().GetFloorIntY();
 

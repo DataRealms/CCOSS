@@ -288,6 +288,17 @@ namespace RTE {
 		/// <param name="text">The std::string to fill.</param>
 		/// <returns>Whether there is text input.</returns>
 		bool GetTextInput(std::string &text) const { text = m_TextInput; return !m_TextInput.empty(); }
+
+		/// <summary>
+		/// Returns whether text input events are available.
+		/// </summary>
+		bool HasTextInput() const { return !m_TextInput.empty(); }
+
+		/// <summary>
+		/// Returns the current text input.
+		/// </summary>
+		/// <returns>The current text input.</returns>
+		const std::string& GetTextInput() const {return m_TextInput; }
 #pragma endregion
 
 #pragma region Mouse Handling

@@ -12,12 +12,14 @@
 // Inclusions of header files
 
 #include "AHuman.h"
+
 #include "AtomGroup.h"
 #include "ThrownDevice.h"
 #include "Arm.h"
 #include "Leg.h"
 #include "Controller.h"
 #include "MOPixel.h"
+#include "FrameMan.h"
 #include "AEmitter.h"
 #include "HDFirearm.h"
 #include "SLTerrain.h"
@@ -69,6 +71,7 @@ void AHuman::Clear()
     m_Aiming = false;
     m_ArmClimbing[FGROUND] = false;
     m_ArmClimbing[BGROUND] = false;
+	m_StrideFrame = false;
     m_StrideStart = false;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
@@ -1005,7 +1008,8 @@ bool AHuman::EquipNamedDevice(const std::string &moduleName, const std::string &
 		return false;
 	}
 
-	if (const HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); heldDevice && (moduleName.empty() || heldDevice->GetModuleName() == moduleName) && heldDevice->GetPresetName() == presetName) {
+	if (const HeldDevice *heldDevice = m_pFGArm->GetHeldDevice(); 
+        heldDevice && (moduleName.empty() || heldDevice->GetModuleName() == moduleName) && heldDevice->GetPresetName() == presetName) {
         return true;
     }
 
@@ -1672,17 +1676,11 @@ void AHuman::ResetAllTimers()
         m_pFGArm->GetHeldDevice()->ResetAllTimers();
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
-// Method:          UpdateMovePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the path to move along to the currently set movetarget.
 
-bool AHuman::UpdateMovePath()
+void AHuman::OnNewMovePath()
 {
-    // Do the real path calc; abort and pass along the message if it didn't happen due to throttling
-    if (!Actor::UpdateMovePath())
-        return false;
+    Actor::OnNewMovePath();
 
     // Process the new path we now have, if any
     if (!m_MovePath.empty())
@@ -1716,8 +1714,6 @@ bool AHuman::UpdateMovePath()
             previousPoint = (*lItr);
         }
     }
-
-    return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1754,1278 +1750,11 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateAI
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' AI state. Supposed to be done every frame that this has
-//                  a CAI controller controlling it.
 
-void AHuman::UpdateAI()
+void AHuman::PreControllerUpdate()
 {
-    Actor::UpdateAI();
+    Actor::PreControllerUpdate();
 
-    Vector cpuPos = GetCPUPos();
-    MovableObject *pSeenMO = 0;
-    Actor *pSeenActor = 0;
-
-    ///////////////////////////////////////////////
-    // React to relevant AlarmEvents
-
-	const std::list<AlarmEvent> &events = g_MovableMan.GetAlarmEvents();
-	if (!events.empty()) {
-		Vector alarmVec;
-		Vector sensorPos = GetEyePos();
-		for (const AlarmEvent &alarmEvent : events) {
-			// Caused by some other team's activites - alarming!
-			if (alarmEvent.m_Team != m_Team) {
-				// See how far away the alarm situation is
-				alarmVec = g_SceneMan.ShortestDistance(sensorPos, alarmEvent.m_ScenePos);
-				// Only react if the alarm is within range and this is perceptive enough to hear it
-				if (alarmVec.GetLargest() <= alarmEvent.m_Range * m_Perceptiveness) {
-					Vector zero;
-					// Now check if we have line of sight to the alarm point
-					// Don't check all the way to the target, we are checking for no obstacles, and target will be an obstacle in itself
-					if (g_SceneMan.CastObstacleRay(sensorPos, alarmVec * 0.9F, zero, zero, m_RootMOID, IgnoresWhichTeam(), g_MaterialGrass, 5) < 0 && g_SceneMan.ShortestDistance(m_LastAlarmPos, alarmEvent.m_ScenePos).GetLargest() > 10) {
-						// If this is the same alarm location as last, then don't repeat the signal
-							// Yes! WE ARE ALARMED!
-						AlarmPoint(alarmEvent.m_ScenePos);
-						break;
-					}
-				}
-			}
-		}
-	}
-
-    ////////////////////////////////////////////////
-    // AI MODES
-
-	// Squad logic
-	if (m_AIMode == AIMODE_SQUAD) {
-		m_AIMode = AIMODE_GOTO;
-	}
-
-    // If alarmed, override all modes, look at the alarming point
-    if (!m_AlarmTimer.IsPastSimTimeLimit())
-    {
-        // Freeze!
-        m_LateralMoveState = LAT_STILL;
-
-        // If we're unarmed, hit the deck!
-        if (!EquipFirearm() && !EquipThrowable() && !EquipDiggingTool())
-        {
-            m_Controller.SetState(BODY_CROUCH, true);
-            // Also hit the deck completely and crawl away, not jsut sit down in place
-            m_Controller.SetState(m_HFlipped ? MOVE_LEFT : MOVE_RIGHT, true);
-        }
-
-        // We're not stuck, just waiting and watching
-        m_StuckTimer.Reset();
-        // If we're not already engaging a target, jsut point in the direciton we heard the alarm come from
-        if (m_DeviceState != AIMING && m_DeviceState != FIRING && m_DeviceState != THROWING)
-        {
-            // Look/point in the direction of alarm, the point should already ahve been set
-            m_DeviceState = POINTING;
-        }
-    }
-    // Patrolling
-    else if (m_AIMode == AIMODE_PATROL)
-    {
-        m_SweepCenterAimAngle = 0;
-        m_SweepRange = c_EighthPI;
-
-        if (m_LateralMoveState == LAT_STILL)
-        {
-            // Avoid seeming stuck if we're waiting to turn
-            m_StuckTimer.Reset();
-
-            if (m_PatrolTimer.IsPastSimMS(2000))
-            {
-                m_PatrolTimer.Reset();
-                m_LateralMoveState = m_HFlipped ? LAT_RIGHT : LAT_LEFT;
-            }
-        }
-        else
-        {
-			Vector hitPos;
-			Vector trace((m_LateralMoveState == LAT_RIGHT ? GetRadius() : -GetRadius()) * 0.5F, 0);
-			// Stop and turn around after a period of time, or if bumped into another actor (like a rocket), or if walking off a ledge.
-			if (m_PatrolTimer.IsPastSimMS(8000) || g_SceneMan.CastMORay(m_Pos, trace, m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 5) != g_NoMOID || !g_SceneMan.CastStrengthRay(m_Pos + trace, Vector(0, GetRadius()), 5.0F, hitPos, 5, g_MaterialGrass)) {
-				m_PatrolTimer.Reset();
-				m_LateralMoveState = LAT_STILL;
-			}
-        }
-    }
-    // Going to a goal, potentially through a set of waypoints
-    else if (m_AIMode == AIMODE_GOTO)
-    {
-        // Calculate the path to the target brain if need for refresh (note updating each pathfindingupdated causes small chug, maybe space em out with a timer?)
-        // Also if we're way off form the path, or haven't made progress toward the current waypoint in a while, update the path to see if we can improve
-        // Also if we seem to have completed the path to the current waypoint, we should update to get the path to the next waypoint
-        if (m_UpdateMovePath || (m_ProgressTimer.IsPastSimMS(10000) && m_DeviceState != DIGGING) || (m_MovePath.empty() && m_MoveVector.GetLargest() < m_CharHeight * 0.5F))// || (m_MoveVector.GetLargest() > m_CharHeight * 2))// || g_SceneMan.GetScene()->PathFindingUpdated())
-        {
-            // Also never update while jumping
-            if (m_ObstacleState != JUMPING)
-                UpdateMovePath();
-        }
-
-        // If we used to be pointing at something (probably alarmed), just scan ahead instead
-        if (m_DeviceState == POINTING)
-            m_DeviceState = SCANNING;
-
-        // Digging has its own advancement modes
-        if (m_DeviceState != DIGGING)
-        {
-			Vector notUsed;
-            Vector pathPointVec;
-            // See if we are close enough to the next move target that we should grab the next in the path that is out of proximity range
-            for (std::list<Vector>::iterator lItr = m_MovePath.begin(); lItr != m_MovePath.end();)
-            {
-                pathPointVec = g_SceneMan.ShortestDistance(m_Pos, *lItr);
-                // Make sure we are within range AND have a clear sight to the waypoint we're about to eliminate, or it might be around a corner
-                if (pathPointVec.GetLargest() <= m_MoveProximityLimit && !g_SceneMan.CastStrengthRay(m_Pos, pathPointVec, 5, notUsed, 0, g_MaterialDoor))
-                {
-                    lItr++;
-                    // Save the last one before being popped off so we can use it to check if we need to dig (if there's any material between last and current)
-                    m_PrevPathTarget = m_MovePath.front();
-                    m_MovePath.pop_front();
-                }
-                else
-                    break;
-            }
-
-            // If still stuff in the path, get the next point on it
-            if (!m_MovePath.empty())
-                m_MoveTarget = m_MovePath.front();
-        }
-
-        // Determine the direction to walk to get to the next move target, or if to simply stay still
-        m_MoveVector = g_SceneMan.ShortestDistance(m_Pos, m_MoveTarget);
-        if ((m_MoveVector.m_X > 0 && m_LateralMoveState == LAT_LEFT) || (m_MoveVector.m_X < 0 && m_LateralMoveState == LAT_RIGHT) || (m_LateralMoveState == LAT_STILL && m_DeviceState != AIMING && m_DeviceState != FIRING))
-        {
-			// Stay still and switch to sentry mode if we're close enough to the final destination.
-			if (m_Waypoints.empty() && m_MovePath.empty() && std::abs(m_MoveVector.m_X) < 10.0F) {
-				m_LateralMoveState = LAT_STILL;
-				m_DeviceState = SCANNING;
-				if (!m_pMOMoveTarget) { m_AIMode = AIMODE_SENTRY; }
-			}
-            // Turns only after a delay to avoid getting stuck on switchback corners in corridors
-            else if (m_MoveOvershootTimer.IsPastSimMS(500) || m_LateralMoveState == LAT_STILL)
-                m_LateralMoveState = m_LateralMoveState == LAT_RIGHT ? LAT_LEFT : LAT_RIGHT;
-        }
-        else
-            m_MoveOvershootTimer.Reset();
-
-        // Calculate and set the sweep center for the bots to be pointing to the target location
-        if (m_DeviceState == SCANNING)
-        {
-            Vector targetVector(fabs(m_MoveVector.m_X), m_MoveVector.m_Y);
-            m_SweepCenterAimAngle = targetVector.GetAbsRadAngle();
-            m_SweepRange = c_SixteenthPI;
-        }
-    }
-    // Brain hunting
-    else if (m_AIMode == AIMODE_BRAINHUNT)
-    {
-        // Just set up the closest brain as a target and switch to GOTO mode
-        const Actor *pTargetBrain = g_MovableMan.GetClosestBrainActor(m_Team == 0 ? 1 : 0, m_Pos);
-        if (pTargetBrain)
-        {
-            m_UpdateMovePath = true;
-            AddAIMOWaypoint(pTargetBrain);
-        }
-        // Couldn't find any, so stay put
-        else
-            m_MoveTarget = m_Pos;
-
-        // If we used to be pointing at something (probably alarmed), just scan ahead instead
-        if (m_DeviceState == POINTING)
-            m_DeviceState = SCANNING;
-
-        m_AIMode = AIMODE_GOTO;
-    }
-    // Gold digging
-    else if (m_AIMode == AIMODE_GOLDDIG)
-    {
-        m_SweepRange = c_EighthPI;
-
-        // Only dig if we have a tool for it
-        if (EquipDiggingTool())
-        {
-            Vector newGoldPos;
-            // Scan for gold, slightly more than the facing direction arc
-            if (LookForGold(100, m_SightDistance / 2, newGoldPos))
-            {
-                // Start digging when gold is spotted and tool is ready
-                m_DeviceState = DIGGING;
-
-                // Only replace the target if the one we found is closer, or the old one isn't gold anymore
-                Vector newGoldDir = newGoldPos - m_Pos;
-                Vector oldGoldDir = m_DigTarget - m_Pos;
-                if (newGoldDir.GetSqrMagnitude() < oldGoldDir.GetSqrMagnitude() || g_SceneMan.GetTerrain()->GetMaterialPixel(m_DigTarget.m_X, m_DigTarget.m_Y) != g_MaterialGold)
-                {
-                    m_DigTarget = newGoldPos;
-                    m_StuckTimer.Reset();
-                }
-
-                // Turn around if the target is behind us
-                m_HFlipped = m_DigTarget.m_X < m_Pos.m_X;
-            }
-            // If we can't see any gold, and our current target is out of date, then stop pressing the trigger
-            else if (g_SceneMan.GetTerrain()->GetMaterialPixel(m_DigTarget.m_X, m_DigTarget.m_Y) != g_MaterialGold)
-                m_DeviceState = STILL;
-
-            // Figure out which direction to be digging in.
-            Vector goldDir = m_DigTarget - m_Pos;
-            m_SweepCenterAimAngle = goldDir.GetAbsRadAngle();
-
-            // Move if there is space or a cavity to move into
-            Vector moveRay(m_CharHeight / 2, 0);
-            moveRay.AbsRotateTo(goldDir);
-// TODO; Consider backstepping implications here, want to override it every time?
-            if (g_SceneMan.CastNotMaterialRay(m_Pos, moveRay, g_MaterialAir, 3, false) < 0)
-            {
-                m_ObstacleState = PROCEEDING;
-                m_LateralMoveState = m_HFlipped ? LAT_LEFT : LAT_RIGHT;
-            }
-            else
-            {
-                m_ObstacleState = DIGPAUSING;
-                m_LateralMoveState = LAT_STILL;
-            }
-        }
-        // Otherwise just stand sentry with a gun
-        else
-        {
-            EquipFirearm();
-            m_LateralMoveState = LAT_STILL;
-            m_SweepCenterAimAngle = 0;
-            m_SweepRange = c_EighthPI;
-        }
-    }
-    // Sentry
-    else
-    {
-        m_LateralMoveState = LAT_STILL;
-        m_SweepCenterAimAngle = 0;
-        m_SweepRange = c_EighthPI;
-    }
-
-    ///////////////////////////////
-    // DEVICE LOGIC
-
-    // If there's a digger on the ground and we don't have one, pick it up
-    if (m_pItemInReach && m_pItemInReach->IsTool() && !EquipDiggingTool(false))
-        m_Controller.SetState(WEAPON_PICKUP, true);
-
-    // Still, pointing at the movetarget
-    if (m_DeviceState == STILL)
-    {
-        m_SweepCenterAimAngle = FacingAngle(g_SceneMan.ShortestDistance(cpuPos, m_MoveTarget).GetAbsRadAngle());
-        // Aim to point there
-        float aimAngle = GetAimAngle(false);
-        if (aimAngle < m_SweepCenterAimAngle && aimAngle < c_HalfPI)
-        {
-            m_Controller.SetState(AIM_UP, true);
-        }
-        else if (aimAngle > m_SweepCenterAimAngle && aimAngle > -c_HalfPI)
-        {
-            m_Controller.SetState(AIM_DOWN, true);
-        }
-    }
-    // Pointing at a specifc target
-    else if (m_DeviceState == POINTING)
-    {
-        Vector targetVector = g_SceneMan.ShortestDistance(GetEyePos(), m_PointingTarget, false);
-        m_Controller.m_AnalogAim = targetVector;
-        m_Controller.m_AnalogAim.CapMagnitude(1.0);
-/* Old digital way, now jsut use analog aim instead
-        // Do the actual aiming; first figure out which direction to aim in
-        float aimAngleDiff = targetVector.GetAbsRadAngle() - GetLookVector().GetAbsRadAngle();
-        // Flip if we're flipped
-        aimAngleDiff = IsHFlipped() ? -aimAngleDiff : aimAngleDiff;
-        // Now send the command to move aim in the appropriate direction
-        m_ControlStates[aimAngleDiff > 0 ? AIM_UP : AIM_DOWN] = true;
-*/
-/*
-        m_SweepCenterAimAngle = FacingAngle(g_SceneMan.ShortestDistance(cpuPos, m_PointingTarget).GetAbsRadAngle());
-        // Aim to point there
-        float aimAngle = GetAimAngle(false);
-        if (aimAngle < m_SweepCenterAimAngle && aimAngle < c_HalfPI)
-        {
-            m_Controller.SetState(AIM_UP, true);
-        }
-        else if (aimAngle > m_SweepCenterAimAngle && aimAngle > -c_HalfPI)
-        {
-            m_Controller.SetState(AIM_DOWN, true);
-        }
-*/
-        // Narrow FOV range scan, 10 degrees each direction
-        pSeenMO = LookForMOs(10, g_MaterialGrass, false);
-        // Saw something!
-        if (pSeenMO)
-        {
-            pSeenActor = dynamic_cast<Actor *>(pSeenMO->GetRootParent());
-            // ENEMY SIGHTED! Switch to a weapon with ammo if we haven't already
-            if (pSeenActor && pSeenActor->GetTeam() != m_Team && (EquipFirearm() || EquipThrowable() || EquipDiggingTool()))
-            {
-                // Start aiming or throwing toward that target, depending on what we have in hands
-                if (FirearmIsReady())
-                {
-                    m_SeenTargetPos = g_SceneMan.GetLastRayHitPos();//pSeenActor->GetCPUPos();
-                    if (IsWithinRange(m_SeenTargetPos))
-                    {
-                        m_DeviceState = AIMING;
-                        m_FireTimer.Reset();
-                    }
-                }
-                else if (ThrowableIsReady())
-                {
-                    m_SeenTargetPos = g_SceneMan.GetLastRayHitPos();//pSeenActor->GetCPUPos();
-                    // Only throw if within range
-                    if (IsWithinRange(m_SeenTargetPos))
-                    {
-                        m_DeviceState = THROWING;
-                        m_FireTimer.Reset();
-                    }
-                }
-            }
-        }
-    }
-    // Digging
-    else if (m_DeviceState == DIGGING)
-    {
-        // Switch to the digger if we have one
-        if (EquipDiggingTool())
-        {
-            // Reload if it's empty
-            if (FirearmIsEmpty())
-                m_Controller.SetState(WEAPON_RELOAD, true);
-            // Everything's ready - dig away!
-            else
-            {
-                // Pull the trigger on the digger, if we're not backstepping or a teammate is in the way!
-                m_Controller.SetState(WEAPON_FIRE, m_ObstacleState != BACKSTEPPING && m_TeamBlockState != BLOCKED);
-
-                // Finishing off a tunnel, so aim squarely for the end tunnel positon
-                if (m_DigState == FINISHINGDIG)
-                    m_SweepCenterAimAngle = FacingAngle(g_SceneMan.ShortestDistance(cpuPos, m_DigTunnelEndPos).GetAbsRadAngle());
-                // Tunneling: update the digging direction, aiming exactly between the prev target and the current one
-                else
-                {
-                    Vector digTarget = m_PrevPathTarget + (g_SceneMan.ShortestDistance(m_PrevPathTarget, m_MoveTarget) * 0.5);
-                    // Flip us around if we're facing away from the dig target, also don't dig
-                    if (digTarget.m_X > m_Pos.m_X && m_HFlipped)
-                    {
-                        m_LateralMoveState = LAT_RIGHT;
-                        m_Controller.SetState(WEAPON_FIRE, false);
-                    }
-                    else if (digTarget.m_X < m_Pos.m_X && !m_HFlipped)
-                    {
-                        m_LateralMoveState = LAT_LEFT;
-                        m_Controller.SetState(WEAPON_FIRE, false);
-                    }
-                    m_SweepCenterAimAngle = FacingAngle(g_SceneMan.ShortestDistance(cpuPos, digTarget).GetAbsRadAngle());
-                }
-
-                // Sweep digging up and down
-                if (m_SweepState == SWEEPINGUP && m_TeamBlockState != BLOCKED)
-                {
-                    float aimAngle = GetAimAngle(false);
-                    if (aimAngle < m_SweepCenterAimAngle + m_SweepRange && aimAngle < c_HalfPI)
-                    {
-                        m_Controller.SetState(AIM_UP, true);
-                    }
-                    else
-                    {
-                        m_SweepState = SWEEPUPPAUSE;
-                        m_SweepTimer.Reset();
-                    }
-                }
-                else if (m_SweepState == SWEEPUPPAUSE && m_SweepTimer.IsPastSimMS(10))
-                {
-                    m_SweepState = SWEEPINGDOWN;
-                }
-                else if (m_SweepState == SWEEPINGDOWN && m_TeamBlockState != BLOCKED)
-                {
-                    float aimAngle = GetAimAngle(false);
-                    if (aimAngle > m_SweepCenterAimAngle - m_SweepRange && aimAngle > -c_HalfPI)
-                    {
-                        m_Controller.SetState(AIM_DOWN, true);
-                    }
-                    else
-                    {
-                        m_SweepState = SWEEPDOWNPAUSE;
-                        m_SweepTimer.Reset();
-                    }
-                }
-                else if (m_SweepState == SWEEPDOWNPAUSE && m_SweepTimer.IsPastSimMS(10))
-                {
-                    m_SweepState = SWEEPINGUP;
-                }
-
-                // See if we have dug out all that we can in the sweep area without moving closer
-// TODO: base the range on the digger's actual range, quereied from teh digger itself
-                Vector centerRay(m_CharHeight * 0.45, 0);
-                centerRay.RadRotate(GetAimAngle(true));
-                if (g_SceneMan.CastNotMaterialRay(cpuPos, centerRay, g_MaterialAir, 3) < 0)
-                {
-                    // Now check the tunnel's thickness
-                    Vector upRay(m_CharHeight * 0.4, 0);
-                    upRay.RadRotate(GetAimAngle(true) + m_SweepRange * 0.5);
-                    Vector downRay(m_CharHeight * 0.4, 0);
-                    downRay.RadRotate(GetAimAngle(true) - m_SweepRange * 0.5);
-                    if (g_SceneMan.CastNotMaterialRay(cpuPos, upRay, g_MaterialAir, 3) < 0 &&
-                        g_SceneMan.CastNotMaterialRay(cpuPos, downRay, g_MaterialAir, 3) < 0)
-                    {
-                        // Ok the tunnel section is clear, so start walking forward while still digging
-                        m_ObstacleState = PROCEEDING;
-                    }
-                    // Tunnel cavity not clear yet, so stay put and dig some more
-                    else if (m_ObstacleState != BACKSTEPPING)
-                        m_ObstacleState = DIGPAUSING;
-                }
-                // Tunnel cavity not clear yet, so stay put and dig some more
-                else if (m_ObstacleState != BACKSTEPPING)
-                    m_ObstacleState = DIGPAUSING;
-
-                // When we get close enough to the next point and clear it, advance it and stop again to dig some more
-                if (m_DigState != FINISHINGDIG && (fabs(m_PrevPathTarget.m_X - m_Pos.m_X) < (m_CharHeight * 0.33)))
-                {
-					Vector notUsed;
-
-                    // If we have cleared the buried path segment, advance to the next
-                    if (!g_SceneMan.CastStrengthRay(m_PrevPathTarget, g_SceneMan.ShortestDistance(m_PrevPathTarget, m_MoveTarget), 5, notUsed, 1, g_MaterialDoor))
-                    {
-                        // Advance to the next one, if there are any
-                        if (m_MovePath.size() >= 2)
-                        {
-                            m_PrevPathTarget = m_MovePath.front();
-                            m_MovePath.pop_front();
-                            m_MoveTarget = m_MovePath.front();
-                        }
-
-                        // WE HAVE BROKEN THROUGH WITH THIS TUNNEL (but not yet cleared it enough for passing through)!
-                        // If the path segment is now in the air again, and the tunnel cavity is clear, then go into finishing digging mode
-                        if (!g_SceneMan.CastStrengthRay(m_PrevPathTarget, g_SceneMan.ShortestDistance(m_PrevPathTarget, m_MoveTarget), 5, notUsed, 1, g_MaterialDoor))
-                        {
-                            m_DigTunnelEndPos = m_MoveTarget;
-                            m_DigState = FINISHINGDIG;
-                        }
-                    }
-                }
-
-                // If we have broken through to the end of the tunnel, but not yet cleared it completely, then keep digging until the end tunnel position is hit
-                if (m_DigState == FINISHINGDIG && g_SceneMan.ShortestDistance(m_Pos, m_DigTunnelEndPos).m_X < (m_CharHeight * 0.33))
-                {
-                    // DONE DIGGING THIS FUCKING TUNNEL, PROCEED
-                    m_ObstacleState = PROCEEDING;
-                    m_DeviceState = SCANNING;
-                    m_DigState = NOTDIGGING;
-                }
-            }
-        }
-        // If we need to and can, pick up any weapon on the ground
-        else if (m_pItemInReach)
-        {
-            m_Controller.SetState(WEAPON_PICKUP, true);
-            // Can't be digging without a tool, fool
-            m_DeviceState = SCANNING;
-            m_DigState = NOTDIGGING;
-        }
-    }
-    // Look for, aim at, and fire upon enemy Actors
-    else if (m_DeviceState == SCANNING)
-    {
-        if (m_SweepState == NOSWEEP)
-            m_SweepState = SWEEPINGUP;
-
-        // Try to switch to, and if necessary, reload a firearm when we are scanning
-        if (EquipFirearm())
-        {
-            // Reload if necessary
-            if (FirearmNeedsReload())
-                m_Controller.SetState(WEAPON_RELOAD, true);
-        }
-        // Use digger instead if we have one!
-        else if (EquipDiggingTool())
-        {
-            if (FirearmIsEmpty())
-                m_Controller.SetState(WEAPON_RELOAD, true);
-        }
-        // If we need to and can, pick up any weapon on the ground
-        else if (m_pItemInReach)
-            m_Controller.SetState(WEAPON_PICKUP, true);
-
-        // Scan aiming up and down
-        if (m_SweepState == SWEEPINGUP)
-        {
-            float aimAngle = GetAimAngle(false);
-            if (aimAngle < m_SweepCenterAimAngle + m_SweepRange && aimAngle < c_HalfPI)
-            {
-                m_Controller.SetState(AIM_UP, true);
-            }
-            else
-            {
-                m_SweepState = SWEEPUPPAUSE;
-                m_SweepTimer.Reset();
-            }
-        }
-        else if (m_SweepState == SWEEPUPPAUSE && m_SweepTimer.IsPastSimMS(1000))
-        {
-            m_SweepState = SWEEPINGDOWN;
-        }
-        else if (m_SweepState == SWEEPINGDOWN)
-        {
-            float aimAngle = GetAimAngle(false);
-            if (aimAngle > m_SweepCenterAimAngle - m_SweepRange && aimAngle > -c_HalfPI)
-            {
-                m_Controller.SetState(AIM_DOWN, true);
-            }
-            else
-            {
-                m_SweepState = SWEEPDOWNPAUSE;
-                m_SweepTimer.Reset();
-            }
-        }
-        else if (m_SweepState == SWEEPDOWNPAUSE && m_SweepTimer.IsPastSimMS(1000))
-        {
-            m_SweepState = SWEEPINGUP;
-        }
-/*
-        // Scan aiming up and down
-        if (GetViewPoint().m_Y > m_Pos.m_Y + 2)
-            m_ControlStates[AIM_UP] = true;
-        else if (GetViewPoint().m_Y < m_Pos.m_Y - 2)
-            m_ControlStates[AIM_DOWN] = true;
-*/
-        // Wide FOV range scan, 25 degrees each direction
-        pSeenMO = LookForMOs(25, g_MaterialGrass, false);
-        // Saw something!
-        if (pSeenMO)
-        {
-            pSeenActor = dynamic_cast<Actor *>(pSeenMO->GetRootParent());
-            // ENEMY SIGHTED! Switch to a weapon with ammo if we haven't already
-            if (pSeenActor && pSeenActor->GetTeam() != m_Team && (EquipFirearm() || EquipThrowable() || EquipDiggingTool()))
-            {
-                // Start aiming or throwing toward that target, depending on what we have in hands
-                if (FirearmIsReady())
-                {
-                    m_SeenTargetPos = g_SceneMan.GetLastRayHitPos();//pSeenActor->GetCPUPos();
-                    if (IsWithinRange(m_SeenTargetPos))
-                    {
-                        m_DeviceState = AIMING;
-                        m_FireTimer.Reset();
-                    }
-                }
-                else if (ThrowableIsReady())
-                {
-                    m_SeenTargetPos = g_SceneMan.GetLastRayHitPos();//pSeenActor->GetCPUPos();
-                    // Only throw if within range
-                    if (IsWithinRange(m_SeenTargetPos))
-                    {
-                        m_DeviceState = THROWING;
-                        m_FireTimer.Reset();
-                    }
-                }
-            }
-        }
-    }
-    // Aiming toward spotted target to confirm enemy presence
-    else if (m_DeviceState == AIMING)
-    {
-        // Aim carefully!
-        m_Controller.SetState(AIM_SHARP, true);
-
-        // If we're alarmed, then hit the deck! while aiming
-        if (!m_AlarmTimer.IsPastSimTimeLimit())
-        {
-            m_Controller.SetState(BODY_CROUCH, true);
-            // Also hit the deck completely, not jsut sit down in place
-            if (m_ProneState != PRONE)
-                m_Controller.SetState(m_HFlipped ? MOVE_LEFT : MOVE_RIGHT, true);
-        }
-
-        Vector targetVector = g_SceneMan.ShortestDistance(GetEyePos(), m_SeenTargetPos, false);
-        m_Controller.m_AnalogAim = targetVector;
-        m_Controller.m_AnalogAim.CapMagnitude(1.0);
-/* Old digital way, now jsut use analog aim instead
-        // Do the actual aiming; first figure out which direction to aim in
-        float aimAngleDiff = targetVector.GetAbsRadAngle() - GetLookVector().GetAbsRadAngle();
-        // Flip if we're flipped
-        aimAngleDiff = IsHFlipped() ? -aimAngleDiff : aimAngleDiff;
-        // Now send the command to move aim in the appropriate direction
-        m_ControlStates[aimAngleDiff > 0 ? AIM_UP : AIM_DOWN] = true;
-*/
-        // Narrow focused FOV range scan
-        pSeenMO = LookForMOs(10, g_MaterialGrass, false);
-
-        // Saw the enemy actor again through the sights!
-        if (pSeenMO)
-            pSeenActor = dynamic_cast<Actor *>(pSeenMO->GetRootParent());
-
-        if (pSeenActor && pSeenActor->GetTeam() != m_Team)
-        {
-            // Adjust aim in case seen target is moving
-            m_SeenTargetPos = g_SceneMan.GetLastRayHitPos();//pSeenActor->GetCPUPos();
-
-            // If we have something to fire with
-            if (m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->GetHeldDevice())
-            {
-                // Don't press the trigger too fast in succession
-                if (m_FireTimer.IsPastSimMS(250))
-                {
-                    // Get the distance to the target and see if we've aimed well enough
-                    Vector targetVec = g_SceneMan.ShortestDistance(m_Pos, m_SeenTargetPos, false);
-                    float threshold = (m_AimDistance * 6.0F) + (m_pFGArm->GetHeldDevice()->GetSharpLength() * m_SharpAimProgress);
-                    // Fire if really close, or if we have aimed well enough
-                    if (targetVec.MagnitudeIsLessThan(threshold))
-                    {
-                        // ENEMY AIMED AT well enough - FIRE!
-                        m_DeviceState = FIRING;
-                        m_SweepTimer.Reset();
-                        m_FireTimer.Reset();
-                    }
-                    // Stop and aim more carefully
-                    else
-                        m_LateralMoveState = LAT_STILL;
-                }
-                // Stop and aim more carefully
-                else
-                    m_LateralMoveState = LAT_STILL;
-            }
-        }
-        // If we can't see the guy after some time of aiming, then give up and keep scanning
-        else if (m_FireTimer.IsPastSimMS(3000))
-        {
-            m_DeviceState = SCANNING;
-        }
-
-        // Make sure we're not detected as being stuck just because we're standing still
-        m_StuckTimer.Reset();
-    }
-    // Firing at seen and aimed at target
-    else if (m_DeviceState == FIRING)
-    {
-        // Keep aiming sharply!
-        m_Controller.SetState(AIM_SHARP, true);
-
-        // Pull the trigger repeatedly, so semi-auto weapons are fired properly
-        if (!m_SweepTimer.IsPastSimMS(666))
-        {
-            // Pull the trigger!
-            m_Controller.SetState(WEAPON_FIRE, true);
-            if (FirearmIsSemiAuto())
-                m_SweepTimer.Reset();
-        }
-        else
-        {
-            // Let go momentarily
-            m_Controller.SetState(WEAPON_FIRE, false);
-            m_SweepTimer.Reset();
-        }
-
-        // Adjust aim
-        Vector targetVector = g_SceneMan.ShortestDistance(GetEyePos(), m_SeenTargetPos, false);
-        m_Controller.m_AnalogAim = targetVector;
-        m_Controller.m_AnalogAim.CapMagnitude(1.0);
-
-        // Narrow focused FOV range scan
-        pSeenMO = LookForMOs(8, g_MaterialGrass, false);
-        // Still seeing enemy actor through the sights, keep firing!
-        if (pSeenMO)
-            pSeenActor = dynamic_cast<Actor *>(pSeenMO->GetRootParent());
-
-        if (pSeenActor && pSeenActor->GetTeam() != m_Team)
-        {
-            // Adjust aim in case seen target is moving, and keep firing
-            m_SeenTargetPos = g_SceneMan.GetLastRayHitPos();//pSeenActor->GetCPUPos();
-            m_FireTimer.Reset();
-        }
-
-        // After burst of fire, if we don't still see the guy, then stop firing.
-        if (m_FireTimer.IsPastSimMS(500) || FirearmIsEmpty())
-        {
-            m_DeviceState = SCANNING;
-        }
-        // Make sure we're not detected as being stuck just because we're standing still
-        m_StuckTimer.Reset();
-    }
-    // Throwing at seen target
-    else if (m_DeviceState == THROWING)
-    {
-        // Keep aiming sharply!
-        m_Controller.SetState(AIM_SHARP, true);
-
-        // Adjust aim constantly
-        Vector targetVector = g_SceneMan.ShortestDistance(GetEyePos(), m_SeenTargetPos, false);
-        // Adjust upward so we aim the throw higer than the target to compensate for gravity in throw trajectory
-        targetVector.m_Y -= targetVector.GetMagnitude();
-        m_Controller.m_AnalogAim = targetVector;
-        m_Controller.m_AnalogAim.CapMagnitude(1.0);
-
-        // Narrow focused FOV range scan
-        pSeenMO = LookForMOs(18, g_MaterialGrass, false);
-        // Still seeing enemy actor through the sights, keep aiming the throw!
-        if (pSeenMO)
-            pSeenActor = dynamic_cast<Actor *>(pSeenMO->GetRootParent());
-
-        if (pSeenActor && pSeenActor->GetTeam() != m_Team)
-        {
-            // Adjust aim in case seen target is moving, and keep aiming thr throw
-            m_SeenTargetPos = g_SceneMan.GetLastRayHitPos();//pSeenActor->GetCPUPos();
-        }
-
-// TODO: make proper throw range calc based on the throwable's mass etc
-        float range = m_CharHeight * 4;
-        // Figure out how far away the target is based on max range
-        float targetScalar = targetVector.GetMagnitude() / range;
-        if (targetScalar < 0.01)
-            targetScalar = 0.01;
-
-        // Start making the throw, and charge up in proportion to how far away the target is
-        if (!m_FireTimer.IsPastSimMS(m_ThrowPrepTime * targetScalar))
-        {
-            // HOld down the fire button so the throw is charged
-            m_Controller.SetState(WEAPON_FIRE, true);
-        }
-        // Now release the throw and let fly!
-        else
-        {
-            m_Controller.SetState(WEAPON_FIRE, false);
-            m_DeviceState = SCANNING;
-        }
-
-        // Make sure we're not detected as being stuck just because we're standing still
-        m_StuckTimer.Reset();
-    }
-
-    /////////////////////////////////////////////////
-    // JUMPING LOGIC
-
-    // Already in a jump
-    if (m_ObstacleState == JUMPING)
-    {
-        // Override the lateral control for the precise jump
-        // Turn around
-        if (m_MoveVector.m_X > 0 && m_LateralMoveState == LAT_LEFT)
-            m_LateralMoveState = LAT_RIGHT;
-        else if (m_MoveVector.m_X < 0 && m_LateralMoveState == LAT_RIGHT)
-            m_LateralMoveState = LAT_LEFT;
-
-        if (m_JumpState == PREUPJUMP)
-        {
-            // Stand still for a little while to stabilize and look in the right dir, if we're directly under
-            m_LateralMoveState = LAT_STILL;
-            // Start the actual jump
-            if (m_JumpTimer.IsPastSimMS(333))
-            {
-                // Here we go!
-                m_JumpState = UPJUMP;
-                m_JumpTimer.Reset();
-                m_Controller.SetState(BODY_JUMPSTART, true);
-            }
-        }
-        if (m_JumpState == UPJUMP)
-        {
-			Vector notUsed;
-
-            // Burn the jetpack
-            m_Controller.SetState(BODY_JUMP, true);
-
-            // If we now can see the point we're going to, start adjusting our aim and jet nozzle forward
-            if (!g_SceneMan.CastStrengthRay(cpuPos, m_JumpTarget - cpuPos, 5, notUsed, 4))
-                m_PointingTarget = m_JumpTarget;
-
-            // if we are a bit over the target, stop firing the jetpack and try to go forward and land
-            if (m_Pos.m_Y < m_JumpTarget.m_Y)
-            {
-                m_DeviceState = POINTING;
-                m_JumpState = APEXJUMP;
-                m_JumpTimer.Reset();
-            }
-            // Abort the jump if we're not reaching the target height within reasonable time
-            else if (m_JumpTimer.IsPastSimMS(5000) || m_StuckTimer.IsPastRealMS(500))
-            {
-                m_JumpState = NOTJUMPING;
-                m_ObstacleState = PROCEEDING;
-                if (m_DeviceState == POINTING)
-                    m_DeviceState = SCANNING;
-                m_JumpTimer.Reset();
-            }
-        }
-
-		Vector notUsed;
-
-        // Got the height, now wait until we crest the top and start falling again
-        if (m_JumpState == APEXJUMP)
-        {
-			Vector notUsedInner;
-
-            m_PointingTarget = m_JumpTarget;
-
-            // We are falling again, and we can still see the target! start adjusting our aim and jet nozzle forward
-            if (m_Vel.m_Y > 4.0 && !g_SceneMan.CastStrengthRay(cpuPos, m_JumpTarget - cpuPos, 5, notUsedInner, 3))
-            {
-                m_DeviceState = POINTING;
-                m_JumpState = LANDJUMP;
-                m_JumpTimer.Reset();
-            }
-
-            // Time abortion
-            if (m_JumpTimer.IsPastSimMS(3500))
-            {
-                m_JumpState = NOTJUMPING;
-                m_ObstacleState = PROCEEDING;
-                if (m_DeviceState == POINTING)
-                    m_DeviceState = SCANNING;
-                m_JumpTimer.Reset();
-            }
-            // If we've fallen below the target again, then abort the jump
-            else if (cpuPos.m_Y > m_JumpTarget.m_Y && g_SceneMan.CastStrengthRay(cpuPos, g_SceneMan.ShortestDistance(cpuPos, m_JumpTarget), 5, notUsedInner, 3))
-            {
-                // Set the move target back to the ledge, to undo any checked off points we may have seen while hovering oer teh edge
-                m_MoveTarget = m_JumpTarget;
-                m_JumpState = NOTJUMPING;
-                m_ObstacleState = PROCEEDING;
-                if (m_DeviceState == POINTING)
-                    m_DeviceState = SCANNING;
-                m_JumpTimer.Reset();
-            }
-        }
-        // We are high and falling again, now go forward to land on top of the ledge
-        if (m_JumpState == LANDJUMP)
-        {
-			Vector notUsedInner;
-
-            m_PointingTarget = m_JumpTarget;
-
-            // Burn the jetpack for a short while to get forward momentum, but not too much
-//            if (!m_JumpTimer.IsPastSimMS(500))
-                m_Controller.SetState(BODY_JUMP, true);
-
-            // If we've fallen below the target again, then abort the jump
-            // If we're flying past the target too, end the jump
-            // Lastly, if we're flying way over the target again, just cut the jets!
-            if (m_JumpTimer.IsPastSimMS(3500) || (cpuPos.m_Y > m_JumpTarget.m_Y && g_SceneMan.CastStrengthRay(cpuPos, m_JumpTarget - cpuPos, 5, notUsedInner, 3)) ||
-                (m_JumpingRight && m_Pos.m_X > m_JumpTarget.m_X) || (!m_JumpingRight && m_Pos.m_X < m_JumpTarget.m_X) || (cpuPos.m_Y < m_JumpTarget.m_Y - m_CharHeight))
-            {
-                m_JumpState = NOTJUMPING;
-                m_ObstacleState = PROCEEDING;
-                if (m_DeviceState == POINTING)
-                    m_DeviceState = SCANNING;
-                m_JumpTimer.Reset();
-            }
-        }
-        else if (m_JumpState == FORWARDJUMP)
-        {
-            // Burn the jetpack
-            m_Controller.SetState(BODY_JUMP, true);
-
-            // Stop firing the jetpack after a period or if we've flown past the target
-            if (m_JumpTimer.IsPastSimMS(500) || (m_JumpingRight && m_Pos.m_X > m_JumpTarget.m_X) || (!m_JumpingRight && m_Pos.m_X < m_JumpTarget.m_X))
-            {
-                m_JumpState = NOTJUMPING;
-                m_ObstacleState = PROCEEDING;
-                if (m_DeviceState == POINTING)
-                    m_DeviceState = SCANNING;
-                m_JumpTimer.Reset();
-            }
-        }
-    }
-    // Not in a jump yet, so check for conditions to trigger a jump
-    // Also if the movetarget is szzero, probably first frame , but don't try to chase it
-    // Don't start jumping if we are crawling
-    else if (!m_MoveTarget.IsZero() && !m_Crawling)
-    {
-		Vector notUsed;
-
-        // UPWARD JUMP TRIGGERINGS if it's a good time to jump up to a ledge
-        if ((-m_MoveVector.m_Y > m_CharHeight * 0.75) && m_DeviceState != AIMING && m_DeviceState != FIRING)// && (fabs(m_MoveVector.m_X) < m_CharHeight))
-        {
-            // Is there room to jump straight up for as high as we want?
-            // ALso, has teh jetpack been given a rest since last attempt?
-            if (m_JumpTimer.IsPastSimMS(3500) && !g_SceneMan.CastStrengthRay(cpuPos, Vector(0, m_MoveTarget.m_Y - cpuPos.m_Y), 5, notUsed, 3))
-            {
-                // Yes, so let's start jump, aim at the target!
-                m_ObstacleState = JUMPING;
-                m_JumpState = PREUPJUMP;
-                m_JumpTarget = m_MoveTarget;
-                m_JumpingRight = g_SceneMan.ShortestDistance(m_Pos, m_JumpTarget).m_X > 0;
-//                m_JumpState = UPJUMP;
-//                m_Controller.SetState(BODY_JUMPSTART, true);
-                m_JumpTimer.Reset();
-                m_DeviceState = POINTING;
-                // Aim straight up
-                m_PointingTarget.SetXY(cpuPos.m_X, m_MoveTarget.m_Y);
-            }
-        }
-        // FORWARD JUMP TRIGGERINGS if it's a good time to jump over a chasm; gotto be close to an edge
-        else if (m_MovePath.size() > 2 && (fabs(m_PrevPathTarget.m_X - m_Pos.m_X) < (m_CharHeight * 0.25)))
-        {
-            std::list<Vector>::iterator pItr = m_MovePath.begin();
-            std::list<Vector>::iterator prevItr = m_MovePath.begin();
-            // Start by looking at the dip between last checked waypoint and the next
-// TODO: not wrap safe!
-            int dip = m_MoveTarget.GetFloorIntY() - m_PrevPathTarget.GetFloorIntY();
-            // See if the next few path points dip steeply
-            for (int i = 0; i < 3 && dip < m_CharHeight && pItr != m_MovePath.end(); ++i)
-            {
-                ++pItr;
-                if (pItr == m_MovePath.end())
-                    break;
-                dip += (*pItr).GetFloorIntY() - (*prevItr).GetFloorIntY();
-                ++prevItr;
-                if (dip >= m_CharHeight)
-                    break;
-            }
-            // The dip is deep enough to warrant looking for a rise after the dip
-            if (dip >= m_CharHeight)
-            {
-                int rise = 0;
-                for (int i = 0; i < 6 && pItr != m_MovePath.end(); ++i)
-                {
-                    ++pItr;
-                    if (pItr == m_MovePath.end())
-                        break;
-                    rise -= (*pItr).m_Y - (*prevItr).m_Y;
-                    ++prevItr;
-                    if (rise >= m_CharHeight)
-                        break;
-                }
-
-				Vector notUsedInner;
-
-                // The rise is high enough to warrant looking across the trench for obstacles in the way of a jump
-                if (rise >= m_CharHeight && !g_SceneMan.CastStrengthRay(cpuPos, Vector((*pItr).m_X - cpuPos.m_X, 0), 5, notUsedInner, 3))
-                {
-                    // JUMP!!!
-                    m_Controller.SetState(BODY_JUMPSTART, true);
-                    m_ObstacleState = JUMPING;
-                    m_JumpState = FORWARDJUMP;
-                    m_JumpTarget = *pItr;
-                    m_JumpingRight = g_SceneMan.ShortestDistance(m_Pos, m_JumpTarget).m_X > 0;
-                    m_JumpTimer.Reset();
-                    m_DeviceState = POINTING;
-                    m_PointingTarget = *pItr;
-                    // Remove the waypoints we're about to jump over
-                    std::list<Vector>::iterator pRemItr = m_MovePath.begin();
-                    while (pRemItr != m_MovePath.end())
-                    {
-                        pRemItr++;
-                        m_PrevPathTarget = m_MovePath.front();
-                        m_MovePath.pop_front();
-                        if (pRemItr == pItr)
-                            break;
-                    }
-                    if (!m_MovePath.empty())
-                        m_MoveTarget = m_MovePath.front();
-                    else
-                        m_MoveTarget = m_Pos;
-                }
-            }
-        }
-        // See if we can jump over a teammate who's stuck in the way
-        else if (m_TeamBlockState != NOTBLOCKED && m_TeamBlockState != FOLLOWWAIT && !g_SceneMan.CastStrengthRay(cpuPos, Vector((m_HFlipped ? -m_CharHeight : m_CharHeight) * 1.5, -m_CharHeight * 1.5), 5, notUsed, 3))
-        {
-            // JUMP!!!
-            m_Controller.SetState(BODY_JUMPSTART, true);
-            m_ObstacleState = JUMPING;
-            m_JumpState = FORWARDJUMP;
-            m_JumpTarget = m_Pos + Vector((m_HFlipped ? -m_CharHeight : m_CharHeight) * 3, -m_CharHeight);
-            m_JumpingRight = !m_HFlipped;
-            m_JumpTimer.Reset();
-            m_DeviceState = POINTING;
-            m_PointingTarget = m_JumpTarget;
-        }
-    }
-
-    ////////////////////////////////////////
-    // If falling, use jetpack to land as softly as possible
-
-    // If the height is more than the character's height, do something to soften the landing!
-    float thrustLimit = m_CharHeight;
-
-    // If we're already firing jetpack, then see if it's time to stop
-    if (m_ObstacleState == SOFTLANDING && (m_Vel.m_Y < 4.0 || GetAltitude(thrustLimit, 5) < thrustLimit))
-    {
-        m_ObstacleState = PROCEEDING;
-        if (m_DeviceState == POINTING)
-            m_DeviceState = SCANNING;
-    }
-    // We're falling, so see if it's time to start firing the jetpack to soften the landing
-    if (/*m_FallTimer.IsPastSimMS(300) && */m_Vel.m_Y > 8.0 && m_ObstacleState != SOFTLANDING && m_ObstacleState != JUMPING)
-    {
-        // Look if we have more than the height limit of air below the controlled
-        bool withinLimit = GetAltitude(thrustLimit, 5) < thrustLimit;
-
-        // If the height is more than the limit, do something!
-        if (!withinLimit)
-        {
-            m_ObstacleState = SOFTLANDING;
-            m_Controller.SetState(BODY_JUMPSTART, true);
-        }
-    }
-//        else
-//            m_FallTimer.Reset();
-
-    ///////////////////////////////////////////
-    // Obstacle resolution
-
-    if (m_ObstacleState == PROCEEDING)
-    {
-        // If we're not caring about blocks for a while, then just see how long until we do again
-        if (m_TeamBlockState == IGNORINGBLOCK)
-        {
-            // Ignored long enough, now we can be blocked again
-            if (m_BlockTimer.IsPastSimMS(10000))
-                m_TeamBlockState = NOTBLOCKED;
-        }
-        else
-        {
-            // Detect a TEAMMATE in the way and hold until he has moved
-            Vector lookRay(m_CharHeight * 0.75, 0);
-            Vector lookRayDown(m_CharHeight * 0.75, 0);
-            lookRay.RadRotate(GetAimAngle(true));
-            lookRayDown.RadRotate(GetAimAngle(true) + (m_HFlipped ? c_QuarterPI : -c_QuarterPI));
-            MOID obstructionMOID = g_SceneMan.CastMORay(GetCPUPos(), lookRay, m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 6);
-            obstructionMOID = obstructionMOID == g_NoMOID ? g_SceneMan.CastMORay(cpuPos, lookRayDown, m_MOID, IgnoresWhichTeam(), g_MaterialGrass, false, 6) : obstructionMOID;
-            if (obstructionMOID != g_NoMOID)
-            {
-                // Take a look at the actorness and team of the thing that holds whatever we saw
-                obstructionMOID = g_MovableMan.GetRootMOID(obstructionMOID);
-                Actor *pActor = dynamic_cast<Actor *>(g_MovableMan.GetMOFromID(obstructionMOID));
-                // Oops, a mobile team member is in the way, don't do anything until he moves out of the way!
-                if (pActor && pActor != this && pActor->GetTeam() == m_Team && pActor->IsControllable())
-                {
-                    // If this is the guy we're actually supposed to be following, then indicate that so we jsut wait patiently for him to move
-                    if (pActor == m_pMOMoveTarget)
-                        m_TeamBlockState = FOLLOWWAIT;
-                    else
-                    {
-                        // If already blocked, see if it's long enough to give up and start to ignore the blockage
-                        if (m_TeamBlockState == BLOCKED)
-                        {
-                            if (m_BlockTimer.IsPastSimMS(10000))
-                            {
-                                m_TeamBlockState = IGNORINGBLOCK;
-                                m_BlockTimer.Reset();
-                            }
-                        }
-                        // Not blocked yet, but will be now, so set it
-                        else
-                        {
-                            m_TeamBlockState = BLOCKED;
-                            m_BlockTimer.Reset();
-                        }
-                    }
-                }
-                else if (m_BlockTimer.IsPastSimMS(1000))
-                    m_TeamBlockState = NOTBLOCKED;
-            }
-            else if (m_BlockTimer.IsPastSimMS(1000))
-                m_TeamBlockState = NOTBLOCKED;
-        }
-
-        // Detect MATERIAL blocking the path and start digging through it
-        Vector pathSegRay(g_SceneMan.ShortestDistance(m_PrevPathTarget, m_MoveTarget));
-        Vector obstaclePos;
-        if (m_TeamBlockState != BLOCKED && m_DeviceState == SCANNING && g_SceneMan.CastStrengthRay(m_PrevPathTarget, pathSegRay, 5, obstaclePos, 1, g_MaterialDoor))
-        {
-            // Only if we actually have a digging tool!
-            if (EquipDiggingTool(false))
-            {
-                if (m_DigState == NOTDIGGING)
-                {
-                    // First update the path to make sure a fresh path would still be blocked
-                    UpdateMovePath();
-                    m_DigState = PREDIG;
-                }
-    // TODO: base the range on the digger's actual range, quereied from teh digger itself
-                // Updated the path, and it's still blocked, so check that we're close enough to START digging
-                else if (m_DigState == PREDIG && (fabs(m_PrevPathTarget.m_X - m_Pos.m_X) < (m_CharHeight * 0.5)))
-                {
-                    m_DeviceState = DIGGING;
-                    m_DigState = STARTDIG;
-                    m_SweepRange = c_QuarterPI - c_SixteenthPI;
-                    m_ObstacleState = DIGPAUSING;
-                }
-                // If in invalid state of starting to dig but not actually digging, reset
-                else if (m_DigState == STARTDIG && m_DeviceState != DIGGING)
-                {
-                    m_DigState = NOTDIGGING;
-                    m_ObstacleState = PROCEEDING;
-                }
-            }
-        }
-        else
-        {
-            m_DigState = NOTDIGGING;
-            m_ObstacleState = PROCEEDING;
-        }
-
-        // If our path isn't blocked enough to dig, but the headroom is too little, start crawling to get through!
-        if (m_DeviceState != DIGGING && m_DigState != PREDIG)
-        {
-            Vector heading(g_SceneMan.ShortestDistance(m_Pos, m_PrevPathTarget));
-            heading.SetMagnitude(m_CharHeight * 0.5);
-            // Don't crawl if it's too steep, just let him climb then instead
-            if (fabs(heading.m_X) > fabs(heading.m_Y) && m_pHead && m_pHead->IsAttached())
-            {
-                Vector topHeadPos = m_Pos;
-                // Stack up the maximum height the top back of the head can have over the body's position
-                topHeadPos.m_X += m_HFlipped ? m_pHead->GetRadius() : -m_pHead->GetRadius();
-                topHeadPos.m_Y += m_pHead->GetParentOffset().m_Y - m_pHead->GetJointOffset().m_Y + m_pHead->GetSpriteOffset().m_Y - 3;
-                // First check up to the top of the head, and then from there forward
-                if (g_SceneMan.CastStrengthRay(m_Pos, topHeadPos - m_Pos, 5, obstaclePos, 4, g_MaterialDoor) ||
-                    g_SceneMan.CastStrengthRay(topHeadPos, heading, 5, obstaclePos, 4, g_MaterialDoor))
-                {
-                    m_Controller.SetState(BODY_CROUCH, true);
-                    m_Crawling = true;
-                }
-                else
-                    m_Crawling = false;
-            }
-            else
-                m_Crawling = false;
-        }
-        else
-            m_Crawling = false;
-    }
-    // We're not proceeding
-    else
-    {
-        // Can't be obstructed if we're not going forward
-        m_TeamBlockState = NOTBLOCKED;
-        // Disable invalid digging mode
-        if ((m_DigState == STARTDIG && m_DeviceState != DIGGING) || (m_ObstacleState == DIGPAUSING && m_DeviceState != DIGGING))
-        {
-            m_DigState = NOTDIGGING;
-            m_ObstacleState = PROCEEDING;
-        }
-    }
-
-    /////////////////////////////////////
-    // Detect and react to being stuck
-
-    if (m_ObstacleState == PROCEEDING)
-    {
-        // Reset stuck timer if we're moving fine, or we're waiting for teammate to move
-        if (m_RecentMovement.MagnitudeIsGreaterThan(2.5F) || m_TeamBlockState)
-            m_StuckTimer.Reset();
-
-        if (m_DeviceState == SCANNING)
-        {
-            // Ok we're actually stuck, so backtrack
-            if (m_StuckTimer.IsPastSimMS(1500))
-            {
-                m_ObstacleState = BACKSTEPPING;
-                m_StuckTimer.Reset();
-// TEMP hack to pick up weapon, could be stuck on one
-                m_Controller.SetState(WEAPON_PICKUP, true);
-            }
-        }
-		else if (m_DeviceState == DIGGING && m_StuckTimer.IsPastSimMS(5000))
-		{
-			// Ok we're actually stuck, so backtrack.
-			m_ObstacleState = BACKSTEPPING;
-			m_StuckTimer.Reset();
-		}
-    }
-    if (m_ObstacleState == JUMPING)
-    {
-        // Reset stuck timer if we're moving fine
-        if (m_RecentMovement.MagnitudeIsGreaterThan(2.5F))
-            m_StuckTimer.Reset();
-
-        if (m_StuckTimer.IsPastSimMS(250))
-        {
-            m_JumpState = NOTJUMPING;
-            m_ObstacleState = PROCEEDING;
-            if (m_DeviceState == POINTING)
-                m_DeviceState = SCANNING;
-        }
-    }
-    else if (m_ObstacleState == DIGPAUSING)
-    {
-        // If we've beeen standing still digging in teh same spot for along time, then backstep to get unstuck
-        if (m_DeviceState == DIGGING)
-        {
-            if (m_StuckTimer.IsPastSimMS(5000))
-            {
-                m_ObstacleState = BACKSTEPPING;
-                m_StuckTimer.Reset();
-            }
-        }
-        else
-        {
-            m_StuckTimer.Reset();
-        }
-    }
-    // Reset from backstepping
-// TODO: better movement detection
-    else if (m_ObstacleState == BACKSTEPPING && (m_StuckTimer.IsPastSimMS(2000) || m_RecentMovement.MagnitudeIsGreaterThan(15.0F)))
-    {
-        m_ObstacleState = PROCEEDING;
-        m_StuckTimer.Reset();
-    }
-
-    ////////////////////////////////////
-    // Set the movement commands now according to what we've decided to do
-
-    // Don't move if there's a teammate in the way (but we can flip)
-    if (m_LateralMoveState != LAT_STILL && ((m_TeamBlockState != BLOCKED && m_TeamBlockState != FOLLOWWAIT) || (!m_HFlipped && m_LateralMoveState == LAT_LEFT) || (m_HFlipped && m_LateralMoveState == LAT_RIGHT)))
-    {
-        if (m_ObstacleState == SOFTLANDING)
-        {
-            m_Controller.SetState(BODY_JUMP, true);
-            // Direct the jetpack blast
-            m_Controller.m_AnalogMove = -m_Vel;
-            m_Controller.m_AnalogMove.Normalize();
-        }
-        else if (m_ObstacleState == JUMPING)
-        {
-            if (m_LateralMoveState == LAT_LEFT)
-                m_Controller.SetState(MOVE_LEFT, true);
-            else if (m_LateralMoveState == LAT_RIGHT)
-                m_Controller.SetState(MOVE_RIGHT, true);
-        }
-        else if (m_ObstacleState == DIGPAUSING)
-        {
-            // Only flip if we're commanded to, don't move though, and DON'T FIRE IN THE OPPOSITE DIRECTION
-            if (m_LateralMoveState == LAT_LEFT && !m_HFlipped)
-            {
-                m_Controller.SetState(MOVE_LEFT, true);
-                m_Controller.SetState(WEAPON_FIRE, false);
-            }
-            else if (m_LateralMoveState == LAT_RIGHT && m_HFlipped)
-            {
-                m_Controller.SetState(MOVE_RIGHT, true);
-                m_Controller.SetState(WEAPON_FIRE, false);
-            }
-        }
-        else if (m_ObstacleState == PROCEEDING)
-        {
-            if (m_LateralMoveState == LAT_LEFT)
-                m_Controller.SetState(MOVE_LEFT, true);
-            else if (m_LateralMoveState == LAT_RIGHT)
-                m_Controller.SetState(MOVE_RIGHT, true);
-        }
-        else if (m_ObstacleState == BACKSTEPPING)
-        {
-            if (m_LateralMoveState == LAT_LEFT)
-                m_Controller.SetState(MOVE_RIGHT, true);
-            else if (m_LateralMoveState == LAT_RIGHT)
-                m_Controller.SetState(MOVE_LEFT, true);
-        }
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this AHuman. Supposed to be done every frame.
-
-void AHuman::Update()
-{
 	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
 	float rot = m_Rotation.GetRadAngle();
 
@@ -3535,6 +2264,8 @@ void AHuman::Update()
     ///////////////////////////////////////////////////
     // Travel the limb AtomGroup:s
 
+	m_StrideFrame = false;
+
 	if (m_Status == STABLE && !m_LimbPushForcesAndCollisionsDisabled && m_MoveState != NOMOVE)
     {
         // This exists to support disabling foot collisions if the limbpath has that flag set.
@@ -3595,6 +2326,7 @@ void AHuman::Update()
 					m_WalkAngle[FGROUND] = Matrix();
 					m_WalkAngle[BGROUND] = Matrix();
 				} else {
+					m_StrideFrame = true;
 					RunScriptedFunctionInAppropriateScripts("OnStride");
 				}
 			}
@@ -3859,10 +2591,14 @@ void AHuman::Update()
 			}
 		}
 	}
+}
 
-    /////////////////////////////////////////////////
-    // Update MovableObject, adds on the forces etc
-    // NOTE: this also updates the controller, so any setstates of it will be wiped!
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void AHuman::Update()
+{
+    float rot = m_Rotation.GetRadAngle(); // eugh, for backwards compat to be the same behaviour as with multithreaded AI
+
     Actor::Update();
 
     ////////////////////////////////////
@@ -4163,47 +2899,47 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     GUIFont *pSmallFont = g_FrameMan.GetSmallFont();
 
     // Only show extra HUD if this guy is controlled by the same player that this screen belongs to
-    if (m_Controller.IsPlayerControlled() && g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller.GetPlayer()) == whichScreen && pSmallFont && pSymbolFont)
-    {
-        AllegroBitmap allegroBitmap(pTargetBitmap);
-/*
-        // Device aiming reticle
-        if (m_Controller.IsState(AIM_SHARP) &&
-            m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
-            m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen);*/
+	if (m_Controller.IsPlayerControlled() && g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller.GetPlayer()) == whichScreen && pSmallFont && pSymbolFont)
+	{
+		AllegroBitmap allegroBitmap(pTargetBitmap);
+		/*
+				// Device aiming reticle
+				if (m_Controller.IsState(AIM_SHARP) &&
+					m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
+					m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen);*/
 
-        Vector drawPos = m_Pos - targetPos;
+		Vector drawPos = m_Pos - targetPos;
 
-        // Adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam
-        if (!targetPos.IsZero())
-        {
-            // Spans vertical scene seam
-            int sceneWidth = g_SceneMan.GetSceneWidth();
-            if (g_SceneMan.SceneWrapsX() && pTargetBitmap->w < sceneWidth)
-            {
-                if ((targetPos.m_X < 0) && (m_Pos.m_X > (sceneWidth - pTargetBitmap->w)))
-                    drawPos.m_X -= sceneWidth;
-                else if (((targetPos.m_X + pTargetBitmap->w) > sceneWidth) && (m_Pos.m_X < pTargetBitmap->w))
-                    drawPos.m_X += sceneWidth;
-            }
-            // Spans horizontal scene seam
-            int sceneHeight = g_SceneMan.GetSceneHeight();
-            if (g_SceneMan.SceneWrapsY() && pTargetBitmap->h < sceneHeight)
-            {
-                if ((targetPos.m_Y < 0) && (m_Pos.m_Y > (sceneHeight - pTargetBitmap->h)))
-                    drawPos.m_Y -= sceneHeight;
-                else if (((targetPos.m_Y + pTargetBitmap->h) > sceneHeight) && (m_Pos.m_Y < pTargetBitmap->h))
-                    drawPos.m_Y += sceneHeight;
-            }
-        }
+		// Adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam
+		if (!targetPos.IsZero())
+		{
+			// Spans vertical scene seam
+			int sceneWidth = g_SceneMan.GetSceneWidth();
+			if (g_SceneMan.SceneWrapsX() && pTargetBitmap->w < sceneWidth)
+			{
+				if ((targetPos.m_X < 0) && (m_Pos.m_X > (sceneWidth - pTargetBitmap->w)))
+					drawPos.m_X -= sceneWidth;
+				else if (((targetPos.m_X + pTargetBitmap->w) > sceneWidth) && (m_Pos.m_X < pTargetBitmap->w))
+					drawPos.m_X += sceneWidth;
+			}
+			// Spans horizontal scene seam
+			int sceneHeight = g_SceneMan.GetSceneHeight();
+			if (g_SceneMan.SceneWrapsY() && pTargetBitmap->h < sceneHeight)
+			{
+				if ((targetPos.m_Y < 0) && (m_Pos.m_Y > (sceneHeight - pTargetBitmap->h)))
+					drawPos.m_Y -= sceneHeight;
+				else if (((targetPos.m_Y + pTargetBitmap->h) > sceneHeight) && (m_Pos.m_Y < pTargetBitmap->h))
+					drawPos.m_Y += sceneHeight;
+			}
+		}
 
 		if (m_pFGArm || m_pBGArm) {
 			// Held-related GUI stuff
-            HDFirearm *fgHeldFirearm = dynamic_cast<HDFirearm *>(GetEquippedItem());
-			HDFirearm *bgHeldFirearm = dynamic_cast<HDFirearm *>(GetEquippedBGItem());
+			HDFirearm* fgHeldFirearm = dynamic_cast<HDFirearm*>(GetEquippedItem());
+			HDFirearm* bgHeldFirearm = dynamic_cast<HDFirearm*>(GetEquippedBGItem());
 
-            if (fgHeldFirearm || bgHeldFirearm) {
-                str[0] = -56;
+			if (fgHeldFirearm || bgHeldFirearm) {
+				str[0] = -56;
 				str[1] = 0;
 
 				std::string fgWeaponString = "EMPTY";
@@ -4218,20 +2954,22 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 								str[0] = -37; str[1] = -49; str[2] = -56; str[3] = 0;
 								if (reloadMultiplier > 1.0F) {
 									if (m_IconBlinkTimer.AlternateSim(250)) { barColorIndex = 13; }
-								} else {
+								}
+								else {
 									barColorIndex = 133;
 								}
 							}
 						}
 						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
 						rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * fgHeldFirearm->GetReloadProgress() + 0.5F), drawPos.GetFloorIntY() + m_HUDStack + 13, barColorIndex);
-					} else {
+					}
+					else {
 						fgWeaponString = fgHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(fgHeldFirearm->GetRoundInMagCount());
 					}
 				}
 
 				std::string bgWeaponString;
-                if (bgHeldFirearm) {
+				if (bgHeldFirearm) {
 					if (bgHeldFirearm->IsReloading()) {
 						bgWeaponString = "Reloading";
 						int barColorIndex = 77;
@@ -4242,7 +2980,8 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 								str[0] = -37; str[1] = -49; str[2] = -56; str[3] = 0;
 								if (reloadMultiplier > 1.0F) {
 									if (m_IconBlinkTimer.AlternateSim(250)) { barColorIndex = 13; }
-								} else {
+								}
+								else {
 									barColorIndex = 133;
 								}
 							}
@@ -4250,43 +2989,47 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 						int totalTextWidth = pSmallFont->CalculateWidth(fgWeaponString) + 6;
 						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1 + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, drawPos.GetFloorIntX() + 29 + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 14, 245);
 						rectfill(pTargetBitmap, drawPos.GetFloorIntX() + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 12, drawPos.GetFloorIntX() + static_cast<int>(28.0F * bgHeldFirearm->GetReloadProgress() + 0.5F) + totalTextWidth, drawPos.GetFloorIntY() + m_HUDStack + 13, barColorIndex);
-					} else {
+					}
+					else {
 						bgWeaponString = bgHeldFirearm->GetRoundInMagCount() < 0 ? "Infinite" : std::to_string(bgHeldFirearm->GetRoundInMagCount());
 					}
-                }
+				}
 				pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - pSymbolFont->CalculateWidth(str) - 3, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Left);
 				std::snprintf(str, sizeof(str), bgHeldFirearm ? "%s | %s" : "%s", fgWeaponString.c_str(), bgWeaponString.c_str());
-                pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Left);
+				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Left);
 
 				m_HUDStack -= 9;
-            }
+			}
 			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_EquipHUDTimer.IsPastRealMS(700)) {
-				HeldDevice *fgEquippedItem = GetEquippedItem();
-				HeldDevice *bgEquippedItem = GetEquippedBGItem();
+				HeldDevice* fgEquippedItem = GetEquippedItem();
+				HeldDevice* bgEquippedItem = GetEquippedBGItem();
 				std::string equippedItemsString = (fgEquippedItem ? fgEquippedItem->GetPresetName() : "EMPTY") + (bgEquippedItem ? " | " + bgEquippedItem->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
 			}
-        }
-        else
-        {
-            std::snprintf(str, sizeof(str), "NO ARM!");
-            pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-            m_HUDStack -= 9;
-        }
+		}
+		else
+		{
+			std::snprintf(str, sizeof(str), "NO ARM!");
+			pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
+			m_HUDStack -= 9;
+		}
 
 		if (m_pJetpack && m_Status != INACTIVE && !m_Controller.IsState(PIE_MENU_ACTIVE) && (m_Controller.IsState(BODY_JUMP) || m_JetTimeLeft < m_JetTimeTotal)) {
 			if (m_JetTimeLeft < 100.0F) {
 				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
-			} else if (m_pJetpack->IsEmitting()) {
+			}
+			else if (m_pJetpack->IsEmitting()) {
 				float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
 				if (acceleration > 0.41F) {
 					str[0] = acceleration > 0.47F ? -31 : -30;
-				} else {
+				}
+				else {
 					str[0] = acceleration > 0.35F ? -29 : -28;
 					if (m_IconBlinkTimer.AlternateSim(200)) { str[0] = -27; }
 				}
-			} else {
+			}
+			else {
 				str[0] = -27;
 			}
 			str[1] = 0;
@@ -4298,13 +3041,17 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 				int gaugeColor;
 				if (jetTimeRatio > 0.75F) {
 					gaugeColor = 149;
-				} else if (jetTimeRatio > 0.5F) {
+				}
+				else if (jetTimeRatio > 0.5F) {
 					gaugeColor = 133;
-				} else if (jetTimeRatio > 0.375F) {
+				}
+				else if (jetTimeRatio > 0.375F) {
 					gaugeColor = 77;
-				} else if (jetTimeRatio > 0.25F) {
+				}
+				else if (jetTimeRatio > 0.25F) {
 					gaugeColor = 48;
-				} else {
+				}
+				else {
 					gaugeColor = 13;
 				}
 				rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
@@ -4312,127 +3059,13 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 			m_HUDStack -= 9;
 		}
 
-        // Pickup GUI
-        if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {
-            std::snprintf(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
-            pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Centre);
+		// Pickup GUI
+		if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {
+			std::snprintf(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
+			pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Centre);
 			m_HUDStack -= 9;
-        }
-/*
-        // AI Mode select GUI HUD
-        if (m_Controller.IsState(AI_MODE_SET))
-        {
-            int iconOff = m_apAIIcons[0]->w + 2;
-            int iconColor = m_Team == Activity::TeamOne ? AIICON_RED : AIICON_GREEN;
-            Vector iconPos = GetCPUPos() - targetPos;
-
-            if (m_AIMode == AIMODE_SENTRY)
-            {
-                std::snprintf(str, sizeof(str), "%s", "Sentry");
-                pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y - 18, str, GUIFont::Centre);
-            }
-            else if (m_AIMode == AIMODE_PATROL)
-            {
-                std::snprintf(str, sizeof(str), "%s", "Patrol");
-                pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X - 9, iconPos.m_Y - 5, str, GUIFont::Right);
-            }
-            else if (m_AIMode == AIMODE_BRAINHUNT)
-            {
-                std::snprintf(str, sizeof(str), "%s", "Brainhunt");
-                pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X + 9, iconPos.m_Y - 5, str, GUIFont::Left);
-            }
-            else if (m_AIMode == AIMODE_GOLDDIG)
-            {
-                std::snprintf(str, sizeof(str), "%s", "Gold Dig");
-                pSmallFont->DrawAligned(&allegroBitmap, iconPos.m_X, iconPos.m_Y + 8, str, GUIFont::Centre);
-            }
-
-            // Draw the mode alternatives if they are not the current one
-            if (m_AIMode != AIMODE_SENTRY)
-            {
-                draw_sprite(pTargetBitmap, m_apAIIcons[AIMODE_SENTRY], iconPos.m_X - 6, iconPos.m_Y - 6 - iconOff);
-            }
-            if (m_AIMode != AIMODE_PATROL)
-            {
-                draw_sprite(pTargetBitmap, m_apAIIcons[AIMODE_PATROL], iconPos.m_X - 6 - iconOff, iconPos.m_Y - 6);
-            }
-            if (m_AIMode != AIMODE_BRAINHUNT)
-            {
-                draw_sprite(pTargetBitmap, m_apAIIcons[AIMODE_BRAINHUNT], iconPos.m_X - 6 + iconOff, iconPos.m_Y - 6);
-            }
-            if (m_AIMode != AIMODE_GOLDDIG)
-            {
-                draw_sprite(pTargetBitmap, m_apAIIcons[AIMODE_GOLDDIG], iconPos.m_X - 6, iconPos.m_Y - 6 + iconOff);
-            }
-        }
-*/
-    }
-
-    // AI mode state debugging
-#ifdef DEBUG_BUILD
-
-    AllegroBitmap allegroBitmap(pTargetBitmap);
-    Vector drawPos = m_Pos - targetPos;
-
-    // Dig state
-    if (m_DigState == PREDIG)
-        std::snprintf(str, sizeof(str), "PREDIG");
-    else if (m_DigState == STARTDIG)
-        std::snprintf(str, sizeof(str), "STARTDIG");
-    else if (m_DigState == TUNNELING)
-        std::snprintf(str, sizeof(str), "TUNNELING");
-    else if (m_DigState == FINISHINGDIG)
-        std::snprintf(str, sizeof(str), "FINISHINGDIG");
-    else if (m_DigState == PAUSEDIGGER)
-        std::snprintf(str, sizeof(str), "PAUSEDIGGER");
-    else
-        std::snprintf(str, sizeof(str), "NOTDIGGING");
-    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-
-    // Device State
-    if (m_DeviceState == POINTING)
-        std::snprintf(str, sizeof(str), "POINTING");
-    else if (m_DeviceState == SCANNING)
-        std::snprintf(str, sizeof(str), "SCANNING");
-    else if (m_DeviceState == AIMING)
-        std::snprintf(str, sizeof(str), "AIMING");
-    else if (m_DeviceState == FIRING)
-        std::snprintf(str, sizeof(str), "FIRING");
-    else if (m_DeviceState == THROWING)
-        std::snprintf(str, sizeof(str), "THROWING");
-    else if (m_DeviceState == DIGGING)
-        std::snprintf(str, sizeof(str), "DIGGING");
-    else
-        std::snprintf(str, sizeof(str), "STILL");
-    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-
-    // Jump State
-    if (m_JumpState == FORWARDJUMP)
-        std::snprintf(str, sizeof(str), "FORWARDJUMP");
-    else if (m_JumpState == PREUPJUMP)
-        std::snprintf(str, sizeof(str), "PREUPJUMP");
-    else if (m_JumpState == UPJUMP)
-        std::snprintf(str, sizeof(str), "UPJUMP");
-    else if (m_JumpState == APEXJUMP)
-        std::snprintf(str, sizeof(str), "APEXJUMP");
-    else if (m_JumpState == LANDJUMP)
-        std::snprintf(str, sizeof(str), "LANDJUMP");
-    else
-        std::snprintf(str, sizeof(str), "NOTJUMPING");
-    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-
-    if (m_Status == STABLE)
-        std::snprintf(str, sizeof(str), "STABLE");
-    else if (m_Status == UNSTABLE)
-        std::snprintf(str, sizeof(str), "UNSTABLE");
-    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-
-#endif
-
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

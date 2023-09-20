@@ -466,17 +466,17 @@ void SceneEditorGUI::Update()
 	m_PieMenu->Update();
 
     // Show the pie menu only when the secondary button is held down
-    if (m_pController->IsState(PRESS_SECONDARY) && m_EditorGUIMode != INACTIVE && m_EditorGUIMode != PICKINGOBJECT) {
-		m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
-		m_PieMenu->SetEnabled(true);
+    if (m_pController->IsState(PIE_MENU_ACTIVE) && m_EditorGUIMode != INACTIVE && m_EditorGUIMode != PICKINGOBJECT) {
+        m_PieMenu->SetEnabled(true);
+        m_PieMenu->SetPos(m_GridSnapping ? g_SceneMan.SnapPosition(m_CursorPos) : m_CursorPos);
 
-		std::array<PieSlice *, 2> infrontAndBehindPieSlices = { m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorInFront), m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorBehind) };
-		for (PieSlice *pieSlice : infrontAndBehindPieSlices) {
-			if (pieSlice) { pieSlice->SetEnabled(m_EditorGUIMode == ADDINGOBJECT); }
-		}
+        std::array<PieSlice*, 2> infrontAndBehindPieSlices = { m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorInFront), m_PieMenu->GetFirstPieSliceByType(PieSlice::SliceType::EditorBehind) };
+        for (PieSlice* pieSlice : infrontAndBehindPieSlices) {
+            if (pieSlice) { pieSlice->SetEnabled(m_EditorGUIMode == ADDINGOBJECT); }
+        }
+    } else {
+        m_PieMenu->SetEnabled(false); 
     }
-
-	if (!m_pController->IsState(PIE_MENU_ACTIVE) || m_EditorGUIMode == INACTIVE || m_EditorGUIMode == PICKINGOBJECT) { m_PieMenu->SetEnabled(false); }
 
     ///////////////////////////////////////
     // Handle pie menu selections
@@ -535,7 +535,7 @@ void SceneEditorGUI::Update()
             // Set the std::list order to be at the end so new objects are added there
             m_ObjectListOrder = -1;
             // Update the object
-            m_pCurrentObject->Update();
+            m_pCurrentObject->FullUpdate();
             // Update the path to the brain, or clear it if there's none
             UpdateBrainPath();
 
@@ -619,7 +619,7 @@ void SceneEditorGUI::Update()
             {
                 // Set and update the cursor object
                 if (SetCurrentObject(dynamic_cast<SceneObject *>(pNewObject->Clone())))
-                    m_pCurrentObject->Update();
+                    m_pCurrentObject->FullUpdate();
             }
         }
         else if (m_pController->IsState(SCROLL_DOWN) || m_pController->IsState(ControlState::ACTOR_PREV))
@@ -630,7 +630,7 @@ void SceneEditorGUI::Update()
             {
                 // Set and update the object
                 if (SetCurrentObject(dynamic_cast<SceneObject *>(pNewObject->Clone())))
-                    m_pCurrentObject->Update();
+                    m_pCurrentObject->FullUpdate();
             }
         }
 
@@ -878,7 +878,7 @@ void SceneEditorGUI::Update()
         // Only place if the picker and pie menus are completely out of view, to avoid immediate placing after picking
         else if (m_pCurrentObject && m_pController->IsState(RELEASE_PRIMARY) && !m_pPicker->IsVisible())
         {
-            m_pCurrentObject->Update();
+            m_pCurrentObject->FullUpdate();
 
             // Placing governor brain, which actually just puts it back into the resident brain roster
             if (m_PreviousMode == INSTALLINGBRAIN)
@@ -1349,10 +1349,10 @@ void SceneEditorGUI::Update()
         m_CursorOffset.Reset();
 
     // Keep the cursor position within the world
-    bool cursorWrapped = g_SceneMan.ForceBounds(m_CursorPos);
+    g_SceneMan.ForceBounds(m_CursorPos);
 // TODO: make setscrolltarget with 'sloppy' target
     // Scroll to the cursor's scene position
-    g_CameraMan.SetScrollTarget(m_CursorPos, 0.3, cursorWrapped, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
+    g_CameraMan.SetScrollTarget(m_CursorPos, 0.3, g_ActivityMan.GetActivity()->ScreenOfPlayer(m_pController->GetPlayer()));
     // Apply the cursor position to the currently held object
     if (m_pCurrentObject && m_DrawCurrentObject)
     {
@@ -1363,7 +1363,7 @@ void SceneEditorGUI::Update()
             pCurrentActor->SetStatus(Actor::INACTIVE);
             pCurrentActor->GetController()->SetDisabled(true);
         }
-        m_pCurrentObject->Update();
+        m_pCurrentObject->FullUpdate();
     }
 
     // Animate the reveal index so it is clear which order blueprint things are placed/built

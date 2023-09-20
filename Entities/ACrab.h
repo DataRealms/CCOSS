@@ -67,6 +67,7 @@ public:
 
 // Concrete allocation and cloning definitions
 	EntityAllocation(ACrab);
+	AddScriptFunctionNames(Actor, "OnStride");
 	SerializableOverrideMethods;
 	ClassInfoGetters;
 	DefaultPieMenuNameGetter(HasObjectInGroup("Turrets") ? "Default Turret Pie Menu" : "Default Crab Pie Menu");
@@ -419,26 +420,20 @@ int FirearmActivationDelay() const;
 	BITMAP * GetGraphicalIcon() const override;
 
 
+	/// <summary>
+	/// Gets whether this ACrab has just taken a stride this frame.
+	/// </summary>
+	/// <returns>Whether this ACrab has taken a stride this frame or not.</returns>
+	bool StrideFrame() const { return m_StrideFrame; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateMovePath
+// Virtual method:  PreControllerUpdate
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the path to move along to the currently set movetarget.
+// Description:     Update called prior to controller update. Ugly hack. Supposed to be done every frame.
 // Arguments:       None.
 // Return value:    None.
 
-	bool UpdateMovePath() override;
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateAI
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' AI state. Supposed to be done every frame that this has
-//                  a CAI controller controlling it.
-// Arguments:       None.
-// Return value:    None.
-
-	void UpdateAI() override;
-
+	void PreControllerUpdate() override;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Update
@@ -572,6 +567,11 @@ int FirearmActivationDelay() const;
 
 protected:
 
+    /// <summary>
+    /// Function that is called when we get a new movepath.
+	/// This processes and cleans up the movepath.
+    /// </summary>
+    void OnNewMovePath() override;
 
 	// Member variables
 	static Entity::ClassInfo m_sClass;
@@ -611,6 +611,8 @@ protected:
 	Timer m_IconBlinkTimer;
 	// Current movement state.
 	MovementState m_MoveState;
+	// Whether a stride was taken this frame or not.
+	bool m_StrideFrame = false;
 	// Limb paths for different movement states.
 	// First which side, then which background/foreground, then the movement state
 	LimbPath m_Paths[SIDECOUNT][LAYERCOUNT][MOVEMENTSTATECOUNT];

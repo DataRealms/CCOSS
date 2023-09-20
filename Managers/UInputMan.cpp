@@ -903,6 +903,7 @@ namespace RTE {
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
 			if (!g_MetaMan.GameInProgress() && !g_ActivityMan.ActivitySetToRestart()) {
+				g_ActivityMan.SetRestartActivity(FlagCtrlState() && KeyPressed(SDLK_r) || AnyBackPress());
 				g_ActivityMan.SetRestartActivity((FlagCtrlState() && KeyPressed(SDLK_r)) || AnyBackPress());
 			}
 			if (g_ActivityMan.ActivitySetToRestart()) {
@@ -967,7 +968,11 @@ namespace RTE {
 			} else if (KeyPressed(SDLK_F4)) {
 				g_ConsoleMan.SaveInputLog("Console.input.log");
 			} else if (KeyPressed(SDLK_F5)) {
-				g_ActivityMan.SaveCurrentGame("QuickSave");
+				if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->CanBeUserSaved()) {
+					g_ActivityMan.SaveCurrentGame("QuickSave");
+				} else {
+					RTEError::ShowMessageBox("Cannot Save Game - This Activity Does Not Allow QuickSaving!");
+				}
 			} else if (KeyPressed(SDLK_F9)) {
 				g_ActivityMan.LoadAndLaunchGame("QuickSave");
 			} else if (KeyPressed(SDLK_F10)) {

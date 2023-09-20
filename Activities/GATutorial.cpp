@@ -12,9 +12,11 @@
 // Inclusions of header files
 
 #include "GATutorial.h"
+
 #include "SceneMan.h"
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "FrameMan.h"
 #include "UInputMan.h"
 #include "ConsoleMan.h"
 #include "AudioMan.h"

@@ -774,17 +774,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
     void ResetAllTimers() override;
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateMovePath
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates the path to move along to the currently set movetarget.
-// Arguments:       None.
-// Return value:    None.
-
-	bool UpdateMovePath() override;
-
-
 	/// <summary>
 	/// Detects slopes in terrain and updates the walk path rotation for the corresponding Layer accordingly.
 	/// </summary>
@@ -806,21 +795,25 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	void SetWalkAngle(AHuman::Layer whichLayer, float angle) { m_WalkAngle[whichLayer] = Matrix(angle); }
 
 	/// <summary>
+	/// Gets whether this AHuman has just taken a stride this frame.
+	/// </summary>
+	/// <returns>Whether this AHuman has taken a stride this frame or not.</returns>
+    bool StrideFrame() const { return m_StrideFrame; }
+
+	/// <summary>
 	/// Gets whether this AHuman is currently attempting to climb something, using arms.
 	/// </summary>
 	/// <returns>Whether this AHuman is currently climbing or not.</returns>
 	bool IsClimbing() const { return m_ArmClimbing[FGROUND] || m_ArmClimbing[BGROUND]; }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  UpdateAI
+// Virtual method:  PreControllerUpdate
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' AI state. Supposed to be done every frame that this has
-//                  a CAI controller controlling it.
+// Description:     Update called prior to controller update. Ugly hack. Supposed to be done every frame.
 // Arguments:       None.
 // Return value:    None.
 
-	void UpdateAI() override;
+    void PreControllerUpdate() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -979,6 +972,11 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 
 protected:
 
+    /// <summary>
+    /// Function that is called when we get a new movepath.
+    /// This processes and cleans up the movepath.
+    /// </summary>
+    void OnNewMovePath() override;
 
 	/// <summary>
 	/// Draws an aiming aid in front of this AHuman for throwing.
@@ -1044,6 +1042,8 @@ protected:
     bool m_Aiming;
     // Whether the BG Arm is helping with locomotion or not.
     bool m_ArmClimbing[2];
+    // Whether a stride was taken this frame or not.
+    bool m_StrideFrame = false;
     // Controls the start of leg synch.
     bool m_StrideStart;
     // Times the stride to see if it is taking too long and needs restart

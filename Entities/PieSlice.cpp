@@ -174,7 +174,7 @@ namespace RTE {
 			std::string filePath = m_LuabindFunctionObject->GetFilePath();
 			std::unordered_map<std::string, LuabindObjectWrapper *> scriptFileFunctions;
 
-			status = g_LuaMan.RunScriptFileAndRetrieveFunctions(filePath, { m_FunctionName }, scriptFileFunctions);
+			status = g_LuaMan.GetMasterScriptState().RunScriptFileAndRetrieveFunctions(filePath, { m_FunctionName }, scriptFileFunctions);
 			if (scriptFileFunctions.find(m_FunctionName) != scriptFileFunctions.end()) {
 				m_LuabindFunctionObject = std::unique_ptr<LuabindObjectWrapper>(scriptFileFunctions.at(m_FunctionName));
 			}

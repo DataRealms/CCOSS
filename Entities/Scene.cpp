@@ -12,8 +12,10 @@
 // Inclusions of header files
 
 #include "Scene.h"
+
 #include "PresetMan.h"
 #include "MovableMan.h"
+#include "FrameMan.h"
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
 #include "MetaMan.h"
@@ -45,6 +47,9 @@ namespace RTE {
 
 ConcreteClassInfo(Scene, Entity, 0);
 const std::string Scene::Area::c_ClassName = "Area";
+
+// Holds the path calculated by CalculateScenePath
+thread_local std::list<Vector> s_ScenePath;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -471,7 +476,6 @@ void Scene::Clear()
 	m_AreaList.clear();
     m_Locked = false;
     m_GlobalAcc.Reset();
-    m_ScenePath.clear();
 	m_SelectedAssemblies.clear();
     m_AssembliesCounts.clear();
 	m_pPreviewBitmap = 0;
@@ -926,13 +930,8 @@ int Scene::LoadData(bool placeObjects, bool initPathfinding, bool placeUnits)
 		// Create the pathfinding stuff based on the current scene
 		int pathFinderGridNodeSize = g_SettingsMan.GetPathFinderGridNodeSize();
 
-		// TODO: test dynamically setting this. The code below sets it based on map area and block size, with a hefty upper limit.
-		//int sceneArea = GetWidth() * GetHeight();
-		//unsigned int numberOfBlocksToAllocate = std::min(128000, sceneArea / (pathFinderGridNodeSize * pathFinderGridNodeSize));
-		unsigned int numberOfBlocksToAllocate = 4000;
-
         for (int i = 0; i < m_pPathFinders.size(); ++i) {
-            m_pPathFinders[i] = std::make_unique<PathFinder>(pathFinderGridNodeSize, numberOfBlocksToAllocate);
+            m_pPathFinders[i] = std::make_unique<PathFinder>(pathFinderGridNodeSize);
         }
         ResetPathFinding();
     }
@@ -1462,17 +1461,15 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	}
 
 	writer.NewPropertyWithValue("Position", sceneObjectToSave->GetPos());
-	if (saveFullData || sceneObjectToSave->GetTeam() != Activity::Teams::NoTeam) {
-		writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
-	}
-	if (!isChildAttachable && (saveFullData || sceneObjectToSave->GetPlacedByPlayer() != Players::NoPlayer)) {
+	writer.NewPropertyWithValue("Team", sceneObjectToSave->GetTeam());
+	if (!isChildAttachable) {
 		writer.NewPropertyWithValue("PlacedByPlayer", sceneObjectToSave->GetPlacedByPlayer());
 	}
 	if (saveFullData) {
 		writer.NewPropertyWithValue("GoldValue", sceneObjectToSave->GetGoldValue());
 	}
 
-	if (const Deployment *deploymentToSave = dynamic_cast<const Deployment *>(sceneObjectToSave); saveFullData && deploymentToSave && deploymentToSave->GetID() != 0) {
+	if (const Deployment *deploymentToSave = dynamic_cast<const Deployment *>(sceneObjectToSave); deploymentToSave && deploymentToSave->GetID() != 0) {
 		writer.NewPropertyWithValue("ID", deploymentToSave->GetID());
 	}
 
@@ -1596,9 +1593,9 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 	}
 
 	if (const Actor *actorToSave = dynamic_cast<const Actor *>(sceneObjectToSave)) {
+		writer.NewPropertyWithValue("Health", actorToSave->GetHealth());
+		writer.NewPropertyWithValue("MaxHealth", actorToSave->GetMaxHealth());
 		if (saveFullData) {
-			writer.NewPropertyWithValue("Health", actorToSave->GetHealth());
-			writer.NewPropertyWithValue("MaxHealth", actorToSave->GetMaxHealth());
 			writer.NewPropertyWithValue("Status", actorToSave->GetStatus());
 			writer.NewPropertyWithValue("PlayerControllable", actorToSave->IsPlayerControllable());
 
@@ -2218,12 +2215,12 @@ void Scene::UpdatePlacedObjects(int whichSet)
     {
         for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player)
             if (m_ResidentBrains[player])
-                m_ResidentBrains[player]->Update();
+                m_ResidentBrains[player]->FullUpdate();
     }
 
     for (std::list<SceneObject *>::iterator itr = m_PlacedObjects[whichSet].begin(); itr != m_PlacedObjects[whichSet].end(); ++itr)
     {
-        (*itr)->Update();
+        (*itr)->FullUpdate();
     }
 }
 
@@ -2956,6 +2953,13 @@ void Scene::ResetPathFinding() {
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void Scene::BlockUntilAllPathingRequestsComplete() {
+	for (int team = Activity::Teams::NoTeam; team < Activity::Teams::MaxTeamCount; ++team) {
+		while (GetPathFinder(static_cast<Activity::Teams>(team))->GetCurrentPathingRequests() != 0) {};
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          UpdatePathFinding
@@ -2967,6 +2971,15 @@ void Scene::UpdatePathFinding()
 {
     constexpr int nodeUpdatesPerCall = 100;
     constexpr int maxUnupdatedMaterialAreas = 1000;
+
+    // If any pathing requests are active, don't update things yet, wait till they're finished
+	// TODO: this can indefinitely block updates if pathing requests are made every frame. Figure out a solution for this
+	// Either force-complete pathing requests occasionally, or delay starting new pathing requests if we've not updated in a while
+    for (int team = Activity::Teams::NoTeam; team < Activity::Teams::MaxTeamCount; ++team) {
+		if (GetPathFinder(static_cast<Activity::Teams>(team))->GetCurrentPathingRequests() != 0) {
+            return;
+        };
+	}
 
     int nodesToUpdate = nodeUpdatesPerCall / g_ActivityMan.GetActivity()->GetTeamCount();
     if (m_pTerrain->GetUpdatedMaterialAreas().size() > maxUnupdatedMaterialAreas) {
@@ -3017,6 +3030,21 @@ float Scene::CalculatePath(const Vector &start, const Vector &end, std::list<Vec
     return false;
 }
 
+std::shared_ptr<volatile PathRequest> Scene::CalculatePathAsync(const Vector &start, const Vector &end, float digStrength, Activity::Teams team, PathCompleteCallback callback) {
+    if (const std::unique_ptr<PathFinder> &pathFinder = GetPathFinder(team)) {
+        return pathFinder->CalculatePathAsync(start, end, digStrength, callback);
+    }
+
+    return nullptr;
+}
+
+int Scene::GetScenePathSize() const {
+    return s_ScenePath.size();
+}
+
+std::list<Vector>& Scene::GetScenePath() {
+    return s_ScenePath;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Lock

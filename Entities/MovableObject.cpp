@@ -72,15 +72,17 @@ void MovableObject::Clear()
     m_MOID = g_NoMOID;
     m_RootMOID = g_NoMOID;
     m_HasEverBeenAddedToMovableMan = false;
-	m_ExistsInMovableMan = false;
     m_MOIDFootprint = 0;
     m_AlreadyHitBy.clear();
 	m_VelOscillations = 0;
     m_ToSettle = false;
     m_ToDelete = false;
     m_HUDVisible = true;
+    m_IsTraveling = false;
     m_AllLoadedScripts.clear();
     m_FunctionsAndScripts.clear();
+    m_ThreadedLuaState = nullptr;
+    m_HasSinglethreadedScripts = false;
     m_ScriptObjectName.clear();
     m_ScreenEffectFile.Reset();
     m_pScreenEffect = 0;
@@ -111,10 +113,27 @@ void MovableObject::Clear()
 	m_TerrainMatHit = g_MaterialAir;
 	m_ParticleUniqueIDHit = 0;
 
+    m_LastCollisionSimFrameNumber = 0;
+
 	m_SimUpdatesBetweenScriptedUpdates = 1;
     m_SimUpdatesSinceLastScriptedUpdate = 0;
 }
 
+LuaStateWrapper & MovableObject::GetAndLockStateForScript(const std::string &scriptPath) {
+    // Initialize our threaded state if required
+    if (g_LuaMan.IsScriptThreadSafe(scriptPath)) {
+        if (m_ThreadedLuaState == nullptr) {
+            m_ThreadedLuaState = g_LuaMan.GetAndLockFreeScriptState();
+        } else {
+            m_ThreadedLuaState->GetMutex().lock();
+        }
+        return *m_ThreadedLuaState;
+    }
+
+    m_HasSinglethreadedScripts = true;
+    g_LuaMan.GetMasterScriptState().GetMutex().lock();
+    return g_LuaMan.GetMasterScriptState();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Create
@@ -501,7 +520,21 @@ int MovableObject::Save(Writer &writer) const
 void MovableObject::Destroy(bool notInherited) {
     if (ObjectScriptsInitialized()) {
         RunScriptedFunctionInAppropriateScripts("Destroy");
-        g_LuaMan.RunScriptString(m_ScriptObjectName + " = nil;");
+
+        if (m_ThreadedLuaState) {
+            std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex());
+            m_ThreadedLuaState->RunScriptString(m_ScriptObjectName + " = nil;");
+        }
+
+        if (m_HasSinglethreadedScripts) {
+            // Shouldn't ever happen (destruction is delayed in movableman to happen in singlethreaded manner), but lets check just in case
+            if (g_LuaMan.GetThreadLuaStateOverride() || !g_LuaMan.GetMasterScriptState().GetMutex().try_lock()) {
+                RTEAbort("Failed to destroy object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
+            } else {
+                std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex(), std::adopt_lock);
+                g_LuaMan.GetMasterScriptState().RunScriptString(m_ScriptObjectName + " = nil;");
+            }
+        }
     }
 	g_MovableMan.UnregisterObject(this);
     if (!notInherited) { SceneObject::Destroy(); }
@@ -519,12 +552,15 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 		return -3;
 	}
 
+    LuaStateWrapper& usedState = GetAndLockStateForScript(scriptPath);
+    std::lock_guard<std::recursive_mutex> lock(usedState.GetMutex(), std::adopt_lock);
+
 	std::string luaClearSupportedFunctionsString;
 	luaClearSupportedFunctionsString.reserve(160);
 	for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
 		luaClearSupportedFunctionsString += functionName + " = nil;";
 	}
-	if (g_LuaMan.RunScriptString(luaClearSupportedFunctionsString) < 0) {
+	if (usedState.RunScriptString(luaClearSupportedFunctionsString) < 0) {
 		return -4;
 	}
 
@@ -537,14 +573,14 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 	m_AllLoadedScripts.try_emplace(scriptPath, loadAsEnabledScript);
 
 	std::unordered_map<std::string, LuabindObjectWrapper *> scriptFileFunctions;
-	if (g_LuaMan.RunScriptFileAndRetrieveFunctions(scriptPath, GetSupportedScriptFunctionNames(), scriptFileFunctions) < 0) {
+	if (usedState.RunScriptFileAndRetrieveFunctions(scriptPath, GetSupportedScriptFunctionNames(), scriptFileFunctions) < 0) {
 		return -5;
 	}
 	for (const auto &[functionName, functionObject] : scriptFileFunctions) {
 		m_FunctionsAndScripts.at(functionName).emplace_back(std::unique_ptr<LuabindObjectWrapper>(functionObject));
 	}
 
-	g_LuaMan.RunScriptString(luaClearSupportedFunctionsString);
+	usedState.RunScriptString(luaClearSupportedFunctionsString);
 
 	if (ObjectScriptsInitialized()) {
 		RunFunctionOfScript(scriptPath, "Create");
@@ -587,12 +623,23 @@ int MovableObject::ReloadScripts() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::InitializeObjectScripts() {
-	g_LuaMan.SetTempEntity(this);
+    auto createScriptedObjectInState = [&](LuaStateWrapper &luaState) {
+        luaState.SetTempEntity(this);
+        m_ScriptObjectName = "_ScriptedObjects[\"" + std::to_string(m_UniqueID) + "\"]";
+        if (luaState.RunScriptString("_ScriptedObjects = _ScriptedObjects or {}; " + m_ScriptObjectName + " = To" + GetClassName() + "(LuaMan.TempEntity); ") < 0) {
+            RTEAbort("Failed to initialize object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
+        }
+    };
+    
+    if (m_ThreadedLuaState) {
+        std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex());
+        createScriptedObjectInState(*m_ThreadedLuaState);
+    }
 
-	m_ScriptObjectName = "_ScriptedObjects[\"" + std::to_string(m_UniqueID) + "\"]";
-	if (g_LuaMan.RunScriptString("_ScriptedObjects = _ScriptedObjects or {}; " + m_ScriptObjectName + " = To" + GetClassName() + "(LuaMan.TempEntity); ") < 0) {
-		RTEAbort("Failed to initialize object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
-	}
+    if (m_HasSinglethreadedScripts) {
+        std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex());
+        createScriptedObjectInState(g_LuaMan.GetMasterScriptState());
+    }
 
 	if (!m_FunctionsAndScripts.at("Create").empty() && RunScriptedFunctionInAppropriateScripts("Create", false, true) < 0) {
 		m_ScriptObjectName = "ERROR";
@@ -631,20 +678,32 @@ void MovableObject::EnableOrDisableAllScripts(bool enableScripts) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
+int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, ThreadScriptsToRun scriptsToRun) {
     int status = 0;
 
     auto itr = m_FunctionsAndScripts.find(functionName);
     if (itr == m_FunctionsAndScripts.end() || itr->second.empty()) {
-        status = -1;
-    } else if (!ObjectScriptsInitialized()) {
+        return -1;
+    } 
+    
+    if (!ObjectScriptsInitialized()) {
         status = InitializeObjectScripts();
     }
 
     if (status >= 0) {
         for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : itr->second) {
-            if (runOnDisabledScripts || m_AllLoadedScripts.at(functionObjectWrapper->GetFilePath()) == true) {
-				status = g_LuaMan.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments);
+            bool scriptIsThreadSafe = g_LuaMan.IsScriptThreadSafe(functionObjectWrapper->GetFilePath());
+            bool scriptIsSuitableForThread = scriptsToRun == ThreadScriptsToRun::SingleThreaded ? !scriptIsThreadSafe :
+                                             scriptsToRun == ThreadScriptsToRun::MultiThreaded  ? scriptIsThreadSafe :
+                                                                                                  true;
+            if (!scriptIsSuitableForThread) {
+                continue;
+            }
+
+            if (runOnDisabledScripts || m_AllLoadedScripts.at(functionObjectWrapper->GetFilePath())) {
+                LuaStateWrapper& usedState = GetAndLockStateForScript(functionObjectWrapper->GetFilePath());
+                std::lock_guard<std::recursive_mutex> lock(usedState.GetMutex(), std::adopt_lock);   
+				status = usedState.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments);
                 if (status < 0 && stopOnError) {
                     return status;
                 }
@@ -656,13 +715,16 @@ int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &fu
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::RunFunctionOfScript(const std::string &scriptPath, const std::string &functionName, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) const {
-	if (m_AllLoadedScripts.empty() || !ObjectScriptsInitialized()) {
+int MovableObject::RunFunctionOfScript(const std::string &scriptPath, const std::string &functionName, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {    
+    if (m_AllLoadedScripts.empty() || !ObjectScriptsInitialized()) {
 		return -1;
 	}
 
+    LuaStateWrapper& usedState = GetAndLockStateForScript(scriptPath);
+    std::lock_guard<std::recursive_mutex> lock(usedState.GetMutex(), std::adopt_lock);
+
 	for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : m_FunctionsAndScripts.at(functionName)) {
-		if (scriptPath == functionObjectWrapper->GetFilePath() && g_LuaMan.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments) < 0) {
+		if (scriptPath == functionObjectWrapper->GetFilePath() && usedState.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments) < 0) {
 			if (m_AllLoadedScripts.size() > 1) {
 				g_ConsoleMan.PrintString("ERROR: An error occured while trying to run the " + functionName + " function for script at path " + scriptPath);
 			}
@@ -711,6 +773,24 @@ float MovableObject::GetAltitude(int max, int accuracy)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void MovableObject::AddAbsForce(const Vector &force, const Vector &absPos)
+{
+    m_Forces.push_back(std::make_pair(force, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP));
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::AddAbsImpulseForce(const Vector &impulse, const Vector &absPos)
+{
+#ifndef RELEASE_BUILD
+		RTEAssert(impulse.GetLargest() < 500000, "HUEG IMPULSE FORCE");
+#endif
+
+		m_ImpulseForces.push_back(std::make_pair(impulse, g_SceneMan.ShortestDistance(m_Pos, absPos) * c_MPP));
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void MovableObject::RestDetection() {
 	// Translational settling detection.
 	if (m_Vel.Dot(m_PrevVel) < 0) {
@@ -749,7 +829,13 @@ bool MovableObject::OnMOHit(HitData &hd)
 	return hd.Terminate[hd.RootBody[HITOR] == this ? HITOR : HITEE] = false;
 }
 
-void MovableObject::SetHitWhatTerrMaterial(unsigned char matID) {
+unsigned char MovableObject::HitWhatTerrMaterial() const
+{
+    return m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber() ? m_TerrainMatHit : g_MaterialAir;
+}
+
+void MovableObject::SetHitWhatTerrMaterial(unsigned char matID)
+{
     m_TerrainMatHit = matID;
     m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber();
     RunScriptedFunctionInAppropriateScripts("OnCollideWithTerrain", false, false, {}, {std::to_string(m_TerrainMatHit)});
@@ -922,20 +1008,6 @@ void MovableObject::PostTravel()
 	m_DistanceTravelled += m_Vel.GetMagnitude() * c_PPM * g_TimerMan.GetDeltaTimeSecs();
 }
 
-/*
-//////////////////////////////////////////////////////////////////////////////////////////
-// Pure v. method:  Update
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this MovableObject. Supposed to be done every frame. This also
-//                  applies and clear the accumulated impulse forces (impulses), and the
-//                  transferred forces of MOs attached to this.
-
-void MovableObject::Update()
-{
-    return;
-}
-*/
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::Update() {
@@ -954,7 +1026,7 @@ void MovableObject::Draw(BITMAP* targetBitmap, const Vector& targetPos, DrawMode
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::UpdateScripts() {
+int MovableObject::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
 	m_SimUpdatesSinceLastScriptedUpdate++;
 
 	if (m_AllLoadedScripts.empty()) {
@@ -973,7 +1045,17 @@ int MovableObject::UpdateScripts() {
 	m_SimUpdatesSinceLastScriptedUpdate = 0;
 
 	if (status >= 0) {
-		status = RunScriptedFunctionInAppropriateScripts("Update", false, true);
+		status = RunScriptedFunctionInAppropriateScripts("Update", false, true, {}, {}, scriptsToRun);
+
+        // Perform our synced updates to let multithreaded scripts do anything that interacts with stuff in a non-const way
+        // This is identical to non-multithreaded script's Update()
+        // TODO - in future, enforce that everything in MultiThreaded Update() is const, so non-const actions must be performed in SyncedUpdate
+        // This would require a bunch of Lua binding fuckery, but eventually maybe it'd be possible.
+        // I wonder if we can do some SFINAE magic to make the luabindings automagically do a no-op with const objects, to avoid writing the bindings twice
+        if (status >= -1 && scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
+            // If we're in a SingleThreaded context, we run the MultiThreaded scripts synced updates:
+            status = RunScriptedFunctionInAppropriateScripts("SyncedUpdate", false, true, {}, {}, ThreadScriptsToRun::Both);
+        }
 	}
 
 	return status;
@@ -1011,10 +1093,32 @@ void MovableObject::UpdateMOID(std::vector<MovableObject *> &MOIDIndex, MOID roo
 
 void MovableObject::GetMOIDs(std::vector<MOID> &MOIDs) const
 {
-	if (m_MOID != g_NoMOID)
+	if (m_MOID != g_NoMOID) {
 		MOIDs.push_back(m_MOID);
+    }
 }
 
+MOID MovableObject::HitWhatMOID() const
+{
+    return m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber() ? m_MOIDHit : g_NoMOID;
+}
+
+void MovableObject::SetHitWhatMOID(MOID id)
+{
+    m_MOIDHit = id;
+    m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber();
+}
+
+long int MovableObject::HitWhatParticleUniqueID() const
+{
+    return m_LastCollisionSimFrameNumber == g_MovableMan.GetSimUpdateFrameNumber() ? m_ParticleUniqueIDHit : 0;
+}
+
+void MovableObject::SetHitWhatParticleUniqueID(long int id)
+{
+    m_ParticleUniqueIDHit = id;
+    m_LastCollisionSimFrameNumber = g_MovableMan.GetSimUpdateFrameNumber();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  RegMOID
@@ -1094,7 +1198,10 @@ bool MovableObject::DrawToTerrain(SLTerrain *terrain) {
 		g_SceneMan.RegisterTerrainChange(tempBitmapPos.GetFloorIntX(), tempBitmapPos.GetFloorIntY(), tempBitmap->w, tempBitmap->h, ColorKeys::g_MaskColor, false);
 	} else {
 		Draw(terrain->GetFGColorBitmap(), Vector(), DrawMode::g_DrawColor, true);
-		Draw(terrain->GetMaterialBitmap(), Vector(), DrawMode::g_DrawMaterial, true);
+		Material const *terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY()));
+		if (GetMaterial()->GetPriority() > terrMat->GetPriority()) {
+			Draw(terrain->GetMaterialBitmap(), Vector(), DrawMode::g_DrawMaterial, true);
+		}
 		g_SceneMan.RegisterTerrainChange(m_Pos.GetFloorIntX(), m_Pos.GetFloorIntY(), 1, 1, DrawMode::g_DrawColor, false);
 	}
 	return true;

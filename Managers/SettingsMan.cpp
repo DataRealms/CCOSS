@@ -44,6 +44,8 @@ namespace RTE {
 		m_ShowForeignItems = true;
 		m_ShowMetaScenes = false;
 
+		m_EnableMultithreadedLua = true;
+		m_DisableLuaJIT = false;
 		m_RecommendedMOIDCount = 512;
 		m_SimplifiedCollisionDetection = false;
 		m_SceneBackgroundAutoScaleMode = 1;
@@ -88,7 +90,15 @@ namespace RTE {
 			Reader newSettingsReader(m_SettingsPath, false, nullptr, false, true);
 			return Serializable::Create(newSettingsReader);
 		}
-		return Serializable::Create(settingsReader);
+
+		int failureCode = Serializable::Create(settingsReader);
+
+		if (GetAnyExperimentalSettingsEnabled()) {
+			// Show a message box to annoy people as much as possible while they're using experimental settings, so they can't leave it on accidentally
+			RTEError::ShowMessageBox("Experimental settings are enabled!\nThis may break mods, crash the game, corrupt saves or worse.\nUse at your own risk.");
+		}
+
+		return failureCode;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,7 +199,7 @@ namespace RTE {
 		}); MatchProperty("DefaultSceneName", {
 			reader >> g_SceneMan.m_DefaultSceneName;
 		}); MatchProperty("DisableLuaJIT", {
-			reader >> g_LuaMan.m_DisableLuaJIT;
+			reader >> m_DisableLuaJIT;
 		}); MatchProperty("RecommendedMOIDCount", {
 			reader >> m_RecommendedMOIDCount;
 		}); MatchProperty("SimplifiedCollisionDetection", {
@@ -202,6 +212,8 @@ namespace RTE {
 			reader >> m_DisableFactionBuyMenuThemeCursors;
 		}); MatchProperty("PathFinderGridNodeSize", {
 			reader >> m_PathFinderGridNodeSize;
+		}); MatchProperty("EnableMultithreadedLua", {
+			reader >> m_EnableMultithreadedLua;
 		}); MatchProperty("AIUpdateInterval", {
 			reader >> m_AIUpdateInterval;
 		}); MatchProperty("EnableParticleSettling", {
@@ -387,7 +399,8 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Engine Settings", false);
 		writer.NewLine(false);
-		writer.NewPropertyWithValue("DisableLuaJIT", g_LuaMan.m_DisableLuaJIT);
+		writer.NewPropertyWithValue("EnableMultithreadedLua", m_EnableMultithreadedLua);
+		writer.NewPropertyWithValue("DisableLuaJIT", m_DisableLuaJIT);
 		writer.NewPropertyWithValue("RecommendedMOIDCount", m_RecommendedMOIDCount);
 		writer.NewPropertyWithValue("SimplifiedCollisionDetection", m_SimplifiedCollisionDetection);
 		writer.NewPropertyWithValue("SceneBackgroundAutoScaleMode", m_SceneBackgroundAutoScaleMode);
@@ -399,6 +412,13 @@ namespace RTE {
 		writer.NewPropertyWithValue("EnableMOSubtraction", g_MovableMan.m_MOSubtractionEnabled);
 		writer.NewPropertyWithValue("DeltaTime", g_TimerMan.GetDeltaTimeSecs());
 		writer.NewPropertyWithValue("RealToSimCap", g_TimerMan.GetRealToSimCap());
+		
+		// No experimental settings right now :)
+		//writer.NewLine(false, 2);
+		//writer.NewDivider(false);
+		//writer.NewLineString("// Engine Settings - EXPERIMENTAL", false);
+		//writer.NewLineString("// These settings are experimental! They may break mods, crash the game, corrupt saves or worse. Use at your own risk.", false);
+		//writer.NewLine(false);
 
 		writer.NewLine(false, 2);
 		writer.NewDivider(false);

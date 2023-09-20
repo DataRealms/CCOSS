@@ -49,18 +49,6 @@ namespace RTE {
 		Activity * GetActivity() const { return m_Activity.get(); }
 
 		/// <summary>
-		/// Gets whether or not the currently active Activity allows saving.
-		/// </summary>
-		/// <returns>Whether or not the currently active Activity allows saving.</returns>
-		bool GetActivityAllowsSaving() const { return m_Activity && m_ActivityAllowsSaving; }
-
-		/// <summary>
-		/// Sets whether or not the currently active Activity allows saving.
-		/// </summary>
-		/// <param name="activityAllowsSaving">Whether or not the currently active Activity should allow saving.</param>
-		void SetActivityAllowsSaving(bool activityAllowsSaving) { m_ActivityAllowsSaving = activityAllowsSaving; }
-
-		/// <summary>
 		/// Gets whether or not there is a game currently being saved.
 		/// </summary>
 		/// <returns>Whether or not there is a game currently being saved.</returns>
@@ -177,6 +165,12 @@ namespace RTE {
 
 #pragma region Saving and Loading
 		/// <summary>
+		/// A utility function we can call in the debugger quickwatch window to force an abort save to occur (great for force-saving the game when it crashes)
+		/// </summary>
+		/// <returns>Whether the game was successfully saved.</returns>
+		bool ForceAbortSave();
+
+		/// <summary>
 		/// Saves the currently running Scene and Activity to a savegame file. Note this only works for GAScripted activities.
 		/// </summary>
 		/// <param name="fileName">Path to the file.</param>
@@ -283,7 +277,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates the state of this and the current Activity. Supposed to be done every frame before drawing.
 		/// </summary>
-		void Update() const { if (m_Activity) { m_Activity->Update(); } }
+		void Update();
 #pragma endregion
 
 	private:
@@ -294,7 +288,6 @@ namespace RTE {
 		std::unique_ptr<Activity> m_Activity; //!< The currently active Activity.
 		std::unique_ptr<Activity> m_StartActivity; //!< The starting condition of the next Activity to be (re)started.
 
-		bool m_ActivityAllowsSaving; //!< Whether or not the current Activity allows saving and loading. The details on whether or not an Activity allows this are set up when the Activity is started.
 		std::atomic<int> m_ActiveSavingThreadCount; //!< The number of threads currently saving.
 		bool m_IsLoading; //! Whether or not a game is loading.
 

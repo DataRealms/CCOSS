@@ -22,7 +22,13 @@ namespace RTE {
 		/// <param name="filename">Path to the file to open for writing. If the directory doesn't exist the stream will fail to open.</param>
 		/// <param name="append">Whether to append to the file if it exists, or to overwrite it.</param>
 		/// <param name="createDir">Whether to create the directory path to the file name before attempting to open the stream, in case it doesn't exist.</param>
-		Writer(const std::string &fileName, bool append = false, bool createDir = false) { Clear(); Create(fileName, append, createDir); }
+		Writer(const std::string &fileName, bool append = false, bool createDir = false);
+
+		/// <summary>
+		/// Constructor method used to instantiate a Writer object in system memory and make it ready for writing to the passed in file path.
+		/// </summary>
+		/// <param name="stream">Stream to write to.</param>
+		Writer(std::unique_ptr<std::ostream> &&stream);
 
 		/// <summary>
 		/// Makes the Writer object ready for use.
@@ -32,6 +38,13 @@ namespace RTE {
 		/// <param name="createDir">Whether to create the directory path to the file name before attempting to open the stream, in case it doesn't exist.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Create(const std::string &fileName, bool append = false, bool createDir = false);
+
+		/// <summary>
+		/// Makes the Writer object ready for use.
+		/// </summary>
+		/// <param name="stream">Stream to write to.</param>
+		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
+		int Create(std::unique_ptr<std::ostream> &&stream);
 #pragma endregion
 
 #pragma region Getters
@@ -111,12 +124,12 @@ namespace RTE {
 		/// Shows whether the writer is ready to start accepting data streamed to it.
 		/// </summary>
 		/// <returns>Whether the writer is ready to start accepting data streamed to it or not.</returns>
-		bool WriterOK() const { return m_Stream.get() && !m_Stream->fail() && m_Stream->is_open(); }
+		bool WriterOK() const { return m_Stream.get() && m_Stream->good(); }
 
 		/// <summary>
 		/// Flushes and closes the output stream of this Writer. This happens automatically at destruction but needs to be called manually if a written file must be read from in the same scope.
 		/// </summary>
-		void EndWrite() const { m_Stream->flush(); m_Stream->close(); }
+		void EndWrite() { m_Stream->flush(); m_Stream.reset(); }
 #pragma endregion
 
 #pragma region Operator Overloads
@@ -144,7 +157,7 @@ namespace RTE {
 
 	protected:
 
-		std::unique_ptr<std::ofstream> m_Stream; //!< Stream used for writing to files.
+		std::unique_ptr<std::ostream> m_Stream; //!< Stream used for writing.
 		std::string m_FilePath; //!< Currently used stream's filepath.
 		std::string m_FolderPath; //!< Only the path to the folder that we are writing a file in, excluding the filename.
 		std::string m_FileName; //!< Only the name of the currently read file, excluding the path.

@@ -9,7 +9,7 @@ namespace RTE {
 
 	void Material::Clear() {
 		m_Index = 0;
-		m_Priority = 0;
+		m_Priority = -1;
 		m_Piling = 0;
 		m_Integrity = 0.0F;
 		m_Restitution = 0.0F;

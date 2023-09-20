@@ -148,6 +148,20 @@ else
   conf_data.set('EXEPATH', prefix/get_option('bindir'))
 endif
 
+if get_option('tracy_enable')
+  add_global_arguments('-DTRACY_ENABLE', language:'cpp')
+endif
+if get_option('tracy_callstack')
+  add_global_arguments('-DTRACY_CALLSTACK=10', language:'cpp')
+endif
+if get_option('tracy_on_demand')
+  add_global_arguments('-DTRACY_ON_DEMAND', language:'cpp')
+endif
+if get_option('tracy_debuginfod')
+  deps += [dependency('libdebuginfod')]
+  add_global_arguments('-DTRACY_DEBUGINFOD', language:'cpp')
+endif
+
 #### Platform Common External Libraries ####
 external_objects = []
 external_libs = []
@@ -163,7 +177,9 @@ luabind_proj = subproject('luabind-0.7.1')
 luabind_dep = dependency('luabind')
 raknet_proj = subproject('RakNet')
 raknet_dep = dependency('RakNet')
-deps += [allegro_dep, loadpng_dep, raknet_dep, boost_dep]
+tracy_proj = subproject('tracy')
+tracy_dep = dependency('tracy')
+deps += [allegro_dep, loadpng_dep, raknet_dep, boost_dep, tracy_dep]
 
 #### Sources Setup ####
 pch = meson.current_source_dir()/'System/StandardIncludes.h'

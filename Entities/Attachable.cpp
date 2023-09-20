@@ -238,19 +238,20 @@ namespace RTE {
 			}
 		}
 
-		if (gibImpulseLimitValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
+		if (gibImpulseLimitValueToUse > 0.0F && totalImpulseForce.MagnitudeIsGreaterThan(gibImpulseLimitValueToUse)) {
+			Vector gibImpulse = totalImpulseForce;
 			jointImpulses += totalImpulseForce.SetMagnitude(gibImpulseLimitValueToUse);
-			GibThis();
+			GibThis(gibImpulse);
 			return false;
-		} else if (jointStrengthValueToUse > 0 && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {
+		} else if (jointStrengthValueToUse > 0.0F && totalImpulseForce.MagnitudeIsGreaterThan(jointStrengthValueToUse)) {
 			jointImpulses += totalImpulseForce.SetMagnitude(jointStrengthValueToUse);
+			m_ImpulseForces.emplace_back(-totalImpulseForce, Vector());
 			m_Parent->RemoveAttachable(this, true, true);
 			return false;
-		} else {
-			jointImpulses += totalImpulseForce;
 		}
 
 		m_ImpulseForces.clear();
+		jointImpulses += totalImpulseForce;
 		return true;
 	}
 

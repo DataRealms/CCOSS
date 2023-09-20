@@ -14,6 +14,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/epsilon.hpp"
+#include "tracy/Tracy.hpp"
 
 #ifdef __linux__
 #include "Resources/cccp.xpm"
@@ -751,6 +752,8 @@ namespace RTE {
 		}
 
 		SDL_GL_SwapWindow(m_PrimaryWindow.get());
+
+		FrameMark;
 	}
 
 } // namespace RTE

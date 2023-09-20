@@ -37,6 +37,12 @@
     <Filter Include="System\StackWalker">
       <UniqueIdentifier>{a8668dc1-51c5-418d-91bf-7ee92f008cb1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{c24dc7b0-ca0d-4709-a41b-c44fe77bd6ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\tracy">
+      <UniqueIdentifier>{21b72644-6ffe-4931-909e-130c40fd684f}</UniqueIdentifier>
+    </Filter>
     <Filter Include="System\glad">
       <UniqueIdentifier>{a92cf676-7096-4641-ae98-d02861c1acde}</UniqueIdentifier>
     </Filter>
@@ -601,6 +607,7 @@
       <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="Menus\SaveLoadMenuGUI.h" />
+    <ClInclude Include="System\Base64\base64.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1160,6 +1167,10 @@
       <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="Menus\SaveLoadMenuGUI.cpp" />
+    <ClCompile Include="System\Base64\base64.cpp" />
+    <ClCompile Include="external\sources\tracy\public\TracyClient.cpp">
+      <Filter>external\tracy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\ccicon.ico">

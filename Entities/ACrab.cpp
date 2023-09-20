@@ -1365,12 +1365,11 @@ void ACrab::PreControllerUpdate()
 					m_StrideSound->Play();
 				}
 			}
+
             if (restarted) {
                 m_StrideFrame = true;
                 RunScriptedFunctionInAppropriateScripts("OnStride");
             }
-
-
 		} else if (m_pLFGLeg || m_pLBGLeg || m_pRFGLeg || m_pRBGLeg) {
 			if (m_MoveState == JUMP) {
 				// TODO: Utilize jump paths in an intuitive way?

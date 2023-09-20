@@ -424,7 +424,6 @@ int FirearmActivationDelay() const;
 	/// Gets whether this ACrab has just taken a stride this frame.
 	/// </summary>
 	/// <returns>Whether this ACrab has taken a stride this frame or not.</returns>
-
 	bool StrideFrame() const { return m_StrideFrame; }
 
 //////////////////////////////////////////////////////////////////////////////////////////

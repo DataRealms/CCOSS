@@ -522,19 +522,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaAdaptersUInputMan::MouseButtonHeld(const UInputMan &uinputMan, int whichButton) {
-		return uinputMan.MouseButtonHeld(Players::PlayerOne, whichButton);
+		return uinputMan.MouseButtonHeld(whichButton, Players::PlayerOne);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaAdaptersUInputMan::MouseButtonPressed(const UInputMan &uinputMan, int whichButton) {
-		return uinputMan.MouseButtonPressed(Players::PlayerOne, whichButton);
+		return uinputMan.MouseButtonPressed(whichButton, Players::PlayerOne);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaAdaptersUInputMan::MouseButtonReleased(const UInputMan &uinputMan, int whichButton) {
-		return uinputMan.MouseButtonReleased(Players::PlayerOne, whichButton);
+		return uinputMan.MouseButtonReleased(whichButton, Players::PlayerOne);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

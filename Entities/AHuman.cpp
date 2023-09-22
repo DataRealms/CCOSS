@@ -71,6 +71,7 @@ void AHuman::Clear()
     m_Aiming = false;
     m_ArmClimbing[FGROUND] = false;
     m_ArmClimbing[BGROUND] = false;
+	m_StrideFrame = false;
     m_StrideStart = false;
     m_JetTimeTotal = 0.0;
     m_JetTimeLeft = 0.0;
@@ -1476,8 +1477,14 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) {
 
 			if (reloadHeldFirearm) {
 				heldFirearm->Reload();
-				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+				if (m_DeviceSwitchSound) { 
+					m_DeviceSwitchSound->Play(m_Pos); 
+				}
+
 				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
+
+				// If using the support offset, other code in arm etc will handle where we should target
+				otherArmIsAvailable = otherArmIsAvailable && !heldFirearm->GetUseSupportOffsetWhileReloading();
 
 				if (otherArmIsAvailable) {
 					float delayAtTarget = std::max(static_cast<float>(heldFirearm->GetReloadTime() - 200), 0.0F);
@@ -1487,7 +1494,6 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) {
 					} else {
 						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), delayAtTarget);
 					}
-					otherArm->SetHandPos(heldFirearm->GetMagazinePos());
 				}
 			}
 		}
@@ -2263,6 +2269,8 @@ void AHuman::PreControllerUpdate()
     ///////////////////////////////////////////////////
     // Travel the limb AtomGroup:s
 
+	m_StrideFrame = false;
+
 	if (m_Status == STABLE && !m_LimbPushForcesAndCollisionsDisabled && m_MoveState != NOMOVE)
     {
         // This exists to support disabling foot collisions if the limbpath has that flag set.
@@ -2323,6 +2331,7 @@ void AHuman::PreControllerUpdate()
 					m_WalkAngle[FGROUND] = Matrix();
 					m_WalkAngle[BGROUND] = Matrix();
 				} else {
+					m_StrideFrame = true;
 					RunScriptedFunctionInAppropriateScripts("OnStride");
 				}
 			}

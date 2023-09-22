@@ -568,14 +568,11 @@ namespace RTE {
 
 		if (!soundContainer->SoundPropertiesUpToDate()) {
 			result = soundContainer->UpdateSoundProperties();
+			soundContainer->GetTopLevelSoundSet().SelectNextSounds();
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: Could not update sound properties for SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
 				return false;
 			}
-		}
-		if (!soundContainer->GetTopLevelSoundSet().SelectNextSounds()) {
-			g_ConsoleMan.PrintString("Unable to select new sounds to play for SoundContainer " + soundContainer->GetPresetName());
-			return false;
 		}
 
 		FMOD::ChannelGroup *channelGroupToPlayIn;
@@ -624,7 +621,14 @@ namespace RTE {
 			soundContainer->AddPlayingChannel(channelIndex);
 		}
 
-		if (m_IsInMultiplayerMode) { RegisterSoundEvent(player, SOUND_PLAY, soundContainer); }
+		if (m_IsInMultiplayerMode) { 
+			RegisterSoundEvent(player, SOUND_PLAY, soundContainer); 
+		}
+
+		// Choose the sounds for next time
+		bool choseNext = soundContainer->GetTopLevelSoundSet().SelectNextSounds();
+		RTEAssert(choseNext, "Unable to select new sounds to play for SoundContainer " + soundContainer->GetPresetName());
+
 		return true;
 	}
 

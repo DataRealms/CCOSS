@@ -141,16 +141,16 @@ namespace RTE {
 		void SetTrailLength(int trailLength);
 
 		/// <summary>
-		/// TODO description
+		/// Gets this MOPixel's staininess, which defines how likely a pixel is to stain a surface when it collides with it. 
 		/// </summary>
-		/// <param name="staininess">TODO</param>
-		void SetStaininess(float staininess) { m_Staininess = staininess; }
+		/// <returns>This MOPixel's current staininess value.</returns>
+		float GetStaininess() const { return m_Staininess; }
 
 		/// <summary>
-		/// TODO description
+		/// Sets this MOPixel's staininess, which defines how likely a pixel is to stain a surface when it collides with it. 
 		/// </summary>
-		/// <returns>TODO</returns>
-		float GetStaininess() const { return m_Staininess; }
+		/// <param name="staininess">The new staininess value.</param>
+		void SetStaininess(float staininess) { m_Staininess = staininess; }
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -212,8 +212,7 @@ namespace RTE {
 		float m_MinLethalRange; //!< Lower bound multiplier for setting LethalRange at random. By default, 1.0 equals one screen.
 		float m_MaxLethalRange; //!< Upper bound multiplier for setting LethalRange at random. By default, 1.0 equals one screen.
 		float m_LethalSharpness; //!< When Sharpness has decreased below this threshold the MO becomes m_HitsMOs = false. Default is Sharpness * 0.5.
-	
-		float m_Staininess; //!< TODO description and maybe a better name
+		float m_Staininess; //!< How likely a pixel is to stain a surface when it collides with it. Defaults to 0 (never stain).
 
 	private:
 

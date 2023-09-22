@@ -5,6 +5,12 @@
 #include "ConsoleMan.h"
 
 #include "SDL.h"
+#include "tracy/Tracy.hpp"
+
+#ifdef __linux__
+#include "Resources/cccp.xpm"
+#include "SDL2/SDL_image.h"
+#endif
 
 namespace RTE {
 
@@ -133,6 +139,14 @@ namespace RTE {
 				RTEAbort("Failed to create window because:\n" + std::string(SDL_GetError()));
 			}
 		}
+
+#ifdef __linux__
+		SDL_Surface *iconSurface = IMG_ReadXPMFromArray(ccicon);
+		if (iconSurface) {
+			SDL_SetWindowIcon(m_PrimaryWindow.get(), iconSurface);
+			SDL_FreeSurface(iconSurface);
+		}
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -627,6 +641,8 @@ namespace RTE {
 				SDL_RenderPresent(m_MultiDisplayRenderers[i].get());
 			}
 		}
+
+		FrameMark;
 	}
 
 }

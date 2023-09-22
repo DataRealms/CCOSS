@@ -87,7 +87,7 @@ namespace RTE {
 			if (entry.is_directory()) {
 				SaveRecord record;
 				record.SavePath = entry.path();
-				record.SaveDate = entry.last_write_time();
+				record.SaveDate = std::filesystem::last_write_time(entry.path() / "Save.ini");
 				m_SaveGames.push_back(record);
 			}
 		}

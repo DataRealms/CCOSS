@@ -67,6 +67,7 @@ public:
 
 // Concrete allocation and cloning definitions
 	EntityAllocation(ACrab);
+	AddScriptFunctionNames(Actor, "OnStride");
 	SerializableOverrideMethods;
 	ClassInfoGetters;
 	DefaultPieMenuNameGetter(HasObjectInGroup("Turrets") ? "Default Turret Pie Menu" : "Default Crab Pie Menu");
@@ -419,6 +420,12 @@ int FirearmActivationDelay() const;
 	BITMAP * GetGraphicalIcon() const override;
 
 
+	/// <summary>
+	/// Gets whether this ACrab has just taken a stride this frame.
+	/// </summary>
+	/// <returns>Whether this ACrab has taken a stride this frame or not.</returns>
+	bool StrideFrame() const { return m_StrideFrame; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  PreControllerUpdate
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -604,6 +611,8 @@ protected:
 	Timer m_IconBlinkTimer;
 	// Current movement state.
 	MovementState m_MoveState;
+	// Whether a stride was taken this frame or not.
+	bool m_StrideFrame = false;
 	// Limb paths for different movement states.
 	// First which side, then which background/foreground, then the movement state
 	LimbPath m_Paths[SIDECOUNT][LAYERCOUNT][MOVEMENTSTATECOUNT];

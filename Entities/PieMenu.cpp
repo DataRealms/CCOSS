@@ -611,7 +611,7 @@ namespace RTE {
 							PrepareAnalogCursorForEnableOrDisable(true);
 							m_CursorInVisiblePosition = true;
 						} else {
-							bool shouldClearHoveredSlice = controller->IsMouseControlled() || controller->IsGamepadControlled();
+							bool shouldClearHoveredSlice = controller->IsState(ControlState::PIE_MENU_ACTIVE_ANALOG);
 							// If a keyboard-only sub-PieMenu is exited by going off the sides, the parent PieMenu should handle input so the next PieSlice can be naturally stepped to.
 							if (activeSubPieMenuDirection != Directions::None) {
 								for (const auto &[controlState, controlStateDirection] : c_ControlStateDirections) {
@@ -629,9 +629,9 @@ namespace RTE {
 					}
 				}
 				if (!m_ActiveSubPieMenu && !skipInputBecauseActiveSubPieMenuWasJustDisabled) {
-					if (controller->IsMouseControlled() || controller->IsGamepadControlled()) {
-						anyInput = HandleAnalogInput();
-					} else {
+					if (controller->IsState(PIE_MENU_ACTIVE_ANALOG)) {
+						anyInput = HandleAnalogInput(controller->GetAnalogCursor());
+					} else if (controller->IsState(PIE_MENU_ACTIVE_DIGITAL)) {
 						anyInput = HandleDigitalInput();
 					}
 				}
@@ -717,13 +717,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PieMenu::HandleAnalogInput() {
+	bool PieMenu::HandleAnalogInput(const Vector &input) {
 		const Controller *controller = GetController();
 		const PieSlice *pieSliceToSelect = nullptr;
 
-		if (controller->GetAnalogCursor().MagnitudeIsGreaterThan(0.5F)) {
+		if (input.MagnitudeIsGreaterThan(0.5F)) {
 			m_CursorInVisiblePosition = true;
-			float normalizedCursorAngle = NormalizeAngleBetween0And2PI(controller->GetAnalogCursor().GetAbsRadAngle());
+			float normalizedCursorAngle = NormalizeAngleBetween0And2PI(input.GetAbsRadAngle());
 			m_CursorAngle = normalizedCursorAngle;
 
 			for (const PieSlice *pieSlice : m_CurrentPieSlices) {
@@ -749,6 +749,12 @@ namespace RTE {
 		const Controller *controller = GetController();
 		if (!controller) {
 			return false;
+		}
+
+		// Don't allow our analog move to interfere with us - joystick-to-digital input is really awkward and doesn't feel nice
+		if (controller->GetAnalogMove().MagnitudeIsGreaterThan(0.1F)) {
+			// So instead use the analog input, but use our move instead of our cursor
+			return HandleAnalogInput(controller->GetAnalogMove());
 		}
 
 		auto GetPieQuadrantContainingHoveredSlice = [this]() {

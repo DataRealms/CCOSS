@@ -615,7 +615,7 @@ namespace RTE {
 				buttonState = GetInputElementState(player, InputElements::INPUT_FIRE, whichState) || GetMouseButtonState(player, MouseButtons::MOUSE_LEFT, whichState);
 			}
 			if (!buttonState && whichButton >= MenuCursorButtons::MENU_SECONDARY) {
-				buttonState = GetInputElementState(player, InputElements::INPUT_PIEMENU, whichState) || GetMouseButtonState(player, MouseButtons::MOUSE_RIGHT, whichState);
+				buttonState = GetInputElementState(player, InputElements::INPUT_PIEMENU_DIGITAL, whichState) || GetMouseButtonState(player, MouseButtons::MOUSE_RIGHT, whichState);
 			}
 			if (buttonState) {
 				m_LastDeviceWhichControlledGUICursor = device;

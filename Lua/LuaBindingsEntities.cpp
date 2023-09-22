@@ -236,6 +236,7 @@ namespace RTE {
 		.property("DeploymentID", &Actor::GetDeploymentID)
 		.property("PassengerSlots", &Actor::GetPassengerSlots, &Actor::SetPassengerSlots)
 		.property("Perceptiveness", &Actor::GetPerceptiveness, &Actor::SetPerceptiveness)
+		.property("PainThreshold", &Actor::GetPainThreshold, &Actor::SetPainThreshold)
 		.property("CanRevealUnseen", &Actor::GetCanRevealUnseen, &Actor::SetCanRevealUnseen)
 		.property("InventorySize", &Actor::GetInventorySize)
 		.property("MaxInventoryMass", &Actor::GetMaxInventoryMass)
@@ -679,6 +680,7 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, HDFirearm) {
 		return ConcreteTypeLuaClassDefinition(HDFirearm, HeldDevice)
 
+		.property("ReloadEndOffset", &HDFirearm::GetReloadEndOffset, &HDFirearm::SetReloadEndOffset)
 		.property("RateOfFire", &HDFirearm::GetRateOfFire, &HDFirearm::SetRateOfFire)
 		.property("MSPerRound", &HDFirearm::GetMSPerRound)
 		.property("FullAuto", &HDFirearm::IsFullAuto, &HDFirearm::SetFullAuto)

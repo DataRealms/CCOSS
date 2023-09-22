@@ -82,6 +82,18 @@ namespace RTE {
 		/// <returns>Whether this SoundContainer has any sounds.</returns>
 		bool HasAnySounds() const { return m_TopLevelSoundSet.HasAnySounds(); }
 
+		enum class LengthOfSoundType {
+			Any,
+			NextPlayed
+		};
+
+		/// <summary>
+		/// Gets the length of the sound in this sound container.
+		/// </summary>
+		/// <param name="type">Whether to get the length of the next played sound, or the maximum length of any sound in this container.</param>
+		/// <returns>The length of this sound, in ms.</returns>
+		float GetLength(LengthOfSoundType type) const;
+
 		/// <summary>
 		/// Gets a reference to the top level SoundSet of this SoundContainer, to which all SoundData and sub SoundSets belong.
 		/// </summary>

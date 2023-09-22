@@ -48,6 +48,8 @@ void HDFirearm::Clear()
     m_EmptySound = nullptr;
 	m_ReloadStartSound = nullptr;
     m_ReloadEndSound = nullptr;
+    m_ReloadEndOffset = -1.0F;
+    m_HasPlayedEndReloadSound = false;
     m_RateOfFire = 0;
     m_ActivationDelay = 0;
     m_DeactivationDelay = 0;
@@ -129,6 +131,7 @@ int HDFirearm::Create(const HDFirearm &reference) {
 	if (reference.m_EmptySound) { m_EmptySound = dynamic_cast<SoundContainer *>(reference.m_EmptySound->Clone()); }
 	if (reference.m_ReloadStartSound) { m_ReloadStartSound = dynamic_cast<SoundContainer *>(reference.m_ReloadStartSound->Clone()); }
 	if (reference.m_ReloadEndSound) { m_ReloadEndSound = dynamic_cast<SoundContainer *>(reference.m_ReloadEndSound->Clone()); }
+    m_ReloadEndOffset = reference.m_ReloadEndOffset;
 	m_RateOfFire = reference.m_RateOfFire;
     m_ActivationDelay = reference.m_ActivationDelay;
     m_DeactivationDelay = reference.m_DeactivationDelay;
@@ -203,6 +206,8 @@ int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
 	} else if (propName == "ReloadEndSound") {
 		m_ReloadEndSound = new SoundContainer;
 		reader >> m_ReloadEndSound;
+    } else if (propName == "ReloadEndOffset") {
+        reader >> m_ReloadEndOffset;
 	} else if (propName == "RateOfFire") {
         reader >> m_RateOfFire;
     } else if (propName == "ActivationDelay") {
@@ -296,6 +301,7 @@ int HDFirearm::Save(Writer &writer) const
     writer << m_ReloadStartSound;
     writer.NewProperty("ReloadEndSound");
     writer << m_ReloadEndSound;
+    writer.NewPropertyWithValue("ReloadEndOffset", m_ReloadEndOffset);
     writer.NewProperty("RateOfFire");
     writer << m_RateOfFire;
     writer.NewProperty("ActivationDelay");
@@ -979,15 +985,27 @@ void HDFirearm::Update()
         m_AlreadyClicked = true;
     }
 
+    if (m_Reloading && m_ReloadEndSound) {
+        // x0.5 the sound length generally just lines up better and leaves less dead air assuming a normal attempt at a ReloadEnd sound
+        float offsetMilliseconds = m_ReloadEndOffset == -1.0F ? m_ReloadEndSound->GetLength(SoundContainer::LengthOfSoundType::NextPlayed) * 0.5f : m_ReloadEndOffset;
+        bool shouldPlay = !m_HasPlayedEndReloadSound && m_ReloadTmr.LeftTillSimTimeLimitMS() <= offsetMilliseconds;
+        if (shouldPlay) {
+            m_ReloadEndSound->Play(m_Pos);
+            m_HasPlayedEndReloadSound = true;
+        }
+    }
+
 	if (m_Reloading && !m_pMagazine && m_pMagazineReference && m_ReloadTmr.IsPastSimTimeLimit()) {
 		SetMagazine(dynamic_cast<Magazine *>(m_pMagazineReference->Clone()));
-		if (m_ReloadEndSound) { m_ReloadEndSound->Play(m_Pos); }
 
 		m_ActivationTimer.Reset();
 		m_LastFireTmr.Reset();
 
-		if (m_PreFireSound && m_Activated) { m_PreFireSound->Play(); }
+		if (m_PreFireSound && m_Activated) { 
+            m_PreFireSound->Play(); 
+        }
 
+        m_HasPlayedEndReloadSound = false;
 		m_Reloading = false;
 		m_DoneReloading = true;
 	}

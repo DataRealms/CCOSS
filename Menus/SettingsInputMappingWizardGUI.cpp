@@ -241,7 +241,7 @@ namespace RTE {
 		// Hard map the mouse controls and set names so they don't show as undefined after applying the new scheme.
 		if (m_ConfiguringDevice == InputDevice::DEVICE_MOUSE_KEYB) {
 			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_FIRE).SetMouseButton(MouseButtons::MOUSE_LEFT);
-			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_PIEMENU).SetMouseButton(MouseButtons::MOUSE_RIGHT);
+			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_PIEMENU_ANALOG).SetMouseButton(MouseButtons::MOUSE_RIGHT);
 			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_AIM).SetPresetDescription("Mouse Move");
 			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_AIM_UP).SetPresetDescription("Mouse Move");
 			m_NewInputScheme.GetInputMappings()->at(InputElements::INPUT_AIM_DOWN).SetPresetDescription("Mouse Move");
@@ -484,7 +484,7 @@ namespace RTE {
 					m_WizardManualConfigScreen.ConfigStepRecommendedKeyLabel->SetText("[K] or [Num 3]");
 					m_ConfigStepChange = false;
 				}
-				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_PIEMENU)) {
+				if (m_NewInputScheme.CaptureKeyMapping(InputElements::INPUT_PIEMENU_DIGITAL)) {
 					return true;
 				}
 				break;
@@ -782,7 +782,7 @@ namespace RTE {
 					m_WizardManualConfigScreen.GamepadConfigStepRecommendedInputLabel->SetText("[X Button]");
 					m_ConfigStepChange = false;
 				}
-				if (m_NewInputScheme.CaptureJoystickMapping(m_ConfiguringGamepadIndex, InputElements::INPUT_PIEMENU)) {
+				if (m_NewInputScheme.CaptureJoystickMapping(m_ConfiguringGamepadIndex, InputElements::INPUT_PIEMENU_DIGITAL)) {
 					return true;
 				}
 				break;
@@ -958,7 +958,7 @@ namespace RTE {
 					m_WizardManualConfigScreen.GamepadConfigStepRecommendedInputLabel->SetText((m_ConfiguringGamepadType == GamepadType::AnalogDualShock) ? "[Circle Button]" : "[B Button]");
 					m_ConfigStepChange = false;
 				}
-				if (m_NewInputScheme.CaptureJoystickMapping(m_ConfiguringGamepadIndex, InputElements::INPUT_PIEMENU)) {
+				if (m_NewInputScheme.CaptureJoystickMapping(m_ConfiguringGamepadIndex, m_ConfiguringGamepadType == GamepadType::AnalogDualShock ? InputElements::INPUT_PIEMENU_ANALOG : InputElements::INPUT_PIEMENU_DIGITAL)) {
 					return true;
 				}
 				break;

@@ -116,8 +116,7 @@ int Magazine::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     StartPropertyList(return Attachable::ReadProperty(propName, reader));
 
-    MatchProperty("RoundCount",
-    {
+    MatchProperty("RoundCount", {
         reader >> m_RoundCount;
         m_FullCapacity = m_RoundCount;
     });

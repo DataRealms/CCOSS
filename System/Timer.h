@@ -156,14 +156,14 @@ namespace RTE {
 		/// <summary>
 		/// Returns how much time in ms that there is left till this Timer reaches a certain time limit previously set by SetRealTimeLimitMS.
 		/// </summary>
-		/// <returns>A unsigned long with the real time left till the passed in value, or negative if this Timer is already past that point in time.</returns>
-		double LeftTillRealTimeLimitMS() { return (m_RealTimeLimit / m_TicksPerMS) - GetElapsedRealTimeMS(); }
+		/// <returns>How many MS left till the real time limit, or negative if this Timer is already past that point in time.</returns>
+		double LeftTillRealTimeLimitMS() { return GetRealTimeLimitMS() - GetElapsedRealTimeMS(); }
 
 		/// <summary>
 		/// Returns how much time in ms that there is left till this Timer reaches a certain time limit previously set by SetRealTimeLimitS.
 		/// </summary>
-		/// <returns>A unsigned long with the real time left till the passed in value, or negative if this Timer is already past that point in time.</returns>
-		double LeftTillRealTimeLimitS() { return (m_RealTimeLimit * static_cast<double>(g_TimerMan.GetTicksPerSecond())) - GetElapsedRealTimeS(); }
+		/// <returns>How many S left till the real time limit, or negative if this Timer is already past that point in time.</returns>
+		double LeftTillRealTimeLimitS() { return GetRealTimeLimitS() - GetElapsedRealTimeS(); }
 
 		/// <summary>
 		/// Returns true if the elapsed real time is past a certain amount of time after the start previously set by SetRealTimeLimit.
@@ -269,14 +269,14 @@ namespace RTE {
 		/// <summary>
 		/// Returns how much time in ms that there is left till this Timer reaches a certain time limit previously set by SetSimTimeLimitMS.
 		/// </summary>
-		/// <returns>A unsigned long with the sim time left till the passed in value, or negative if this Timer is already past that point in time.</returns>
-		double LeftTillSimTimeLimitMS() const { return (m_SimTimeLimit / m_TicksPerMS) - GetElapsedSimTimeMS(); }
+		/// <returns>How many MS left till the sim time limit, or negative if this Timer is already past that point in time.</returns>
+		double LeftTillSimTimeLimitMS() const { return GetSimTimeLimitMS() - GetElapsedSimTimeMS(); }
 
 		/// <summary>
 		/// Returns how much time in ms that there is left till this Timer reaches a certain time limit previously set by SetSimTimeLimitS.
 		/// </summary>
-		/// <returns>A unsigned long with the sim time left till the passed in value, or negative if this Timer is already past that point in time.</returns>
-		double LeftTillSimTimeLimitS() const { return (m_SimTimeLimit * static_cast<double>(g_TimerMan.GetTicksPerSecond())) - GetElapsedSimTimeS(); }
+		/// <returns>How many S left till the real time limit, or negative if this Timer is already past that point in time.</returns>
+		double LeftTillSimTimeLimitS() const { return GetSimTimeLimitS() - GetElapsedSimTimeS(); }
 
 		/// <summary>
 		/// Returns true if the elapsed sim time is past a certain amount of time after the start previously set by SetSimTimeLimit.

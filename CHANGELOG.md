@@ -8,11 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 <details><summary><b>Added</b></summary>
 
-- Added in-game pause menu when pressing `Esc`. Pressing `Shift + Esc` will skip this menu and pause into scenario/conquest menu. 
+- Added in-game pause menu when pressing `Esc`. Pressing `Shift + Esc` will skip this menu and pause into scenario/conquest menu.
+
+- Added a save/load game menu which can be accessed from the main or pause menus, which allows the user to save their current progress in an activity to resume at a later date.
 
 - New `Activity` INI and Lua (R/W) property `AllowsUserSaving`, which can be used to enable/disable manual user saving/loading. This defaults to true for all `GAScripted` with an `OnSave()` function, but false otherwise. Lua `ActivityMan::SaveGame()` function now forces a save even if `AllowsUserSaving` is disabled. This allows mods and scripted gamemodes to handle saving in their own way (for example, only allowing saving at set points).
 
-- New `Settings.ini` property `EnableMultithreadedLua`, which can be used to enable multithreaded Lua scripts and AI, for any lua script with the `--[[MULTITHREAD]]--` tag. Defaults to on.
+- New `Settings.ini` property `EnableMultithreadedLua`, which can be used to enable multithreaded Lua scripts and AI, for any lua script with the `--[[MULTITHREAD]]--` tag. Defaults to true.
 
 - New Lua event function `SyncedUpdate()`, which will be called in a thread-safe synchronized manner and allows multithreaded scripts to modify game state in a safe and consistent way.
 
@@ -38,13 +40,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `HeldDevice` Lua (R) function `IsBeingHeld`, which returns whether or not the `HeldDevice` is currently being held.
 
-- New `HeldDevice` INI and Lua (R/W) property `GetsHitByMOsWhenHeld`, which determines whether this `HeldDevice` can be hit by MOs while equipped and held by an actor. Defaults to true.
+- New `HeldDevice` INI and Lua (R/W) property `GetsHitByMOsWhenHeld`, which defines whether this `HeldDevice` can be hit by MOs while equipped and held by an actor. Defaults to true.
 	
-- New `MovableObject` INI and Lua (R/W) property `IgnoresActorHits`, which determines whether this `MovableObject` should ignore collisions with actors. Defaults to false.
+- New `MovableObject` INI and Lua (R/W) property `IgnoresActorHits`, which defines whether this `MovableObject` should ignore collisions with actors. Defaults to false.
 
-- New `HeldDevice` INI and Lua (R/W) property `VisualRecoilMultiplier`, which determines how much the recoil animation should be scaled for this weapon (without affecting SharpAim). Defaults to 1.0.
+- New `HeldDevice` INI and Lua (R/W) property `VisualRecoilMultiplier`, which defines how much the recoil animation should be scaled for this weapon (without affecting SharpAim). Defaults to 1.0.
 
-- New `HeldDevice` INI and Lua (R/W) property `UseSupportOffsetWhileReloading`, which determines whether the off-hand should stay at the weapon's support offset when reloading. Defaults to false.
+- New `HeldDevice` INI and Lua (R/W) property `UseSupportOffsetWhileReloading`, which defines whether the off-hand should stay at the weapon's support offset when reloading. Defaults to false.
+
+- New `HDFirearm` INI and Lua (R/W) property `ReloadEndOffset`, to define how many milliseconds prior to the reload being complete that the `ReloadEndSound` should play. Defaults to -1, which means the game will automatically calculate so that the middle of the sound is aligned with the reload completing.
+
+- New `Actor` INI and Lua (R/W) property `PainThreshold`, which determines how much damage this actor must take in a frame to play their `PainSound`. This can be set to 0 to never manually play the sound. Defaults to 15.
+
+- New `MOPixel` INI and Lua (R/W) property `Staininess`, which defines how likely a pixel is to stain a surface when it collides with it. Staining a surface changes that surface's `Color` to that of this `MOPixel`, without changing the underlying material. Value can be between 0 and 1. Defaults to 0 (never stain).
 
 </details>
 
@@ -65,6 +73,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - `CameraMan::SetScrollTarget()` function has had the `targetWrapped` parameter removed, as it's not necessary. The camera will always focus taking the shortest path regardless now. The new full function signature is `CameraMan::SetScrollTarget(target, speed, screenId)`, where speed defaults to 0.1 and screenId defaults to 0.
 
+- Actors will now play their pain sound from any source of significant damage, instead of specifically when taking damage from colliding with terrain.
+
+- Gibbing objects will now inherit the velocity from the impulse that caused them to gib, meaning that gibs will be thrown away from the explosion or source of damage that caused it.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -72,6 +84,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed music resuming from incorrect position when unpausing.
 
 - Camera wrapping now works correctly on scenes which are both X and Y wrapped.
+
+- Fixed extreme lag in the Decision Day scenario.
+
+- Fixed Lua `UInputMan:MouseButtonPressed`, `UInputMan:MouseButtonHeld(mouseButton)` and `UInputMan:MouseButtonReleased(mouseButton)` functions not working. Please note that this should take an enum of type `MouseButtons`, i.e `MouseButtons.MOUSE_LEFT`, not a number.
+
+- Fixed a rare crash bug that could occur when under extreme CPU load.
 
 </details>
 

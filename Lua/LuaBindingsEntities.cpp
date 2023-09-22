@@ -744,11 +744,15 @@ namespace RTE {
 		.property("SharpLength", &HeldDevice::GetSharpLength, &HeldDevice::SetSharpLength)
 		.property("Supportable", &HeldDevice::IsSupportable, &HeldDevice::SetSupportable)
 		.property("SupportOffset", &HeldDevice::GetSupportOffset, &HeldDevice::SetSupportOffset)
+		.property("UseSupportOffsetWhileReloading", &HeldDevice::GetUseSupportOffsetWhileReloading, &HeldDevice::SetUseSupportOffsetWhileReloading)
 		.property("HasPickupLimitations", &HeldDevice::HasPickupLimitations)
 		.property("UnPickupable", &HeldDevice::IsUnPickupable, &HeldDevice::SetUnPickupable)
 		.property("GripStrengthMultiplier", &HeldDevice::GetGripStrengthMultiplier, &HeldDevice::SetGripStrengthMultiplier)
 		.property("Supported", &HeldDevice::GetSupported, &HeldDevice::SetSupported)
+		.property("GetsHitByMOsWhenHeld", &HeldDevice::GetsHitByMOsWhenHeld, &HeldDevice::SetGetsHitByMOsWhenHeld)
+		.property("VisualRecoilMultiplier", &HeldDevice::GetVisualRecoilMultiplier, &HeldDevice::SetVisualRecoilMultiplier)
 
+		.def("IsBeingHeld", &HeldDevice::IsBeingHeld)
 		.def("IsWeapon", &HeldDevice::IsWeapon)
 		.def("IsTool", &HeldDevice::IsTool)
 		.def("IsShield", &HeldDevice::IsShield)
@@ -845,7 +849,8 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, MOPixel) {
 		return ConcreteTypeLuaClassDefinition(MOPixel, MovableObject)
 
-		.property("TrailLength", &MOPixel::GetTrailLength, &MOPixel::SetTrailLength);
+		.property("TrailLength", &MOPixel::GetTrailLength, &MOPixel::SetTrailLength)
+		.property("Staininess", &MOPixel::GetStaininess, &MOPixel::SetStaininess);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1006,6 +1011,7 @@ namespace RTE {
 		.property("IgnoresTeamHits", &MovableObject::IgnoresTeamHits, &MovableObject::SetIgnoresTeamHits)
 		.property("IgnoresWhichTeam", &MovableObject::IgnoresWhichTeam)
 		.property("IgnoreTerrain", &MovableObject::IgnoreTerrain, &MovableObject::SetIgnoreTerrain)
+		.property("IgnoresActorHits", &MovableObject::GetIgnoresActorHits, &MovableObject::SetIgnoresActorHits)
 		.property("ToSettle", &MovableObject::ToSettle, &MovableObject::SetToSettle)
 		.property("ToDelete", &MovableObject::ToDelete, &MovableObject::SetToDelete)
 		.property("MissionCritical", &MovableObject::IsMissionCritical, &MovableObject::SetMissionCritical)

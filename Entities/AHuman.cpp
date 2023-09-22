@@ -1477,8 +1477,14 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) {
 
 			if (reloadHeldFirearm) {
 				heldFirearm->Reload();
-				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+				if (m_DeviceSwitchSound) { 
+					m_DeviceSwitchSound->Play(m_Pos); 
+				}
+
 				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
+
+				// If using the support offset, other code in arm etc will handle where we should target
+				otherArmIsAvailable = otherArmIsAvailable && !heldFirearm->GetUseSupportOffsetWhileReloading();
 
 				if (otherArmIsAvailable) {
 					float delayAtTarget = std::max(static_cast<float>(heldFirearm->GetReloadTime() - 200), 0.0F);
@@ -1488,7 +1494,6 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) {
 					} else {
 						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), delayAtTarget);
 					}
-					otherArm->SetHandPos(heldFirearm->GetMagazinePos());
 				}
 			}
 		}

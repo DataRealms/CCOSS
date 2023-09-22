@@ -64,6 +64,7 @@ void MovableObject::Clear()
     m_IgnoresTeamHits = false;
     m_IgnoresAtomGroupHits = false;
     m_IgnoresAGHitsWhenSlowerThan = -1;
+    m_IgnoresActorHits = false;
     m_MissionCritical = false;
     m_CanBeSquished = true;
     m_IsUpdated = false;
@@ -234,6 +235,7 @@ int MovableObject::Create(const MovableObject &reference)
     m_IgnoresTeamHits = reference.m_IgnoresTeamHits;
     m_IgnoresAtomGroupHits = reference.m_IgnoresAtomGroupHits;
     m_IgnoresAGHitsWhenSlowerThan = reference.m_IgnoresAGHitsWhenSlowerThan;
+    m_IgnoresActorHits = reference.m_IgnoresActorHits;
     m_pMOToNotHit = reference.m_pMOToNotHit;
     m_MOIgnoreTimer = reference.m_MOIgnoreTimer;
     m_MissionCritical = reference.m_MissionCritical;
@@ -334,6 +336,8 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		reader >> m_IgnoresAtomGroupHits;
 	else if (propName == "IgnoresAGHitsWhenSlowerThan")
 		reader >> m_IgnoresAGHitsWhenSlowerThan;
+    else if (propName == "IgnoresActorHits")
+        reader >> m_IgnoresActorHits;
 	else if (propName == "RemoveOrphanTerrainRadius")
 	{
 		reader >> m_RemoveOrphanTerrainRadius;
@@ -473,6 +477,8 @@ int MovableObject::Save(Writer &writer) const
     writer << m_IgnoresAtomGroupHits;
     writer.NewProperty("IgnoresAGHitsWhenSlowerThan");
     writer << m_IgnoresAGHitsWhenSlowerThan;
+    writer.NewProperty("IgnoresActorHits");
+    writer << m_IgnoresActorHits;
     writer.NewProperty("MissionCritical");
     writer << m_MissionCritical;
     writer.NewProperty("CanBeSquished");

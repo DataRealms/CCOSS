@@ -62,6 +62,7 @@ namespace RTE {
 		.property("RightFGLeg", &ACrab::GetRightFGLeg, &LuaAdaptersPropertyOwnershipSafetyFaker::ACrabSetRightFGLeg)
 		.property("RightBGLeg", &ACrab::GetRightBGLeg, &LuaAdaptersPropertyOwnershipSafetyFaker::ACrabSetRightBGLeg)
 		.property("StrideSound", &ACrab::GetStrideSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ACrabSetStrideSound)
+		.property("StrideFrame", &ACrab::StrideFrame)
 		.property("EquippedItem", &ACrab::GetEquippedItem)
 		.property("FirearmIsReady", &ACrab::FirearmIsReady)
 		.property("FirearmIsEmpty", &ACrab::FirearmIsEmpty)
@@ -224,6 +225,7 @@ namespace RTE {
 		.property("DeploymentID", &Actor::GetDeploymentID)
 		.property("PassengerSlots", &Actor::GetPassengerSlots, &Actor::SetPassengerSlots)
 		.property("Perceptiveness", &Actor::GetPerceptiveness, &Actor::SetPerceptiveness)
+		.property("PainThreshold", &Actor::GetPainThreshold, &Actor::SetPainThreshold)
 		.property("CanRevealUnseen", &Actor::GetCanRevealUnseen, &Actor::SetCanRevealUnseen)
 		.property("InventorySize", &Actor::GetInventorySize)
 		.property("MaxInventoryMass", &Actor::GetMaxInventoryMass)
@@ -469,6 +471,7 @@ namespace RTE {
 		.property("FirearmActivationDelay", &AHuman::FirearmActivationDelay)
 		.property("LimbPathPushForce", &AHuman::GetLimbPathPushForce, &AHuman::SetLimbPathPushForce)
 		.property("IsClimbing", &AHuman::IsClimbing)
+		.property("StrideFrame", &AHuman::StrideFrame)
 		.property("ArmSwingRate", &AHuman::GetArmSwingRate, &AHuman::SetArmSwingRate)
 		.property("DeviceArmSwayRate", &AHuman::GetDeviceArmSwayRate, &AHuman::SetDeviceArmSwayRate)
 
@@ -682,6 +685,7 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, HDFirearm) {
 		return ConcreteTypeLuaClassDefinition(HDFirearm, HeldDevice)
 
+		.property("ReloadEndOffset", &HDFirearm::GetReloadEndOffset, &HDFirearm::SetReloadEndOffset)
 		.property("RateOfFire", &HDFirearm::GetRateOfFire, &HDFirearm::SetRateOfFire)
 		.property("MSPerRound", &HDFirearm::GetMSPerRound)
 		.property("FullAuto", &HDFirearm::IsFullAuto, &HDFirearm::SetFullAuto)
@@ -745,11 +749,15 @@ namespace RTE {
 		.property("SharpLength", &HeldDevice::GetSharpLength, &HeldDevice::SetSharpLength)
 		.property("Supportable", &HeldDevice::IsSupportable, &HeldDevice::SetSupportable)
 		.property("SupportOffset", &HeldDevice::GetSupportOffset, &HeldDevice::SetSupportOffset)
+		.property("UseSupportOffsetWhileReloading", &HeldDevice::GetUseSupportOffsetWhileReloading, &HeldDevice::SetUseSupportOffsetWhileReloading)
 		.property("HasPickupLimitations", &HeldDevice::HasPickupLimitations)
 		.property("UnPickupable", &HeldDevice::IsUnPickupable, &HeldDevice::SetUnPickupable)
 		.property("GripStrengthMultiplier", &HeldDevice::GetGripStrengthMultiplier, &HeldDevice::SetGripStrengthMultiplier)
 		.property("Supported", &HeldDevice::GetSupported, &HeldDevice::SetSupported)
+		.property("GetsHitByMOsWhenHeld", &HeldDevice::GetsHitByMOsWhenHeld, &HeldDevice::SetGetsHitByMOsWhenHeld)
+		.property("VisualRecoilMultiplier", &HeldDevice::GetVisualRecoilMultiplier, &HeldDevice::SetVisualRecoilMultiplier)
 
+		.def("IsBeingHeld", &HeldDevice::IsBeingHeld)
 		.def("IsWeapon", &HeldDevice::IsWeapon)
 		.def("IsTool", &HeldDevice::IsTool)
 		.def("IsShield", &HeldDevice::IsShield)
@@ -846,7 +854,8 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, MOPixel) {
 		return ConcreteTypeLuaClassDefinition(MOPixel, MovableObject)
 
-		.property("TrailLength", &MOPixel::GetTrailLength, &MOPixel::SetTrailLength);
+		.property("TrailLength", &MOPixel::GetTrailLength, &MOPixel::SetTrailLength)
+		.property("Staininess", &MOPixel::GetStaininess, &MOPixel::SetStaininess);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1007,6 +1016,7 @@ namespace RTE {
 		.property("IgnoresTeamHits", &MovableObject::IgnoresTeamHits, &MovableObject::SetIgnoresTeamHits)
 		.property("IgnoresWhichTeam", &MovableObject::IgnoresWhichTeam)
 		.property("IgnoreTerrain", &MovableObject::IgnoreTerrain, &MovableObject::SetIgnoreTerrain)
+		.property("IgnoresActorHits", &MovableObject::GetIgnoresActorHits, &MovableObject::SetIgnoresActorHits)
 		.property("ToSettle", &MovableObject::ToSettle, &MovableObject::SetToSettle)
 		.property("ToDelete", &MovableObject::ToDelete, &MovableObject::SetToDelete)
 		.property("MissionCritical", &MovableObject::IsMissionCritical, &MovableObject::SetMissionCritical)

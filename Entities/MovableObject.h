@@ -446,12 +446,6 @@ enum MOType
     /// <returns>Whether or not this MovableObject has ever been added to MovableMan.</returns>
     bool HasEverBeenAddedToMovableMan() const { return m_HasEverBeenAddedToMovableMan; }
 
-	/// <summary>
-	/// Returns whether or not this MovableObject exists in MovableMan, accounting for removal from MovableMan.
-	/// </summary>
-	/// <returns>Whether or not this MovableObject currently exists in MovableMan.</returns>
-	bool ExistsInMovableMan() const { return m_ExistsInMovableMan; }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetSharpness
@@ -623,6 +617,17 @@ enum MOType
 
 	void SetIgnoreTerrain(bool ignores) { m_IgnoreTerrain = ignores; }
 
+    /// <summary>
+    /// Gets whether this MO ignores collisions with actors.
+    /// </summary>
+    /// <returns>Whether this MO ignores collisions with actors.</returns>
+    bool GetIgnoresActorHits() const { return m_IgnoresActorHits; }
+
+    /// <summary>
+    /// Sets whether this MO ignores collisions with actors.
+    /// </summary>
+    /// <param name="value">Whether this MO will ignore collisions with actors.</returns>
+    void SetIgnoresActorHits(bool value) { m_IgnoresActorHits = value; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Pure V. method:  GetMaterial
@@ -789,7 +794,7 @@ enum MOType
     /// Sets this MovableObject as having been added to MovableMan. Should only really be done in MovableMan::Add/Remove Actor/Item/Particle.
     /// </summary>
 	/// <param name="addedToMovableMan">Whether or not this MovableObject has been added to MovableMan.</param>
-	void SetAsAddedToMovableMan(bool addedToMovableMan = true) { if (addedToMovableMan) { m_HasEverBeenAddedToMovableMan = true; } m_ExistsInMovableMan = addedToMovableMan; }
+	void SetAsAddedToMovableMan(bool addedToMovableMan = true) { if (addedToMovableMan) { m_HasEverBeenAddedToMovableMan = true; } }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1905,6 +1910,8 @@ protected:
     // This will flip the IgnoreAtomGroupHits on or off depending on whether this MO is travelling slower than the threshold here, in m/s
     // This is disabled if set to negative value, and 0 means AG hits are never ignored
     float m_IgnoresAGHitsWhenSlowerThan;
+    // Wehther this ignores collisions with actors
+    bool m_IgnoresActorHits;
     // This is mission critical, which means it should NEVER be settled or destroyed by gibbing
     bool m_MissionCritical;
     // Whether this can be destroyed by being squished into the terrain
@@ -1926,7 +1933,6 @@ protected:
     int m_MOIDFootprint;
     // Whether or not this object has ever been added to MovableMan. Does not take into account the object being removed from MovableMan, though in practice it usually will, cause objects are usually only removed when they're deleted.
     bool m_HasEverBeenAddedToMovableMan;
-	bool m_ExistsInMovableMan; //<! Whether or not this object currently exists in MovableMan. Takes into account the object being removed from MovableMan.
     // A set of ID:s of MO:s that already have collided with this MO during this frame.
     std::set<MOID> m_AlreadyHitBy;
 	int m_VelOscillations; //!< A counter for oscillations in translational velocity, in order to detect settling.

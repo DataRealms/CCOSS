@@ -69,6 +69,9 @@ void MovableMan::Clear()
     m_AddedActors.clear();
     m_AddedItems.clear();
     m_AddedParticles.clear();
+    m_ValidActors.clear();
+    m_ValidItems.clear();
+    m_ValidParticles.clear();
     m_ActorRoster[Activity::TeamOne].clear();
     m_ActorRoster[Activity::TeamTwo].clear();
     m_ActorRoster[Activity::TeamThree].clear();
@@ -302,6 +305,9 @@ void MovableMan::PurgeAllMOs()
     m_AddedActors.clear();
     m_AddedItems.clear();
     m_AddedParticles.clear();
+    m_ValidActors.clear();
+    m_ValidItems.clear();
+    m_ValidParticles.clear();
     m_ActorRoster[Activity::TeamOne].clear();
     m_ActorRoster[Activity::TeamTwo].clear();
     m_ActorRoster[Activity::TeamThree].clear();
@@ -870,6 +876,7 @@ void MovableMan::AddActor(Actor *actorToAdd) {
         {
             std::lock_guard<std::mutex> lock(m_AddedActorsMutex);
             m_AddedActors.push_back(actorToAdd);
+            m_ValidActors.insert(actorToAdd);
 
             // This will call SetTeam and subsequently force the team as active.
 		    AddActorToTeamRoster(actorToAdd);
@@ -896,6 +903,7 @@ void MovableMan::AddItem(HeldDevice *itemToAdd) {
 
         std::lock_guard<std::mutex> lock(m_AddedItemsMutex);
         m_AddedItems.push_back(itemToAdd);
+        m_ValidItems.insert(itemToAdd);
     }
 }
 
@@ -918,9 +926,11 @@ void MovableMan::AddParticle(MovableObject *particleToAdd){
 		if (particleToAdd->IsDevice()) {
             std::lock_guard<std::mutex> lock(m_AddedItemsMutex);
 			m_AddedItems.push_back(particleToAdd);
+            m_ValidItems.insert(particleToAdd);
 		} else {
             std::lock_guard<std::mutex> lock(m_AddedParticlesMutex);
 			m_AddedParticles.push_back(particleToAdd);
+            m_ValidParticles.insert(particleToAdd);
 		}
     }
 }
@@ -944,6 +954,7 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
             if (*itr == pActorToRem)
             {
                 std::lock_guard<std::mutex> lock(m_ActorsMutex);
+                m_ValidActors.erase(*itr);
                 m_Actors.erase(itr);
                 removed = true;
                 break;
@@ -957,6 +968,7 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
                 if (*itr == pActorToRem)
                 {
                     std::lock_guard<std::mutex> lock(m_AddedActorsMutex);
+                    m_ValidActors.erase(*itr);
                     m_AddedActors.erase(itr);
                     removed = true;
                     break;
@@ -988,6 +1000,7 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
             if (*itr == pItemToRem)
             {
                 std::lock_guard<std::mutex> lock(m_ItemsMutex);
+                m_ValidItems.erase(*itr);
                 m_Items.erase(itr);
                 removed = true;
                 break;
@@ -1001,6 +1014,7 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
                 if (*itr == pItemToRem)
                 {
                     std::lock_guard<std::mutex> lock(m_AddedItemsMutex);
+                    m_ValidItems.erase(*itr);
                     m_AddedItems.erase(itr);
                     removed = true;
                     break;
@@ -1110,6 +1124,7 @@ bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
             if (*itr == pMOToRem)
             {
                 std::lock_guard<std::mutex> lock(m_ParticlesMutex);
+                m_ValidParticles.erase(*itr);
                 m_Particles.erase(itr);
                 removed = true;
                 break;
@@ -1123,6 +1138,7 @@ bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
                 if (*itr == pMOToRem)
                 {
                     std::lock_guard<std::mutex> lock(m_AddedParticlesMutex);
+                    m_ValidParticles.erase(*itr);
                     m_AddedParticles.erase(itr);
                     removed = true;
                     break;
@@ -1159,7 +1175,11 @@ bool MovableMan::ValidateMOIDs() {
 //                  MO that's currently active in the simulation, and kept by this MovableMan.
 
 bool MovableMan::ValidMO(const MovableObject *pMOToCheck) {
-	return pMOToCheck && pMOToCheck->ExistsInMovableMan();
+    bool exists = m_ValidActors.find(pMOToCheck) != m_ValidActors.end() ||
+                  m_ValidItems.find(pMOToCheck) != m_ValidItems.end() ||
+                  m_ValidParticles.find(pMOToCheck) != m_ValidParticles.end();
+
+    return pMOToCheck && exists;
 }
 
 
@@ -1171,32 +1191,7 @@ bool MovableMan::ValidMO(const MovableObject *pMOToCheck) {
 
 bool MovableMan::IsActor(const MovableObject *pMOToCheck)
 {
-    bool found = false;
-
-    if (pMOToCheck)
-    {
-        for (std::deque<Actor *>::iterator itr = m_Actors.begin(); !found && itr != m_Actors.end(); ++itr)
-        {
-            if (*itr == pMOToCheck)
-            {
-                found = true;
-                break;
-            }
-        }
-        // Try the actors just added this frame
-        if (!found)
-        {
-            for (std::deque<Actor *>::iterator itr = m_AddedActors.begin(); !found && itr != m_AddedActors.end(); ++itr)
-            {
-                if (*itr == pMOToCheck)
-                {
-                    found = true;
-                    break;
-                }
-            }
-        }
-    }
-    return found;
+    return pMOToCheck && m_ValidActors.find(pMOToCheck) != m_ValidActors.end();
 }
 
 
@@ -1208,32 +1203,7 @@ bool MovableMan::IsActor(const MovableObject *pMOToCheck)
 
 bool MovableMan::IsDevice(const MovableObject *pMOToCheck)
 {
-    bool found = false;
-
-    if (pMOToCheck)
-    {
-        for (std::deque<MovableObject *>::iterator itr = m_Items.begin(); !found && itr != m_Items.end(); ++itr)
-        {
-            if (*itr == pMOToCheck)
-            {
-                found = true;
-                break;
-            }
-        }
-        // Try the items just added this frame
-        if (!found)
-        {
-            for (std::deque<MovableObject *>::iterator itr = m_AddedItems.begin(); !found && itr != m_AddedItems.end(); ++itr)
-            {
-                if (*itr == pMOToCheck)
-                {
-                    found = true;
-                    break;
-                }
-            }
-        }
-    }
-    return found;
+    return pMOToCheck && m_ValidItems.find(pMOToCheck) != m_ValidItems.end();
 }
 
 
@@ -1245,32 +1215,7 @@ bool MovableMan::IsDevice(const MovableObject *pMOToCheck)
 
 bool MovableMan::IsParticle(const MovableObject *pMOToCheck)
 {
-    bool found = false;
-
-    if (pMOToCheck)
-    {
-        for (std::deque<MovableObject *>::iterator itr = m_Particles.begin(); !found && itr != m_Particles.end(); ++itr)
-        {
-            if (*itr == pMOToCheck)
-            {
-                found = true;
-                break;
-            }
-        }
-        // Try the items just added this frame
-        if (!found)
-        {
-            for (std::deque<MovableObject *>::iterator itr = m_AddedParticles.begin(); !found && itr != m_AddedParticles.end(); ++itr)
-            {
-                if (*itr == pMOToCheck)
-                {
-                    found = true;
-                    break;
-                }
-            }
-        }
-    }
-    return found;
+    return pMOToCheck && m_ValidParticles.find(pMOToCheck) != m_ValidParticles.end();
 }
 
 
@@ -1450,10 +1395,10 @@ int MovableMan::GetAllActors(bool transferOwnership, std::list<SceneObject *> &a
 
     if (transferOwnership)
     {
-        // Clear the internal Actor list; we transferred the ownership of them
+        // Clear the internal Actor lists; we transferred the ownership of them
         m_Actors.clear();
-        // Clear the internal Actor list; we transferred the ownership of them
         m_AddedActors.clear();
+        m_ValidActors.clear();
 
         // Also clear the actor rosters
         for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; ++team)
@@ -1490,6 +1435,7 @@ int MovableMan::GetAllItems(bool transferOwnership, std::list<SceneObject *> &it
         // Clear the internal Item list; we transferred the ownership of them
         m_Items.clear();
         m_AddedItems.clear();
+        m_ValidItems.clear();
     }
 
     return addedCount;
@@ -1520,6 +1466,7 @@ int MovableMan::GetAllParticles(bool transferOwnership, std::list<SceneObject *>
         // Clear the internal Particle list; we transferred the ownership of them
         m_Particles.clear();
         m_AddedParticles.clear();
+        m_ValidParticles.clear();
     }
 
     return addedCount;
@@ -1783,10 +1730,12 @@ void MovableMan::Update()
                 m_Actors.push_back(*aIt);
             else
 			{
+                m_ValidActors.erase(*aIt);
 				// Also remove actor from the roster
-				if ((*aIt)->GetTeam() >= 0)
-					//m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
-					RemoveActorFromTeamRoster(*aIt);
+                if ((*aIt)->GetTeam() >= 0) {
+                    //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
+                    RemoveActorFromTeamRoster(*aIt);
+                }
                 delete (*aIt);
 			}
         }
@@ -1796,10 +1745,12 @@ void MovableMan::Update()
         for (iIt = m_AddedItems.begin(); iIt != m_AddedItems.end(); ++iIt)
         {
             // Delete instead if it's marked for it
-            if (!(*iIt)->IsSetToDelete())
+            if (!(*iIt)->IsSetToDelete()) {
                 m_Items.push_back(*iIt);
-            else
+            } else {
+                m_ValidItems.erase(*iIt);
                 delete (*iIt);
+            }
         }
         m_AddedItems.clear();
 
@@ -1807,10 +1758,12 @@ void MovableMan::Update()
         for (parIt = m_AddedParticles.begin(); parIt != m_AddedParticles.end(); ++parIt)
         {
             // Delete instead if it's marked for it
-            if (!(*parIt)->IsSetToDelete())
+            if (!(*parIt)->IsSetToDelete()) {
                 m_Particles.push_back(*parIt);
-            else
+            } else {
+                m_ValidParticles.erase(*parIt);
                 delete (*parIt);
+            }
         }
         m_AddedParticles.clear();
     }
@@ -1834,11 +1787,15 @@ void MovableMan::Update()
 
                 // Add to the particles list
                 m_Particles.push_back(*aIt);
+                m_ValidParticles.insert(*aIt);
                 // Remove from the team roster
 
-                if ((*aIt)->GetTeam() >= 0)
+                if ((*aIt)->GetTeam() >= 0) {
                     //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
-					RemoveActorFromTeamRoster(*aIt);
+                    RemoveActorFromTeamRoster(*aIt);
+                }
+                
+                m_ValidActors.erase(*aIt);
                 aIt++;
             }
             // Try to set the existing iterator to a safer value, erase can crash in debug mode otherwise?
@@ -1858,9 +1815,12 @@ void MovableMan::Update()
             {
                 (*iIt)->SetToSettle(false);
 				// Disable TDExplosive's immunity to settling
-				if ((*iIt)->GetRestThreshold()< 0)
-					(*iIt)->SetRestThreshold(500);
-                m_Particles.push_back(*(iIt++));
+                if ((*iIt)->GetRestThreshold() < 0) {
+                    (*iIt)->SetRestThreshold(500);
+                }
+                m_ValidItems.erase(*iIt);
+                m_Particles.push_back(*iIt);
+                iIt++;
             }
             m_Items.erase(imidIt, m_Items.end());
         }
@@ -1889,7 +1849,8 @@ void MovableMan::Update()
 				RemoveActorFromTeamRoster(*aIt);
 
             // Delete
-            delete *aIt;
+            m_ValidActors.erase(*aIt);
+            delete (*aIt);
             aIt++;
         }
         // Try to set the existing iterator to a safer value, erase can crash in debug mode otherwise?
@@ -1900,16 +1861,22 @@ void MovableMan::Update()
         iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
         imidIt = iIt;
 
-        while (iIt != m_Items.end())
-            delete *(iIt++);
+        while (iIt != m_Items.end()) {
+            m_ValidItems.erase(*iIt);
+            delete (*iIt);
+            iIt++;
+        }
         m_Items.erase(imidIt, m_Items.end());
 
         // Particles
         parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
         midIt = parIt;
 
-        while (parIt != m_Particles.end())
-            delete *(parIt++);
+        while (parIt != m_Particles.end()) {
+            m_ValidParticles.erase(*parIt);
+            delete (*parIt);
+            parIt++;
+        }
         m_Particles.erase(midIt, m_Particles.end());
     }
 
@@ -1935,7 +1902,9 @@ void MovableMan::Update()
 				(*parIt)->SetPos(parPos.GetFloored());
 			}
 			if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) { (*parIt)->DrawToTerrain(g_SceneMan.GetTerrain()); }
-			delete *(parIt++);
+            m_ValidParticles.erase(*parIt);
+			delete (*parIt);
+            parIt++;
 		}
 		m_Particles.erase(midIt, m_Particles.end());
 	}

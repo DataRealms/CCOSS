@@ -836,6 +836,23 @@ ClassInfoGetters;
 	/// <param name="newCanRevealUnseen">Whether this actor can reveal unseen areas.</param>
 	void SetCanRevealUnseen(bool newCanRevealUnseen) { m_CanRevealUnseen = newCanRevealUnseen; }
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  SetPainThreshold
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Sets this' PainThreshold value above which it will play PainSound
+// Arguments:       Desired PainThreshold value
+// Return value:    None.
+
+    void SetPainThreshold(float newPainThreshold) { m_PainThreshold = newPainThreshold; }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:  GetPainThreshold
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Gets this' PainThreshold value above which it will play PainSound
+// Arguments:       None.
+// Return value:    The current PainThreshold
+
+    float GetPainThreshold() const { return m_PainThreshold; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:  AlarmPoint
@@ -1495,6 +1512,8 @@ protected:
     float m_SightDistance;
     // How perceptive this is of alarming events going on around him, 0.0 - 1.0
     float m_Perceptiveness;
+    /// Damage value above which this will play PainSound
+    float m_PainThreshold;
 	// Whether or not this actor can reveal unseen areas by looking
 	bool m_CanRevealUnseen;
     // About How tall is the Actor, in pixels?

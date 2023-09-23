@@ -30,7 +30,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <OutDir>_Bin\</OutDir>
     <IntDir>_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>zlibstaticd</TargetName>
@@ -38,7 +38,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <OutDir>_Bin\</OutDir>
     <IntDir>_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>zlibstaticd-32</TargetName>
@@ -46,7 +46,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <OutDir>_Bin\</OutDir>
     <IntDir>_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>zlibstatic</TargetName>
@@ -54,7 +54,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <OutDir>_Bin\</OutDir>
     <IntDir>_Bin\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>zlibstatic-32</TargetName>

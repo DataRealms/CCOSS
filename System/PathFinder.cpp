@@ -204,8 +204,8 @@ namespace RTE {
 			int status = this->CalculatePath(start, end, request.path, request.totalCost, digStrength);
 			
 			request.status = status;
-			request.complete = true;
 			request.pathLength = request.path.size();
+			request.complete = true;
 
 			if (callback) {
 				callback(volRequest);

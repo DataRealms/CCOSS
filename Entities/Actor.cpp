@@ -103,6 +103,7 @@ void Actor::Clear() {
     m_LastAlarmPos.Reset();
     m_SightDistance = 450.0F;
     m_Perceptiveness = 0.5F;
+    m_PainThreshold = 15.0F;
 	m_CanRevealUnseen = true;
     m_CharHeight = 0;
     m_HolsterOffset.Reset();
@@ -228,6 +229,7 @@ int Actor::Create(const Actor &reference)
     m_SeenTargetPos = reference.m_SeenTargetPos;
     m_SightDistance = reference.m_SightDistance;
     m_Perceptiveness = reference.m_Perceptiveness;
+    m_PainThreshold = reference.m_PainThreshold;
 	m_CanRevealUnseen = reference.m_CanRevealUnseen;
     m_CharHeight = reference.m_CharHeight;
     m_HolsterOffset = reference.m_HolsterOffset;
@@ -372,6 +374,8 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_SightDistance;
     else if (propName == "Perceptiveness")
         reader >> m_Perceptiveness;
+    else if (propName == "PainThreshold")
+        reader >> m_PainThreshold;
 	else if (propName == "CanRevealUnseen")
 		reader >> m_CanRevealUnseen;
     else if (propName == "CharHeight")
@@ -464,6 +468,8 @@ int Actor::Save(Writer &writer) const
     writer << m_SightDistance;
     writer.NewProperty("Perceptiveness");
     writer << m_Perceptiveness;
+    writer.NewProperty("PainThreshold");
+    writer << m_PainThreshold;
 	writer.NewProperty("CanRevealUnseen");
 	writer << m_CanRevealUnseen;
     writer.NewProperty("CharHeight");
@@ -1251,7 +1257,7 @@ void Actor::UpdateAIScripted(ThreadScriptsToRun scriptsToRun) {
     RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true, {}, {}, scriptsToRun);
     if (scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
         // If we're in a SingleThreaded context, we run the MultiThreaded scripts synced updates
-         RunScriptedFunctionInAppropriateScripts("SyncedUpdateAI", false, true, {}, {}, ThreadScriptsToRun::MultiThreaded); // This isn't a typo!
+         RunScriptedFunctionInAppropriateScripts("SyncedUpdateAI", false, true, {}, {}, ThreadScriptsToRun::Both);
     }
 }
 
@@ -1392,7 +1398,6 @@ void Actor::Update()
 		const float impulse = std::sqrt(travelImpulseMagnitudeSqr) - m_TravelImpulseDamage;
 		const float damage = std::max(impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth, 0.0F);
 		m_Health -= damage;
-		if (damage > 0 && m_Health > 0 && m_PainSound) { m_PainSound->Play(m_Pos); }
 		if (m_Status == Actor::STABLE) { m_Status = UNSTABLE; }
 		m_ForceDeepCheck = true;
 	}
@@ -1468,6 +1473,9 @@ void Actor::Update()
     {
         g_MovableMan.SortTeamRoster(m_Team);
     }
+
+    // Play PainSound if damage this frame exceeded PainThreshold
+    if (m_PainThreshold > 0 && m_PrevHealth - m_Health > m_PainThreshold && m_Health > 1 && m_PainSound) { m_PainSound->Play(m_Pos); }
 
 	int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
 	if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer)) {

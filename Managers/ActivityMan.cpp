@@ -65,6 +65,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	bool ActivityMan::ForceAbortSave() {
+		// Just a utility function we can call in the debugger quickwatch window to force an abort save to occur (great for force-saving the game when it crashes)
+		// Throw ActivityMan::Instance().ForceAbortSave() into a quickwatch window and evaluate :)
+		return SaveCurrentGame("AbortSave");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool ActivityMan::SaveCurrentGame(const std::string &fileName) {
 		if (IsSaving() || m_IsLoading) {
 			RTEError::ShowMessageBox("Cannot Save Game\nA game is currently being saved/loaded, try again shortly.");

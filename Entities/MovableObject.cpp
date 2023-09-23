@@ -64,6 +64,7 @@ void MovableObject::Clear()
     m_IgnoresTeamHits = false;
     m_IgnoresAtomGroupHits = false;
     m_IgnoresAGHitsWhenSlowerThan = -1;
+    m_IgnoresActorHits = false;
     m_MissionCritical = false;
     m_CanBeSquished = true;
     m_IsUpdated = false;
@@ -72,7 +73,6 @@ void MovableObject::Clear()
     m_MOID = g_NoMOID;
     m_RootMOID = g_NoMOID;
     m_HasEverBeenAddedToMovableMan = false;
-	m_ExistsInMovableMan = false;
     m_MOIDFootprint = 0;
     m_AlreadyHitBy.clear();
 	m_VelOscillations = 0;
@@ -235,6 +235,7 @@ int MovableObject::Create(const MovableObject &reference)
     m_IgnoresTeamHits = reference.m_IgnoresTeamHits;
     m_IgnoresAtomGroupHits = reference.m_IgnoresAtomGroupHits;
     m_IgnoresAGHitsWhenSlowerThan = reference.m_IgnoresAGHitsWhenSlowerThan;
+    m_IgnoresActorHits = reference.m_IgnoresActorHits;
     m_pMOToNotHit = reference.m_pMOToNotHit;
     m_MOIgnoreTimer = reference.m_MOIgnoreTimer;
     m_MissionCritical = reference.m_MissionCritical;
@@ -335,6 +336,8 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		reader >> m_IgnoresAtomGroupHits;
 	else if (propName == "IgnoresAGHitsWhenSlowerThan")
 		reader >> m_IgnoresAGHitsWhenSlowerThan;
+    else if (propName == "IgnoresActorHits")
+        reader >> m_IgnoresActorHits;
 	else if (propName == "RemoveOrphanTerrainRadius")
 	{
 		reader >> m_RemoveOrphanTerrainRadius;
@@ -474,6 +477,8 @@ int MovableObject::Save(Writer &writer) const
     writer << m_IgnoresAtomGroupHits;
     writer.NewProperty("IgnoresAGHitsWhenSlowerThan");
     writer << m_IgnoresAGHitsWhenSlowerThan;
+    writer.NewProperty("IgnoresActorHits");
+    writer << m_IgnoresActorHits;
     writer.NewProperty("MissionCritical");
     writer << m_MissionCritical;
     writer.NewProperty("CanBeSquished");
@@ -1053,9 +1058,9 @@ int MovableObject::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
         // TODO - in future, enforce that everything in MultiThreaded Update() is const, so non-const actions must be performed in SyncedUpdate
         // This would require a bunch of Lua binding fuckery, but eventually maybe it'd be possible.
         // I wonder if we can do some SFINAE magic to make the luabindings automagically do a no-op with const objects, to avoid writing the bindings twice
-        if (status >= 0 && scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
+        if (status >= -1 && scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
             // If we're in a SingleThreaded context, we run the MultiThreaded scripts synced updates:
-            status = RunScriptedFunctionInAppropriateScripts("SyncedUpdate", false, true, {}, {}, ThreadScriptsToRun::MultiThreaded); // This isn't a typo!
+            status = RunScriptedFunctionInAppropriateScripts("SyncedUpdate", false, true, {}, {}, ThreadScriptsToRun::Both);
         }
 	}
 

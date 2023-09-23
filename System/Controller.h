@@ -28,6 +28,11 @@ namespace RTE {
 		WEAPON_RELOAD,
 		PIE_MENU_OPENED,
 		PIE_MENU_ACTIVE,
+		// When using a gamepad, the pie menu can be opened either by left trigger or the right secondary button
+		// We want to differentiate between those, so that if the player is using their left hand to open the pie menu, then their right hand selects options
+		// And vice versa
+		PIE_MENU_ACTIVE_ANALOG,
+		PIE_MENU_ACTIVE_DIGITAL,
 		WEAPON_CHANGE_NEXT,
 		WEAPON_CHANGE_PREV,
 		WEAPON_PICKUP,
@@ -193,7 +198,7 @@ namespace RTE {
 		/// Sets the analog movement vector state of this.
 		/// </summary>
 		/// <param name="newMove">The new analog movement vector.</param>
-		void SetAnalogMove(Vector &newMove) { m_AnalogMove = newMove; }
+		void SetAnalogMove(const Vector &newMove) { m_AnalogMove = newMove; }
 
 		/// <summary>
 		/// Gets the analog aiming input data.
@@ -205,7 +210,7 @@ namespace RTE {
 		/// Sets the analog aiming vector state of this.
 		/// </summary>
 		/// <param name="newAim">The new analog aiming vector.</param>
-		void SetAnalogAim(Vector &newAim) { m_AnalogAim = newAim; }
+		void SetAnalogAim(const Vector &newAim) { m_AnalogAim = newAim; }
 
 		/// <summary>
 		/// Gets the analog menu input data.

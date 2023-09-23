@@ -284,6 +284,17 @@ ClassInfoGetters;
 	/// <param name="supported">Whether this HeldDevice's parent has a second Arm available to provide support (or this is on a Turret).</param>
 	void SetSupportAvailable(bool supportAvailable) { m_SupportAvailable = m_Supportable && supportAvailable; }
 
+	/// <summary>
+	/// Gets whether this HeldDevice while be held at the support offset with the off-hand when reloading.
+	/// </summary>
+	/// <returns>Whether this HeldDevice while be held at the support offset with the off-hand when reloading.</returns>
+	bool GetUseSupportOffsetWhileReloading() const { return m_UseSupportOffsetWhileReloading; }
+
+	/// <summary>
+	/// Sets whether this HeldDevice while be held at the support offset with the off-hand when reloading.
+	/// </summary>
+	/// <param name="value">Whether this HeldDevice while be held at the support offset with the off-hand when reloading.</param>
+	void SetUseSupportOffsetWhileReloading(bool value) { m_UseSupportOffsetWhileReloading = value; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetSupportOffset
@@ -354,6 +365,35 @@ ClassInfoGetters;
     /// <param name="gripStrengthMultiplier">The new grip strength multiplier for this HeldDevice.</param>
     void SetGripStrengthMultiplier(float gripStrengthMultiplier) { m_GripStrengthMultiplier = gripStrengthMultiplier; }
 
+    /// <summary>
+    /// Gets whether this can get hit by MOs when held.
+    /// </summary>
+    /// <returns>Whether this can get hit by MOs when held.</returns>
+    bool GetsHitByMOsWhenHeld() const { return m_GetsHitByMOsWhenHeld; }
+
+    /// <summary>
+    /// Sets whether this can get hit by MOs when held.
+    /// </summary>
+    /// <param name="value">Whether this can get hit by MOs when held.</param>
+    void SetGetsHitByMOsWhenHeld(bool value) { m_GetsHitByMOsWhenHeld = value; }
+
+    /// <summary>
+    /// Gets whether this HeldDevice is currently being held or not.
+    /// </summary>
+    /// <returns>Whether this HeldDevice is currently being held or not.</returns>
+    bool IsBeingHeld() const;
+
+    /// <summary>
+	/// Gets the visual recoil multiplier.
+	/// </summary>
+	/// <returns>A float with the scalar value.</returns>
+	float GetVisualRecoilMultiplier() const { return m_VisualRecoilMultiplier; }
+
+	/// <summary>
+	/// Sets the visual recoil multiplier.
+	/// </summary>
+	/// <param name="value">The new recoil multiplier scalar.</param>
+	void SetVisualRecoilMultiplier(float value) { m_VisualRecoilMultiplier = value; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetSharpAim
@@ -630,6 +670,8 @@ protected:
     // The point at which the other arm of the holder can support this HeldDevice.
     // Relative to the m_Pos. This is like a seconday handle position.
     Vector m_SupportOffset;
+    // Whether the actor using this gun should keep hold of the support offset when reloading, instead of using their ReloadOffset/HolsterOffset
+    bool m_UseSupportOffsetWhileReloading;
     // The degree as to this is being aimed carefully. 0 means no sharp aim, and 1.0 means best aim.
     float m_SharpAim;
     // How much farther the player can see when aiming this sharply.
@@ -648,6 +690,10 @@ protected:
     float m_Loudness;
     // If this weapon belongs to the "Explosive Weapons" group or not
     bool m_IsExplosiveWeapon;
+    // If this device can be hit by MOs whenever it's held
+    bool m_GetsHitByMOsWhenHeld;
+    /// The multiplier for visual recoil
+	float m_VisualRecoilMultiplier;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

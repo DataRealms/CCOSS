@@ -243,6 +243,9 @@ namespace RTE {
 			if ((m_OwnerMO->IgnoresAtomGroupHits() && dynamic_cast<const MOSRotating *>(hitMO)) || (hitMO->IgnoresAtomGroupHits() && dynamic_cast<const MOSRotating *>(m_OwnerMO))) {
 				return true;
 			}
+			if ((m_OwnerMO->GetIgnoresActorHits() && dynamic_cast<const Actor*>(hitMO)) || (hitMO->GetIgnoresActorHits() && dynamic_cast<const Actor*>(m_OwnerMO))) {
+				return true;
+			}
 		}
 		// Now check for explicit ignore
 		bool ignored = false;

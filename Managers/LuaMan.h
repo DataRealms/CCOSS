@@ -223,6 +223,18 @@ namespace RTE {
 		/// <returns>A random number between 0 and 1.</returns>
 		double PosRand();
 
+#pragma region Passthrough LuaMan Functions
+		const std::vector<std::string>& DirectoryList(const std::string& relativeDirectory);
+		const std::vector<std::string>& FileList(const std::string& relativeDirectory);
+		bool FileExists(const std::string &fileName);
+		int FileOpen(const std::string& fileName, const std::string& accessMode);
+		void FileClose(int fileIndex);
+		void FileCloseAll();
+		std::string FileReadLine(int fileIndex);
+		void FileWriteLine(int fileIndex, const std::string& line);
+		bool FileEOF(int fileIndex);
+#pragma endregion
+
 		/// <summary>
 		/// Generates a string that describes the current state of the Lua stack, for debugging purposes.
 		/// </summary>

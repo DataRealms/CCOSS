@@ -59,6 +59,7 @@ void ACrab::Clear()
     m_StrideSound = nullptr;
     m_pJetpack = nullptr;
     m_MoveState = STAND;
+    m_StrideFrame = false;
     for (int side = 0; side < SIDECOUNT; ++side)
     {
         for (int layer = 0; layer < LAYERCOUNT; ++layer)
@@ -1198,6 +1199,8 @@ void ACrab::PreControllerUpdate()
     ///////////////////////////////////////////////////
     // Travel the limb AtomGroup:s
 
+    m_StrideFrame = false;
+
     if (m_Status == STABLE && !m_LimbPushForcesAndCollisionsDisabled)
     {
         // This exists to support disabling foot collisions if the limbpath has that flag set.
@@ -1286,6 +1289,11 @@ void ACrab::PreControllerUpdate()
 					m_StrideSound->Play();
 				}
 			}
+
+            if (restarted) {
+                m_StrideFrame = true;
+                RunScriptedFunctionInAppropriateScripts("OnStride");
+            }
 		} else if (m_pLFGLeg || m_pLBGLeg || m_pRFGLeg || m_pRBGLeg) {
 			if (m_MoveState == JUMP) {
 				// TODO: Utilize jump paths in an intuitive way?

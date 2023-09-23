@@ -283,7 +283,7 @@ namespace RTE {
 		inline float RadiansToDegrees(float angleRadians) { return angleRadians / c_PI * 180.0F; }
 	#pragma endregion
 
-	#pragma region Comparison
+	#pragma region Strings
 		/// <summary>
 		/// Checks whether two strings are equal when the casing is disregarded.
 		/// </summary>
@@ -291,6 +291,13 @@ namespace RTE {
 		/// <param name="strB">Second string.</param>
 		/// <returns>Whether the two strings are equal case insensitively.</returns>
 		inline bool StringsEqualCaseInsensitive(const std::string_view &strA, const std::string_view &strB) { return std::equal(strA.begin(), strA.end(), strB.begin(), strB.end(), [](char strAChar, char strBChar) { return std::tolower(strAChar) == std::tolower(strBChar); }); }
+
+		/// <summary>
+		/// Hashes a string in a cross-compiler/platform safe way (std::hash gives different results on different compilers).
+		/// </summary>
+		/// <param name="text">Text string to hash.</param>
+		/// <returns>The hash result value.</returns>
+		uint64_t Hash(const std::string &text);
 	#pragma endregion
 
 	#pragma region True Alpha Blending

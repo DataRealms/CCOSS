@@ -131,18 +131,13 @@ int EditorActivity::Create(const EditorActivity &reference)
 
 int EditorActivity::ReadProperty(const std::string_view &propName, Reader &reader)
 {
+    StartPropertyList(Activity::ReadProperty(propName, reader));
 /*
-    if (propName == "CPUTeam")
-        reader >> m_CPUTeam;
-    else if (propName == "Difficulty")
-        reader >> m_Difficulty;
-    else if (propName == "DeliveryDelay")
-        reader >> m_DeliveryDelay;
-    else
+    MatchProperty("CPUTeam", { reader >> m_CPUTeam; });
+    MatchProperty("Difficulty", { reader >> m_Difficulty; });
+    MatchProperty("DeliveryDelay", { reader >> m_DeliveryDelay; });
 */
-        return Activity::ReadProperty(propName, reader);
-
-    return 0;
+    EndPropertyList;
 }
 
 

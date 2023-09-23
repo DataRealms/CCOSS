@@ -110,55 +110,40 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Attachable::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "ParentOffset") {
-			reader >> m_ParentOffset;
-		} else if (propName == "DrawAfterParent") {
-			reader >> m_DrawAfterParent;
-		} else if (propName == "DeleteWhenRemovedFromParent") {
-			reader >> m_DeleteWhenRemovedFromParent;
-		} else if (propName == "GibWhenRemovedFromParent") {
-			reader >> m_GibWhenRemovedFromParent;
-		} else if (propName == "ApplyTransferredForcesAtOffset") {
-			reader >> m_ApplyTransferredForcesAtOffset;
-		} else if (propName == "GibWithParentChance") {
-			reader >> m_GibWithParentChance;
-		} else if (propName == "ParentGibBlastStrengthMultiplier") {
-			reader >> m_ParentGibBlastStrengthMultiplier;
-		} else if (propName == "JointStrength" || propName == "Strength") {
-			reader >> m_JointStrength;
-		} else if (propName == "JointStiffness" || propName == "Stiffness") {
+		StartPropertyList(return MOSRotating::ReadProperty(propName, reader));
+		
+		MatchProperty("ParentOffset", { reader >> m_ParentOffset; });
+		MatchProperty("DrawAfterParent", { reader >> m_DrawAfterParent; });
+		MatchProperty("DeleteWhenRemovedFromParent", { reader >> m_DeleteWhenRemovedFromParent; });
+		MatchProperty("GibWhenRemovedFromParent", { reader >> m_GibWhenRemovedFromParent; });
+		MatchProperty("ApplyTransferredForcesAtOffset", { reader >> m_ApplyTransferredForcesAtOffset; });
+		MatchProperty("GibWithParentChance", { reader >> m_GibWithParentChance; });
+		MatchProperty("ParentGibBlastStrengthMultiplier", { reader >> m_ParentGibBlastStrengthMultiplier; });
+		MatchForwards("JointStrength") MatchProperty("Strength", { reader >> m_JointStrength; });
+		MatchForwards("JointStiffness") MatchProperty("Stiffness", {
 			float jointStiffness = 0;
 			reader >> jointStiffness;
 			SetJointStiffness(jointStiffness);
-		} else if (propName == "JointOffset") {
-			reader >> m_JointOffset;
-		} else if (propName == "BreakWound") {
+		});
+		MatchProperty("JointOffset", { reader >> m_JointOffset; });
+		MatchProperty("BreakWound", {
 			m_BreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
 			if (!m_ParentBreakWound) { m_ParentBreakWound = m_BreakWound; }
-		} else if (propName == "ParentBreakWound") {
-			m_ParentBreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader));
-		} else if (propName == "InheritsHFlipped") {
+		});
+		MatchProperty("ParentBreakWound", { m_ParentBreakWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader)); });
+		MatchProperty("InheritsHFlipped", {
 			reader >> m_InheritsHFlipped;
 			if (m_InheritsHFlipped != 0 && m_InheritsHFlipped != 1) { m_InheritsHFlipped = -1; }
-		} else if (propName == "InheritsRotAngle") {
-			reader >> m_InheritsRotAngle;
-		} else if (propName == "InheritedRotAngleRadOffset" || propName == "InheritedRotAngleOffset") {
-			reader >> m_InheritedRotAngleOffset;
-		} else if (propName == "InheritedRotAngleDegOffset") {
-			m_InheritedRotAngleOffset = DegreesToRadians(std::stof(reader.ReadPropValue()));
-		} else if (propName == "InheritsFrame") {
-			reader >> m_InheritsFrame;
-		} else if (propName == "CollidesWithTerrainWhileAttached") {
-			reader >> m_CollidesWithTerrainWhileAttached;
-		} else if (propName == "IgnoresParticlesWhileAttached") {
-			reader >> m_IgnoresParticlesWhileAttached;
-		} else if (propName == "AddPieSlice") {
-			m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader))));
-		} else {
-			return MOSRotating::ReadProperty(propName, reader);
-		}
+		});
+		MatchProperty("InheritsRotAngle", { reader >> m_InheritsRotAngle; });
+		MatchForwards("InheritedRotAngleRadOffset") MatchProperty("InheritedRotAngleOffset", { reader >> m_InheritedRotAngleOffset; });
+		MatchProperty("InheritedRotAngleDegOffset", { m_InheritedRotAngleOffset = DegreesToRadians(std::stof(reader.ReadPropValue())); });
+		MatchProperty("InheritsFrame", { reader >> m_InheritsFrame; });
+		MatchProperty("CollidesWithTerrainWhileAttached", { reader >> m_CollidesWithTerrainWhileAttached; });
+		MatchProperty("IgnoresParticlesWhileAttached", { reader >> m_IgnoresParticlesWhileAttached; });
+		MatchProperty("AddPieSlice", { m_PieSlices.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader)))); });
 
-		return 0;
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

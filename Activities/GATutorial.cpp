@@ -163,23 +163,15 @@ int GATutorial::Create(const GATutorial &reference)
 
 int GATutorial::ReadProperty(const std::string_view &propName, Reader &reader)
 {
+    StartPropertyList(return GameActivity::ReadProperty(propName, reader));
 /*
-    if (propName == "SpawnIntervalEasiest")
-        reader >> m_SpawnIntervalEasiest;
-    else if (propName == "SpawnIntervalHardest")
-        reader >> m_SpawnIntervalHardest;
-    else if (propName == "AddAttackerSpawn")
-    {
+    MatchProperty("SpawnIntervalEasiest", { reader >> m_SpawnIntervalEasiest; });
+    MatchProperty("SpawnIntervalHardest", { reader >> m_SpawnIntervalHardest; });
+    MatchProperty("AddAttackerSpawn",
         Actor *pNewSpawn = dynamic_cast<Actor *>(g_PresetMan.ReadReflectedPreset(reader));
-        if (pNewSpawn)
-            m_AttackerSpawns.push_back(pNewSpawn);
-    }
-
-    else
+        if (pNewSpawn) { m_AttackerSpawns.push_back(pNewSpawn); } );
 */
-        return GameActivity::ReadProperty(propName, reader);
-
-    return 0;
+    EndPropertyList;
 }
 
 

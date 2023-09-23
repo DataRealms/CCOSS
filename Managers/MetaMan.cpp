@@ -264,64 +264,44 @@ int MetaMan::Load(const MetaSave *pSave)
 
 int MetaMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "GameState")
-        reader >> m_GameState;
-    else if (propName == "GameName")
-        reader >> m_GameName;
-    else if (propName == "AddPlayer")
+    StartPropertyList(return Serializable::ReadProperty(propName, reader));
+    
+    MatchProperty("GameState", { reader >> m_GameState; });
+    MatchProperty("GameName", { reader >> m_GameName; });
+    MatchProperty("AddPlayer",
     {
         MetaPlayer player;
         reader >> player;
         m_Players.push_back(player);
-    }
-    else if (propName == "TeamCount")
-        reader >> m_TeamCount;
-    else if (propName == "Team1Icon")
-        reader >> m_TeamIcons[Activity::TeamOne];
-    else if (propName == "Team2Icon")
-        reader >> m_TeamIcons[Activity::TeamTwo];
-    else if (propName == "Team3Icon")
-        reader >> m_TeamIcons[Activity::TeamThree];
-    else if (propName == "Team4Icon")
-        reader >> m_TeamIcons[Activity::TeamFour];
-    else if (propName == "CurrentRound")
-        reader >> m_CurrentRound;
-    else if(propName == "AddScene")
-    {
+    });
+    MatchProperty("TeamCount", { reader >> m_TeamCount; });
+    MatchProperty("Team1Icon", { reader >> m_TeamIcons[Activity::TeamOne]; });
+    MatchProperty("Team2Icon", { reader >> m_TeamIcons[Activity::TeamTwo]; });
+    MatchProperty("Team3Icon", { reader >> m_TeamIcons[Activity::TeamThree]; });
+    MatchProperty("Team4Icon", { reader >> m_TeamIcons[Activity::TeamFour]; });
+    MatchProperty("CurrentRound", { reader >> m_CurrentRound; });
+    MatchProperty("AddScene", {
         Scene *pScene = new Scene;
         reader >> pScene;
         m_Scenes.push_back(pScene);
-    }
-    else if (propName == "RevealedScenes")
-        reader >> m_RevealedScenes;
-    else if (propName == "RevealRate")
-        reader >> m_RevealRate;
-    else if (propName == "RevealExtra")
-        reader >> m_RevealExtra;
-    else if(propName == "AddOffensive")
-    {
+    });
+    MatchProperty("RevealedScenes", { reader >> m_RevealedScenes; });
+    MatchProperty("RevealRate", { reader >> m_RevealRate; });
+    MatchProperty("RevealExtra", { reader >> m_RevealExtra; });
+    MatchProperty("AddOffensive", {
         GAScripted *pOffensive = new GAScripted();
         reader >> pOffensive;
         m_RoundOffensives.push_back(pOffensive);
-    }
-    else if (propName == "CurrentOffensive")
-        reader >> m_CurrentOffensive;
-    else if (propName == "Difficulty")
-        reader >> m_Difficulty;
-    else if (propName == "Team1AISkill")
-		reader >> m_TeamAISkill[Activity::TeamOne];
-    else if (propName == "Team2AISkill")
-		reader >> m_TeamAISkill[Activity::TeamTwo];
-    else if (propName == "Team3AISkill")
-		reader >> m_TeamAISkill[Activity::TeamThree];
-    else if (propName == "Team4AISkill")
-		reader >> m_TeamAISkill[Activity::TeamFour];
-    else if (propName == "MetaGUI")
-        reader >> m_pMetaGUI;
-    else
-        return Serializable::ReadProperty(propName, reader);
+    });
+    MatchProperty("CurrentOffensive", { reader >> m_CurrentOffensive; });
+    MatchProperty("Difficulty", { reader >> m_Difficulty; });
+    MatchProperty("Team1AISkill", { reader >> m_TeamAISkill[Activity::TeamOne]; });
+    MatchProperty("Team2AISkill", { reader >> m_TeamAISkill[Activity::TeamTwo]; });
+    MatchProperty("Team3AISkill", { reader >> m_TeamAISkill[Activity::TeamThree]; });
+    MatchProperty("Team4AISkill", { reader >> m_TeamAISkill[Activity::TeamFour]; });
+    MatchProperty("MetaGUI", { reader >> m_pMetaGUI; });
 
-    return 0;
+    EndPropertyList;
 }
 
 

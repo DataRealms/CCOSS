@@ -99,20 +99,15 @@ int ACraft::Exit::Create()
 
 int ACraft::Exit::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "Offset")
-        reader >> m_Offset;
-    else if (propName == "Velocity")
-        reader >> m_Velocity;
-    else if (propName == "VelocitySpread")
-        reader >> m_VelSpread;
-    else if (propName == "Radius")
-        reader >> m_Radius;
-    else if (propName == "Range")
-        reader >> m_Range;
-    else
-        return Serializable::ReadProperty(propName, reader);
+    StartPropertyList(return Serializable::ReadProperty(propName, reader));
 
-    return 0;
+    MatchProperty("Offset", { reader >> m_Offset; });
+    MatchProperty("Velocity", { reader >> m_Velocity; });
+    MatchProperty("VelocitySpread", { reader >> m_VelSpread; });
+    MatchProperty("Radius", { reader >> m_Radius; });
+    MatchProperty("Range", { reader >> m_Range; });
+
+    EndPropertyList;
 }
 
 
@@ -366,39 +361,35 @@ int ACraft::Create(const ACraft &reference)
 
 int ACraft::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "HatchDelay")
-        reader >> m_HatchDelay;
-	else if (propName == "HatchOpenSound") {
+    StartPropertyList(return Actor::ReadProperty(propName, reader)); 
+    
+    MatchProperty("HatchDelay", { reader >> m_HatchDelay; });
+	MatchProperty("HatchOpenSound", {
 		m_HatchOpenSound = new SoundContainer;
 		reader >> m_HatchOpenSound;
-	} else if (propName == "HatchCloseSound") {
+	});
+	MatchProperty("HatchCloseSound", {
 		m_HatchCloseSound = new SoundContainer;
 		reader >> m_HatchCloseSound;
-	} else if (propName == "CrashSound") {
+	});
+	MatchProperty("CrashSound", {
 		m_CrashSound = new SoundContainer;
 		reader >> m_CrashSound;
-	} else if (propName == "AddExit")
+	});
+	MatchProperty("AddExit",
     {
         Exit exit;
         reader >> exit;
         m_Exits.push_back(exit);
-    }
-    else if (propName == "DeliveryDelayMultiplier")
-        reader >> m_DeliveryDelayMultiplier;
-	else if (propName == "ExitInterval")
-		reader >> m_ExitInterval;
-	else if (propName == "CanLand")
-        reader >> m_LandingCraft;
-    else if (propName == "MaxPassengers")
-        reader >> m_MaxPassengers;
-	else if (propName == "ScuttleIfFlippedTime")
-		reader >> m_ScuttleIfFlippedTime;
-	else if (propName == "ScuttleOnDeath")
-		reader >> m_ScuttleOnDeath;
-    else
-        return Actor::ReadProperty(propName, reader);
+    });
+    MatchProperty("DeliveryDelayMultiplier", { reader >> m_DeliveryDelayMultiplier; });
+	MatchProperty("ExitInterval", { reader >> m_ExitInterval; });
+	MatchProperty("CanLand", { reader >> m_LandingCraft; });
+    MatchProperty("MaxPassengers", { reader >> m_MaxPassengers; });
+	MatchProperty("ScuttleIfFlippedTime", { reader >> m_ScuttleIfFlippedTime; });
+    MatchProperty("ScuttleOnDeath", { reader >> m_ScuttleOnDeath; });
 
-    return 0;
+    EndPropertyList;
 }
 
 

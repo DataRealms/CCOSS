@@ -94,7 +94,9 @@ int BunkerAssemblyScheme::Create(const BunkerAssemblyScheme &reference)
 
 int BunkerAssemblyScheme::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "BitmapFile")
+    StartPropertyList(return SceneObject::ReadProperty(propName, reader));
+    
+    MatchProperty("BitmapFile",
     {
         reader >> m_BitmapFile;
         m_pBitmap = m_BitmapFile.GetAsBitmap();
@@ -221,28 +223,21 @@ int BunkerAssemblyScheme::ReadProperty(const std::string_view &propName, Reader 
 				else if (px == SCHEME_COLOR_VARIABLE)
 					rectfill(m_pIconBitmap, x * ScaleX * scale, y * ScaleY * scale, x * ScaleX * scale + ScaleX-1, y * ScaleY + ScaleY-1, PAINT_COLOR_VARIABLE);
 			}
-    }
-    else if (propName == "AddChildObject")
+    });
+    MatchProperty("AddChildObject",
     {
         SOPlacer newChild;
         reader >> newChild;
         newChild.SetTeam(m_Team);
         m_ChildObjects.push_back(newChild);
-    }
-    else if (propName == "Limit")
-		reader >> m_Limit;
-    else if (propName == "OneTypePerScene")
-		reader >> m_IsOneTypePerScene;
-    else if (propName == "MaxDeployments")
-		reader >> m_MaxDeployments;
-    else if (propName == "SymmetricScheme")
-		reader >> m_SymmetricScheme;
-    else if (propName == "AssemblyGroup")
-		reader >> m_AssemblyGroup;
-    else
-        return SceneObject::ReadProperty(propName, reader);
+    });
+    MatchProperty("Limit", { reader >> m_Limit; });
+    MatchProperty("OneTypePerScene", { reader >> m_IsOneTypePerScene; });
+    MatchProperty("MaxDeployments", { reader >> m_MaxDeployments; });
+    MatchProperty("SymmetricScheme", { reader >> m_SymmetricScheme; });
+    MatchProperty("AssemblyGroup", { reader >> m_AssemblyGroup; });
 
-    return 0;
+    EndPropertyList;
 }
 
 

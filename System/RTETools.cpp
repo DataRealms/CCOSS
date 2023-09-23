@@ -1,4 +1,5 @@
 #include "RTETools.h"
+
 #include "Vector.h"
 
 #include "allegro.h"
@@ -17,13 +18,14 @@ namespace RTE {
 			// ...it's the name of my childhood pet ;)
 			std::string_view seedString = "Bubble";
 
-			// Biggest prime in a int64_t, because we want all bits to potentially be set (so let us overflow).
+			// Biggest prime in an int64_t, because we want all bits to potentially be set (so let us overflow).
 			const uint64_t hugePrime = 18446744073709551557;
 
 			uint64_t seedResult = 0;
 			for (char c : seedString) {
 				seedResult += static_cast<uint64_t>(c) * hugePrime;
 			}
+			
 			return static_cast<uint32_t>(seedResult);
 		}();
 
@@ -231,5 +233,22 @@ namespace RTE {
 
 	void SetTrueAlphaBlender() {
 		set_blender_mode_ex(_blender_black, _blender_black, _blender_black, TrueAlphaBlender, _blender_black, _blender_black, _blender_black, 0, 0, 0, 0);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// From https://stackoverflow.com/a/66764681, under license https://creativecommons.org/licenses/by-sa/4.0/. Minor modifications
+	uint64_t Hash(const std::string &text) {
+		constexpr uint64_t fnv_prime = 1099511628211ULL;
+		constexpr uint64_t fnv_offset_basis = 14695981039346656037ULL;
+		
+		uint64_t hash = fnv_offset_basis;
+		
+		for(auto c: text) {
+			hash ^= c;
+			hash *= fnv_prime;
+		}
+
+		return hash;
 	}
 }

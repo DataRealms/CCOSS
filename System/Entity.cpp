@@ -44,7 +44,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Entity::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "CopyOf") {
+		StartPropertyList(
+			// Search for a property name match failed!
+			// TODO: write this out to some log file
+			return Serializable::ReadProperty(propName, reader);
+		);
+		
+		MatchProperty("CopyOf", {
 			std::string refName = reader.ReadPropValue();
 			if (refName != "None") {
 				std::string className = GetClassName();
@@ -55,7 +61,8 @@ namespace RTE {
 					reader.ReportError("Couldn't find the preset \"" + refName + "\" of type \"" + className + "\" when trying to do CopyOf.");
 				}
 			}
-		} else if (propName == "PresetName" || propName == "InstanceName") {
+		});
+		MatchForwards("PresetName") MatchProperty("InstanceName", {
 			SetPresetName(reader.ReadPropValue());
 			// Preset name might have "[ModuleName]/" preceding it, detect it here and select proper module!
 			int slashPos = m_PresetName.find_first_of('/');
@@ -64,7 +71,8 @@ namespace RTE {
 			m_IsOriginalPreset = true;
 			// Indicate where this was read from
 			m_DefinedInModule = reader.GetReadModuleID();
-		} else if (propName == "Description") {
+		});
+		MatchProperty("Description", {
 			std::string descriptionValue = reader.ReadPropValue();
 			if (descriptionValue == "MultiLineText") {
 				m_PresetDescription.clear();
@@ -77,21 +85,20 @@ namespace RTE {
 			} else {
 				m_PresetDescription = descriptionValue;
 			}
-		} else if (propName == "RandomWeight") {
+		});
+		MatchProperty("RandomWeight", {
 			reader >> m_RandomWeight;
 			m_RandomWeight = Limit(m_RandomWeight, 100, 0);
-		} else if (propName == "AddToGroup") {
+		});
+		MatchProperty("AddToGroup", {
 			std::string newGroup;
 			reader >> newGroup;
 			AddToGroup(newGroup);
 			// Do this in AddToGroup instead?
 			g_PresetMan.RegisterGroup(newGroup, reader.GetReadModuleID());
-		} else {
-			// Search for a property name match failed!
-			// TODO: write this out to some log file
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

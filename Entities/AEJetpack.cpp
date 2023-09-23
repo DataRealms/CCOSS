@@ -36,8 +36,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    int AEJetpack::Create(const AEJetpack &reference)
-    {
+    int AEJetpack::Create(const AEJetpack &reference) {
         AEmitter::Create(reference);
 
 		m_JetpackType = reference.m_JetpackType;
@@ -54,7 +53,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int AEJetpack::ReadProperty(const std::string_view& propName, Reader& reader) {
-		if (propName == "JetpackType") {
+		StartPropertyList(return AEmitter::ReadProperty(propName, reader));
+		
+		MatchProperty("JetpackType", {
 			std::string jetpackType;
 			reader >> jetpackType;
 			if (jetpackType == "Standard") {
@@ -64,21 +65,18 @@ namespace RTE {
 			} else {
 				reader.ReportError("Unknown JetpackType '" + jetpackType + "'!");
 			}
-		} else if (propName == "JumpTime" || propName == "JetTime") {
+		});
+		MatchForwards("JumpTime") MatchProperty("JetTime", {
             reader >> m_JetTimeTotal;
             m_JetTimeTotal *= 1000.0f; // Convert to ms
-	    } else if (propName == "JumpReplenishRate" || propName == "JetReplenishRate") {
-            reader >> m_JetReplenishRate;
-        } else if (propName == "JumpAngleRange" || propName == "JetAngleRange") {
-            reader >> m_JetAngleRange; 
-        } else if (propName == "CanAdjustAngleWhileFiring") {
-            reader >> m_CanAdjustAngleWhileFiring; 
-		} else if (propName == "AdjustsThrottleForWeight") {
-            reader >> m_AdjustsThrottleForWeight; 
-        } else {
-			return AEmitter::ReadProperty(propName, reader);
-		}
-		return 0;
+	    });
+		MatchForwards("JumpReplenishRate") MatchProperty("JetReplenishRate", { reader >> m_JetReplenishRate; });
+		MatchForwards("JumpAngleRange") MatchProperty("JetAngleRange", { reader >> m_JetAngleRange; });
+		MatchProperty("CanAdjustAngleWhileFiring", { reader >> m_CanAdjustAngleWhileFiring; });
+		MatchProperty("AdjustsThrottleForWeight", { reader >> m_AdjustsThrottleForWeight; });
+        
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

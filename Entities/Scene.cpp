@@ -106,18 +106,15 @@ int Scene::Area::Create()
 
 int Scene::Area::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "AddBox")
-    {
+    StartPropertyList(return Serializable::ReadProperty(propName, reader));
+    
+    MatchProperty("AddBox",
         Box box;
         reader >> box;
-        m_BoxList.push_back(box);
-    }
-    else if (propName == "Name")
-        reader >> m_Name;
-    else
-        return Serializable::ReadProperty(propName, reader);
+        m_BoxList.push_back(box); );
+    MatchProperty("Name", { reader >> m_Name; });
 
-    return 0;
+    EndPropertyList;
 }
 
 
@@ -1183,148 +1180,95 @@ int Scene::ClearData()
 
 int Scene::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-
-    if (propName == "LocationOnPlanet")
-        reader >> m_Location;
-    else if (propName == "MetagamePlayable")
-        reader >> m_MetagamePlayable;
-    else if (propName == "Revealed")
-        reader >> m_Revealed;
-    else if (propName == "MetasceneParent")
-        reader >> m_MetasceneParent;
-    else if (propName == "MetagameInternal")
-        reader >> m_IsMetagameInternal;
-     else if (propName == "ScriptSave")
-        reader >> m_IsSavedGameInternal;
-    else if (propName == "OwnedByTeam")
-        reader >> m_OwnedByTeam;
-    else if (propName == "RoundIncome")
-        reader >> m_RoundIncome;
-    else if (propName == "P1ResidentBrain")
-        m_ResidentBrains[Players::PlayerOne] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
-    else if (propName == "P2ResidentBrain")
-        m_ResidentBrains[Players::PlayerTwo] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
-    else if (propName == "P3ResidentBrain")
-        m_ResidentBrains[Players::PlayerThree] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
-    else if (propName == "P4ResidentBrain")
-        m_ResidentBrains[Players::PlayerFour] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
-    else if (propName == "P1BuildBudget")
-        reader >> m_BuildBudget[Players::PlayerOne];
-    else if (propName == "P2BuildBudget")
-        reader >> m_BuildBudget[Players::PlayerTwo];
-    else if (propName == "P3BuildBudget")
-        reader >> m_BuildBudget[Players::PlayerThree];
-    else if (propName == "P4BuildBudget")
-        reader >> m_BuildBudget[Players::PlayerFour];
-    else if (propName == "P1BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Players::PlayerOne];
-    else if (propName == "P2BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Players::PlayerTwo];
-    else if (propName == "P3BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Players::PlayerThree];
-    else if (propName == "P4BuildBudgetRatio")
-        reader >> m_BuildBudgetRatio[Players::PlayerFour];
-    else if (propName == "AutoDesigned")
-        reader >> m_AutoDesigned;
-    else if (propName == "TotalInvestment")
-        reader >> m_TotalInvestment;
-    else if (propName == "PreviewBitmapFile")
-	{
+    StartPropertyList(return Entity::ReadProperty(propName, reader));
+    
+    MatchProperty("LocationOnPlanet", { reader >> m_Location; });
+    MatchProperty("MetagamePlayable", { reader >> m_MetagamePlayable; });
+    MatchProperty("Revealed", { reader >> m_Revealed; });
+    MatchProperty("MetasceneParent", { reader >> m_MetasceneParent; });
+    MatchProperty("MetagameInternal", { reader >> m_IsMetagameInternal; });
+    MatchProperty("ScriptSave", { reader >> m_IsSavedGameInternal; });
+    MatchProperty("OwnedByTeam", { reader >> m_OwnedByTeam; });
+    MatchProperty("RoundIncome", { reader >> m_RoundIncome; });
+    MatchProperty("P1ResidentBrain", { m_ResidentBrains[Players::PlayerOne] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); });
+    MatchProperty("P2ResidentBrain", { m_ResidentBrains[Players::PlayerTwo] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); });
+    MatchProperty("P3ResidentBrain", { m_ResidentBrains[Players::PlayerThree] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); });
+    MatchProperty("P4ResidentBrain", { m_ResidentBrains[Players::PlayerFour] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); });
+    MatchProperty("P1BuildBudget", { reader >> m_BuildBudget[Players::PlayerOne]; });
+    MatchProperty("P2BuildBudget", { reader >> m_BuildBudget[Players::PlayerTwo]; });
+    MatchProperty("P3BuildBudget", { reader >> m_BuildBudget[Players::PlayerThree]; });
+    MatchProperty("P4BuildBudget", { reader >> m_BuildBudget[Players::PlayerFour]; });
+    MatchProperty("P1BuildBudgetRatio", { reader >> m_BuildBudgetRatio[Players::PlayerOne]; });
+    MatchProperty("P2BuildBudgetRatio", { reader >> m_BuildBudgetRatio[Players::PlayerTwo]; });
+    MatchProperty("P3BuildBudgetRatio", { reader >> m_BuildBudgetRatio[Players::PlayerThree]; });
+    MatchProperty("P4BuildBudgetRatio", { reader >> m_BuildBudgetRatio[Players::PlayerFour]; });
+    MatchProperty("AutoDesigned", { reader >> m_AutoDesigned; });
+    MatchProperty("TotalInvestment", { reader >> m_TotalInvestment; });
+    MatchProperty("PreviewBitmapFile",
         reader >> m_PreviewBitmapFile;
-		m_pPreviewBitmap = m_PreviewBitmapFile.GetAsBitmap(COLORCONV_NONE, false);
-	}
-    else if (propName == "Terrain")
-    {
+		m_pPreviewBitmap = m_PreviewBitmapFile.GetAsBitmap(COLORCONV_NONE, false); );
+    MatchProperty("Terrain",
         delete m_pTerrain;
         m_pTerrain = new SLTerrain();
-        reader >> m_pTerrain;
-    }
-    else if (propName == "PlaceSceneObject" || propName == "PlaceMovableObject")
-    {
+        reader >> m_pTerrain; );
+    MatchForwards("PlaceSceneObject")
+    MatchProperty("PlaceMovableObject",
         SceneObject *pSO = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
-        if (pSO)
+        if (pSO) {
             m_PlacedObjects[PLACEONLOAD].push_back(pSO);
-    }
-    else if (propName == "BlueprintObject")
-    {
+        } );
+    MatchProperty("BlueprintObject",
         SceneObject *pSO = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
-        if (pSO)
+        if (pSO) {
             m_PlacedObjects[BLUEPRINT].push_back(pSO);
-    }
-    else if (propName == "PlaceAIPlanObject")
-    {
+        } );
+    MatchProperty("PlaceAIPlanObject",
         SceneObject *pSO = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
-        if (pSO)
+        if (pSO) {
             m_PlacedObjects[AIPLAN].push_back(pSO);
-    }
-    else if (propName == "AddBackgroundLayer")
-    {
+        } );
+    MatchProperty("AddBackgroundLayer",
 		SLBackground *pLayer = dynamic_cast<SLBackground *>(g_PresetMan.ReadReflectedPreset(reader));
         RTEAssert(pLayer, "Something went wrong with reading SceneLayer");
-        if (pLayer)
-            m_BackLayerList.push_back(pLayer);
-    }
-    else if (propName == "AllUnseenPixelSizeTeam1")
-    {
+        if (pLayer) {
+            m_BackLayerList.push_back(pLayer); 
+        } );
+    MatchProperty("AllUnseenPixelSizeTeam1",
         // Read the desired pixel dimensions of the dynamically generated unseen map
-        reader >> m_UnseenPixelSize[Activity::TeamOne];
-    }
-    else if (propName == "AllUnseenPixelSizeTeam2")
-    {
+        reader >> m_UnseenPixelSize[Activity::TeamOne]; );
+    MatchProperty("AllUnseenPixelSizeTeam2",
         // Read the desired pixel dimensions of the dynamically generated unseen map
-        reader >> m_UnseenPixelSize[Activity::TeamTwo];
-    }
-    else if (propName == "AllUnseenPixelSizeTeam3")
-    {
+        reader >> m_UnseenPixelSize[Activity::TeamTwo]; );
+    MatchProperty("AllUnseenPixelSizeTeam3",
         // Read the desired pixel dimensions of the dynamically generated unseen map
-        reader >> m_UnseenPixelSize[Activity::TeamThree];
-    }
-    else if (propName == "AllUnseenPixelSizeTeam4")
-    {
+        reader >> m_UnseenPixelSize[Activity::TeamThree]; );
+    MatchProperty("AllUnseenPixelSizeTeam4",
         // Read the desired pixel dimensions of the dynamically generated unseen map
-        reader >> m_UnseenPixelSize[Activity::TeamFour];
-    }
-    else if (propName == "UnseenLayerTeam1")
-    {
+        reader >> m_UnseenPixelSize[Activity::TeamFour]; );
+    MatchProperty("UnseenLayerTeam1",
         delete m_apUnseenLayer[Activity::TeamOne];
-        m_apUnseenLayer[Activity::TeamOne] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
-    }
-    else if (propName == "UnseenLayerTeam2")
-    {
+        m_apUnseenLayer[Activity::TeamOne] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader)); );
+    MatchProperty("UnseenLayerTeam2",
         delete m_apUnseenLayer[Activity::TeamTwo];
-        m_apUnseenLayer[Activity::TeamTwo] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
-    }
-    else if (propName == "UnseenLayerTeam3")
-    {
+        m_apUnseenLayer[Activity::TeamTwo] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader)); );
+    MatchProperty("UnseenLayerTeam3",
         delete m_apUnseenLayer[Activity::TeamThree];
-        m_apUnseenLayer[Activity::TeamThree] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
-    }
-    else if (propName == "UnseenLayerTeam4")
-    {
+        m_apUnseenLayer[Activity::TeamThree] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader)); );
+    MatchProperty("UnseenLayerTeam4",
         delete m_apUnseenLayer[Activity::TeamFour];
-        m_apUnseenLayer[Activity::TeamFour] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader));
-    }
-    else if (propName == "ScanScheduledTeam1")
-        reader >> m_ScanScheduled[Activity::TeamOne];
-    else if (propName == "ScanScheduledTeam2")
-        reader >> m_ScanScheduled[Activity::TeamTwo];
-    else if (propName == "ScanScheduledTeam3")
-        reader >> m_ScanScheduled[Activity::TeamThree];
-    else if (propName == "ScanScheduledTeam4")
-        reader >> m_ScanScheduled[Activity::TeamFour];
-    else if (propName == "AddArea")
-    {
+        m_apUnseenLayer[Activity::TeamFour] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader)); );
+    MatchProperty("ScanScheduledTeam1", { reader >> m_ScanScheduled[Activity::TeamOne]; });
+    MatchProperty("ScanScheduledTeam2", { reader >> m_ScanScheduled[Activity::TeamTwo]; });
+    MatchProperty("ScanScheduledTeam3", { reader >> m_ScanScheduled[Activity::TeamThree]; });
+    MatchProperty("ScanScheduledTeam4", { reader >> m_ScanScheduled[Activity::TeamFour]; });
+    MatchProperty("AddArea",
         Area area;
         reader >> area;
         // This replaces any existing ones
-        SetArea(area);
-    }
-    else if (propName == "GlobalAcceleration")
-        reader >> m_GlobalAcc;
-    else
-        return Entity::ReadProperty(propName, reader);
+        SetArea(area); );
+    MatchProperty("GlobalAcceleration", { reader >> m_GlobalAcc; });
 
-    return 0;
+    EndPropertyList;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

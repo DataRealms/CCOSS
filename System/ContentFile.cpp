@@ -1,12 +1,13 @@
 #include "ContentFile.h"
+
 #include "AudioMan.h"
 #include "PresetMan.h"
 #include "ConsoleMan.h"
+#include "RTETools.h"
 
 #include "png.h"
 #include "fmod/fmod.hpp"
 #include "fmod/fmod_errors.h"
-#include "boost/functional/hash.hpp"
 
 namespace RTE {
 
@@ -62,12 +63,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ContentFile::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "FilePath" || propName == "Path") {
-			SetDataPath(reader.ReadPropValue());
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchForwards("FilePath") MatchProperty("Path", { SetDataPath(reader.ReadPropValue()); });
+		
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,8 +105,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	size_t ContentFile::GetHash() const {
-		// Use boost::hash for compiler independent hashing.
-		return boost::hash<std::string>()(m_DataPath);
+		return Hash(m_DataPath);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -85,12 +85,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - The `AHuman`/`ACrab` property `Jetpack` now takes an `AEJetpack`, instead of an `AEmitter`.
 
-- The following properties have all been moved from `AHuman`/`ACrab` to `AEJetpack`:
-	`JetTime`
-	`JetReplenishRate`
-	`JetAngleRange`
-	`JetTimeTotal`
-	`JetTimeLeft`
+- The following properties have all been moved from `AHuman`/`ACrab` to `AEJetpack`:  
+	`JetTime`  
+	`JetReplenishRate`  
+	`JetAngleRange`  
+	`JetTimeTotal`  
+	`JetTimeLeft`  
 
 </details>
 

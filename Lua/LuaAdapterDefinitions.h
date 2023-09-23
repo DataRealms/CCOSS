@@ -40,6 +40,7 @@
 #include "Actor.h"
 #include "ADoor.h"
 #include "AEmitter.h"
+#include "AEJetpack.h"
 #include "AHuman.h"
 #include "Arm.h"
 #include "AtomGroup.h"
@@ -107,6 +108,7 @@ namespace RTE {
 		LuaEntityCreateFunctionsDeclarationsForType(Arm);
 		LuaEntityCreateFunctionsDeclarationsForType(Leg);
 		LuaEntityCreateFunctionsDeclarationsForType(AEmitter);
+		LuaEntityCreateFunctionsDeclarationsForType(AEJetpack);
 		LuaEntityCreateFunctionsDeclarationsForType(Turret);
 		LuaEntityCreateFunctionsDeclarationsForType(Actor);
 		LuaEntityCreateFunctionsDeclarationsForType(ADoor);
@@ -147,6 +149,7 @@ namespace RTE {
 		LuaEntityCloneFunctionDeclarationForType(Leg);
 		LuaEntityCloneFunctionDeclarationForType(Emission);
 		LuaEntityCloneFunctionDeclarationForType(AEmitter);
+		LuaEntityCloneFunctionDeclarationForType(AEJetpack);
 		LuaEntityCloneFunctionDeclarationForType(Turret);
 		LuaEntityCloneFunctionDeclarationForType(Actor);
 		LuaEntityCloneFunctionDeclarationForType(ADoor);
@@ -192,6 +195,7 @@ namespace RTE {
 		LuaEntityCastFunctionsDeclarationsForType(Leg);
 		LuaEntityCastFunctionsDeclarationsForType(Emission);
 		LuaEntityCastFunctionsDeclarationsForType(AEmitter);
+		LuaEntityCastFunctionsDeclarationsForType(AEJetpack);
 		LuaEntityCastFunctionsDeclarationsForType(Turret);
 		LuaEntityCastFunctionsDeclarationsForType(Actor);
 		LuaEntityCastFunctionsDeclarationsForType(ADoor);
@@ -250,7 +254,7 @@ namespace RTE {
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(ADoor, SoundContainer, SetDoorDirectionChangeSound);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(ADoor, SoundContainer, SetDoorMoveEndSound);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(AHuman, Attachable, SetHead);
-		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(AHuman, AEmitter, SetJetpack);
+		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(AHuman, AEJetpack, SetJetpack);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(AHuman, Arm, SetFGArm);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(AHuman, Arm, SetBGArm);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(AHuman, Leg, SetFGLeg);
@@ -259,7 +263,7 @@ namespace RTE {
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(AHuman, Attachable, SetBGFoot);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(AHuman, SoundContainer, SetStrideSound);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(ACrab, Turret, SetTurret);
-		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(ACrab, AEmitter, SetJetpack);
+		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(ACrab, AEJetpack, SetJetpack);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(ACrab, Leg, SetLeftFGLeg);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(ACrab, Leg, SetLeftBGLeg);
 		LuaPropertyOwnershipSafetyFakerFunctionDeclaration(ACrab, Leg, SetRightFGLeg);

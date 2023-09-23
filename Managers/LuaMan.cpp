@@ -104,6 +104,7 @@ namespace RTE {
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Attachable),
 			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, Emission),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, AEmitter),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, AEJetpack),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PEmitter),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Actor),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ADoor),

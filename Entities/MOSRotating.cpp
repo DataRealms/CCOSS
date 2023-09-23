@@ -314,23 +314,23 @@ int MOSRotating::Create(const MOSRotating &reference) {
 
 int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "AtomGroup")
+    StartPropertyList(return MOSprite::ReadProperty(propName, reader));
+    
+    MatchProperty("AtomGroup",
     {
         delete m_pAtomGroup;
         m_pAtomGroup = new AtomGroup();
         reader >> *m_pAtomGroup;
-    }
-    else if (propName == "DeepGroup")
+    });
+    MatchProperty("DeepGroup",
     {
         delete m_pDeepGroup;
         m_pDeepGroup = new AtomGroup();
         reader >> *m_pDeepGroup;
-    }
-    else if (propName == "DeepCheck")
-        reader >> m_DeepCheck;
-    else if (propName == "OrientToVel")
-        reader >> m_OrientToVel;
-	else if (propName == "SpecialBehaviour_ClearAllAttachables") {
+    });
+    MatchProperty("DeepCheck", { reader >> m_DeepCheck; });
+    MatchProperty("OrientToVel", { reader >> m_OrientToVel; });
+	MatchProperty("SpecialBehaviour_ClearAllAttachables", {
 		// This special property is used to make Attachables work with our limited serialization system, when saving the game. Note that we discard the property value here, because all that matters is whether or not we have the property.
 		reader.ReadPropValue();
 		for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
@@ -338,54 +338,47 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 			++attachableIterator;
 			delete RemoveAttachable(attachable);
 		}
-	} else if (propName == "AddAttachable" || propName == "AddAEmitter" || propName == "AddEmitter") {
+	});
+    MatchForwards("AddAttachable") MatchForwards("AddAEmitter") MatchProperty("AddEmitter", {
 		Entity *readerEntity = g_PresetMan.ReadReflectedPreset(reader);
 		if (Attachable *readerAttachable = dynamic_cast<Attachable *>(readerEntity)) {
 			AddAttachable(readerAttachable);
 		} else {
 			reader.ReportError("Tried to AddAttachable a non-Attachable type!");
 		}
-	} else if (propName == "SpecialBehaviour_AddWound") {
+	});
+	MatchProperty("SpecialBehaviour_AddWound", {
 		AEmitter *wound = new AEmitter;
 		reader >> wound;
 		AddWound(wound, wound->GetParentOffset());
-	}
-    else if (propName == "AddGib")
+	});
+    MatchProperty("AddGib",
     {
         Gib gib;
         reader >> gib;
         m_Gibs.push_back(gib);
-    }
-    else if (propName == "GibImpulseLimit")
-        reader >> m_GibImpulseLimit;
-    else if (propName == "GibWoundLimit" || propName == "WoundLimit")
-        reader >> m_GibWoundLimit;
-	else if (propName == "GibBlastStrength") {
-		reader >> m_GibBlastStrength;
-    } else if (propName == "GibScreenShakeAmount") {
-		reader >> m_GibScreenShakeAmount;
-	} else if (propName == "WoundCountAffectsImpulseLimitRatio") {
-        reader >> m_WoundCountAffectsImpulseLimitRatio;
-	} else if (propName == "DetachAttachablesBeforeGibbingFromWounds") {
-		reader >> m_DetachAttachablesBeforeGibbingFromWounds;
-	} else if (propName == "GibAtEndOfLifetime") {
-		reader >> m_GibAtEndOfLifetime;
-	} else if (propName == "GibSound") {
+    });
+    MatchProperty("GibImpulseLimit", { reader >> m_GibImpulseLimit; });
+    MatchForwards("GibWoundLimit") MatchProperty("WoundLimit", { reader >> m_GibWoundLimit; });
+	MatchProperty("GibBlastStrength", { reader >> m_GibBlastStrength; });
+    MatchProperty("GibScreenShakeAmount", { reader >> m_GibScreenShakeAmount; });
+	MatchProperty("WoundCountAffectsImpulseLimitRatio", { reader >> m_WoundCountAffectsImpulseLimitRatio; });
+	MatchProperty("DetachAttachablesBeforeGibbingFromWounds", { reader >> m_DetachAttachablesBeforeGibbingFromWounds; });
+	MatchProperty("GibAtEndOfLifetime", { reader >> m_GibAtEndOfLifetime; });
+	MatchProperty("GibSound", {
 		if (!m_GibSound) { m_GibSound = new SoundContainer; }
 		reader >> m_GibSound;
-	} else if (propName == "EffectOnGib")
-        reader >> m_EffectOnGib;
-    else if (propName == "LoudnessOnGib")
-        reader >> m_LoudnessOnGib;
-	else if (propName == "DamageMultiplier") {
+	});
+	MatchProperty("EffectOnGib", { reader >> m_EffectOnGib; });
+    MatchProperty("LoudnessOnGib", { reader >> m_LoudnessOnGib; });
+	MatchProperty("DamageMultiplier", {
 		reader >> m_DamageMultiplier;
         m_NoSetDamageMultiplier = false;
-    } else if (propName == "AddCustomValue") {
-        ReadCustomValueProperty(reader);
-    } else
-        return MOSprite::ReadProperty(propName, reader);
-
-    return 0;
+    });
+    MatchProperty("AddCustomValue", { ReadCustomValueProperty(reader); });
+    
+    
+    EndPropertyList;
 }
 
 void MOSRotating::ReadCustomValueProperty(Reader &reader) {

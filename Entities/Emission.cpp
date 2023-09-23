@@ -93,48 +93,40 @@ int Emission::Create(const Emission &reference)
 
 int Emission::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-	if (propName == "EmittedParticle")
+	StartPropertyList(return Serializable::ReadProperty(propName, reader));
+
+	MatchProperty("EmittedParticle",
 	{
 		m_pEmission = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 		RTEAssert(m_pEmission, "Stream suggests allocating an unallocatable type in AEmitter::Emission::Create!");
-	}
-	else if (propName == "ParticlesPerMinute")
-		reader >> m_PPM;
-	else if (propName == "BurstSize")
-		reader >> m_BurstSize;
-	else if (propName == "Spread")
-		reader >> m_Spread;
-	else if (propName == "MinVelocity")
-		reader >> m_MinVelocity;
-	else if (propName == "MaxVelocity")
-		reader >> m_MaxVelocity;
-	else if (propName == "LifeVariation")
-		reader >> m_LifeVariation;
-	else if (propName == "PushesEmitter")
-		reader >> m_PushesEmitter;
-	else if (propName == "Offset")
-		reader >> m_Offset;
-	else if (propName == "InheritsVel")
+	});
+	MatchProperty("ParticlesPerMinute", { reader >> m_PPM; });
+	MatchProperty("BurstSize", { reader >> m_BurstSize; });
+	MatchProperty("Spread", { reader >> m_Spread; });
+	MatchProperty("MinVelocity", { reader >> m_MinVelocity; });
+	MatchProperty("MaxVelocity", { reader >> m_MaxVelocity; });
+	MatchProperty("LifeVariation", { reader >> m_LifeVariation; });
+	MatchProperty("PushesEmitter", { reader >> m_PushesEmitter; });
+	MatchProperty("Offset", { reader >> m_Offset; });
+	MatchProperty("InheritsVel",
 	{
 		reader >> m_InheritsVel;
 		Clamp(m_InheritsVel, 1, 0);
-	}
-	else if (propName == "StartTimeMS")
+	});
+	MatchProperty("StartTimeMS",
 	{
 		double startTime;
 		reader >> startTime;
 		m_StartTimer.SetSimTimeLimitMS(startTime);
-	}
-	else if (propName == "StopTimeMS")
+	});
+	MatchProperty("StopTimeMS",
 	{
 		double stopTime;
 		reader >> stopTime;
 		m_StopTimer.SetSimTimeLimitMS(stopTime);
-	}
-	else
-		return Serializable::ReadProperty(propName, reader);
+	});
 
-	return 0;
+	EndPropertyList;
 }
 
 

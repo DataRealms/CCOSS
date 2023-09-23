@@ -18,20 +18,16 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int TerrainFrosting::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "FrostingMaterial") {
-			reader >> m_FrostingMaterial;
-		} else if (propName == "TargetMaterial") {
-			reader >> m_TargetMaterial;
-		} else if (propName == "MinThickness") {
-			reader >> m_MinThickness;
-		} else if (propName == "MaxThickness") {
-			reader >> m_MaxThickness;
-		} else if (propName == "InAirOnly") {
-			reader >> m_InAirOnly;
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("FrostingMaterial", { reader >> m_FrostingMaterial; });
+		MatchProperty("TargetMaterial", { reader >> m_TargetMaterial; });
+		MatchProperty("MinThickness", { reader >> m_MinThickness; });
+		MatchProperty("MaxThickness", { reader >> m_MaxThickness; });
+		MatchProperty("InAirOnly", { reader >> m_InAirOnly; });
+		
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

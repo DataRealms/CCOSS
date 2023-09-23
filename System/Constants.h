@@ -199,7 +199,8 @@ namespace RTE {
 		INPUT_AIM_RIGHT,
 		INPUT_FIRE,
 		INPUT_AIM,
-		INPUT_PIEMENU,
+		INPUT_PIEMENU_ANALOG,
+		INPUT_PIEMENU_DIGITAL,
 		INPUT_JUMP,
 		INPUT_CROUCH,
 		INPUT_NEXT,
@@ -229,7 +230,8 @@ namespace RTE {
 		"Aim Right",		// INPUT_AIM_RIGHT
 		"Fire/Activate",	// INPUT_FIRE
 		"Sharp Aim",		// INPUT_AIM
-		"Pie Menu",			// INPUT_PIEMENU
+		"Pie Menu Analog",	// INPUT_PIEMENU_ANALOG
+		"Pie Menu Digital",	// INPUT_PIEMENU_DIGITAL
 		"Jump",				// INPUT_JUMP
 		"Crouch",			// INPUT_CROUCH
 		"Next Body",		// INPUT_NEXT

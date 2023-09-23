@@ -450,8 +450,9 @@ namespace RTE {
 		/// <summary>
 		/// Handles the analog input when updating.
 		/// </summary>
+		/// <param name="input">The analog input vector.</param>
 		/// <returns>Whether or not enough input was received to do something.</returns>
-		bool HandleAnalogInput();
+		bool HandleAnalogInput(const Vector &input);
 
 		/// <summary>
 		/// Handles the digital input when updating.

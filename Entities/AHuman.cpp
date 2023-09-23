@@ -20,7 +20,7 @@
 #include "Controller.h"
 #include "MOPixel.h"
 #include "FrameMan.h"
-#include "AEmitter.h"
+#include "AEJetpack.h"
 #include "HDFirearm.h"
 #include "SLTerrain.h"
 #include "PresetMan.h"
@@ -45,7 +45,7 @@ void AHuman::Clear()
 {
     m_pHead = 0;
 	m_LookToAimRatio = 0.7F;
-    m_pJetpack = 0;
+    m_pJetpack = nullptr;
     m_pFGArm = 0;
     m_pBGArm = 0;
     m_pFGLeg = 0;
@@ -71,11 +71,8 @@ void AHuman::Clear()
     m_Aiming = false;
     m_ArmClimbing[FGROUND] = false;
     m_ArmClimbing[BGROUND] = false;
+	m_StrideFrame = false;
     m_StrideStart = false;
-    m_JetTimeTotal = 0.0;
-    m_JetTimeLeft = 0.0;
-	m_JetReplenishRate = 1.0F;
-	m_JetAngleRange = 0.25F;
 	m_CanActivateBGItem = false;
 	m_TriggerPulled = false;
 	m_WaitingToReloadOffhand = false;
@@ -145,9 +142,6 @@ int AHuman::Create()
         m_pFGArm->SetHandPos(m_Pos + m_HolsterOffset.GetXFlipped(m_HFlipped));
     }
 
-    // Initalize the jump time left
-    m_JetTimeLeft = m_JetTimeTotal;
-
     // All AHumans by default avoid hitting each other ont he same team
     m_IgnoresTeamHits = true;
 
@@ -173,7 +167,7 @@ int AHuman::Create(const AHuman &reference) {
     //Note - hardcoded attachable copying is organized based on desired draw order here.
     if (reference.m_pBGArm) { SetBGArm(dynamic_cast<Arm *>(reference.m_pBGArm->Clone())); }
     if (reference.m_pBGLeg) { SetBGLeg(dynamic_cast<Leg *>(reference.m_pBGLeg->Clone())); }
-    if (reference.m_pJetpack) { SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone())); }
+    if (reference.m_pJetpack) { SetJetpack(dynamic_cast<AEJetpack *>(reference.m_pJetpack->Clone())); }
     if (reference.m_pHead) { SetHead(dynamic_cast<Attachable *>(reference.m_pHead->Clone())); }
     if (reference.m_pFGLeg) { SetFGLeg(dynamic_cast<Leg *>(reference.m_pFGLeg->Clone())); }
     if (reference.m_pFGArm) { SetFGArm(dynamic_cast<Arm *>(reference.m_pFGArm->Clone())); }
@@ -181,10 +175,6 @@ int AHuman::Create(const AHuman &reference) {
 	m_LookToAimRatio = reference.m_LookToAimRatio;
 
 	m_ThrowPrepTime = reference.m_ThrowPrepTime;
-    m_JetTimeTotal = reference.m_JetTimeTotal;
-    m_JetTimeLeft = reference.m_JetTimeLeft;
-    m_JetReplenishRate = reference.m_JetReplenishRate;
-	m_JetAngleRange = reference.m_JetAngleRange;
 	m_WaitingToReloadOffhand = reference.m_WaitingToReloadOffhand;
 	m_FGArmFlailScalar = reference.m_FGArmFlailScalar;
 	m_BGArmFlailScalar = reference.m_BGArmFlailScalar;
@@ -258,15 +248,7 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
 	} else if (propName == "LookToAimRatio") {
 		reader >> m_LookToAimRatio;
     } else if (propName == "Jetpack") {
-        SetJetpack(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-	} else if (propName == "JumpTime" || propName == "JetTime") {
-        reader >> m_JetTimeTotal;
-        // Convert to ms
-        m_JetTimeTotal *= 1000;
-	} else if (propName == "JumpReplenishRate" || propName == "JetReplenishRate") {
-		reader >> m_JetReplenishRate;
-	} else if (propName == "JumpAngleRange" || propName == "JetAngleRange") {
-		reader >> m_JetAngleRange;
+        SetJetpack(dynamic_cast<AEJetpack *>(g_PresetMan.ReadReflectedPreset(reader)));
 	} else if (propName == "FGArmFlailScalar") {
 		reader >> m_FGArmFlailScalar;
 	} else if (propName == "BGArmFlailScalar") {
@@ -363,13 +345,6 @@ int AHuman::Save(Writer &writer) const
     writer << m_LookToAimRatio;
     writer.NewProperty("Jetpack");
     writer << m_pJetpack;
-    writer.NewProperty("JumpTime");
-    // Convert to seconds
-    writer << m_JetTimeTotal / 1000;
-	writer.NewProperty("JumpReplenishRate");
-	writer << m_JetReplenishRate;
-	writer.NewProperty("JumpAngleRange");
-	writer << m_JetAngleRange;
 	writer.NewProperty("FGArmFlailScalar");
 	writer << m_FGArmFlailScalar;
 	writer.NewProperty("BGArmFlailScalar");
@@ -544,7 +519,7 @@ void AHuman::SetHead(Attachable *newHead) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void AHuman::SetJetpack(AEmitter *newJetpack) {
+void AHuman::SetJetpack(AEJetpack *newJetpack) {
     if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAndDeleteAttachable(m_pJetpack); }
     if (newJetpack == nullptr) {
         m_pJetpack = nullptr;
@@ -553,7 +528,7 @@ void AHuman::SetJetpack(AEmitter *newJetpack) {
         AddAttachable(newJetpack);
 
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
-            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            AEJetpack *castedAttachable = dynamic_cast<AEJetpack *>(attachable);
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
             dynamic_cast<AHuman *>(parent)->SetJetpack(castedAttachable);
         }});
@@ -1476,8 +1451,14 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) {
 
 			if (reloadHeldFirearm) {
 				heldFirearm->Reload();
-				if (m_DeviceSwitchSound) { m_DeviceSwitchSound->Play(m_Pos); }
+				if (m_DeviceSwitchSound) { 
+					m_DeviceSwitchSound->Play(m_Pos); 
+				}
+
 				bool otherArmIsAvailable = otherArm && !otherArm->GetHeldDevice();
+
+				// If using the support offset, other code in arm etc will handle where we should target
+				otherArmIsAvailable = otherArmIsAvailable && !heldFirearm->GetUseSupportOffsetWhileReloading();
 
 				if (otherArmIsAvailable) {
 					float delayAtTarget = std::max(static_cast<float>(heldFirearm->GetReloadTime() - 200), 0.0F);
@@ -1487,7 +1468,6 @@ void AHuman::ReloadFirearms(bool onlyReloadEmptyFirearms) {
 					} else {
 						otherArm->AddHandTarget("Holster Offset", m_Pos + RotateOffset(m_HolsterOffset), delayAtTarget);
 					}
-					otherArm->SetHandPos(heldFirearm->GetMagazinePos());
 				}
 			}
 		}
@@ -1668,12 +1648,12 @@ void AHuman::ResetAllTimers()
 {
     Actor::ResetAllTimers();
 
-    if (m_pJetpack)
-        m_pJetpack->ResetAllTimers();
-
-    if (m_pFGArm && m_pFGArm->GetHeldDevice())
+    if (m_pFGArm && m_pFGArm->GetHeldDevice()) {
         m_pFGArm->GetHeldDevice()->ResetAllTimers();
+    }
 }
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1763,50 +1743,13 @@ void AHuman::PreControllerUpdate()
 	m_Paths[FGROUND][m_MoveState].SetHFlip(m_HFlipped);
 	m_Paths[BGROUND][m_MoveState].SetHFlip(m_HFlipped);
 
-	////////////////////////////////////
-	// Jetpack activation and blast direction
+	if (m_pJetpack && m_pJetpack->IsAttached()) {
+		m_pJetpack->UpdateBurstState(*this);
 
-	if (m_pJetpack) {
-		if (m_JetTimeTotal > 0) {
-			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
-			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
-			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
-		}
-		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
-			m_pJetpack->TriggerBurst();
-			m_ForceDeepCheck = true;
-			m_pJetpack->EnableEmission(true);
-			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * static_cast<float>(std::max(m_pJetpack->GetTotalBurstSize(), 2)) * (m_pJetpack->CanTriggerBurst() ? 1.0F : 0.5F), 0.0F);
-		} else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
-			m_pJetpack->EnableEmission(true);
-			m_pJetpack->AlarmOnEmit(m_Team);
-			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);
-			m_MoveState = JUMP;
-			m_Paths[FGROUND][JUMP].Restart();
+        if (m_Controller.IsState(BODY_JUMP) && !m_pJetpack->IsOutOfFuel() && m_Status != INACTIVE) {
+            m_Paths[FGROUND][JUMP].Restart();
 			m_Paths[BGROUND][JUMP].Restart();
-		} else {
-			m_pJetpack->EnableEmission(false);
-			if (m_MoveState == JUMP) { m_MoveState = STAND; }
-			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * m_JetReplenishRate, m_JetTimeTotal);
-		}
-
-		float maxAngle = c_HalfPI * m_JetAngleRange;
-		// If pie menu is on, keep the angle to what it was before.
-		if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
-			// Direct the jetpack nozzle according to either analog stick input or aim angle.
-			if (m_Controller.GetAnalogMove().MagnitudeIsGreaterThan(analogDeadzone)) {
-				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
-				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
-			} else {
-				// Thrust in the opposite direction when strafing.
-				float flip = ((m_HFlipped && m_Controller.IsState(MOVE_RIGHT)) || (!m_HFlipped && m_Controller.IsState(MOVE_LEFT))) ? -1.0F : 1.0F;
-				// Halve the jet angle when looking downwards so the actor isn't forced to go sideways
-                // TODO: don't hardcode this ratio?
-				float jetAngle = (m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F) - maxAngle;
-				// FacingAngle isn't needed because it's already been applied to AimAngle since last update.
-				m_pJetpack->SetEmitAngle(jetAngle * flip - c_HalfPI);
-			}
-		}
+        }
 	}
 
 	////////////////////////////////////
@@ -2168,14 +2111,6 @@ void AHuman::PreControllerUpdate()
 		m_ArmsState = WEAPON_READY;
 	}
 
-    // Controller disabled
-    if (m_Controller.IsDisabled())
-    {
-        m_MoveState = STAND;
-        if (m_pJetpack && m_pJetpack->IsAttached())
-            m_pJetpack->EnableEmission(false);
-    }
-
 //    m_aSprite->SetAngle((m_AimAngle / 180) * 3.141592654);
 //    m_aSprite->SetScale(2.0);
 
@@ -2263,6 +2198,8 @@ void AHuman::PreControllerUpdate()
     ///////////////////////////////////////////////////
     // Travel the limb AtomGroup:s
 
+	m_StrideFrame = false;
+
 	if (m_Status == STABLE && !m_LimbPushForcesAndCollisionsDisabled && m_MoveState != NOMOVE)
     {
         // This exists to support disabling foot collisions if the limbpath has that flag set.
@@ -2323,6 +2260,7 @@ void AHuman::PreControllerUpdate()
 					m_WalkAngle[FGROUND] = Matrix();
 					m_WalkAngle[BGROUND] = Matrix();
 				} else {
+					m_StrideFrame = true;
 					RunScriptedFunctionInAppropriateScripts("OnStride");
 				}
 			}
@@ -2419,16 +2357,6 @@ void AHuman::PreControllerUpdate()
 				if (m_pFGLeg) { m_pFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pFGLeg->GetParentOffset()), m_pFGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pFGLeg->GetMass(), deltaTime); }
 
 				if (m_pBGLeg) { m_pBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pBGLeg->GetParentOffset()), m_pBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pBGLeg->GetMass(), deltaTime); }
-
-				if (m_JetTimeLeft <= 0) {
-					m_MoveState = STAND;
-					m_Paths[FGROUND][JUMP].Terminate();
-					m_Paths[BGROUND][JUMP].Terminate();
-					m_Paths[FGROUND][STAND].Terminate();
-					m_Paths[BGROUND][STAND].Terminate();
-					m_Paths[FGROUND][WALK].Terminate();
-					m_Paths[BGROUND][WALK].Terminate();
-				}
 			} else {
 				m_Paths[FGROUND][JUMP].Terminate();
 				m_Paths[BGROUND][JUMP].Terminate();
@@ -3011,8 +2939,8 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 			m_HUDStack -= 9;
 		}
 
-		if (m_pJetpack && m_Status != INACTIVE && !m_Controller.IsState(PIE_MENU_ACTIVE) && (m_Controller.IsState(BODY_JUMP) || m_JetTimeLeft < m_JetTimeTotal)) {
-			if (m_JetTimeLeft < 100.0F) {
+		if (m_pJetpack && m_Status != INACTIVE && !m_Controller.IsState(PIE_MENU_ACTIVE) && (m_Controller.IsState(BODY_JUMP) || !m_pJetpack->IsFullyFueled())) {
+			if (m_pJetpack->GetJetTimeLeft() < 100.0F) {
 				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
 			}
 			else if (m_pJetpack->IsEmitting()) {
@@ -3032,8 +2960,8 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 7, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
 
 			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 15, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
-			if (m_JetTimeTotal > 0) {
-				float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
+			if (m_pJetpack->GetJetTimeTotal() > 0) {
+				float jetTimeRatio = m_pJetpack->GetJetTimeRatio();
 				int gaugeColor;
 				if (jetTimeRatio > 0.75F) {
 					gaugeColor = 149;

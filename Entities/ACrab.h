@@ -24,7 +24,7 @@ namespace RTE
 {
 
 class Turret;
-class AEmitter;
+class AEJetpack;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -36,15 +36,6 @@ class AEmitter;
 
 class ACrab : public Actor {
 	friend struct EntityLuaBindings;
-
-
-	enum MovementState {
-		STAND = 0,
-		WALK,
-		JUMP,
-		DISLODGE,
-		MOVEMENTSTATECOUNT
-	};
 
 	enum Side {
 		LEFTSIDE = 0,
@@ -67,6 +58,7 @@ public:
 
 // Concrete allocation and cloning definitions
 	EntityAllocation(ACrab);
+	AddScriptFunctionNames(Actor, "OnStride");
 	SerializableOverrideMethods;
 	ClassInfoGetters;
 	DefaultPieMenuNameGetter(HasObjectInGroup("Turrets") ? "Default Turret Pie Menu" : "Default Crab Pie Menu");
@@ -162,13 +154,13 @@ public:
 	/// Gets the jetpack of this ACrab.
 	/// </summary>
 	/// <returns>A pointer to the jetpack of this ACrab. Ownership is NOT transferred!</returns>
-	AEmitter * GetJetpack() const { return m_pJetpack; }
+	AEJetpack * GetJetpack() const { return m_pJetpack; }
 
 	/// <summary>
 	/// Sets the jetpack for this ACrab. Ownership IS Transferred!
 	/// </summary>
 	/// <param name="newJetpack">The new jetpack to use.</param>
-	void SetJetpack(AEmitter *newJetpack);
+	void SetJetpack(AEJetpack *newJetpack);
 
     /// <summary>
     /// Gets the left foreground Leg of this ACrab.
@@ -217,62 +209,6 @@ public:
     /// </summary>
     /// <param name="newLeg">The new Leg to use.</param>
     void SetRightBGLeg(Leg *newLeg);
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetJetTimeTotal
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the amount of time this' jetpack can fire when filled, in ms.
-// Arguments:       None.
-// Return value:    The amount of time this' jetpack can fire when it's at max.
-
-	float GetJetTimeTotal() const { return m_JetTimeTotal; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetJetTimeTotal
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the amount of time this' jetpack can fire when filled, in ms.
-// Arguments:       The amount of time this' jetpack can fire when it's at max.
-// Return value:    None.
-
-	void SetJetTimeTotal(float newValue) { m_JetTimeTotal = newValue; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetJetTimeLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the amount of time this' jetpack can still fire until out, in ms.
-// Arguments:       None.
-// Return value:    The amount of time this' jetpack can still fire before running out.
-
-	float GetJetTimeLeft() const { return m_JetTimeLeft; }
-
-
-	/// <summary>
-	/// Gets the rate at which this ACrab's jetpack is replenished during downtime.
-	/// </summary>
-	/// <returns>The rate at which the jetpack is replenished.</returns>
-	float GetJetReplenishRate() const { return m_JetReplenishRate; }
-
-	/// <summary>
-	/// Sets the rate at which this ACrab's jetpack is replenished during downtime.
-	/// </summary>
-	/// <param name="newValue">The rate at which the jetpack is replenished.</param>
-	void SetJetReplenishRate(float newValue) { m_JetReplenishRate = newValue; }
-
-	/// <summary>
-	/// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
-	/// </summary>
-	/// <returns>The ratio at which this jetpack follows the aim angle of the user.</returns>
-	float GetJetAngleRange() const { return m_JetAngleRange; }
-
-
-	/// <summary>
-	/// Sets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
-	/// </summary>
-	/// <param name="newValue">The ratio at which this jetpack follows the aim angle of the user.</param>
-	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -418,6 +354,12 @@ int FirearmActivationDelay() const;
 	/// <returns>The graphical representation of this ACrab as a BITMAP.</returns>
 	BITMAP * GetGraphicalIcon() const override;
 
+
+	/// <summary>
+	/// Gets whether this ACrab has just taken a stride this frame.
+	/// </summary>
+	/// <returns>Whether this ACrab has taken a stride this frame or not.</returns>
+	bool StrideFrame() const { return m_StrideFrame; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  PreControllerUpdate
@@ -592,18 +534,11 @@ protected:
 	// The sound of the actor taking a step (think robot servo)
 	SoundContainer *m_StrideSound;
 	// Jetpack booster.
-	AEmitter *m_pJetpack;
-	// The max total time, in ms, that the jetpack can be used without pause
-	float m_JetTimeTotal;
-	// How much time left the jetpack can go, in ms
-	float m_JetTimeLeft;
-	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
-	// Ratio at which the jetpack angle follows aim angle
-	float m_JetAngleRange;
+	AEJetpack *m_pJetpack;
 	// Blink timer
 	Timer m_IconBlinkTimer;
-	// Current movement state.
-	MovementState m_MoveState;
+	// Whether a stride was taken this frame or not.
+	bool m_StrideFrame = false;
 	// Limb paths for different movement states.
 	// First which side, then which background/foreground, then the movement state
 	LimbPath m_Paths[SIDECOUNT][LAYERCOUNT][MOVEMENTSTATECOUNT];

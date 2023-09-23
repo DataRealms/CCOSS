@@ -51,6 +51,7 @@ namespace RTE {
 	LuaEntityCreateFunctionsDefinitionsForType(Arm);
 	LuaEntityCreateFunctionsDefinitionsForType(Leg);
 	LuaEntityCreateFunctionsDefinitionsForType(AEmitter);
+	LuaEntityCreateFunctionsDefinitionsForType(AEJetpack);
 	LuaEntityCreateFunctionsDefinitionsForType(Turret);
 	LuaEntityCreateFunctionsDefinitionsForType(Actor);
 	LuaEntityCreateFunctionsDefinitionsForType(ADoor);
@@ -94,6 +95,7 @@ namespace RTE {
 	LuaEntityCloneFunctionDefinitionForType(Leg);
 	LuaEntityCloneFunctionDefinitionForType(Emission);
 	LuaEntityCloneFunctionDefinitionForType(AEmitter);
+	LuaEntityCloneFunctionDefinitionForType(AEJetpack);
 	LuaEntityCloneFunctionDefinitionForType(Turret);
 	LuaEntityCloneFunctionDefinitionForType(Actor);
 	LuaEntityCloneFunctionDefinitionForType(ADoor);
@@ -151,6 +153,7 @@ namespace RTE {
 	LuaEntityCastFunctionsDefinitionsForType(Leg);
 	LuaEntityCastFunctionsDefinitionsForType(Emission);
 	LuaEntityCastFunctionsDefinitionsForType(AEmitter);
+	LuaEntityCastFunctionsDefinitionsForType(AEJetpack);
 	LuaEntityCastFunctionsDefinitionsForType(Turret);
 	LuaEntityCastFunctionsDefinitionsForType(Actor);
 	LuaEntityCastFunctionsDefinitionsForType(ADoor);
@@ -207,7 +210,7 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(ADoor, SoundContainer, SetDoorDirectionChangeSound);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(ADoor, SoundContainer, SetDoorMoveEndSound);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(AHuman, Attachable, SetHead);
-	LuaPropertyOwnershipSafetyFakerFunctionDefinition(AHuman, AEmitter, SetJetpack);
+	LuaPropertyOwnershipSafetyFakerFunctionDefinition(AHuman, AEJetpack, SetJetpack);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(AHuman, Arm, SetFGArm);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(AHuman, Arm, SetBGArm);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(AHuman, Leg, SetFGLeg);
@@ -216,7 +219,7 @@ namespace RTE {
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(AHuman, Attachable, SetBGFoot);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(AHuman, SoundContainer, SetStrideSound);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(ACrab, Turret, SetTurret);
-	LuaPropertyOwnershipSafetyFakerFunctionDefinition(ACrab, AEmitter, SetJetpack);
+	LuaPropertyOwnershipSafetyFakerFunctionDefinition(ACrab, AEJetpack, SetJetpack);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(ACrab, Leg, SetLeftFGLeg);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(ACrab, Leg, SetLeftBGLeg);
 	LuaPropertyOwnershipSafetyFakerFunctionDefinition(ACrab, Leg, SetRightFGLeg);

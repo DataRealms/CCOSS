@@ -103,6 +103,7 @@ void Actor::Clear() {
     m_LastAlarmPos.Reset();
     m_SightDistance = 450.0F;
     m_Perceptiveness = 0.5F;
+    m_PainThreshold = 15.0F;
 	m_CanRevealUnseen = true;
     m_CharHeight = 0;
     m_HolsterOffset.Reset();
@@ -126,6 +127,7 @@ void Actor::Clear() {
     m_UpdateMovePath = true;
     m_MoveProximityLimit = 100.0F;
     m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
+    m_BaseMass = std::numeric_limits<float>::infinity();
 
     m_DamageMultiplier = 1.0F;
 
@@ -145,13 +147,14 @@ void Actor::Clear() {
 
 int Actor::Create()
 {
-    if (MOSRotating::Create() < 0)
+    if (MOSRotating::Create() < 0) {
         return -1;
+    }
 
     // Set MO Type.
     m_MOType = MovableObject::TypeActor;
 
-    // Default to an interesitng AI controller mode
+    // Default to an interesting AI controller mode
     m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
     m_UpdateMovePath = true;
@@ -162,9 +165,14 @@ int Actor::Create()
     // Sets up the team icon
     SetTeam(m_Team);
 
-	// All brain actors by default avoid hitting each other ont he same team
-	if (IsInGroup("Brains"))
+    if (const Actor *presetActor = static_cast<const Actor *>(GetPreset())) {
+        m_BaseMass = presetActor->GetMass();
+    }
+
+	// All brain actors by default avoid hitting each other on the same team
+	if (IsInGroup("Brains")) {
 		m_IgnoresTeamHits = true;
+    }
 
 	if (!m_PieMenu) {
 		SetPieMenu(static_cast<PieMenu *>(g_PresetMan.GetEntityPreset("PieMenu", GetDefaultPieMenuName())->Clone()));
@@ -221,6 +229,7 @@ int Actor::Create(const Actor &reference)
     m_SeenTargetPos = reference.m_SeenTargetPos;
     m_SightDistance = reference.m_SightDistance;
     m_Perceptiveness = reference.m_Perceptiveness;
+    m_PainThreshold = reference.m_PainThreshold;
 	m_CanRevealUnseen = reference.m_CanRevealUnseen;
     m_CharHeight = reference.m_CharHeight;
     m_HolsterOffset = reference.m_HolsterOffset;
@@ -282,6 +291,8 @@ int Actor::Create(const Actor &reference)
 //    m_MovePath.clear(); will recalc on its own
     m_UpdateMovePath = reference.m_UpdateMovePath;
     m_MoveProximityLimit = reference.m_MoveProximityLimit;
+    m_AIBaseDigStrength = reference.m_AIBaseDigStrength;
+    m_BaseMass = reference.m_BaseMass;
 
 	m_Organic = reference.m_Organic;
 	m_Mechanical = reference.m_Mechanical;
@@ -363,6 +374,8 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> m_SightDistance;
     else if (propName == "Perceptiveness")
         reader >> m_Perceptiveness;
+    else if (propName == "PainThreshold")
+        reader >> m_PainThreshold;
 	else if (propName == "CanRevealUnseen")
 		reader >> m_CanRevealUnseen;
     else if (propName == "CharHeight")
@@ -455,6 +468,8 @@ int Actor::Save(Writer &writer) const
     writer << m_SightDistance;
     writer.NewProperty("Perceptiveness");
     writer << m_Perceptiveness;
+    writer.NewProperty("PainThreshold");
+    writer << m_PainThreshold;
 	writer.NewProperty("CanRevealUnseen");
 	writer << m_CanRevealUnseen;
     writer.NewProperty("CharHeight");
@@ -511,6 +526,20 @@ float Actor::GetInventoryMass() const {
         inventoryMass += inventoryItem->GetMass();
     }
     return inventoryMass;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float Actor::GetBaseMass() {
+    if (m_BaseMass == std::numeric_limits<float>::infinity()) {
+        if (const Actor* presetActor = static_cast<const Actor*>(GetPreset())) {
+            m_BaseMass = presetActor->GetMass();
+        } else {
+            m_BaseMass = GetMass();
+        }
+    }
+
+    return m_BaseMass;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1369,7 +1398,6 @@ void Actor::Update()
 		const float impulse = std::sqrt(travelImpulseMagnitudeSqr) - m_TravelImpulseDamage;
 		const float damage = std::max(impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth, 0.0F);
 		m_Health -= damage;
-		if (damage > 0 && m_Health > 0 && m_PainSound) { m_PainSound->Play(m_Pos); }
 		if (m_Status == Actor::STABLE) { m_Status = UNSTABLE; }
 		m_ForceDeepCheck = true;
 	}
@@ -1445,6 +1473,9 @@ void Actor::Update()
     {
         g_MovableMan.SortTeamRoster(m_Team);
     }
+
+    // Play PainSound if damage this frame exceeded PainThreshold
+    if (m_PainThreshold > 0 && m_PrevHealth - m_Health > m_PainThreshold && m_Health > 1 && m_PainSound) { m_PainSound->Play(m_Pos); }
 
 	int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
 	if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer)) {

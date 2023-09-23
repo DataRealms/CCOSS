@@ -432,7 +432,7 @@ namespace RTE {
 						(*eItr).m_Accumulator += m_LastEmitTmr.GetElapsedSimTimeS();
 
 						// Now figure how many full emissions can fit in the current accumulator
-						emissions = floor((*eItr).m_Accumulator / SPE);
+						emissions = std::floor((*eItr).m_Accumulator / SPE);
 						// Deduct the about to be emitted emissions from the accumulator
 						(*eItr).m_Accumulator -= emissions * SPE;
 
@@ -441,7 +441,7 @@ namespace RTE {
 
 					// Add extra emissions if bursting.
 					if (m_BurstTriggered)
-						emissions += (*eItr).GetBurstSize();
+						emissions += (*eItr).GetBurstSize() * std::floor(throttleFactor);
 
 					pParticle = 0;
 					emitVel.Reset();

@@ -63,10 +63,6 @@ namespace RTE {
 		.property("RightBGLeg", &ACrab::GetRightBGLeg, &LuaAdaptersPropertyOwnershipSafetyFaker::ACrabSetRightBGLeg)
 		.property("StrideSound", &ACrab::GetStrideSound, &LuaAdaptersPropertyOwnershipSafetyFaker::ACrabSetStrideSound)
 		.property("StrideFrame", &ACrab::StrideFrame)
-		.property("JetTimeTotal", &ACrab::GetJetTimeTotal, &ACrab::SetJetTimeTotal)
-		.property("JetTimeLeft", &ACrab::GetJetTimeLeft)
-		.property("JetReplenishRate", &ACrab::GetJetReplenishRate, &ACrab::SetJetReplenishRate)
-		.property("JetAngleRange", &ACrab::GetJetAngleRange, &ACrab::SetJetAngleRange)
 		.property("EquippedItem", &ACrab::GetEquippedItem)
 		.property("FirearmIsReady", &ACrab::FirearmIsReady)
 		.property("FirearmIsEmpty", &ACrab::FirearmIsEmpty)
@@ -85,13 +81,6 @@ namespace RTE {
 		.def("GetLimbPathSpeed", &ACrab::GetLimbPathSpeed)
 		.def("SetLimbPathSpeed", &ACrab::SetLimbPathSpeed)
 
-		.enum_("MovementState")[
-			luabind::value("STAND", ACrab::MovementState::STAND),
-			luabind::value("WALK", ACrab::MovementState::WALK),
-			luabind::value("JUMP", ACrab::MovementState::JUMP),
-			luabind::value("DISLODGE", ACrab::MovementState::DISLODGE),
-			luabind::value("MOVEMENTSTATECOUNT", ACrab::MovementState::MOVEMENTSTATECOUNT)
-		]
 		.enum_("Side")[
 			luabind::value("LEFTSIDE", ACrab::Side::LEFTSIDE),
 			luabind::value("RIGHTSIDE", ACrab::Side::RIGHTSIDE),
@@ -306,6 +295,18 @@ namespace RTE {
 			luabind::value("DYING", Actor::Status::DYING),
 			luabind::value("DEAD", Actor::Status::DEAD)
 		]
+		.enum_("MovementState")[
+			luabind::value("NOMOVE", Actor::MovementState::NOMOVE),
+			luabind::value("STAND", Actor::MovementState::STAND),
+			luabind::value("WALK", Actor::MovementState::WALK),
+			luabind::value("JUMP", Actor::MovementState::JUMP),
+			luabind::value("DISLODGE", Actor::MovementState::DISLODGE),
+			luabind::value("CROUCH", Actor::MovementState::CROUCH),
+			luabind::value("CRAWL", Actor::MovementState::CRAWL),
+			luabind::value("ARMCRAWL", Actor::MovementState::ARMCRAWL),
+			luabind::value("CLIMB", Actor::MovementState::CLIMB),
+			luabind::value("MOVEMENTSTATECOUNT", Actor::MovementState::MOVEMENTSTATECOUNT)
+		]
 		.enum_("AIMode")[
 			luabind::value("AIMODE_NONE", Actor::AIMode::AIMODE_NONE),
 			luabind::value("AIMODE_SENTRY", Actor::AIMode::AIMODE_SENTRY),
@@ -415,7 +416,27 @@ namespace RTE {
 		.def("EstimateImpulse", &AEmitter::EstimateImpulse)
 		.def("TriggerBurst", &AEmitter::TriggerBurst)
 		.def("IsSetToBurst", &AEmitter::IsSetToBurst)
-		.def("CanTriggerBurst", &AEmitter::CanTriggerBurst);
+		.def("CanTriggerBurst", &AEmitter::CanTriggerBurst)
+		.def("GetScaledThrottle", &AEmitter::GetScaledThrottle);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, AEJetpack) {
+		return ConcreteTypeLuaClassDefinition(AEJetpack, AEmitter)
+
+		.property("JetPackType", &AEJetpack::GetJetpackType, &AEJetpack::SetJetpackType)
+		.property("JetTimeTotal", &AEJetpack::GetJetTimeTotal, &AEJetpack::SetJetTimeTotal)
+		.property("JetTimeLeft", &AEJetpack::GetJetTimeLeft)
+		.property("JetReplenishRate", &AEJetpack::GetJetReplenishRate, &AEJetpack::SetJetReplenishRate)
+		.property("JetAngleRange", &AEJetpack::GetJetAngleRange, &AEJetpack::SetJetAngleRange)
+		.property("CanAdjustAngleWhileFiring", &AEJetpack::GetCanAdjustAngleWhileFiring, &AEJetpack::SetCanAdjustAngleWhileFiring)
+		.property("AdjustsThrottleForWeight", &AEJetpack::GetAdjustsThrottleForWeight, &AEJetpack::SetAdjustsThrottleForWeight)
+
+		.enum_("JetpackType")[
+			luabind::value("Standard", AEJetpack::Standard),
+			luabind::value("JumpPack", AEJetpack::JumpPack)
+		];
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -434,10 +455,6 @@ namespace RTE {
 		.property("FGFoot", &AHuman::GetFGFoot, &LuaAdaptersPropertyOwnershipSafetyFaker::AHumanSetFGFoot)
 		.property("BGFoot", &AHuman::GetBGFoot, &LuaAdaptersPropertyOwnershipSafetyFaker::AHumanSetBGFoot)
 		.property("StrideSound", &AHuman::GetStrideSound, &LuaAdaptersPropertyOwnershipSafetyFaker::AHumanSetStrideSound)
-		.property("JetTimeTotal", &AHuman::GetJetTimeTotal, &AHuman::SetJetTimeTotal)
-		.property("JetTimeLeft", &AHuman::GetJetTimeLeft, &AHuman::SetJetTimeLeft)
-		.property("JetReplenishRate", &AHuman::GetJetReplenishRate, &AHuman::SetJetReplenishRate)
-		.property("JetAngleRange", &AHuman::GetJetAngleRange, &AHuman::SetJetAngleRange)
 		.property("UpperBodyState", &AHuman::GetUpperBodyState, &AHuman::SetUpperBodyState)
 		.property("MovementState", &AHuman::GetMovementState, &AHuman::SetMovementState)
 		.property("ProneState", &AHuman::GetProneState, &AHuman::SetProneState)
@@ -494,18 +511,6 @@ namespace RTE {
 			luabind::value("DEHOLSTERING_BELT", AHuman::UpperBodyState::DEHOLSTERING_BELT),
 			luabind::value("THROWING_PREP", AHuman::UpperBodyState::THROWING_PREP),
 			luabind::value("THROWING_RELEASE",AHuman::UpperBodyState::THROWING_RELEASE)
-		]
-		.enum_("MovementState")[
-			luabind::value("NOMOVE", AHuman::MovementState::NOMOVE),
-			luabind::value("STAND", AHuman::MovementState::STAND),
-			luabind::value("WALK", AHuman::MovementState::WALK),
-			luabind::value("CROUCH", AHuman::MovementState::CROUCH),
-			luabind::value("CRAWL", AHuman::MovementState::CRAWL),
-			luabind::value("ARMCRAWL", AHuman::MovementState::ARMCRAWL),
-			luabind::value("CLIMB", AHuman::MovementState::CLIMB),
-			luabind::value("JUMP", AHuman::MovementState::JUMP),
-			luabind::value("DISLODGE", AHuman::MovementState::DISLODGE),
-			luabind::value("MOVEMENTSTATECOUNT", AHuman::MovementState::MOVEMENTSTATECOUNT)
 		]
 		.enum_("ProneState")[
 			luabind::value("NOTPRONE", AHuman::ProneState::NOTPRONE),

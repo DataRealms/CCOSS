@@ -289,7 +289,7 @@ void ACDropShip::PreControllerUpdate()
     // TODO: Improve and make optional thrusters more robust!
 	if (m_Status != DEAD && m_Status != DYING)
 	{
-		float targetYVel = 0;
+		float targetYVel = 0.0F;
 		float throttleRange = 7.5f;
 
 		if (m_Controller.IsState(PRESS_UP))
@@ -314,50 +314,57 @@ void ACDropShip::PreControllerUpdate()
 
 		// This is to trim the hover so it's perfectly still altitude-wise
 		float trimming = -1.75f;
-		float throttle = (targetYVel + (m_Vel.m_Y + trimming)) / throttleRange;
-		//AEmitter do this already: throttle = throttle > 1.0f ? 1.0f : (throttle < -1.0f ? -1.0f : throttle);
+
+		float throttle = (targetYVel + m_Vel.m_Y + trimming) / throttleRange;
+
+        // Adjust trim based on weight. Dropships hover nicely at zero weight, but tend to drop when they have a large inventory
+        float massAdjustment = GetMass() / GetBaseMass();
 
 		// Right main thruster
 		if (m_pRThruster && m_pRThruster->IsAttached())
 		{
-			float rightThrottle = throttle;
+			float rightThrottle = m_pRThruster->GetScaledThrottle(throttle, massAdjustment);
+
 			// Throttle override control for correcting heavy tilt, only applies if both engines are present
-			if (m_pLThruster && m_pLThruster->IsAttached())
-			{
-				if (m_Rotation.GetRadAngle() > c_SixteenthPI)
+			if (m_pLThruster && m_pLThruster->IsAttached()) {
+				if (m_Rotation.GetRadAngle() > c_SixteenthPI) {
 					rightThrottle = -0.8f;
-				else if (m_Rotation.GetRadAngle() < -c_SixteenthPI)
+                } else if (m_Rotation.GetRadAngle() < -c_SixteenthPI) {
 					rightThrottle = 0.8f;
+                }
 			}
 
-			if (rightThrottle > m_pRThruster->GetThrottle())
-				rightThrottle = rightThrottle * 0.3f + m_pRThruster->GetThrottle() * 0.7f;  // Increase throttle slowly
+            if (rightThrottle > m_pRThruster->GetThrottle()) {
+                rightThrottle = rightThrottle * 0.3f + m_pRThruster->GetThrottle() * 0.7f;  // Increase throttle slowly
+            }
 
 			m_pRThruster->EnableEmission(m_Status == STABLE);
 			m_pRThruster->SetThrottle(rightThrottle);
-			m_pRThruster->SetFlashScale((rightThrottle + 1.5f) / 2);
+			m_pRThruster->SetFlashScale((m_pRThruster->GetThrottle() + 1.5f) / 2.0f);
 			// Engines are noisy! Make AI aware of them
 			m_pRThruster->AlarmOnEmit(m_Team);
 		}
 		// Left main thruster
 		if (m_pLThruster && m_pLThruster->IsAttached())
 		{
-			float leftThrottle = throttle;
+			float leftThrottle = m_pLThruster->GetScaledThrottle(throttle, massAdjustment);
 			// Throttle override control for correcting heavy tilt, only applies if both engines are present
 			if (m_pRThruster && m_pRThruster->IsAttached())
 			{
-				if (m_Rotation.GetRadAngle() > c_SixteenthPI)
-					leftThrottle = 0.8f;
-				else if (m_Rotation.GetRadAngle() < -c_SixteenthPI)
-					leftThrottle = -0.8f;
+                if (m_Rotation.GetRadAngle() > c_SixteenthPI) {
+                    leftThrottle = 0.8f;
+                } else if (m_Rotation.GetRadAngle() < -c_SixteenthPI) {
+                    leftThrottle = -0.8f;
+                }
 			}
 
-			if (leftThrottle > m_pLThruster->GetThrottle())
-				leftThrottle = leftThrottle * 0.3f + m_pLThruster->GetThrottle() * 0.7f;  // Increase throttle slowly
+            if (leftThrottle > m_pLThruster->GetThrottle()) {
+                leftThrottle = leftThrottle * 0.3f + m_pLThruster->GetThrottle() * 0.7f;  // Increase throttle slowly
+            }
 
 			m_pLThruster->EnableEmission(m_Status == STABLE);
 			m_pLThruster->SetThrottle(leftThrottle);
-			m_pLThruster->SetFlashScale((leftThrottle + 1.5f) / 2);
+			m_pLThruster->SetFlashScale((m_pLThruster->GetThrottle() + 1.5f) / 2.0F);
 			// Engines are noisy! Make AI aware of them
 			m_pLThruster->AlarmOnEmit(m_Team);
 		}

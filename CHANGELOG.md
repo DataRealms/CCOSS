@@ -36,10 +36,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	);
 	```
 
-- New `AEJetpack` type, which replaces the old technique of `ACrab`/`AHuman` using an `AEmitter` as a jetpack. This type inherits from `AEmitter`.
-	New INI and Lua (R/W) property `JetpackType`, which can be either `AEJetpack.Standard` or `AEJetpack.JumpPack`. Standard acts the same as the typical jetpack, whereas JumpPacks can only be activated when fully recharged, and fires all of it's fuel in one burst. Defaults to Standard.
-	New INI and Lua (R/W) property `CanAdjustAngleWhileFiring`, which defines whether the jet angle can change while the jetpack is active. Defaults to true.
+- New `AEJetpack` type, which replaces the old technique of `ACrab`/`AHuman` using an `AEmitter` as a jetpack. This type inherits from `AEmitter`.  
+	New INI and Lua (R/W) property `JetpackType`, which can be either `AEJetpack.Standard` or `AEJetpack.JumpPack`. Standard acts the same as the typical jetpack, whereas JumpPacks can only be activated when fully recharged, and fires all of it's fuel in one burst. Defaults to Standard.  
+	New INI and Lua (R/W) property `CanAdjustAngleWhileFiring`, which defines whether the jet angle can change while the jetpack is active. Defaults to true.  
 	New INI and Lua (R/W) property `AdjustsThrottleForWeight`, which defines whether the jetpack will adjust it's throttle (between `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier`) to account for any extra inventory mass. Increased throttle will decrease jet time accordingly. Defaults to true.
+
 
 - New `HeldDevice` Lua (R) function `IsBeingHeld`, which returns whether or not the `HeldDevice` is currently being held.
 

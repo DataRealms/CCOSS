@@ -375,6 +375,21 @@ int AEmitter::GetTotalBurstSize() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+float AEmitter::GetScaledThrottle(float throttle, float multiplier) const {
+    float throttleFactor = 1.0F - std::abs(throttle) + (throttle < 0.0F ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier) * std::abs(throttle);
+    throttleFactor *= multiplier;
+    throttleFactor -= 1.0F;
+    if (throttleFactor >= 0.0F) {
+        return (throttleFactor / (m_PositiveThrottleMultiplier - 1.0F));
+    } else {
+        return (throttleFactor / (m_NegativeThrottleMultiplier - 1.0F)) * -1.0F;
+    }
+
+    //std::unreachable();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void AEmitter::SetFlash(Attachable *newFlash) {
     if (m_pFlash && m_pFlash->IsAttached()) { RemoveAndDeleteAttachable(m_pFlash); }
     if (newFlash == nullptr) {
@@ -496,7 +511,7 @@ void AEmitter::Update()
 				float scale = 1.0F;
                 // Add extra emissions if bursting.
 				if (m_BurstTriggered) {
-					emissionCount += (*eItr)->GetBurstSize() * throttleFactor;
+					emissionCount += (*eItr)->GetBurstSize() * std::floor(throttleFactor);
 					scale = m_BurstScale;
 				}
 				emissionCountTotal += emissionCount;

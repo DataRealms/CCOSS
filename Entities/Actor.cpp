@@ -127,6 +127,7 @@ void Actor::Clear() {
     m_UpdateMovePath = true;
     m_MoveProximityLimit = 100.0F;
     m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
+    m_BaseMass = std::numeric_limits<float>::infinity();
 
     m_DamageMultiplier = 1.0F;
 
@@ -146,13 +147,14 @@ void Actor::Clear() {
 
 int Actor::Create()
 {
-    if (MOSRotating::Create() < 0)
+    if (MOSRotating::Create() < 0) {
         return -1;
+    }
 
     // Set MO Type.
     m_MOType = MovableObject::TypeActor;
 
-    // Default to an interesitng AI controller mode
+    // Default to an interesting AI controller mode
     m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
     m_UpdateMovePath = true;
@@ -163,9 +165,14 @@ int Actor::Create()
     // Sets up the team icon
     SetTeam(m_Team);
 
-	// All brain actors by default avoid hitting each other ont he same team
-	if (IsInGroup("Brains"))
+    if (const Actor *presetActor = static_cast<const Actor *>(GetPreset())) {
+        m_BaseMass = presetActor->GetMass();
+    }
+
+	// All brain actors by default avoid hitting each other on the same team
+	if (IsInGroup("Brains")) {
 		m_IgnoresTeamHits = true;
+    }
 
 	if (!m_PieMenu) {
 		SetPieMenu(static_cast<PieMenu *>(g_PresetMan.GetEntityPreset("PieMenu", GetDefaultPieMenuName())->Clone()));
@@ -284,6 +291,8 @@ int Actor::Create(const Actor &reference)
 //    m_MovePath.clear(); will recalc on its own
     m_UpdateMovePath = reference.m_UpdateMovePath;
     m_MoveProximityLimit = reference.m_MoveProximityLimit;
+    m_AIBaseDigStrength = reference.m_AIBaseDigStrength;
+    m_BaseMass = reference.m_BaseMass;
 
 	m_Organic = reference.m_Organic;
 	m_Mechanical = reference.m_Mechanical;
@@ -517,6 +526,20 @@ float Actor::GetInventoryMass() const {
         inventoryMass += inventoryItem->GetMass();
     }
     return inventoryMass;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float Actor::GetBaseMass() {
+    if (m_BaseMass == std::numeric_limits<float>::infinity()) {
+        if (const Actor* presetActor = static_cast<const Actor*>(GetPreset())) {
+            m_BaseMass = presetActor->GetMass();
+        } else {
+            m_BaseMass = GetMass();
+        }
+    }
+
+    return m_BaseMass;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

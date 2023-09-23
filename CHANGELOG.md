@@ -12,8 +12,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added a save/load game menu which can be accessed from the main or pause menus, which allows the user to save their current progress in an activity to resume at a later date.
 
-- New `Activity` INI and Lua (R/W) property `AllowsUserSaving`, which can be used to enable/disable manual user saving/loading. This defaults to true for all `GAScripted` with an `OnSave()` function, but false otherwise. Lua `ActivityMan::SaveGame()` function now forces a save even if `AllowsUserSaving` is disabled. This allows mods and scripted gamemodes to handle saving in their own way (for example, only allowing saving at set points).
-
 - New `Settings.ini` property `EnableMultithreadedLua`, which can be used to enable multithreaded Lua scripts and AI, for any lua script with the `--[[MULTITHREAD]]--` tag. Defaults to true.
 
 - New Lua event function `SyncedUpdate()`, which will be called in a thread-safe synchronized manner and allows multithreaded scripts to modify game state in a safe and consistent way.
@@ -38,6 +36,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	);
 	```
 
+- New `AEJetpack` type, which replaces the old technique of `ACrab`/`AHuman` using an `AEmitter` as a jetpack. This type inherits from `AEmitter`.  
+	New INI and Lua (R/W) property `JetpackType`, which can be either `AEJetpack.Standard` or `AEJetpack.JumpPack`. Standard acts the same as the typical jetpack, whereas JumpPacks can only be activated when fully recharged, and fires all of it's fuel in one burst. Defaults to Standard.  
+	New INI and Lua (R/W) property `CanAdjustAngleWhileFiring`, which defines whether the jet angle can change while the jetpack is active. Defaults to true.  
+	New INI and Lua (R/W) property `AdjustsThrottleForWeight`, which defines whether the jetpack will adjust it's throttle (between `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier`) to account for any extra inventory mass. Increased throttle will decrease jet time accordingly. Defaults to true.
+
+
 - New `HeldDevice` Lua (R) function `IsBeingHeld`, which returns whether or not the `HeldDevice` is currently being held.
 
 - New `HeldDevice` INI and Lua (R/W) property `GetsHitByMOsWhenHeld`, which defines whether this `HeldDevice` can be hit by MOs while equipped and held by an actor. Defaults to true.
@@ -53,6 +57,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New `Actor` INI and Lua (R/W) property `PainThreshold`, which determines how much damage this actor must take in a frame to play their `PainSound`. This can be set to 0 to never manually play the sound. Defaults to 15.
 
 - New `MOPixel` INI and Lua (R/W) property `Staininess`, which defines how likely a pixel is to stain a surface when it collides with it. Staining a surface changes that surface's `Color` to that of this `MOPixel`, without changing the underlying material. Value can be between 0 and 1. Defaults to 0 (never stain).
+
+- New `Activity` INI and Lua (R/W) property `AllowsUserSaving`, which can be used to enable/disable manual user saving/loading. This defaults to true for all `GAScripted` with an `OnSave()` function, but false otherwise. Lua `ActivityMan::SaveGame()` function now forces a save even if `AllowsUserSaving` is disabled. This allows mods and scripted gamemodes to handle saving in their own way (for example, only allowing saving at set points).
 
 </details>
 
@@ -77,6 +83,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Gibbing objects will now inherit the velocity from the impulse that caused them to gib, meaning that gibs will be thrown away from the explosion or source of damage that caused it.
 
+- Actors will now play their pain sound from any source of significant damage, instead of specifically when taking damage from colliding with terrain.
+
+- Gibbing objects will now inherit the velocity from the impulse that caused them to gib, meaning that gibs will be thrown away from the explosion or source of damage that caused it.
+
+- The `AHuman`/`ACrab` property `Jetpack` now takes an `AEJetpack`, instead of an `AEmitter`.
+
+- The following properties have all been moved from `AHuman`/`ACrab` to `AEJetpack`:  
+	`JetTime`  
+	`JetReplenishRate`  
+	`JetAngleRange`  
+	`JetTimeTotal`  
+	`JetTimeLeft`  
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -90,6 +109,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed Lua `UInputMan:MouseButtonPressed`, `UInputMan:MouseButtonHeld(mouseButton)` and `UInputMan:MouseButtonReleased(mouseButton)` functions not working. Please note that this should take an enum of type `MouseButtons`, i.e `MouseButtons.MOUSE_LEFT`, not a number.
 
 - Fixed a rare crash bug that could occur when under extreme CPU load.
+
+- Fixed a bug where dropships that were non-empty would slowly drop down over time.
 
 </details>
 

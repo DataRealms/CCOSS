@@ -83,10 +83,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Gibbing objects will now inherit the velocity from the impulse that caused them to gib, meaning that gibs will be thrown away from the explosion or source of damage that caused it.
 
-- Actors will now play their pain sound from any source of significant damage, instead of specifically when taking damage from colliding with terrain.
-
-- Gibbing objects will now inherit the velocity from the impulse that caused them to gib, meaning that gibs will be thrown away from the explosion or source of damage that caused it.
-
 - The `AHuman`/`ACrab` property `Jetpack` now takes an `AEJetpack`, instead of an `AEmitter`.
 
 - The following properties have all been moved from `AHuman`/`ACrab` to `AEJetpack`:  

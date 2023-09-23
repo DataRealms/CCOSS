@@ -14,7 +14,6 @@ namespace RTE {
 		MatchProperty("X", { reader >> m_X; });
 		MatchProperty("Y", { reader >> m_Y; });
 		
-		
 		EndPropertyList;
 	}
 

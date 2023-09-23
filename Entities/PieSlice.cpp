@@ -76,9 +76,8 @@ namespace RTE {
 	int PieSlice::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Entity::ReadProperty(propName, reader));
 		
-		MatchProperty("Type", {
-			m_Type = static_cast<SliceType>(std::stoi(reader.ReadPropValue()));
-		}); MatchProperty("Direction", {
+		MatchProperty("Type", { m_Type = static_cast<SliceType>(std::stoi(reader.ReadPropValue())); });
+		MatchProperty("Direction", {
 			if (std::string directionString = reader.ReadPropValue(); c_DirectionNameToDirectionsMap.find(directionString) != c_DirectionNameToDirectionsMap.end()) {
 				m_Direction = c_DirectionNameToDirectionsMap.find(directionString)->second;
 			} else {
@@ -93,29 +92,26 @@ namespace RTE {
 				}
 			}
 			if (m_Direction == Directions::None) { reader.ReportError("Pie Slices cannot have direction None."); }
-		}); MatchProperty("CanBeMiddleSlice", {
-			reader >> m_CanBeMiddleSlice;
-		}); MatchProperty("Enabled", {
-			reader >> m_Enabled;
-		}); MatchProperty("Icon", {
-			SetIcon(dynamic_cast<Icon *>(g_PresetMan.ReadReflectedPreset(reader)));
-		}); MatchProperty("ScriptPath", {
+		});
+		MatchProperty("CanBeMiddleSlice", { reader >> m_CanBeMiddleSlice; });
+		MatchProperty("Enabled", { reader >> m_Enabled; });
+		MatchProperty("Icon", { SetIcon(dynamic_cast<Icon *>(g_PresetMan.ReadReflectedPreset(reader))); });
+		MatchProperty("ScriptPath", {
 			std::string scriptPath;
 			reader >> scriptPath;
 			m_LuabindFunctionObject = std::make_unique<LuabindObjectWrapper>(nullptr, scriptPath);
 			if (!m_FunctionName.empty()) {
 				ReloadScripts();
 			}
-		}); MatchProperty("FunctionName", {
+		});
+		MatchProperty("FunctionName", {
 			reader >> m_FunctionName;
 			if (m_LuabindFunctionObject) {
 				ReloadScripts();
 			}
-		}); MatchProperty("SubPieMenu", {
-			SetSubPieMenu(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
-		}); MatchProperty("DrawFlippedToMatchAbsoluteAngle", {
-			reader >> m_DrawFlippedToMatchAbsoluteAngle;
 		});
+		MatchProperty("SubPieMenu", { SetSubPieMenu(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader))); });
+		MatchProperty("DrawFlippedToMatchAbsoluteAngle", { reader >> m_DrawFlippedToMatchAbsoluteAngle; });
 
 		EndPropertyList;
 	}

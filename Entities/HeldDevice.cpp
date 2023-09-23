@@ -184,22 +184,14 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     StartPropertyList(return Attachable::ReadProperty(propName, reader));
 
-    MatchProperty("HeldDeviceType",
-        reader >> m_HeldDeviceType; );
-    MatchProperty("OneHanded",
-        reader >> m_OneHanded; );
-	MatchProperty("DualWieldable",
-		reader >> m_DualWieldable; );
-	MatchProperty("StanceOffset",
-        reader >> m_StanceOffset; );
-    MatchProperty("SharpStanceOffset",
-        reader >> m_SharpStanceOffset; );
-	MatchProperty("Supportable",
-		reader >> m_Supportable; );
-	MatchProperty("SupportOffset",
-        reader >> m_SupportOffset; );
-    MatchProperty("UseSupportOffsetWhileReloading",
-        reader >> m_UseSupportOffsetWhileReloading; );
+    MatchProperty("HeldDeviceType", { reader >> m_HeldDeviceType; });
+    MatchProperty("OneHanded", { reader >> m_OneHanded; });
+	MatchProperty("DualWieldable", { reader >> m_DualWieldable; });
+	MatchProperty("StanceOffset", { reader >> m_StanceOffset; });
+    MatchProperty("SharpStanceOffset", { reader >> m_SharpStanceOffset; });
+	MatchProperty("Supportable", { reader >> m_Supportable; });
+	MatchProperty("SupportOffset", { reader >> m_SupportOffset; });
+    MatchProperty("UseSupportOffsetWhileReloading", { reader >> m_UseSupportOffsetWhileReloading; });
     MatchProperty("PickupableBy", {
         std::string pickupableByValue = reader.ReadPropValue();
         if (pickupableByValue == "PickupableByEntries") {
@@ -220,18 +212,13 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
         } else if (pickupableByValue == "None") {
             SetUnPickupable(true);
         }
-    }); MatchProperty("GripStrengthMultiplier", {
-        reader >> m_GripStrengthMultiplier;
-    }); MatchProperty("SharpLength",
-        reader >> m_MaxSharpLength; );
-    MatchProperty("Loudness",
-        reader >> m_Loudness; );
-    MatchProperty("GetsHitByMOsWhenHeld",
-        reader >> m_GetsHitByMOsWhenHeld; );
-    MatchProperty("VisualRecoilMultiplier",
-		reader >> m_VisualRecoilMultiplier; );
-	MatchProperty("SpecialBehaviour_Activated",
-		reader >> m_Activated; );
+    });
+    MatchProperty("GripStrengthMultiplier", { reader >> m_GripStrengthMultiplier; });
+    MatchProperty("SharpLength", { reader >> m_MaxSharpLength; });
+    MatchProperty("Loudness", { reader >> m_Loudness; });
+    MatchProperty("GetsHitByMOsWhenHeld", { reader >> m_GetsHitByMOsWhenHeld; });
+    MatchProperty("VisualRecoilMultiplier", { reader >> m_VisualRecoilMultiplier; });
+	MatchProperty("SpecialBehaviour_Activated", { reader >> m_Activated; });
 	MatchProperty("SpecialBehaviour_ActivationTimerElapsedSimTimeMS", {
 		double elapsedSimTimeMS;
 		reader >> elapsedSimTimeMS;

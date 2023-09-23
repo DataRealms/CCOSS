@@ -65,18 +65,16 @@ namespace RTE {
 			} else {
 				reader.ReportError("Unknown JetpackType '" + jetpackType + "'!");
 			}
-		}); MatchForwards("JumpTime") MatchProperty("JetTime", {
+		});
+		MatchForwards("JumpTime") MatchProperty("JetTime", {
             reader >> m_JetTimeTotal;
             m_JetTimeTotal *= 1000.0f; // Convert to ms
-	    }); MatchForwards("JumpReplenishRate") MatchProperty("JetReplenishRate", {
-            reader >> m_JetReplenishRate;
-		}); MatchForwards("JumpAngleRange") MatchProperty("JetAngleRange", {
-            reader >> m_JetAngleRange;
-		}); MatchProperty("CanAdjustAngleWhileFiring", {
-            reader >> m_CanAdjustAngleWhileFiring;
-		}); MatchProperty("AdjustsThrottleForWeight", {
-            reader >> m_AdjustsThrottleForWeight;
-        });
+	    });
+		MatchForwards("JumpReplenishRate") MatchProperty("JetReplenishRate", { reader >> m_JetReplenishRate; });
+		MatchForwards("JumpAngleRange") MatchProperty("JetAngleRange", { reader >> m_JetAngleRange; });
+		MatchProperty("CanAdjustAngleWhileFiring", { reader >> m_CanAdjustAngleWhileFiring; });
+		MatchProperty("AdjustsThrottleForWeight", { reader >> m_AdjustsThrottleForWeight; });
+        
 
 		EndPropertyList;
 	}

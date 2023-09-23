@@ -112,13 +112,10 @@ namespace RTE {
 	int SceneLayerImpl<TRACK_DRAWINGS>::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Entity::ReadProperty(propName, reader));
 		
-		MatchProperty("WrapX", {
-			reader >> m_WrapX;
-		}); MatchProperty("WrapY", {
-			reader >> m_WrapY;
-		}); MatchProperty("BitmapFile", {
-			reader >> m_BitmapFile;
-		});
+		MatchProperty("WrapX", { reader >> m_WrapX; });
+		MatchProperty("WrapY", { reader >> m_WrapY; });
+		MatchProperty("BitmapFile", { reader >> m_BitmapFile; });
+		
 		
 		EndPropertyList;
 	}

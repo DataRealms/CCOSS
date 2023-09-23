@@ -125,18 +125,12 @@ namespace RTE {
 			reader >> emission;
 			m_EmissionList.push_back(emission);
 		});
-		MatchProperty("EmissionSound",
-			reader >> m_EmissionSound; );
-		MatchProperty("BurstSound",
-			reader >> m_BurstSound; );
-		MatchProperty("EndSound",
-			reader >> m_EndSound; );
-		MatchProperty("EmissionEnabled",
-			reader >> m_EmitEnabled; );
-		MatchProperty("EmissionCount",
-			reader >> m_EmitCount; );
-		MatchProperty("EmissionCountLimit",
-			reader >> m_EmitCountLimit; );
+		MatchProperty("EmissionSound", { reader >> m_EmissionSound; });
+		MatchProperty("BurstSound", { reader >> m_BurstSound; });
+		MatchProperty("EndSound", { reader >> m_EndSound; });
+		MatchProperty("EmissionEnabled", { reader >> m_EmitEnabled; });
+		MatchProperty("EmissionCount", { reader >> m_EmitCount; });
+		MatchProperty("EmissionCountLimit", { reader >> m_EmitCountLimit; });
 		MatchProperty("ParticlesPerMinute",
 		{
 			float ppm;
@@ -145,14 +139,10 @@ namespace RTE {
 			for (std::list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
 				(*eItr).m_PPM = ppm / m_EmissionList.size();
 		});
-		MatchProperty("NegativeThrottleMultiplier",
-			reader >> m_NegativeThrottleMultiplier; );
-		MatchProperty("PositiveThrottleMultiplier",
-			reader >> m_PositiveThrottleMultiplier; );
-		MatchProperty("Throttle",
-			reader >> m_Throttle; );
-		MatchProperty("EmissionsIgnoreThis",
-			reader >> m_EmissionsIgnoreThis; );
+		MatchProperty("NegativeThrottleMultiplier", { reader >> m_NegativeThrottleMultiplier; });
+		MatchProperty("PositiveThrottleMultiplier", { reader >> m_PositiveThrottleMultiplier; });
+		MatchProperty("Throttle", { reader >> m_Throttle; });
+		MatchProperty("EmissionsIgnoreThis", { reader >> m_EmissionsIgnoreThis; });
 		MatchProperty("BurstSize",
 		{
 			int burstSize;
@@ -161,22 +151,14 @@ namespace RTE {
 			for (std::list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
 				(*eItr).m_BurstSize = std::ceil((float)burstSize / (float)m_EmissionList.size());
 		});
-		MatchProperty("BurstScale",
-			reader >> m_BurstScale; );
-		MatchProperty("BurstSpacing",
-			reader >> m_BurstSpacing; );
-		MatchProperty("BurstTriggered",
-			reader >> m_BurstTriggered; );
-		MatchProperty("EmissionAngle",
-			reader >> m_EmitAngle; );
-		MatchProperty("EmissionOffset",
-			reader >> m_EmissionOffset; );
-		MatchProperty("FlashScale",
-			reader >> m_FlashScale; );
-		MatchProperty("FlashOnlyOnBurst",
-			reader >> m_FlashOnlyOnBurst; );
-		MatchProperty("LoudnessOnEmit",
-			reader >> m_LoudnessOnEmit; );
+		MatchProperty("BurstScale", { reader >> m_BurstScale; });
+		MatchProperty("BurstSpacing", { reader >> m_BurstSpacing; });
+		MatchProperty("BurstTriggered", { reader >> m_BurstTriggered; });
+		MatchProperty("EmissionAngle", { reader >> m_EmitAngle; });
+		MatchProperty("EmissionOffset", { reader >> m_EmissionOffset; });
+		MatchProperty("FlashScale", { reader >> m_FlashScale; });
+		MatchProperty("FlashOnlyOnBurst", { reader >> m_FlashOnlyOnBurst; });
+		MatchProperty("LoudnessOnEmit", { reader >> m_LoudnessOnEmit; });
 		
 		EndPropertyList;
 	}

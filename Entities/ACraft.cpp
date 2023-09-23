@@ -101,16 +101,11 @@ int ACraft::Exit::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     StartPropertyList(return Serializable::ReadProperty(propName, reader));
 
-    MatchProperty("Offset",
-        reader >> m_Offset; );
-    MatchProperty("Velocity",
-        reader >> m_Velocity; );
-    MatchProperty("VelocitySpread",
-        reader >> m_VelSpread; );
-    MatchProperty("Radius",
-        reader >> m_Radius; );
-    MatchProperty("Range",
-        reader >> m_Range; );
+    MatchProperty("Offset", { reader >> m_Offset; });
+    MatchProperty("Velocity", { reader >> m_Velocity; });
+    MatchProperty("VelocitySpread", { reader >> m_VelSpread; });
+    MatchProperty("Radius", { reader >> m_Radius; });
+    MatchProperty("Range", { reader >> m_Range; });
 
     EndPropertyList;
 }
@@ -368,35 +363,31 @@ int ACraft::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     StartPropertyList(return Actor::ReadProperty(propName, reader)); 
     
-    MatchProperty("HatchDelay",
-        reader >> m_HatchDelay; );
+    MatchProperty("HatchDelay", { reader >> m_HatchDelay; });
 	MatchProperty("HatchOpenSound", {
 		m_HatchOpenSound = new SoundContainer;
 		reader >> m_HatchOpenSound;
-	}); MatchProperty("HatchCloseSound", {
+	});
+	MatchProperty("HatchCloseSound", {
 		m_HatchCloseSound = new SoundContainer;
 		reader >> m_HatchCloseSound;
-	}); MatchProperty("CrashSound", {
+	});
+	MatchProperty("CrashSound", {
 		m_CrashSound = new SoundContainer;
 		reader >> m_CrashSound;
-	}); MatchProperty("AddExit",
+	});
+	MatchProperty("AddExit",
     {
         Exit exit;
         reader >> exit;
         m_Exits.push_back(exit);
     });
-    MatchProperty("DeliveryDelayMultiplier",
-        reader >> m_DeliveryDelayMultiplier; );
-	MatchProperty("ExitInterval",
-		reader >> m_ExitInterval; );
-	MatchProperty("CanLand",
-        reader >> m_LandingCraft; );
-    MatchProperty("MaxPassengers",
-        reader >> m_MaxPassengers; );
-	MatchProperty("ScuttleIfFlippedTime",
-		reader >> m_ScuttleIfFlippedTime; );
-    MatchProperty("ScuttleOnDeath",
-        reader >> m_ScuttleOnDeath; );
+    MatchProperty("DeliveryDelayMultiplier", { reader >> m_DeliveryDelayMultiplier; });
+	MatchProperty("ExitInterval", { reader >> m_ExitInterval; });
+	MatchProperty("CanLand", { reader >> m_LandingCraft; });
+    MatchProperty("MaxPassengers", { reader >> m_MaxPassengers; });
+	MatchProperty("ScuttleIfFlippedTime", { reader >> m_ScuttleIfFlippedTime; });
+    MatchProperty("ScuttleOnDeath", { reader >> m_ScuttleOnDeath; });
 
     EndPropertyList;
 }

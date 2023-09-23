@@ -61,7 +61,8 @@ namespace RTE {
 					reader.ReportError("Couldn't find the preset \"" + refName + "\" of type \"" + className + "\" when trying to do CopyOf.");
 				}
 			}
-		}); MatchForwards("PresetName") MatchProperty("InstanceName", {
+		});
+		MatchForwards("PresetName") MatchProperty("InstanceName", {
 			SetPresetName(reader.ReadPropValue());
 			// Preset name might have "[ModuleName]/" preceding it, detect it here and select proper module!
 			int slashPos = m_PresetName.find_first_of('/');
@@ -70,7 +71,8 @@ namespace RTE {
 			m_IsOriginalPreset = true;
 			// Indicate where this was read from
 			m_DefinedInModule = reader.GetReadModuleID();
-		}); MatchProperty("Description", {
+		});
+		MatchProperty("Description", {
 			std::string descriptionValue = reader.ReadPropValue();
 			if (descriptionValue == "MultiLineText") {
 				m_PresetDescription.clear();
@@ -83,10 +85,12 @@ namespace RTE {
 			} else {
 				m_PresetDescription = descriptionValue;
 			}
-		}); MatchProperty("RandomWeight", {
+		});
+		MatchProperty("RandomWeight", {
 			reader >> m_RandomWeight;
 			m_RandomWeight = Limit(m_RandomWeight, 100, 0);
-		}); MatchProperty("AddToGroup", {
+		});
+		MatchProperty("AddToGroup", {
 			std::string newGroup;
 			reader >> newGroup;
 			AddToGroup(newGroup);

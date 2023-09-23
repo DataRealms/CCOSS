@@ -64,37 +64,27 @@ namespace RTE {
 	int TerrainDebris::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Entity::ReadProperty(propName, reader));
 		
-		MatchProperty("DebrisFile", {
-			reader >> m_DebrisFile;
-		}); MatchProperty("DebrisPieceCount", {
+		MatchProperty("DebrisFile", { reader >> m_DebrisFile; });
+		MatchProperty("DebrisPieceCount", {
 			reader >> m_BitmapCount;
 			m_Bitmaps.reserve(m_BitmapCount);
-		}); MatchProperty("DebrisMaterial", {
-			reader >> m_Material;
-		}); MatchProperty("TargetMaterial", {
-			reader >> m_TargetMaterial;
-		}); MatchProperty("DebrisPlacementMode", {
+		});
+		MatchProperty("DebrisMaterial", { reader >> m_Material; });
+		MatchProperty("TargetMaterial", { reader >> m_TargetMaterial; });
+		MatchProperty("DebrisPlacementMode", {
 			m_DebrisPlacementMode = static_cast<DebrisPlacementMode>(std::stoi(reader.ReadPropValue()));
 			if (m_DebrisPlacementMode < DebrisPlacementMode::NoPlacementRestrictions || m_DebrisPlacementMode > DebrisPlacementMode::OnOverhangAndCavityOverhang) { reader.ReportError("Invalid TerrainDebris placement mode!"); }
-		}); MatchProperty("OnlyBuried", {
-			reader >> m_OnlyBuried;
-		}); MatchProperty("MinDepth", {
-			reader >> m_MinDepth;
-		}); MatchProperty("MaxDepth", {
-			reader >> m_MaxDepth;
-		}); MatchProperty("MinRotation", {
-			reader >> m_MinRotation;
-		}); MatchProperty("MaxRotation", {
-			reader >> m_MaxRotation;
-		}); MatchProperty("CanHFlip", {
-			reader >> m_CanHFlip;
-		}); MatchProperty("CanVFlip", {
-			reader >> m_CanVFlip;
-		}); MatchProperty("FlipChance", {
-			reader >> m_FlipChance;
-		}); MatchProperty("DensityPerMeter", {
-			reader >> m_Density;
 		});
+		MatchProperty("OnlyBuried", { reader >> m_OnlyBuried; });
+		MatchProperty("MinDepth", { reader >> m_MinDepth; });
+		MatchProperty("MaxDepth", { reader >> m_MaxDepth; });
+		MatchProperty("MinRotation", { reader >> m_MinRotation; });
+		MatchProperty("MaxRotation", { reader >> m_MaxRotation; });
+		MatchProperty("CanHFlip", { reader >> m_CanHFlip; });
+		MatchProperty("CanVFlip", { reader >> m_CanVFlip; });
+		MatchProperty("FlipChance", { reader >> m_FlipChance; });
+		MatchProperty("DensityPerMeter", { reader >> m_Density; });
+		
 		
 		EndPropertyList;
 	}

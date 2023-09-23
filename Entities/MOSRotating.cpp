@@ -328,10 +328,8 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
         m_pDeepGroup = new AtomGroup();
         reader >> *m_pDeepGroup;
     });
-    MatchProperty("DeepCheck",
-        reader >> m_DeepCheck; );
-    MatchProperty("OrientToVel",
-        reader >> m_OrientToVel; );
+    MatchProperty("DeepCheck", { reader >> m_DeepCheck; });
+    MatchProperty("OrientToVel", { reader >> m_OrientToVel; });
 	MatchProperty("SpecialBehaviour_ClearAllAttachables", {
 		// This special property is used to make Attachables work with our limited serialization system, when saving the game. Note that we discard the property value here, because all that matters is whether or not we have the property.
 		reader.ReadPropValue();
@@ -340,14 +338,16 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 			++attachableIterator;
 			delete RemoveAttachable(attachable);
 		}
-	}); MatchForwards("AddAttachable") MatchForwards("AddAEmitter") MatchProperty("AddEmitter", {
+	});
+    MatchForwards("AddAttachable") MatchForwards("AddAEmitter") MatchProperty("AddEmitter", {
 		Entity *readerEntity = g_PresetMan.ReadReflectedPreset(reader);
 		if (Attachable *readerAttachable = dynamic_cast<Attachable *>(readerEntity)) {
 			AddAttachable(readerAttachable);
 		} else {
 			reader.ReportError("Tried to AddAttachable a non-Attachable type!");
 		}
-	}); MatchProperty("SpecialBehaviour_AddWound", {
+	});
+	MatchProperty("SpecialBehaviour_AddWound", {
 		AEmitter *wound = new AEmitter;
 		reader >> wound;
 		AddWound(wound, wound->GetParentOffset());
@@ -358,33 +358,25 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
         reader >> gib;
         m_Gibs.push_back(gib);
     });
-    MatchProperty("GibImpulseLimit",
-        reader >> m_GibImpulseLimit; );
-    MatchForwards("GibWoundLimit") MatchProperty("WoundLimit",
-        reader >> m_GibWoundLimit; );
-	MatchProperty("GibBlastStrength", {
-		reader >> m_GibBlastStrength;
-    }); MatchProperty("GibScreenShakeAmount", {
-		reader >> m_GibScreenShakeAmount;
-	}); MatchProperty("WoundCountAffectsImpulseLimitRatio", {
-        reader >> m_WoundCountAffectsImpulseLimitRatio;
-	}); MatchProperty("DetachAttachablesBeforeGibbingFromWounds", {
-		reader >> m_DetachAttachablesBeforeGibbingFromWounds;
-	}); MatchProperty("GibAtEndOfLifetime", {
-		reader >> m_GibAtEndOfLifetime;
-	}); MatchProperty("GibSound", {
+    MatchProperty("GibImpulseLimit", { reader >> m_GibImpulseLimit; });
+    MatchForwards("GibWoundLimit") MatchProperty("WoundLimit", { reader >> m_GibWoundLimit; });
+	MatchProperty("GibBlastStrength", { reader >> m_GibBlastStrength; });
+    MatchProperty("GibScreenShakeAmount", { reader >> m_GibScreenShakeAmount; });
+	MatchProperty("WoundCountAffectsImpulseLimitRatio", { reader >> m_WoundCountAffectsImpulseLimitRatio; });
+	MatchProperty("DetachAttachablesBeforeGibbingFromWounds", { reader >> m_DetachAttachablesBeforeGibbingFromWounds; });
+	MatchProperty("GibAtEndOfLifetime", { reader >> m_GibAtEndOfLifetime; });
+	MatchProperty("GibSound", {
 		if (!m_GibSound) { m_GibSound = new SoundContainer; }
 		reader >> m_GibSound;
-	}); MatchProperty("EffectOnGib",
-        reader >> m_EffectOnGib; );
-    MatchProperty("LoudnessOnGib",
-        reader >> m_LoudnessOnGib; );
+	});
+	MatchProperty("EffectOnGib", { reader >> m_EffectOnGib; });
+    MatchProperty("LoudnessOnGib", { reader >> m_LoudnessOnGib; });
 	MatchProperty("DamageMultiplier", {
 		reader >> m_DamageMultiplier;
         m_NoSetDamageMultiplier = false;
-    }); MatchProperty("AddCustomValue", {
-        ReadCustomValueProperty(reader);
-    }); 
+    });
+    MatchProperty("AddCustomValue", { ReadCustomValueProperty(reader); });
+    
     
     EndPropertyList;
 }

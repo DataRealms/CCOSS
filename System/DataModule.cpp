@@ -123,11 +123,9 @@ namespace RTE {
 	int DataModule::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(if (!g_PresetMan.GetEntityPreset(reader)) { reader.ReportError("Could not understand Preset type!"); })
 		
-		MatchProperty("ModuleName", {
-			reader >> m_FriendlyName;
-		}); MatchProperty("Author", {
-			reader >> m_Author;
-		}); MatchProperty("Description", {
+		MatchProperty("ModuleName", { reader >> m_FriendlyName; });
+		MatchProperty("Author", { reader >> m_Author; });
+		MatchProperty("Description", {
 			std::string descriptionValue = reader.ReadPropValue();
 			if (descriptionValue == "MultiLineText") {
 				m_Description.clear();
@@ -140,13 +138,16 @@ namespace RTE {
 			} else {
 				m_Description = descriptionValue;
 			}
-		}); MatchProperty("IsFaction", {
+		});
+		MatchProperty("IsFaction", {
 			reader >> m_IsFaction;
 			if (m_IsMerchant) { m_IsFaction = false; }
-		}); MatchProperty("IsMerchant", {
+		});
+		MatchProperty("IsMerchant", {
 			reader >> m_IsMerchant;
 			if (m_IsMerchant) { m_IsFaction = false; }
-		}); MatchProperty("SupportedGameVersion", {
+		});
+		MatchProperty("SupportedGameVersion", {
 			std::string versionText;
 			reader >> versionText;
 			// TODO: Need to proceed reading the includes after ReadModuleProperties so we don't read the properties again when fully creating.
@@ -157,28 +158,28 @@ namespace RTE {
 					reader.ReportError("Couldn't parse the supported game version from the value provided: \"" + versionText + "\"!\nThe supported game version must be a valid semantic version number.\n");
 				}
 			}
-		}); MatchProperty("Version", {
-			reader >> m_Version;
-		}); MatchProperty("ScanFolderContents", {
-			reader >> m_ScanFolderContents;
-		}); MatchProperty("IgnoreMissingItems", {
-			reader >> m_IgnoreMissingItems;
-		}); MatchProperty("CrabToHumanSpawnRatio", {
-			reader >> m_CrabToHumanSpawnRatio;
-		}); MatchProperty("ScriptPath", {
+		});
+		MatchProperty("Version", { reader >> m_Version; });
+		MatchProperty("ScanFolderContents", { reader >> m_ScanFolderContents; });
+		MatchProperty("IgnoreMissingItems", { reader >> m_IgnoreMissingItems; });
+		MatchProperty("CrabToHumanSpawnRatio", { reader >> m_CrabToHumanSpawnRatio; });
+		MatchProperty("ScriptPath", {
 			reader >> m_ScriptPath;
 			LoadScripts();
-		}); MatchProperty("Require", {
+		});
+		MatchProperty("Require", {
 			// Check for required dependencies if we're not load properties
 			std::string requiredModule;
 			reader >> requiredModule;
 			if (!reader.GetSkipIncludes() && g_PresetMan.GetModuleID(requiredModule) == -1) {
 				reader.ReportError("\"" + m_FileName + "\" requires \"" + requiredModule + "\" in order to load!\n");
 			}
-		}); MatchProperty("IconFile", {
+		});
+		MatchProperty("IconFile", {
 			reader >> m_IconFile;
 			m_Icon = m_IconFile.GetAsBitmap();
-		}); MatchProperty("FactionBuyMenuTheme", {
+		});
+		MatchProperty("FactionBuyMenuTheme", {
 			if (reader.ReadPropValue() == "BuyMenuTheme") {
 				while (reader.NextProperty()) {
 					std::string themePropName = reader.ReadPropName();
@@ -195,9 +196,8 @@ namespace RTE {
 					}
 				}
 			}
-		}); MatchProperty("AddMaterial", {
-			return g_SceneMan.ReadProperty(propName, reader);
 		});
+		MatchProperty("AddMaterial", { return g_SceneMan.ReadProperty(propName, reader); });
 
 		EndPropertyList;
 	}

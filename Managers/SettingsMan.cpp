@@ -113,202 +113,111 @@ namespace RTE {
 	int SettingsMan::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Serializable::ReadProperty(propName, reader));
 		
-		MatchProperty("PaletteFile", {
-			reader >> g_FrameMan.m_PaletteFile;
-		}); MatchProperty("ResolutionX", {
-			reader >> g_WindowMan.m_ResX;
-		}); MatchProperty("ResolutionY", {
-			reader >> g_WindowMan.m_ResY;
-		}); MatchProperty("ResolutionMultiplier", {
-			reader >> g_WindowMan.m_ResMultiplier;
-		}); MatchProperty("EnableVSync", {
-			reader >> g_WindowMan.m_EnableVSync;
-		}); MatchProperty("IgnoreMultiDisplays", {
-			reader >> g_WindowMan.m_IgnoreMultiDisplays;
-		}); MatchProperty("TwoPlayerSplitscreenVertSplit", {
-			reader >> g_FrameMan.m_TwoPlayerVSplit;
-		}); MatchProperty("MasterVolume", {
-			g_AudioMan.SetMasterVolume(std::stof(reader.ReadPropValue()) / 100.0F);
-		}); MatchProperty("MuteMaster", {
-			reader >> g_AudioMan.m_MuteMaster;
-		}); MatchProperty("MusicVolume", {
-			g_AudioMan.SetMusicVolume(std::stof(reader.ReadPropValue()) / 100.0F);
-		}); MatchProperty("MuteMusic", {
-			reader >> g_AudioMan.m_MuteMusic;
-		}); MatchProperty("SoundVolume", {
-			g_AudioMan.SetSoundsVolume(std::stof(reader.ReadPropValue()) / 100.0F);
-		}); MatchProperty("MuteSounds", {
-			reader >> g_AudioMan.m_MuteSounds;
-		}); MatchProperty("SoundPanningEffectStrength", {
+		MatchProperty("PaletteFile", { reader >> g_FrameMan.m_PaletteFile; });
+		MatchProperty("ResolutionX", { reader >> g_WindowMan.m_ResX; });
+		MatchProperty("ResolutionY", { reader >> g_WindowMan.m_ResY; });
+		MatchProperty("ResolutionMultiplier", { reader >> g_WindowMan.m_ResMultiplier; });
+		MatchProperty("EnableVSync", { reader >> g_WindowMan.m_EnableVSync; });
+		MatchProperty("IgnoreMultiDisplays", { reader >> g_WindowMan.m_IgnoreMultiDisplays; });
+		MatchProperty("TwoPlayerSplitscreenVertSplit", { reader >> g_FrameMan.m_TwoPlayerVSplit; });
+		MatchProperty("MasterVolume", { g_AudioMan.SetMasterVolume(std::stof(reader.ReadPropValue()) / 100.0F); });
+		MatchProperty("MuteMaster", { reader >> g_AudioMan.m_MuteMaster; });
+		MatchProperty("MusicVolume", { g_AudioMan.SetMusicVolume(std::stof(reader.ReadPropValue()) / 100.0F); });
+		MatchProperty("MuteMusic", { reader >> g_AudioMan.m_MuteMusic; });
+		MatchProperty("SoundVolume", { g_AudioMan.SetSoundsVolume(std::stof(reader.ReadPropValue()) / 100.0F); });
+		MatchProperty("MuteSounds", { reader >> g_AudioMan.m_MuteSounds; });
+		MatchProperty("SoundPanningEffectStrength", {
 			reader >> g_AudioMan.m_SoundPanningEffectStrength;
 
 		//////////////////////////////////////////////////
 		//TODO These need to be removed when our soundscape is sorted out. They're only here temporarily to allow for easier tweaking by pawnis.
-		}); MatchProperty("ListenerZOffset", {
-			reader >> g_AudioMan.m_ListenerZOffset;
-		}); MatchProperty("MinimumDistanceForPanning", {
+		});
+		MatchProperty("ListenerZOffset", { reader >> g_AudioMan.m_ListenerZOffset; });
+		MatchProperty("MinimumDistanceForPanning", {
 			reader >> g_AudioMan.m_MinimumDistanceForPanning;
 		//////////////////////////////////////////////////
 
-		}); MatchProperty("ShowForeignItems", {
-			reader >> m_ShowForeignItems;
-		}); MatchProperty("FlashOnBrainDamage", {
-			reader >> m_FlashOnBrainDamage;
-		}); MatchProperty("BlipOnRevealUnseen", {
-			reader >> m_BlipOnRevealUnseen;
-		}); MatchProperty("MaxUnheldItems", {
-			reader >> g_MovableMan.m_MaxDroppedItems;
-		}); MatchProperty("UnheldItemsHUDDisplayRange", {
-			SetUnheldItemsHUDDisplayRange(std::stof(reader.ReadPropValue()));
-		}); MatchProperty("AlwaysDisplayUnheldItemsInStrategicMode", {
-			reader >> m_AlwaysDisplayUnheldItemsInStrategicMode;
-		}); MatchProperty("SubPieMenuHoverOpenDelay", {
-			reader >> m_SubPieMenuHoverOpenDelay;
-		}); MatchProperty("EndlessMode", {
-			reader >> m_EndlessMetaGameMode;
-		}); MatchProperty("EnableCrabBombs", {
-			reader >> m_EnableCrabBombs;
-		}); MatchProperty("CrabBombThreshold", {
-			reader >> m_CrabBombThreshold;
-		}); MatchProperty("ShowEnemyHUD", {
-			reader >> m_ShowEnemyHUD;
-		}); MatchProperty("SmartBuyMenuNavigation", {
-			reader >> m_EnableSmartBuyMenuNavigation;
-		}); MatchProperty("ScrapCompactingHeight", {
-			reader >> g_SceneMan.m_ScrapCompactingHeight;
-		}); MatchProperty("AutomaticGoldDeposit", {
-			reader >> m_AutomaticGoldDeposit;
-		}); MatchProperty("ScreenShakeStrength", {
-			reader >> g_CameraMan.m_ScreenShakeStrength;
-		}); MatchProperty("ScreenShakeDecay", {
-			reader >> g_CameraMan.m_ScreenShakeDecay;
-		}); MatchProperty("MaxScreenShakeTime", {
-			reader >> g_CameraMan.m_MaxScreenShakeTime;
-		}); MatchProperty("DefaultShakePerUnitOfGibEnergy", {
-			reader >> g_CameraMan.m_DefaultShakePerUnitOfGibEnergy;
-		}); MatchProperty("DefaultShakePerUnitOfRecoilEnergy", {
-			reader >> g_CameraMan.m_DefaultShakePerUnitOfRecoilEnergy;
-		}); MatchProperty("DefaultShakeFromRecoilMaximum", {
-			reader >> g_CameraMan.m_DefaultShakeFromRecoilMaximum;
-		}); MatchProperty("LaunchIntoActivity", {
-			reader >> g_ActivityMan.m_LaunchIntoActivity;
-		}); MatchProperty("DefaultActivityType", {
-			reader >> g_ActivityMan.m_DefaultActivityType;
-		}); MatchProperty("DefaultActivityName", {
-			reader >> g_ActivityMan.m_DefaultActivityName;
-		}); MatchProperty("DefaultSceneName", {
-			reader >> g_SceneMan.m_DefaultSceneName;
-		}); MatchProperty("DisableLuaJIT", {
-			reader >> m_DisableLuaJIT;
-		}); MatchProperty("RecommendedMOIDCount", {
-			reader >> m_RecommendedMOIDCount;
-		}); MatchProperty("SimplifiedCollisionDetection", {
-			reader >> m_SimplifiedCollisionDetection;
-		}); MatchProperty("SceneBackgroundAutoScaleMode", {
-			SetSceneBackgroundAutoScaleMode(std::stoi(reader.ReadPropValue()));
-		}); MatchProperty("DisableFactionBuyMenuThemes", {
-			reader >> m_DisableFactionBuyMenuThemes;
-		}); MatchProperty("DisableFactionBuyMenuThemeCursors", {
-			reader >> m_DisableFactionBuyMenuThemeCursors;
-		}); MatchProperty("PathFinderGridNodeSize", {
-			reader >> m_PathFinderGridNodeSize;
-		}); MatchProperty("EnableMultithreadedLua", {
-			reader >> m_EnableMultithreadedLua;
-		}); MatchProperty("AIUpdateInterval", {
-			reader >> m_AIUpdateInterval;
-		}); MatchProperty("EnableParticleSettling", {
-			reader >> g_MovableMan.m_SettlingEnabled;
-		}); MatchProperty("EnableMOSubtraction", {
-			reader >> g_MovableMan.m_MOSubtractionEnabled;
-		}); MatchProperty("DeltaTime", {
-			g_TimerMan.SetDeltaTimeSecs(std::stof(reader.ReadPropValue()));
-		}); MatchProperty("RealToSimCap", {
-			g_TimerMan.SetRealToSimCap(std::stof(reader.ReadPropValue()));
-		}); MatchProperty("AllowSavingToBase", {
-			reader >> m_AllowSavingToBase;
-		}); MatchProperty("ShowMetaScenes", {
-			reader >> m_ShowMetaScenes;
-		}); MatchProperty("SkipIntro", {
-			reader >> m_SkipIntro;
-		}); MatchProperty("ShowToolTips", {
-			reader >> m_ShowToolTips;
-		}); MatchProperty("CaseSensitiveFilePaths", {
-			System::EnableFilePathCaseSensitivity(std::stoi(reader.ReadPropValue()));
-		}); MatchProperty("DisableLoadingScreenProgressReport", {
-			reader >> m_DisableLoadingScreenProgressReport;
-		}); MatchProperty("LoadingScreenProgressReportPrecision", {
-			reader >> m_LoadingScreenProgressReportPrecision;
-		}); MatchProperty("ConsoleScreenRatio", {
-			g_ConsoleMan.SetConsoleScreenSize(std::stof(reader.ReadPropValue()));
-		}); MatchProperty("ConsoleUseMonospaceFont", {
-			reader >> g_ConsoleMan.m_ConsoleUseMonospaceFont;
-		}); MatchProperty("AdvancedPerformanceStats", {
-			reader >> g_PerformanceMan.m_AdvancedPerfStats;
-		}); MatchProperty("MenuTransitionDurationMultiplier", {
-			SetMenuTransitionDurationMultiplier(std::stof(reader.ReadPropValue()));
-		}); MatchProperty("DrawAtomGroupVisualizations", {
-			reader >> m_DrawAtomGroupVisualizations;
-		}); MatchProperty("DrawHandAndFootGroupVisualizations", {
-			reader >> m_DrawHandAndFootGroupVisualizations;
-		}); MatchProperty("DrawLimbPathVisualizations", {
-			reader >> m_DrawLimbPathVisualizations;
-		}); MatchProperty("DrawRaycastVisualizations", {
-			reader >> g_SceneMan.m_DrawRayCastVisualizations;
-		}); MatchProperty("DrawPixelCheckVisualizations", {
-			reader >> g_SceneMan.m_DrawPixelCheckVisualizations;
-		}); MatchProperty("PrintDebugInfo", {
-			reader >> m_PrintDebugInfo;
-		}); MatchProperty("MeasureModuleLoadTime", {
-			reader >> m_MeasureModuleLoadTime;
-		}); MatchProperty("PlayerNetworkName", {
-			reader >> m_PlayerNetworkName;
-		}); MatchProperty("NetworkServerName", {
-			reader >> m_NetworkServerAddress;
-		}); MatchProperty("UseNATService", {
-			reader >> g_NetworkServer.m_UseNATService;
-		}); MatchProperty("NATServiceAddress", {
-			reader >> m_NATServiceAddress;
-		}); MatchProperty("NATServerName", {
-			reader >> m_NATServerName;
-		}); MatchProperty("NATServerPassword", {
-			reader >> m_NATServerPassword;
-		}); MatchProperty("UseExperimentalMultiplayerSpeedBoosts", {
-			reader >> m_UseExperimentalMultiplayerSpeedBoosts;
-		}); MatchProperty("ClientInputFps", {
-			reader >> g_NetworkClient.m_ClientInputFps;
-		}); MatchProperty("ServerTransmitAsBoxes", {
-			reader >> g_NetworkServer.m_TransmitAsBoxes;
-		}); MatchProperty("ServerBoxWidth", {
-			reader >> g_NetworkServer.m_BoxWidth;
-		}); MatchProperty("ServerBoxHeight", {
-			reader >> g_NetworkServer.m_BoxHeight;
-		}); MatchProperty("ServerUseHighCompression", {
-			reader >> g_NetworkServer.m_UseHighCompression;
-		}); MatchProperty("ServerUseFastCompression", {
-			reader >> g_NetworkServer.m_UseFastCompression;
-		}); MatchProperty("ServerUseDeltaCompression", {
-			reader >> g_NetworkServer.m_UseDeltaCompression;
-		}); MatchProperty("ServerHighCompressionLevel", {
-			reader >> g_NetworkServer.m_HighCompressionLevel;
-		}); MatchProperty("ServerFastAccelerationFactor", {
-			reader >> g_NetworkServer.m_FastAccelerationFactor;
-		}); MatchProperty("ServerUseInterlacing", {
-			reader >> g_NetworkServer.m_UseInterlacing;
-		}); MatchProperty("ServerEncodingFps", {
-			reader >> g_NetworkServer.m_EncodingFps;
-		}); MatchProperty("ServerSleepWhenIdle", {
-			reader >> g_NetworkServer.m_SleepWhenIdle;
-		}); MatchProperty("ServerSimSleepWhenIdle", {
-			reader >> g_NetworkServer.m_SimSleepWhenIdle;
-		}); MatchProperty("VisibleAssemblyGroup", {
-			m_VisibleAssemblyGroupsList.push_back(reader.ReadPropValue());
-		}); MatchProperty("DisableMod", {
-			m_DisabledMods.try_emplace(reader.ReadPropValue(), true);
-		}); MatchProperty("EnableGlobalScript", {
-			m_EnabledGlobalScripts.try_emplace(reader.ReadPropValue(), true);
-		}); MatchProperty("MouseSensitivity", {
-			reader >> g_UInputMan.m_MouseSensitivity;
-		}); MatchForwards("Player1Scheme") MatchForwards("Player2Scheme") MatchForwards("Player3Scheme") MatchProperty("Player4Scheme", {
+		});
+		MatchProperty("ShowForeignItems", { reader >> m_ShowForeignItems; });
+		MatchProperty("FlashOnBrainDamage", { reader >> m_FlashOnBrainDamage; });
+		MatchProperty("BlipOnRevealUnseen", { reader >> m_BlipOnRevealUnseen; });
+		MatchProperty("MaxUnheldItems", { reader >> g_MovableMan.m_MaxDroppedItems; });
+		MatchProperty("UnheldItemsHUDDisplayRange", { SetUnheldItemsHUDDisplayRange(std::stof(reader.ReadPropValue())); });
+		MatchProperty("AlwaysDisplayUnheldItemsInStrategicMode", { reader >> m_AlwaysDisplayUnheldItemsInStrategicMode; });
+		MatchProperty("SubPieMenuHoverOpenDelay", { reader >> m_SubPieMenuHoverOpenDelay; });
+		MatchProperty("EndlessMode", { reader >> m_EndlessMetaGameMode; });
+		MatchProperty("EnableCrabBombs", { reader >> m_EnableCrabBombs; });
+		MatchProperty("CrabBombThreshold", { reader >> m_CrabBombThreshold; });
+		MatchProperty("ShowEnemyHUD", { reader >> m_ShowEnemyHUD; });
+		MatchProperty("SmartBuyMenuNavigation", { reader >> m_EnableSmartBuyMenuNavigation; });
+		MatchProperty("ScrapCompactingHeight", { reader >> g_SceneMan.m_ScrapCompactingHeight; });
+		MatchProperty("AutomaticGoldDeposit", { reader >> m_AutomaticGoldDeposit; });
+		MatchProperty("ScreenShakeStrength", { reader >> g_CameraMan.m_ScreenShakeStrength; });
+		MatchProperty("ScreenShakeDecay", { reader >> g_CameraMan.m_ScreenShakeDecay; });
+		MatchProperty("MaxScreenShakeTime", { reader >> g_CameraMan.m_MaxScreenShakeTime; });
+		MatchProperty("DefaultShakePerUnitOfGibEnergy", { reader >> g_CameraMan.m_DefaultShakePerUnitOfGibEnergy; });
+		MatchProperty("DefaultShakePerUnitOfRecoilEnergy", { reader >> g_CameraMan.m_DefaultShakePerUnitOfRecoilEnergy; });
+		MatchProperty("DefaultShakeFromRecoilMaximum", { reader >> g_CameraMan.m_DefaultShakeFromRecoilMaximum; });
+		MatchProperty("LaunchIntoActivity", { reader >> g_ActivityMan.m_LaunchIntoActivity; });
+		MatchProperty("DefaultActivityType", { reader >> g_ActivityMan.m_DefaultActivityType; });
+		MatchProperty("DefaultActivityName", { reader >> g_ActivityMan.m_DefaultActivityName; });
+		MatchProperty("DefaultSceneName", { reader >> g_SceneMan.m_DefaultSceneName; });
+		MatchProperty("DisableLuaJIT", { reader >> m_DisableLuaJIT; });
+		MatchProperty("RecommendedMOIDCount", { reader >> m_RecommendedMOIDCount; });
+		MatchProperty("SimplifiedCollisionDetection", { reader >> m_SimplifiedCollisionDetection; });
+		MatchProperty("SceneBackgroundAutoScaleMode", { SetSceneBackgroundAutoScaleMode(std::stoi(reader.ReadPropValue())); });
+		MatchProperty("DisableFactionBuyMenuThemes", { reader >> m_DisableFactionBuyMenuThemes; });
+		MatchProperty("DisableFactionBuyMenuThemeCursors", { reader >> m_DisableFactionBuyMenuThemeCursors; });
+		MatchProperty("PathFinderGridNodeSize", { reader >> m_PathFinderGridNodeSize; });
+		MatchProperty("EnableMultithreadedLua", { reader >> m_EnableMultithreadedLua; });
+		MatchProperty("AIUpdateInterval", { reader >> m_AIUpdateInterval; });
+		MatchProperty("EnableParticleSettling", { reader >> g_MovableMan.m_SettlingEnabled; });
+		MatchProperty("EnableMOSubtraction", { reader >> g_MovableMan.m_MOSubtractionEnabled; });
+		MatchProperty("DeltaTime", { g_TimerMan.SetDeltaTimeSecs(std::stof(reader.ReadPropValue())); });
+		MatchProperty("RealToSimCap", { g_TimerMan.SetRealToSimCap(std::stof(reader.ReadPropValue())); });
+		MatchProperty("AllowSavingToBase", { reader >> m_AllowSavingToBase; });
+		MatchProperty("ShowMetaScenes", { reader >> m_ShowMetaScenes; });
+		MatchProperty("SkipIntro", { reader >> m_SkipIntro; });
+		MatchProperty("ShowToolTips", { reader >> m_ShowToolTips; });
+		MatchProperty("CaseSensitiveFilePaths", { System::EnableFilePathCaseSensitivity(std::stoi(reader.ReadPropValue())); });
+		MatchProperty("DisableLoadingScreenProgressReport", { reader >> m_DisableLoadingScreenProgressReport; });
+		MatchProperty("LoadingScreenProgressReportPrecision", { reader >> m_LoadingScreenProgressReportPrecision; });
+		MatchProperty("ConsoleScreenRatio", { g_ConsoleMan.SetConsoleScreenSize(std::stof(reader.ReadPropValue())); });
+		MatchProperty("ConsoleUseMonospaceFont", { reader >> g_ConsoleMan.m_ConsoleUseMonospaceFont; });
+		MatchProperty("AdvancedPerformanceStats", { reader >> g_PerformanceMan.m_AdvancedPerfStats; });
+		MatchProperty("MenuTransitionDurationMultiplier", { SetMenuTransitionDurationMultiplier(std::stof(reader.ReadPropValue())); });
+		MatchProperty("DrawAtomGroupVisualizations", { reader >> m_DrawAtomGroupVisualizations; });
+		MatchProperty("DrawHandAndFootGroupVisualizations", { reader >> m_DrawHandAndFootGroupVisualizations; });
+		MatchProperty("DrawLimbPathVisualizations", { reader >> m_DrawLimbPathVisualizations; });
+		MatchProperty("DrawRaycastVisualizations", { reader >> g_SceneMan.m_DrawRayCastVisualizations; });
+		MatchProperty("DrawPixelCheckVisualizations", { reader >> g_SceneMan.m_DrawPixelCheckVisualizations; });
+		MatchProperty("PrintDebugInfo", { reader >> m_PrintDebugInfo; });
+		MatchProperty("MeasureModuleLoadTime", { reader >> m_MeasureModuleLoadTime; });
+		MatchProperty("PlayerNetworkName", { reader >> m_PlayerNetworkName; });
+		MatchProperty("NetworkServerName", { reader >> m_NetworkServerAddress; });
+		MatchProperty("UseNATService", { reader >> g_NetworkServer.m_UseNATService; });
+		MatchProperty("NATServiceAddress", { reader >> m_NATServiceAddress; });
+		MatchProperty("NATServerName", { reader >> m_NATServerName; });
+		MatchProperty("NATServerPassword", { reader >> m_NATServerPassword; });
+		MatchProperty("UseExperimentalMultiplayerSpeedBoosts", { reader >> m_UseExperimentalMultiplayerSpeedBoosts; });
+		MatchProperty("ClientInputFps", { reader >> g_NetworkClient.m_ClientInputFps; });
+		MatchProperty("ServerTransmitAsBoxes", { reader >> g_NetworkServer.m_TransmitAsBoxes; });
+		MatchProperty("ServerBoxWidth", { reader >> g_NetworkServer.m_BoxWidth; });
+		MatchProperty("ServerBoxHeight", { reader >> g_NetworkServer.m_BoxHeight; });
+		MatchProperty("ServerUseHighCompression", { reader >> g_NetworkServer.m_UseHighCompression; });
+		MatchProperty("ServerUseFastCompression", { reader >> g_NetworkServer.m_UseFastCompression; });
+		MatchProperty("ServerUseDeltaCompression", { reader >> g_NetworkServer.m_UseDeltaCompression; });
+		MatchProperty("ServerHighCompressionLevel", { reader >> g_NetworkServer.m_HighCompressionLevel; });
+		MatchProperty("ServerFastAccelerationFactor", { reader >> g_NetworkServer.m_FastAccelerationFactor; });
+		MatchProperty("ServerUseInterlacing", { reader >> g_NetworkServer.m_UseInterlacing; });
+		MatchProperty("ServerEncodingFps", { reader >> g_NetworkServer.m_EncodingFps; });
+		MatchProperty("ServerSleepWhenIdle", { reader >> g_NetworkServer.m_SleepWhenIdle; });
+		MatchProperty("ServerSimSleepWhenIdle", { reader >> g_NetworkServer.m_SimSleepWhenIdle; });
+		MatchProperty("VisibleAssemblyGroup", { m_VisibleAssemblyGroupsList.push_back(reader.ReadPropValue()); });
+		MatchProperty("DisableMod", { m_DisabledMods.try_emplace(reader.ReadPropValue(), true); });
+		MatchProperty("EnableGlobalScript", { m_EnabledGlobalScripts.try_emplace(reader.ReadPropValue(), true); });
+		MatchProperty("MouseSensitivity", { reader >> g_UInputMan.m_MouseSensitivity; });
+		MatchForwards("Player1Scheme") MatchForwards("Player2Scheme") MatchForwards("Player3Scheme") MatchProperty("Player4Scheme", {
 			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
 				std::string playerNum = std::to_string(player + 1);
 				if (propName == "Player" + playerNum + "Scheme") {

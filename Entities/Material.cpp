@@ -67,45 +67,38 @@ namespace RTE {
 		MatchProperty("Index", {
 			// TODO: Check for index collisions here
 			reader >> m_Index;
-		}); MatchProperty("Priority", {
-			reader >> m_Priority;
-		}); MatchProperty("Piling", {
-			reader >> m_Piling;
-		}); MatchForwards("Integrity") MatchProperty("StructuralIntegrity", {
+		});
+		MatchProperty("Priority", { reader >> m_Priority; });
+		MatchProperty("Piling", { reader >> m_Piling; });
+		MatchForwards("Integrity") MatchProperty("StructuralIntegrity", {
 			reader >> m_Integrity;
 			m_Integrity = (m_Integrity == -1.0F) ? std::numeric_limits<float>::max() : m_Integrity;
-		}); MatchForwards("Restitution") MatchProperty("Bounce", {
-			reader >> m_Restitution;
-		}); MatchProperty("Friction", {
-			reader >> m_Friction;
-		}); MatchProperty("Stickiness", {
-			reader >> m_Stickiness;
-		}); MatchProperty("DensityKGPerVolumeL", {
+		});
+		MatchForwards("Restitution") MatchProperty("Bounce", { reader >> m_Restitution; });
+		MatchProperty("Friction", { reader >> m_Friction; });
+		MatchProperty("Stickiness", { reader >> m_Stickiness; });
+		MatchProperty("DensityKGPerVolumeL", {
 			reader >> m_VolumeDensity;
 			// Overrides the pixel density
 			m_PixelDensity = m_VolumeDensity * c_LPP;
-		}); MatchProperty("DensityKGPerPixel", {
+		});
+		MatchProperty("DensityKGPerPixel", {
 			reader >> m_PixelDensity;
 			// Overrides the volume density
 			m_VolumeDensity = m_PixelDensity * c_PPL;
-		}); MatchProperty("GibImpulseLimitPerVolumeL", {
-			reader >> m_GibImpulseLimitPerLiter;
-		}); MatchProperty("GibWoundLimitPerVolumeL", {
-			reader >> m_GibWoundLimitPerLiter;
-		}); MatchProperty("SettleMaterial", {
-			reader >> m_SettleMaterialIndex;
-		}); MatchForwards("SpawnMaterial") MatchProperty("TransformsInto", {
-			reader >> m_SpawnMaterialIndex;
-		}); MatchProperty("IsScrap", {
-			reader >> m_IsScrap;
-		}); MatchProperty("Color", {
-			reader >> m_Color;
-		}); MatchProperty("UseOwnColor", {
-			reader >> m_UseOwnColor;
-		}); MatchProperty("FGTextureFile", {
+		});
+		MatchProperty("GibImpulseLimitPerVolumeL", { reader >> m_GibImpulseLimitPerLiter; });
+		MatchProperty("GibWoundLimitPerVolumeL", { reader >> m_GibWoundLimitPerLiter; });
+		MatchProperty("SettleMaterial", { reader >> m_SettleMaterialIndex; });
+		MatchForwards("SpawnMaterial") MatchProperty("TransformsInto", { reader >> m_SpawnMaterialIndex; });
+		MatchProperty("IsScrap", { reader >> m_IsScrap; });
+		MatchProperty("Color", { reader >> m_Color; });
+		MatchProperty("UseOwnColor", { reader >> m_UseOwnColor; });
+		MatchProperty("FGTextureFile", {
 			reader >> m_FGTextureFile;
 			m_TerrainFGTexture = m_FGTextureFile.GetAsBitmap();
-		}); MatchProperty("BGTextureFile", {
+		});
+		MatchProperty("BGTextureFile", {
 			reader >> m_BGTextureFile;
 			m_TerrainBGTexture = m_BGTextureFile.GetAsBitmap();
 		});

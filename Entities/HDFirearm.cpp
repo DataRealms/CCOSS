@@ -179,93 +179,83 @@ int HDFirearm::Create(const HDFirearm &reference) {
 int HDFirearm::ReadProperty(const std::string_view &propName, Reader &reader) {
     StartPropertyList(return HeldDevice::ReadProperty(propName, reader));
     
-    MatchProperty("Magazine", {
-        SetMagazine(dynamic_cast<Magazine *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchProperty("Flash", {
-        SetFlash(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchProperty("PreFireSound", {
+    MatchProperty("Magazine", { SetMagazine(dynamic_cast<Magazine *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("Flash", { SetFlash(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("PreFireSound", {
 		m_PreFireSound = new SoundContainer;
 		reader >> m_PreFireSound;
-	}); MatchProperty("FireSound", {
+	});
+	MatchProperty("FireSound", {
 		m_FireSound = new SoundContainer;
 		reader >> m_FireSound;
-	}); MatchProperty("FireEchoSound", {
+	});
+	MatchProperty("FireEchoSound", {
 		m_FireEchoSound = new SoundContainer;
 		reader >> m_FireEchoSound;
 		m_FireEchoSound->SetSoundOverlapMode(SoundContainer::SoundOverlapMode::RESTART);
-    }); MatchProperty("ActiveSound", {
+    });
+    MatchProperty("ActiveSound", {
 		m_ActiveSound = new SoundContainer;
 		reader >> m_ActiveSound;
-	}); MatchProperty("DeactivationSound", {
+	});
+	MatchProperty("DeactivationSound", {
 		m_DeactivationSound = new SoundContainer;
         reader >> m_DeactivationSound;
-    }); MatchProperty("EmptySound", {
+    });
+    MatchProperty("EmptySound", {
 		m_EmptySound = new SoundContainer;
 		reader >> m_EmptySound;
-	}); MatchProperty("ReloadStartSound", {
+	});
+	MatchProperty("ReloadStartSound", {
 		m_ReloadStartSound = new SoundContainer;
 		reader >> m_ReloadStartSound;
-	}); MatchProperty("ReloadEndSound", {
+	});
+	MatchProperty("ReloadEndSound", {
 		m_ReloadEndSound = new SoundContainer;
 		reader >> m_ReloadEndSound;
-    }); MatchProperty("ReloadEndOffset", {
-        reader >> m_ReloadEndOffset;
-	}); MatchProperty("RateOfFire", {
-        reader >> m_RateOfFire;
-    }); MatchProperty("ActivationDelay", {
-        reader >> m_ActivationDelay;
-    }); MatchProperty("DeactivationDelay", {
-        reader >> m_DeactivationDelay;
-	}); MatchForwards("BaseReloadTime") MatchProperty("ReloadTime", {
-		reader >> m_BaseReloadTime;
-    }); MatchProperty("FullAuto", {
-        reader >> m_FullAuto;
-    }); MatchProperty("FireIgnoresThis", {
-        reader >> m_FireIgnoresThis;
-    }); MatchProperty("Reloadable", {
-        reader >> m_Reloadable;
-	}); MatchProperty("DualReloadable", {
-		reader >> m_DualReloadable;
-	}); MatchProperty("OneHandedReloadTimeMultiplier", {
-		reader >> m_OneHandedReloadTimeMultiplier;
-	}); MatchProperty("ReloadAngle", {
-		reader >> m_ReloadAngle;
-	}); MatchProperty("OneHandedReloadAngle", {
-		reader >> m_OneHandedReloadAngle;
-    }); MatchProperty("RecoilTransmission", {
-        reader >> m_JointStiffness;
-    }); MatchProperty("IsAnimatedManually", {
-		reader >> m_IsAnimatedManually;
-    }); MatchProperty("ShakeRange", {
+    });
+    MatchProperty("ReloadEndOffset", { reader >> m_ReloadEndOffset; });
+	MatchProperty("RateOfFire", { reader >> m_RateOfFire; });
+    MatchProperty("ActivationDelay", { reader >> m_ActivationDelay; });
+    MatchProperty("DeactivationDelay", { reader >> m_DeactivationDelay; });
+	MatchForwards("BaseReloadTime") MatchProperty("ReloadTime", { reader >> m_BaseReloadTime; });
+    MatchProperty("FullAuto", { reader >> m_FullAuto; });
+    MatchProperty("FireIgnoresThis", { reader >> m_FireIgnoresThis; });
+    MatchProperty("Reloadable", { reader >> m_Reloadable; });
+	MatchProperty("DualReloadable", { reader >> m_DualReloadable; });
+	MatchProperty("OneHandedReloadTimeMultiplier", { reader >> m_OneHandedReloadTimeMultiplier; });
+	MatchProperty("ReloadAngle", { reader >> m_ReloadAngle; });
+	MatchProperty("OneHandedReloadAngle", { reader >> m_OneHandedReloadAngle; });
+    MatchProperty("RecoilTransmission", { reader >> m_JointStiffness; });
+    MatchProperty("IsAnimatedManually", { reader >> m_IsAnimatedManually; });
+    MatchProperty("ShakeRange", {
         reader >> m_ShakeRange;
         m_ShakeRange /= 2;
-    }); MatchProperty("SharpShakeRange", {
+    });
+    MatchProperty("SharpShakeRange", {
         reader >> m_SharpShakeRange;
         m_SharpShakeRange /= 2;
-    }); MatchProperty("NoSupportFactor", {
-        reader >> m_NoSupportFactor;
-    }); MatchProperty("ParticleSpreadRange", {
+    });
+    MatchProperty("NoSupportFactor", { reader >> m_NoSupportFactor; });
+    MatchProperty("ParticleSpreadRange", {
         reader >> m_ParticleSpreadRange;
         m_ParticleSpreadRange /= 2;
-	}); MatchProperty("ShellEjectAngle", {
-		reader >> m_ShellEjectAngle;
-    }); MatchProperty("ShellSpreadRange", {
+	});
+	MatchProperty("ShellEjectAngle", { reader >> m_ShellEjectAngle; });
+    MatchProperty("ShellSpreadRange", {
         reader >> m_ShellSpreadRange;
         m_ShellSpreadRange /= 2;
-    }); MatchProperty("ShellAngVelRange", {
+    });
+    MatchProperty("ShellAngVelRange", {
         reader >> m_ShellAngVelRange;
         m_ShellAngVelRange /= 2;
-	}); MatchProperty("ShellVelVariation", {
-		reader >> m_ShellVelVariation;
-    }); MatchProperty("RecoilScreenShakeAmount", {
-		reader >> m_RecoilScreenShakeAmount;
-    }); MatchProperty("MuzzleOffset", {
-        reader >> m_MuzzleOff;
-	}); MatchProperty("EjectionOffset", {
-		reader >> m_EjectOff;
-	}); MatchProperty("LegacyCompatibilityRoundsAlwaysFireUnflipped", {
-		reader >> m_LegacyCompatibilityRoundsAlwaysFireUnflipped;
-    });
+	});
+	MatchProperty("ShellVelVariation", { reader >> m_ShellVelVariation; });
+    MatchProperty("RecoilScreenShakeAmount", { reader >> m_RecoilScreenShakeAmount; });
+    MatchProperty("MuzzleOffset", { reader >> m_MuzzleOff; });
+	MatchProperty("EjectionOffset", { reader >> m_EjectOff; });
+	MatchProperty("LegacyCompatibilityRoundsAlwaysFireUnflipped", { reader >> m_LegacyCompatibilityRoundsAlwaysFireUnflipped; });
+    
 
     EndPropertyList;
 }

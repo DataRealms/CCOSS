@@ -73,15 +73,11 @@ namespace RTE {
 			if (!m_Atom) { m_Atom = new Atom; }
 			reader >> m_Atom;
 			m_Atom->SetOwner(this);
-		}); MatchProperty("Color", {
-			reader >> m_Color;
-		}); MatchProperty("MinLethalRange", {
-			reader >> m_MinLethalRange;
-		}); MatchProperty("MaxLethalRange", {
-			reader >> m_MaxLethalRange;
-		}); MatchProperty("Staininess", {
-			reader >> m_Staininess;
 		});
+		MatchProperty("Color", { reader >> m_Color; });
+		MatchProperty("MinLethalRange", { reader >> m_MinLethalRange; });
+		MatchProperty("MaxLethalRange", { reader >> m_MaxLethalRange; });
+		MatchProperty("Staininess", { reader >> m_Staininess; });
 
 		EndPropertyList;
 	}

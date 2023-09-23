@@ -182,24 +182,13 @@ int BunkerAssembly::ReadProperty(const std::string_view &propName, Reader &reade
     StartPropertyList(return SceneObject::ReadProperty(propName, reader));
     
     // Ignore TerrainObject's specific properties, but don't let parent class process them
-	MatchProperty("FGColorFile",
-    {
-    });
-    MatchProperty("MaterialFile",
-    {
-    });
-    MatchProperty("BGColorFile",
-    {
-    });
-    MatchProperty("BitmapOffset",
-    {
-    });
-    MatchProperty("Location",
-    {
-    });
-    MatchProperty("AddChildObject",
-    {
-    });
+	MatchProperty("FGColorFile", { });
+    MatchProperty("MaterialFile", { });
+    MatchProperty("BGColorFile", { });
+    MatchProperty("BitmapOffset", { });
+    MatchProperty("Location", { });
+    MatchProperty("AddChildObject", { });
+    
     MatchProperty("SymmetricAssembly",
     {
 		reader >> m_SymmetricAssembly;
@@ -210,8 +199,7 @@ int BunkerAssembly::ReadProperty(const std::string_view &propName, Reader &reade
         if (pSO)
 			AddPlacedObject(pSO);
     });
-    MatchProperty("ParentScheme",
-    {
+    MatchProperty("ParentScheme", {
 		//Add to group like Entity::ReadProperty does
         std::string parentScheme;
         reader >> parentScheme;

@@ -66,9 +66,9 @@ namespace RTE {
 			float degAngle;
 			reader >> degAngle;
 			SetDegAngle(degAngle);
-		}); MatchProperty("AngleRadians", {
-			reader >> m_Rotation;
 		});
+		MatchProperty("AngleRadians", { reader >> m_Rotation; });
+		
 		
 		EndPropertyList;
 	}

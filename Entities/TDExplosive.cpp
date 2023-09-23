@@ -42,9 +42,8 @@ namespace RTE {
 		MatchProperty("DetonationSound", {
 			if (!m_GibSound) { m_GibSound = new SoundContainer; }
 			reader >> m_GibSound;
-		}); MatchProperty("IsAnimatedManually", {
-			reader >> m_IsAnimatedManually;
 		});
+		MatchProperty("IsAnimatedManually", { reader >> m_IsAnimatedManually; });
 
 		EndPropertyList;
 	}

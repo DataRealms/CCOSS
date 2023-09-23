@@ -63,17 +63,15 @@ namespace RTE {
 	int SoundContainer::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Entity::ReadProperty(propName, reader));
 		
-		MatchProperty("SpecialBehaviour_TopLevelSoundSet", {
-			reader >> m_TopLevelSoundSet;
-		}); MatchProperty("AddSound", {
-			m_TopLevelSoundSet.AddSoundData(SoundSet::ReadAndGetSoundData(reader));
-		}); MatchProperty("AddSoundSet", {
+		MatchProperty("SpecialBehaviour_TopLevelSoundSet", { reader >> m_TopLevelSoundSet; });
+		MatchProperty("AddSound", { m_TopLevelSoundSet.AddSoundData(SoundSet::ReadAndGetSoundData(reader)); });
+		MatchProperty("AddSoundSet", {
 			SoundSet soundSetToAdd;
 			reader >> soundSetToAdd;
 			m_TopLevelSoundSet.AddSoundSet(soundSetToAdd);
-		}); MatchForwards("SoundSelectionCycleMode") MatchProperty("CycleMode", {
-			m_TopLevelSoundSet.SetSoundSelectionCycleMode(SoundSet::ReadSoundSelectionCycleMode(reader));
-		}); MatchProperty("SoundOverlapMode", {
+		});
+		MatchForwards("SoundSelectionCycleMode") MatchProperty("CycleMode", { m_TopLevelSoundSet.SetSoundSelectionCycleMode(SoundSet::ReadSoundSelectionCycleMode(reader)); });
+		MatchProperty("SoundOverlapMode", {
 			std::string soundOverlapModeString = reader.ReadPropValue();
 			if (c_SoundOverlapModeMap.find(soundOverlapModeString) != c_SoundOverlapModeMap.end()) {
 				m_SoundOverlapMode = c_SoundOverlapModeMap.find(soundOverlapModeString)->second;
@@ -84,26 +82,19 @@ namespace RTE {
 					reader.ReportError("Cycle mode " + soundOverlapModeString + " is invalid.");
 				}
 			}
-		}); MatchProperty("Immobile", {
-			reader >> m_Immobile;
-		}); MatchProperty("AttenuationStartDistance", {
-			reader >> m_AttenuationStartDistance;
-		}); MatchProperty("LoopSetting", {
-			reader >> m_Loops;
-		}); MatchProperty("Priority", {
+		});
+		MatchProperty("Immobile", { reader >> m_Immobile; });
+		MatchProperty("AttenuationStartDistance", { reader >> m_AttenuationStartDistance; });
+		MatchProperty("LoopSetting", { reader >> m_Loops; });
+		MatchProperty("Priority", {
 			reader >> m_Priority;
 			if (m_Priority < 0 || m_Priority > 256) { reader.ReportError("SoundContainer priority must be between 256 (lowest priority) and 0 (highest priority)."); }
-		}); MatchProperty("AffectedByGlobalPitch", {
-			reader >> m_AffectedByGlobalPitch;
-		}); MatchProperty("Position", {
-			reader >> m_Pos;
-		}); MatchProperty("Volume", {
-			reader >> m_Volume;
-		}); MatchProperty("Pitch", {
-			reader >> m_Pitch;
-		}); MatchProperty("PitchVariation", {
-			reader >> m_PitchVariation;
 		});
+		MatchProperty("AffectedByGlobalPitch", { reader >> m_AffectedByGlobalPitch; });
+		MatchProperty("Position", { reader >> m_Pos; });
+		MatchProperty("Volume", { reader >> m_Volume; });
+		MatchProperty("Pitch", { reader >> m_Pitch; });
+		MatchProperty("PitchVariation", { reader >> m_PitchVariation; });
 
 		EndPropertyList;
 	}

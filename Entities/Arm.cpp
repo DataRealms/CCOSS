@@ -91,22 +91,16 @@ namespace RTE {
 	int Arm::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Attachable::ReadProperty(propName, reader));
 		
-		MatchProperty("MaxLength", {
-			reader >> m_MaxLength;
-		}); MatchProperty("MoveSpeed", {
-			reader >> m_MoveSpeed;
-		}); MatchForwards("HandIdleOffset") MatchProperty("IdleOffset", {
-			reader >> m_HandIdleOffset;
-		}); MatchForwards("HandSprite") MatchProperty("Hand", {
+		MatchProperty("MaxLength", { reader >> m_MaxLength; });
+		MatchProperty("MoveSpeed", { reader >> m_MoveSpeed; });
+		MatchForwards("HandIdleOffset") MatchProperty("IdleOffset", { reader >> m_HandIdleOffset; });
+		MatchForwards("HandSprite") MatchProperty("Hand", {
 			reader >> m_HandSpriteFile;
 			m_HandSpriteBitmap = m_HandSpriteFile.GetAsBitmap();
-		}); MatchProperty("GripStrength", {
-			reader >> m_GripStrength;
-		}); MatchProperty("ThrowStrength", {
-			reader >> m_ThrowStrength;
-		}); MatchProperty("HeldDevice", {
-			SetHeldDevice(dynamic_cast<HeldDevice *>(g_PresetMan.ReadReflectedPreset(reader)));
 		});
+		MatchProperty("GripStrength", { reader >> m_GripStrength; });
+		MatchProperty("ThrowStrength", { reader >> m_ThrowStrength; });
+		MatchProperty("HeldDevice", { SetHeldDevice(dynamic_cast<HeldDevice *>(g_PresetMan.ReadReflectedPreset(reader))); });
 
 		EndPropertyList;
 	}

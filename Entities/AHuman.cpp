@@ -243,31 +243,19 @@ int AHuman::Create(const AHuman &reference) {
 int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
     StartPropertyList(return Actor::ReadProperty(propName, reader));
     
-    MatchProperty("ThrowPrepTime", {
-        reader >> m_ThrowPrepTime;
-    }); MatchProperty("Head", {
-        SetHead(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-	}); MatchProperty("LookToAimRatio", {
-		reader >> m_LookToAimRatio;
-    }); MatchProperty("Jetpack", {
-        SetJetpack(dynamic_cast<AEJetpack *>(g_PresetMan.ReadReflectedPreset(reader)));
-	}); MatchProperty("FGArmFlailScalar", {
-		reader >> m_FGArmFlailScalar;
-	}); MatchProperty("BGArmFlailScalar", {
-		reader >> m_BGArmFlailScalar;
-	}); MatchProperty("ArmSwingRate", {
-		reader >> m_ArmSwingRate;
-	}); MatchProperty("DeviceArmSwayRate", {
-		reader >> m_DeviceArmSwayRate;
-    }); MatchProperty("FGArm", {
-        SetFGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchProperty("BGArm", {
-        SetBGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchProperty("FGLeg", {
-        SetFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchProperty("BGLeg", {
-        SetBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchProperty("HandGroup", {
+    MatchProperty("ThrowPrepTime", { reader >> m_ThrowPrepTime; });
+    MatchProperty("Head", { SetHead(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader))); });
+	MatchProperty("LookToAimRatio", { reader >> m_LookToAimRatio; });
+    MatchProperty("Jetpack", { SetJetpack(dynamic_cast<AEJetpack *>(g_PresetMan.ReadReflectedPreset(reader))); });
+	MatchProperty("FGArmFlailScalar", { reader >> m_FGArmFlailScalar; });
+	MatchProperty("BGArmFlailScalar", { reader >> m_BGArmFlailScalar; });
+	MatchProperty("ArmSwingRate", { reader >> m_ArmSwingRate; });
+	MatchProperty("DeviceArmSwayRate", { reader >> m_DeviceArmSwayRate; });
+    MatchProperty("FGArm", { SetFGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("BGArm", { SetBGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("FGLeg", { SetFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("BGLeg", { SetBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("HandGroup", {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;
         m_pFGHandGroup = new AtomGroup();
@@ -276,52 +264,42 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
         m_pBGHandGroup->Create(*m_pFGHandGroup);
         m_pFGHandGroup->SetOwner(this);
         m_pBGHandGroup->SetOwner(this);
-    }); MatchProperty("FGFootGroup", {
+    });
+    MatchProperty("FGFootGroup", {
         delete m_pFGFootGroup;
         m_pFGFootGroup = new AtomGroup();
         reader >> m_pFGFootGroup;
         m_pFGFootGroup->SetOwner(this);
         m_BackupFGFootGroup = new AtomGroup(*m_pFGFootGroup);
         m_BackupFGFootGroup->RemoveAllAtoms();
-    }); MatchProperty("BGFootGroup", {
+    });
+    MatchProperty("BGFootGroup", {
         delete m_pBGFootGroup;
         m_pBGFootGroup = new AtomGroup();
         reader >> m_pBGFootGroup;
         m_pBGFootGroup->SetOwner(this);
         m_BackupBGFootGroup = new AtomGroup(*m_pBGFootGroup);
         m_BackupBGFootGroup->RemoveAllAtoms();
-    }); MatchProperty("StrideSound", {
+    });
+    MatchProperty("StrideSound", {
 		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;
-    }); MatchProperty("StandLimbPath", {
-        reader >> m_Paths[FGROUND][STAND];
-    }); MatchProperty("StandLimbPathBG", {
-        reader >> m_Paths[BGROUND][STAND];
-    }); MatchProperty("WalkLimbPath", {
-        reader >> m_Paths[FGROUND][WALK];
-    }); MatchProperty("CrouchLimbPath", {
-        reader >> m_Paths[FGROUND][CROUCH];
-    }); MatchProperty("CrouchLimbPathBG", {
-        reader >> m_Paths[BGROUND][CROUCH];
-    }); MatchProperty("CrawlLimbPath", {
-        reader >> m_Paths[FGROUND][CRAWL];
-    }); MatchProperty("ArmCrawlLimbPath", {
-        reader >> m_Paths[FGROUND][ARMCRAWL];
-    }); MatchProperty("ClimbLimbPath", {
-        reader >> m_Paths[FGROUND][CLIMB];
-    }); MatchProperty("JumpLimbPath", {
-        reader >> m_Paths[FGROUND][JUMP];
-    }); MatchProperty("DislodgeLimbPath", {
-        reader >> m_Paths[FGROUND][DISLODGE];
-    }); MatchProperty("StandRotAngleTarget", {
-        reader >> m_RotAngleTargets[STAND];
-    }); MatchProperty("WalkRotAngleTarget", {
-        reader >> m_RotAngleTargets[WALK];
-    }); MatchProperty("CrouchRotAngleTarget", {
-        reader >> m_RotAngleTargets[CROUCH];
-    }); MatchProperty("JumpRotAngleTarget", {
-        reader >> m_RotAngleTargets[JUMP];
     });
+    MatchProperty("StandLimbPath", { reader >> m_Paths[FGROUND][STAND]; });
+    MatchProperty("StandLimbPathBG", { reader >> m_Paths[BGROUND][STAND]; });
+    MatchProperty("WalkLimbPath", { reader >> m_Paths[FGROUND][WALK]; });
+    MatchProperty("CrouchLimbPath", { reader >> m_Paths[FGROUND][CROUCH]; });
+    MatchProperty("CrouchLimbPathBG", { reader >> m_Paths[BGROUND][CROUCH]; });
+    MatchProperty("CrawlLimbPath", { reader >> m_Paths[FGROUND][CRAWL]; });
+    MatchProperty("ArmCrawlLimbPath", { reader >> m_Paths[FGROUND][ARMCRAWL]; });
+    MatchProperty("ClimbLimbPath", { reader >> m_Paths[FGROUND][CLIMB]; });
+    MatchProperty("JumpLimbPath", { reader >> m_Paths[FGROUND][JUMP]; });
+    MatchProperty("DislodgeLimbPath", { reader >> m_Paths[FGROUND][DISLODGE]; });
+    MatchProperty("StandRotAngleTarget", { reader >> m_RotAngleTargets[STAND]; });
+    MatchProperty("WalkRotAngleTarget", { reader >> m_RotAngleTargets[WALK]; });
+    MatchProperty("CrouchRotAngleTarget", { reader >> m_RotAngleTargets[CROUCH]; });
+    MatchProperty("JumpRotAngleTarget", { reader >> m_RotAngleTargets[JUMP]; });
+    
 
     EndPropertyList;
 }

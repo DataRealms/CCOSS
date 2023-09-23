@@ -62,13 +62,10 @@ namespace RTE {
 	int Box::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Serializable::ReadProperty(propName, reader));
 		
-		MatchProperty("Corner", {
-			reader >> m_Corner;
-		}); MatchProperty("Width", {
-			reader >> m_Width;
-		}); MatchProperty("Height", {
-			reader >> m_Height;
-		});
+		MatchProperty("Corner", { reader >> m_Corner; });
+		MatchProperty("Width", { reader >> m_Width; });
+		MatchProperty("Height", { reader >> m_Height; });
+		
 		
 		EndPropertyList;
 	}

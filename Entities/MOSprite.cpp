@@ -167,16 +167,16 @@ int MOSprite::Create(const MOSprite &reference)
 int MOSprite::ReadProperty(const std::string_view &propName, Reader &reader) {
 	StartPropertyList(return MovableObject::ReadProperty(propName, reader));
     
-    MatchProperty("SpriteFile", {
-		reader >> m_SpriteFile;
-	}); MatchProperty("IconFile", {
+    MatchProperty("SpriteFile", { reader >> m_SpriteFile; });
+	MatchProperty("IconFile", {
 		reader >> m_IconFile;
 		m_GraphicalIcon = m_IconFile.GetAsBitmap();
-	}); MatchProperty("FrameCount", {
+	});
+	MatchProperty("FrameCount", {
 		reader >> m_FrameCount;
 		m_aSprite.reserve(m_FrameCount);
-	}); MatchProperty("SpriteOffset",
-        reader >> m_SpriteOffset; );
+	});
+	MatchProperty("SpriteOffset", { reader >> m_SpriteOffset; });
     MatchProperty("SpriteAnimMode",
     {
 //        string mode;
@@ -197,20 +197,13 @@ int MOSprite::ReadProperty(const std::string_view &propName, Reader &reader) {
             Abort
 */
     });
-    MatchProperty("SpriteAnimDuration",
-        reader >> m_SpriteAnimDuration; );
-    MatchProperty("HFlipped",
-        reader >> m_HFlipped; );
-    MatchProperty("Rotation",
-        reader >> m_Rotation; );
-    MatchProperty("AngularVel",
-        reader >> m_AngularVel; );
-    MatchProperty("SettleMaterialDisabled",
-        reader >> m_SettleMaterialDisabled; );
-    MatchProperty("EntryWound",
-        m_pEntryWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader)); );
-    MatchProperty("ExitWound",
-        m_pExitWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader)); );
+    MatchProperty("SpriteAnimDuration", { reader >> m_SpriteAnimDuration; });
+    MatchProperty("HFlipped", { reader >> m_HFlipped; });
+    MatchProperty("Rotation", { reader >> m_Rotation; });
+    MatchProperty("AngularVel", { reader >> m_AngularVel; });
+    MatchProperty("SettleMaterialDisabled", { reader >> m_SettleMaterialDisabled; });
+    MatchProperty("EntryWound", { m_pEntryWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader)); });
+    MatchProperty("ExitWound", { m_pExitWound = dynamic_cast<const AEmitter *>(g_PresetMan.GetEntityPreset(reader)); });
 
     EndPropertyList;
 }

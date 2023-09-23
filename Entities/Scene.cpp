@@ -112,8 +112,7 @@ int Scene::Area::ReadProperty(const std::string_view &propName, Reader &reader)
         Box box;
         reader >> box;
         m_BoxList.push_back(box); );
-    MatchProperty("Name",
-        reader >> m_Name; );
+    MatchProperty("Name", { reader >> m_Name; });
 
     EndPropertyList;
 }
@@ -1183,50 +1182,28 @@ int Scene::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     StartPropertyList(return Entity::ReadProperty(propName, reader));
     
-    MatchProperty("LocationOnPlanet",
-        reader >> m_Location; );
-    MatchProperty("MetagamePlayable",
-        reader >> m_MetagamePlayable; );
-    MatchProperty("Revealed",
-        reader >> m_Revealed; );
-    MatchProperty("MetasceneParent",
-        reader >> m_MetasceneParent; );
-    MatchProperty("MetagameInternal",
-        reader >> m_IsMetagameInternal; );
-    MatchProperty("ScriptSave",
-        reader >> m_IsSavedGameInternal; );
-    MatchProperty("OwnedByTeam",
-        reader >> m_OwnedByTeam; );
-    MatchProperty("RoundIncome",
-        reader >> m_RoundIncome; );
-    MatchProperty("P1ResidentBrain",
-        m_ResidentBrains[Players::PlayerOne] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); )
-    MatchProperty("P2ResidentBrain",
-        m_ResidentBrains[Players::PlayerTwo] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); )
-    MatchProperty("P3ResidentBrain",
-        m_ResidentBrains[Players::PlayerThree] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); )
-    MatchProperty("P4ResidentBrain",
-        m_ResidentBrains[Players::PlayerFour] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); )
-    MatchProperty("P1BuildBudget",
-        reader >> m_BuildBudget[Players::PlayerOne]; );
-    MatchProperty("P2BuildBudget",
-        reader >> m_BuildBudget[Players::PlayerTwo]; );
-    MatchProperty("P3BuildBudget",
-        reader >> m_BuildBudget[Players::PlayerThree]; );
-    MatchProperty("P4BuildBudget",
-        reader >> m_BuildBudget[Players::PlayerFour]; );
-    MatchProperty("P1BuildBudgetRatio",
-        reader >> m_BuildBudgetRatio[Players::PlayerOne]; );
-    MatchProperty("P2BuildBudgetRatio",
-        reader >> m_BuildBudgetRatio[Players::PlayerTwo]; );
-    MatchProperty("P3BuildBudgetRatio",
-        reader >> m_BuildBudgetRatio[Players::PlayerThree]; );
-    MatchProperty("P4BuildBudgetRatio",
-        reader >> m_BuildBudgetRatio[Players::PlayerFour]; );
-    MatchProperty("AutoDesigned",
-        reader >> m_AutoDesigned; );
-    MatchProperty("TotalInvestment",
-        reader >> m_TotalInvestment; );
+    MatchProperty("LocationOnPlanet", { reader >> m_Location; });
+    MatchProperty("MetagamePlayable", { reader >> m_MetagamePlayable; });
+    MatchProperty("Revealed", { reader >> m_Revealed; });
+    MatchProperty("MetasceneParent", { reader >> m_MetasceneParent; });
+    MatchProperty("MetagameInternal", { reader >> m_IsMetagameInternal; });
+    MatchProperty("ScriptSave", { reader >> m_IsSavedGameInternal; });
+    MatchProperty("OwnedByTeam", { reader >> m_OwnedByTeam; });
+    MatchProperty("RoundIncome", { reader >> m_RoundIncome; });
+    MatchProperty("P1ResidentBrain", { m_ResidentBrains[Players::PlayerOne] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); });
+    MatchProperty("P2ResidentBrain", { m_ResidentBrains[Players::PlayerTwo] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); });
+    MatchProperty("P3ResidentBrain", { m_ResidentBrains[Players::PlayerThree] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); });
+    MatchProperty("P4ResidentBrain", { m_ResidentBrains[Players::PlayerFour] = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader)); });
+    MatchProperty("P1BuildBudget", { reader >> m_BuildBudget[Players::PlayerOne]; });
+    MatchProperty("P2BuildBudget", { reader >> m_BuildBudget[Players::PlayerTwo]; });
+    MatchProperty("P3BuildBudget", { reader >> m_BuildBudget[Players::PlayerThree]; });
+    MatchProperty("P4BuildBudget", { reader >> m_BuildBudget[Players::PlayerFour]; });
+    MatchProperty("P1BuildBudgetRatio", { reader >> m_BuildBudgetRatio[Players::PlayerOne]; });
+    MatchProperty("P2BuildBudgetRatio", { reader >> m_BuildBudgetRatio[Players::PlayerTwo]; });
+    MatchProperty("P3BuildBudgetRatio", { reader >> m_BuildBudgetRatio[Players::PlayerThree]; });
+    MatchProperty("P4BuildBudgetRatio", { reader >> m_BuildBudgetRatio[Players::PlayerFour]; });
+    MatchProperty("AutoDesigned", { reader >> m_AutoDesigned; });
+    MatchProperty("TotalInvestment", { reader >> m_TotalInvestment; });
     MatchProperty("PreviewBitmapFile",
         reader >> m_PreviewBitmapFile;
 		m_pPreviewBitmap = m_PreviewBitmapFile.GetAsBitmap(COLORCONV_NONE, false); );
@@ -1280,21 +1257,16 @@ int Scene::ReadProperty(const std::string_view &propName, Reader &reader)
     MatchProperty("UnseenLayerTeam4",
         delete m_apUnseenLayer[Activity::TeamFour];
         m_apUnseenLayer[Activity::TeamFour] = dynamic_cast<SceneLayer *>(g_PresetMan.ReadReflectedPreset(reader)); );
-    MatchProperty("ScanScheduledTeam1",
-        reader >> m_ScanScheduled[Activity::TeamOne]; );
-    MatchProperty("ScanScheduledTeam2",
-        reader >> m_ScanScheduled[Activity::TeamTwo]; );
-    MatchProperty("ScanScheduledTeam3",
-        reader >> m_ScanScheduled[Activity::TeamThree]; );
-    MatchProperty("ScanScheduledTeam4",
-        reader >> m_ScanScheduled[Activity::TeamFour]; );
+    MatchProperty("ScanScheduledTeam1", { reader >> m_ScanScheduled[Activity::TeamOne]; });
+    MatchProperty("ScanScheduledTeam2", { reader >> m_ScanScheduled[Activity::TeamTwo]; });
+    MatchProperty("ScanScheduledTeam3", { reader >> m_ScanScheduled[Activity::TeamThree]; });
+    MatchProperty("ScanScheduledTeam4", { reader >> m_ScanScheduled[Activity::TeamFour]; });
     MatchProperty("AddArea",
         Area area;
         reader >> area;
         // This replaces any existing ones
         SetArea(area); );
-    MatchProperty("GlobalAcceleration",
-        reader >> m_GlobalAcc; );
+    MatchProperty("GlobalAcceleration", { reader >> m_GlobalAcc; });
 
     EndPropertyList;
 }

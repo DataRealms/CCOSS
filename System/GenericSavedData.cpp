@@ -14,13 +14,9 @@ namespace RTE {
 	int GenericSavedData::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Serializable::ReadProperty(propName, reader));
 		
-		MatchProperty("StringValues", {
-			reader >> m_SavedStrings;
-		}); MatchProperty("EncodedStringValues", {
-			reader >> m_SavedEncodedStrings;
-		}); MatchProperty("NumberValues", {
-			reader >> m_SavedNumbers;
-		});
+		MatchProperty("StringValues", { reader >> m_SavedStrings; });
+		MatchProperty("EncodedStringValues", { reader >> m_SavedEncodedStrings; });
+		MatchProperty("NumberValues", { reader >> m_SavedNumbers; });
 
 		EndPropertyList;
 	}

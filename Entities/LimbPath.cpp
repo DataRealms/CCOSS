@@ -152,38 +152,33 @@ int LimbPath::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     StartPropertyList(Entity::ReadProperty(propName, reader));
     
-    MatchProperty("StartOffset",
-        reader >> m_Start; );
-    MatchProperty("StartSegCount",
-        reader >> m_StartSegCount; );
+    MatchProperty("StartOffset", { reader >> m_Start; });
+    MatchProperty("StartSegCount", { reader >> m_StartSegCount; });
     MatchProperty("AddSegment",
     {
         Vector segment;
         reader >> segment;
         m_Segments.push_back(segment);
         m_TotalLength += segment.GetMagnitude();
-        if (m_Segments.size() >= m_StartSegCount)
+        if (m_Segments.size() >= m_StartSegCount) {
             m_RegularLength += segment.GetMagnitude();
-    }); MatchProperty("EndSegCount", {
-        reader >> m_FootCollisionsDisabledSegment;
+        }
     });
-	MatchProperty("SlowTravelSpeed",
-	{
+    MatchProperty("EndSegCount", { reader >> m_FootCollisionsDisabledSegment; });
+    
+	MatchProperty("SlowTravelSpeed", {
 		reader >> m_TravelSpeed[SLOW];
 		//m_TravelSpeed[SLOW] = m_TravelSpeed[SLOW] * 2;
 	});
-	MatchProperty("NormalTravelSpeed",
-	{
+	MatchProperty("NormalTravelSpeed", {	
 		reader >> m_TravelSpeed[NORMAL];
 		//m_TravelSpeed[NORMAL] = m_TravelSpeed[NORMAL] * 2;
 	});
-	MatchProperty("FastTravelSpeed",
-	{
+	MatchProperty("FastTravelSpeed", {
 		reader >> m_TravelSpeed[FAST];
 		//m_TravelSpeed[FAST] = m_TravelSpeed[FAST] * 2;
 	});
-	MatchProperty("PushForce",
-	{
+	MatchProperty("PushForce", {
 		reader >> m_PushForce;
 		//m_PushForce = m_PushForce / 1.5;
 	});

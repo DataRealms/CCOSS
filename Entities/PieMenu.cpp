@@ -185,21 +185,15 @@ namespace RTE {
 					reader.ReportError("IconSeparatorMode " + iconSeparatorModeString + " is invalid.");
 				}
 			}
-		}); MatchProperty("FullInnerRadius", {
-			reader >> m_FullInnerRadius;
-		}); MatchProperty("BackgroundThickness", {
-			reader >> m_BackgroundThickness;
-		}); MatchProperty("BackgroundSeparatorSize", {
-			reader >> m_BackgroundSeparatorSize;
-		}); MatchProperty("DrawBackgroundTransparent", {
-			reader >> m_DrawBackgroundTransparent;
-		}); MatchProperty("BackgroundColor", {
-			reader >> m_BackgroundColor;
-		}); MatchProperty("BackgroundBorderColor", {
-			reader >> m_BackgroundBorderColor;
-		}); MatchProperty("SelectedItemBackgroundColor", {
-			reader >> m_SelectedItemBackgroundColor;
-		}); MatchProperty("AddPieSlice", {
+		});
+		MatchProperty("FullInnerRadius", { reader >> m_FullInnerRadius; });
+		MatchProperty("BackgroundThickness", { reader >> m_BackgroundThickness; });
+		MatchProperty("BackgroundSeparatorSize", { reader >> m_BackgroundSeparatorSize; });
+		MatchProperty("DrawBackgroundTransparent", { reader >> m_DrawBackgroundTransparent; });
+		MatchProperty("BackgroundColor", { reader >> m_BackgroundColor; });
+		MatchProperty("BackgroundBorderColor", { reader >> m_BackgroundBorderColor; });
+		MatchProperty("SelectedItemBackgroundColor", { reader >> m_SelectedItemBackgroundColor; });
+		MatchProperty("AddPieSlice", {
 			if (m_CurrentPieSlices.size() == 4 * PieQuadrant::c_PieQuadrantSlotCount) {
 				reader.ReportError("Pie menus cannot have more than " + std::to_string(4 * PieQuadrant::c_PieQuadrantSlotCount) + " slices. Use sub-pie menus to better organize your pie slices.");
 			}

@@ -63,21 +63,26 @@ namespace RTE {
 		MatchProperty("FGColorFile", {
 			reader >> m_FGColorFile;
 			m_FGColorBitmap = m_FGColorFile.GetAsBitmap();
-		}); MatchProperty("BGColorFile", {
+		});
+		MatchProperty("BGColorFile", {
 			reader >> m_BGColorFile;
 			m_BGColorBitmap = m_BGColorFile.GetAsBitmap();
-		}); MatchProperty("MaterialFile", {
+		});
+		MatchProperty("MaterialFile", {
 			reader >> m_MaterialFile;
 			m_MaterialBitmap = m_MaterialFile.GetAsBitmap();
-		}); MatchProperty("BitmapOffset", {
+		});
+		MatchProperty("BitmapOffset", {
 			reader >> m_BitmapOffset;
 			m_OffsetDefined = true;
-		}); MatchProperty("AddChildObject", {
+		});
+		MatchProperty("AddChildObject", {
 			SceneObject::SOPlacer newChildObject;
 			reader >> newChildObject;
 			newChildObject.SetTeam(m_Team);
 			m_ChildObjects.emplace_back(newChildObject);
-		}); MatchProperty("ClearChildObjects", {
+		});
+		MatchProperty("ClearChildObjects", {
 			bool clearChildObjects;
 			reader >> clearChildObjects;
 			if (clearChildObjects) {

@@ -73,29 +73,19 @@ namespace RTE {
 		MatchProperty("Particle", {
 			m_Particle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 			RTEAssert(m_Particle, "Stream suggests allocating an unallocable type in Round::Create!");
-		}); MatchProperty("ParticleCount", {
-			reader >> m_ParticleCount;
-		}); MatchProperty("FireVelocity", {
-			reader >> m_FireVel;
-		}); MatchProperty("InheritsFirerVelocity", {
-			reader >> m_InheritsFirerVelocity;
-		}); MatchProperty("Separation", {
-			reader >> m_Separation;
-		}); MatchProperty("LifeVariation", {
-			reader >> m_LifeVariation;
-		}); MatchProperty("Shell", {
-			m_Shell = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
-		}); MatchProperty("ShellVelocity", {
-			reader >> m_ShellVel;
-		}); MatchProperty("FireSound", {
-			reader >> m_FireSound;
-		}); MatchProperty("AILifeTime", {
-			reader >> m_AILifeTime;
-		}); MatchProperty("AIFireVel", {
-			reader >> m_AIFireVel;
-		}); MatchProperty("AIPenetration", {
-			reader >> m_AIPenetration;
 		});
+		MatchProperty("ParticleCount", { reader >> m_ParticleCount; });
+		MatchProperty("FireVelocity", { reader >> m_FireVel; });
+		MatchProperty("InheritsFirerVelocity", { reader >> m_InheritsFirerVelocity; });
+		MatchProperty("Separation", { reader >> m_Separation; });
+		MatchProperty("LifeVariation", { reader >> m_LifeVariation; });
+		MatchProperty("Shell", { m_Shell = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader)); });
+		MatchProperty("ShellVelocity", { reader >> m_ShellVel; });
+		MatchProperty("FireSound", { reader >> m_FireSound; });
+		MatchProperty("AILifeTime", { reader >> m_AILifeTime; });
+		MatchProperty("AIFireVel", { reader >> m_AIFireVel; });
+		MatchProperty("AIPenetration", { reader >> m_AIPenetration; });
+		
 		
 		EndPropertyList;
 	}

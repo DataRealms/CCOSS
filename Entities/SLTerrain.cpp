@@ -77,23 +77,26 @@ namespace RTE {
 	int SLTerrain::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return SceneLayer::ReadProperty(propName, reader));
 		
-		MatchProperty("BackgroundTexture", {
-			reader >> m_DefaultBGTextureFile;
-		}); MatchProperty("FGColorLayer", {
+		MatchProperty("BackgroundTexture", { reader >> m_DefaultBGTextureFile; });
+		MatchProperty("FGColorLayer", {
 			m_FGColorLayer = std::make_unique<SceneLayer>();
 			reader >> m_FGColorLayer.get();
-		}); MatchProperty("BGColorLayer", {
+		});
+		MatchProperty("BGColorLayer", {
 			m_BGColorLayer = std::make_unique<SceneLayer>();
 			reader >> m_BGColorLayer.get();
-		}); MatchProperty("AddTerrainFrosting", {
+		});
+		MatchProperty("AddTerrainFrosting", {
 			std::unique_ptr<TerrainFrosting> terrainFrosting = std::make_unique<TerrainFrosting>();
 			reader >> terrainFrosting.get();
 			m_TerrainFrostings.emplace_back(terrainFrosting.release());
-		}); MatchProperty("AddTerrainDebris", {
+		});
+		MatchProperty("AddTerrainDebris", {
 			std::unique_ptr<TerrainDebris> terrainDebris = std::make_unique<TerrainDebris>();
 			reader >> terrainDebris.get();
 			m_TerrainDebris.emplace_back(terrainDebris.release());
-		}); MatchProperty("PlaceTerrainObject", {
+		});
+		MatchProperty("PlaceTerrainObject", {
 			std::unique_ptr<TerrainObject> terrainObject = std::make_unique<TerrainObject>();
 			reader >> terrainObject.get();
 			m_TerrainObjects.emplace_back(terrainObject.release());

@@ -130,18 +130,12 @@ int Deployment::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     StartPropertyList(return SceneObject::ReadProperty(propName, reader));
 
-    MatchProperty("LoadoutName",
-        reader >> m_LoadoutName; );
-    MatchProperty("Icon",
-        reader >> m_Icon; );
-    MatchProperty("SpawnRadius",
-        reader >> m_SpawnRadius; );
-    MatchProperty("WalkRadius",
-        reader >> m_WalkRadius; );
-    MatchProperty("ID",
-        reader >> m_ID; );
-	MatchProperty("HFlipped",
-		reader >> m_HFlipped; );
+    MatchProperty("LoadoutName", { reader >> m_LoadoutName; });
+    MatchProperty("Icon", { reader >> m_Icon; });
+    MatchProperty("SpawnRadius", { reader >> m_SpawnRadius; });
+    MatchProperty("WalkRadius", { reader >> m_WalkRadius; });
+    MatchProperty("ID", { reader >> m_ID; });
+	MatchProperty("HFlipped", { reader >> m_HFlipped; });
 
     EndPropertyList;
 }

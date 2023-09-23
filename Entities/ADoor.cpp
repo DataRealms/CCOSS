@@ -92,55 +92,47 @@ namespace RTE {
 	int ADoor::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Actor::ReadProperty(propName, reader));
 		
-		MatchProperty("Door", {
-			SetDoor(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-		}); MatchProperty("OpenOffset", {
-			reader >> m_OpenOffset;
-		}); MatchProperty("ClosedOffset", {
-			reader >> m_ClosedOffset;
-		}); MatchProperty("OpenClosedOffset", {
+		MatchProperty("Door", { SetDoor(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader))); });
+		MatchProperty("OpenOffset", { reader >> m_OpenOffset; });
+		MatchProperty("ClosedOffset", { reader >> m_ClosedOffset; });
+		MatchProperty("OpenClosedOffset", {
 			reader >> m_OpenOffset;
 			m_ClosedOffset = m_OpenOffset;
-		}); MatchProperty("OpenAngle", {
+		});
+		MatchProperty("OpenAngle", {
 			Matrix rotation;
 			reader >> rotation;
 			m_OpenAngle = rotation.GetRadAngle();
 			if (m_OpenAngle < 0) { reader.ReportError("Door OpenAngle cannot be less than 0."); }
-		}); MatchProperty("ClosedAngle", {
+		});
+		MatchProperty("ClosedAngle", {
 			Matrix rotation;
 			reader >> rotation;
 			m_ClosedAngle = rotation.GetRadAngle();
 			if (m_ClosedAngle < 0) { reader.ReportError("Door ClosedAngle cannot be less than 0."); }
-		}); MatchProperty("OpenClosedAngle", {
+		});
+		MatchProperty("OpenClosedAngle", {
 			Matrix rotation;
 			reader >> rotation;
 			m_OpenAngle = rotation.GetRadAngle();
 			m_ClosedAngle = rotation.GetRadAngle();
-		}); MatchProperty("DoorMoveTime", {
-			reader >> m_DoorMoveTime;
-		}); MatchProperty("ClosedByDefault", {
-			reader >> m_ClosedByDefault;
-		}); MatchProperty("ResetDefaultDelay", {
-			reader >> m_ResetToDefaultStateDelay;
-		}); MatchProperty("SensorInterval", {
-			reader >> m_SensorInterval;
-		}); MatchProperty("AddSensor", {
+		});
+		MatchProperty("DoorMoveTime", { reader >> m_DoorMoveTime; });
+		MatchProperty("ClosedByDefault", { reader >> m_ClosedByDefault; });
+		MatchProperty("ResetDefaultDelay", { reader >> m_ResetToDefaultStateDelay; });
+		MatchProperty("SensorInterval", { reader >> m_SensorInterval; });
+		MatchProperty("AddSensor", {
 			ADSensor sensor;
 			reader >> sensor;
 			m_Sensors.push_back(sensor);
-		}); MatchProperty("DrawMaterialLayerWhenOpen", {
-			reader >> m_DrawMaterialLayerWhenOpen;
-		}); MatchProperty("DrawMaterialLayerWhenClosed", {
-			reader >> m_DrawMaterialLayerWhenClosed;
-		}); MatchProperty("DoorMoveStartSound", {
-			m_DoorMoveStartSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader)));
-		}); MatchProperty("DoorMoveSound", {
-			m_DoorMoveSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader)));
-		}); MatchProperty("DoorDirectionChangeSound", {
-			m_DoorDirectionChangeSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader)));
-		}); MatchProperty("DoorMoveEndSound", {
-			m_DoorMoveEndSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader)));
 		});
+		MatchProperty("DrawMaterialLayerWhenOpen", { reader >> m_DrawMaterialLayerWhenOpen; });
+		MatchProperty("DrawMaterialLayerWhenClosed", { reader >> m_DrawMaterialLayerWhenClosed; });
+		MatchProperty("DoorMoveStartSound", { m_DoorMoveStartSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader))); });
+		MatchProperty("DoorMoveSound", { m_DoorMoveSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader))); });
+		MatchProperty("DoorDirectionChangeSound", { m_DoorDirectionChangeSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader))); });
+		MatchProperty("DoorMoveEndSound", { m_DoorMoveEndSound.reset(dynamic_cast<SoundContainer *>(g_PresetMan.ReadReflectedPreset(reader))); });
+		
 		
 		EndPropertyList;
 	}

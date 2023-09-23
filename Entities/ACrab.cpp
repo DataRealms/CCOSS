@@ -262,19 +262,13 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     StartPropertyList(return Actor::ReadProperty(propName, reader));
 
-    MatchProperty("Turret", {
-        SetTurret(dynamic_cast<Turret *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchProperty("Jetpack", {
-        SetJetpack(dynamic_cast<AEJetpack *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchForwards("LFGLeg") MatchProperty("LeftFGLeg", {
-        SetLeftFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchForwards("LBGLeg") MatchProperty("LeftBGLeg", {
-        SetLeftBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchForwards("RFGLeg") MatchProperty("RightFGLeg", {
-        SetRightFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchForwards("RBGLeg") MatchProperty("RightBGLeg", {
-        SetRightBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    }); MatchForwards("LFootGroup") MatchProperty("LeftFootGroup", {
+    MatchProperty("Turret", { SetTurret(dynamic_cast<Turret *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("Jetpack", { SetJetpack(dynamic_cast<AEJetpack *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("LFGLeg") MatchProperty("LeftFGLeg", { SetLeftFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("LBGLeg") MatchProperty("LeftBGLeg", { SetLeftBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("RFGLeg") MatchProperty("RightFGLeg", { SetRightFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("RBGLeg") MatchProperty("RightBGLeg", { SetRightBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("LFootGroup") MatchProperty("LeftFootGroup", {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;
         delete m_BackupLFGFootGroup;
@@ -288,7 +282,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_BackupLFGFootGroup = new AtomGroup(*m_pLFGFootGroup);
         m_BackupLFGFootGroup->RemoveAllAtoms();
         m_BackupLBGFootGroup = new AtomGroup(*m_BackupLFGFootGroup);
-    }); MatchForwards("RFootGroup") MatchProperty("RightFootGroup", {
+    }); 
+    MatchForwards("RFootGroup") MatchProperty("RightFootGroup", {
         delete m_pRFGFootGroup;
         delete m_pRBGFootGroup;
         delete m_BackupRFGFootGroup;
@@ -302,7 +297,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_BackupRFGFootGroup = new AtomGroup(*m_pRFGFootGroup);
         m_BackupRFGFootGroup->RemoveAllAtoms();
         m_BackupRBGFootGroup = new AtomGroup(*m_BackupRFGFootGroup);
-    }); MatchForwards("LFGFootGroup") MatchProperty("LeftFGFootGroup", {
+    }); 
+    MatchForwards("LFGFootGroup") MatchProperty("LeftFGFootGroup", {
         delete m_pLFGFootGroup;
         delete m_BackupLFGFootGroup;
         m_pLFGFootGroup = new AtomGroup();
@@ -310,7 +306,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_pLFGFootGroup->SetOwner(this);
         m_BackupLFGFootGroup = new AtomGroup(*m_pLFGFootGroup);
         m_BackupLFGFootGroup->RemoveAllAtoms();
-    }); MatchForwards("LBGFootGroup") MatchProperty("LeftBGFootGroup", {
+    }); 
+    MatchForwards("LBGFootGroup") MatchProperty("LeftBGFootGroup", {
         delete m_pLBGFootGroup;
         delete m_BackupLBGFootGroup;
         m_pLBGFootGroup = new AtomGroup();
@@ -318,7 +315,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_pLBGFootGroup->SetOwner(this);
         m_BackupLBGFootGroup = new AtomGroup(*m_pLBGFootGroup);
         m_BackupLBGFootGroup->RemoveAllAtoms();
-    }); MatchForwards("RFGFootGroup") MatchProperty("RightFGFootGroup", {
+    }); 
+    MatchForwards("RFGFootGroup") MatchProperty("RightFGFootGroup", {
         delete m_pRFGFootGroup;
         delete m_BackupRFGFootGroup;
         m_pRFGFootGroup = new AtomGroup();
@@ -326,7 +324,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_pRFGFootGroup->SetOwner(this);
         m_BackupRFGFootGroup = new AtomGroup(*m_pRFGFootGroup);
         m_BackupRFGFootGroup->RemoveAllAtoms();
-    }); MatchForwards("RBGFootGroup") MatchProperty("RightBGFootGroup", {
+    }); 
+    MatchForwards("RBGFootGroup") MatchProperty("RightBGFootGroup", {
         delete m_pRBGFootGroup;
         delete m_BackupRBGFootGroup;
         m_pRBGFootGroup = new AtomGroup();
@@ -334,27 +333,20 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_pRBGFootGroup->SetOwner(this);
         m_BackupRBGFootGroup = new AtomGroup(*m_pRBGFootGroup);
         m_BackupRBGFootGroup->RemoveAllAtoms();
-    }); MatchProperty("StrideSound", {
+    });
+    MatchProperty("StrideSound", {
 		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;
-    }); MatchForwards("LStandLimbPath") MatchProperty("LeftStandLimbPath", {
-        reader >> m_Paths[LEFTSIDE][FGROUND][STAND];
-    }); MatchForwards("LWalkLimbPath") MatchProperty("LeftWalkLimbPath", {
-        reader >> m_Paths[LEFTSIDE][FGROUND][WALK];
-    }); MatchForwards("LDislodgeLimbPath") MatchProperty("LeftDislodgeLimbPath", {
-        reader >> m_Paths[LEFTSIDE][FGROUND][DISLODGE];
-    }); MatchForwards("RStandLimbPath") MatchProperty("RightStandLimbPath", {
-        reader >> m_Paths[RIGHTSIDE][FGROUND][STAND];
-    }); MatchForwards("RWalkLimbPath") MatchProperty("RightWalkLimbPath", {
-        reader >> m_Paths[RIGHTSIDE][FGROUND][WALK];
-    }); MatchForwards("RDislodgeLimbPath") MatchProperty("RightDislodgeLimbPath", {
-        reader >> m_Paths[RIGHTSIDE][FGROUND][DISLODGE];
-    }); MatchProperty("AimRangeUpperLimit", {
-        reader >> m_AimRangeUpperLimit;
-    }); MatchProperty("AimRangeLowerLimit", {
-        reader >> m_AimRangeLowerLimit;
-    });
-
+    }); 
+    MatchForwards("LStandLimbPath") MatchProperty("LeftStandLimbPath", { reader >> m_Paths[LEFTSIDE][FGROUND][STAND]; });
+    MatchForwards("LWalkLimbPath") MatchProperty("LeftWalkLimbPath", { reader >> m_Paths[LEFTSIDE][FGROUND][WALK]; });
+    MatchForwards("LDislodgeLimbPath") MatchProperty("LeftDislodgeLimbPath", { reader >> m_Paths[LEFTSIDE][FGROUND][DISLODGE]; });
+    MatchForwards("RStandLimbPath") MatchProperty("RightStandLimbPath", { reader >> m_Paths[RIGHTSIDE][FGROUND][STAND]; });
+    MatchForwards("RWalkLimbPath") MatchProperty("RightWalkLimbPath", { reader >> m_Paths[RIGHTSIDE][FGROUND][WALK]; });
+    MatchForwards("RDislodgeLimbPath") MatchProperty("RightDislodgeLimbPath", { reader >> m_Paths[RIGHTSIDE][FGROUND][DISLODGE]; });
+    MatchProperty("AimRangeUpperLimit", { reader >> m_AimRangeUpperLimit; });
+    MatchProperty("AimRangeLowerLimit", { reader >> m_AimRangeLowerLimit; });
+    
     EndPropertyList;
 }
 

@@ -98,23 +98,19 @@ namespace RTE {
 	int Atom::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Serializable::ReadProperty(propName, reader));
 		
-		MatchProperty("Offset", {
-			reader >> m_Offset;
-		}); MatchProperty("OriginalOffset", {
-			reader >> m_OriginalOffset;
-		}); MatchProperty("Material", {
+		MatchProperty("Offset", { reader >> m_Offset; });
+		MatchProperty("OriginalOffset", { reader >> m_OriginalOffset; });
+		MatchProperty("Material", {
 			Material mat;
 			mat.Reset();
 			reader >> mat;
 			m_Material = g_SceneMan.AddMaterialCopy(&mat);
 			if (!m_Material) { RTEAbort("Failed to store material \"" + mat.GetPresetName() + "\". Aborting!"); }
-		}); MatchProperty("TrailColor", {
-			reader >> m_TrailColor;
-		}); MatchProperty("TrailLength", {
-			reader >> m_TrailLength;
-		}); MatchProperty("TrailLengthVariation", {
-			reader >> m_TrailLengthVariation;
 		});
+		MatchProperty("TrailColor", { reader >> m_TrailColor; });
+		MatchProperty("TrailLength", { reader >> m_TrailLength; });
+		MatchProperty("TrailLengthVariation", { reader >> m_TrailLengthVariation; });
+		
 		
 		EndPropertyList;
 	}

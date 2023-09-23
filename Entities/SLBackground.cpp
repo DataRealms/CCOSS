@@ -95,36 +95,29 @@ namespace RTE {
 	int SLBackground::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return SceneLayer::ReadProperty(propName, reader));
 		
-		MatchProperty("FrameCount", {
-			reader >> m_FrameCount;
-		}); MatchProperty("SpriteAnimMode", {
+		MatchProperty("FrameCount", { reader >> m_FrameCount; });
+		MatchProperty("SpriteAnimMode", {
 			m_SpriteAnimMode = static_cast<SpriteAnimMode>(std::stoi(reader.ReadPropValue()));
 			if (m_SpriteAnimMode < SpriteAnimMode::NOANIM || m_SpriteAnimMode > SpriteAnimMode::ALWAYSPINGPONG) { reader.ReportError("Invalid SLBackground sprite animation mode!"); }
-		}); MatchProperty("SpriteAnimDuration", {
-			reader >> m_SpriteAnimDuration;
-		}); MatchProperty("IsAnimatedManually", {
-			reader >> m_IsAnimatedManually;
-		}); MatchProperty("DrawTransparent", {
-			reader >> m_DrawMasked;
-		}); MatchProperty("ScrollRatio", {
+		});
+		MatchProperty("SpriteAnimDuration", { reader >> m_SpriteAnimDuration; });
+		MatchProperty("IsAnimatedManually", { reader >> m_IsAnimatedManually; });
+		MatchProperty("DrawTransparent", { reader >> m_DrawMasked; });
+		MatchProperty("ScrollRatio", {
 			// Actually read the ScrollInfo, not the ratio. The ratios will be initialized later.
 			reader >> m_ScrollInfo;
-		}); MatchProperty("ScaleFactor", {
+		});
+		MatchProperty("ScaleFactor", {
 			reader >> m_ScaleFactor;
 			SetScaleFactor(m_ScaleFactor);
-		}); MatchProperty("IgnoreAutoScaling", {
-			reader >> m_IgnoreAutoScale;
-		}); MatchProperty("OriginPointOffset", {
-			reader >> m_OriginOffset;
-		}); MatchProperty("CanAutoScrollX", {
-			reader >> m_CanAutoScrollX;
-		}); MatchProperty("CanAutoScrollY", {
-			reader >> m_CanAutoScrollY;
-		}); MatchProperty("AutoScrollStepInterval", {
-			reader >> m_AutoScrollStepInterval;
-		}); MatchProperty("AutoScrollStep", {
-			reader >> m_AutoScrollStep;
 		});
+		MatchProperty("IgnoreAutoScaling", { reader >> m_IgnoreAutoScale; });
+		MatchProperty("OriginPointOffset", { reader >> m_OriginOffset; });
+		MatchProperty("CanAutoScrollX", { reader >> m_CanAutoScrollX; });
+		MatchProperty("CanAutoScrollY", { reader >> m_CanAutoScrollY; });
+		MatchProperty("AutoScrollStepInterval", { reader >> m_AutoScrollStepInterval; });
+		MatchProperty("AutoScrollStep", { reader >> m_AutoScrollStep; });
+		
 		
 		EndPropertyList;
 	}

@@ -319,29 +319,30 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     StartPropertyList(return MOSRotating::ReadProperty(propName, reader));
 
-	MatchProperty("PlayerControllable", {
-		reader >> m_PlayerControllable;
-	}); MatchProperty("BodyHitSound", {
+	MatchProperty("PlayerControllable", { reader >> m_PlayerControllable; });
+	MatchProperty("BodyHitSound", {
 		m_BodyHitSound = new SoundContainer;
 		reader >> m_BodyHitSound;
-	}); MatchProperty("AlarmSound", {
+	});
+	MatchProperty("AlarmSound", {
 		m_AlarmSound = new SoundContainer;
 		reader >> m_AlarmSound;
-	}); MatchProperty("PainSound", {
+	});
+	MatchProperty("PainSound", {
 		m_PainSound = new SoundContainer;
 		reader >> m_PainSound;
-	}); MatchProperty("DeathSound", {
+	});
+	MatchProperty("DeathSound", {
 		m_DeathSound = new SoundContainer;
 		reader >> m_DeathSound;
-	}); MatchProperty("DeviceSwitchSound", {
+	});
+	MatchProperty("DeviceSwitchSound", {
 		m_DeviceSwitchSound = new SoundContainer;
 		reader >> m_DeviceSwitchSound;
-	}); MatchProperty("Status",
-        reader >> m_Status; );
-    MatchProperty("DeploymentID",
-        reader >> m_DeploymentID; );
-    MatchProperty("PassengerSlots",
-        reader >> m_PassengerSlots; );
+	});
+	MatchProperty("Status", { reader >> m_Status; });
+    MatchProperty("DeploymentID", { reader >> m_DeploymentID; });
+    MatchProperty("PassengerSlots", { reader >> m_PassengerSlots; });
     MatchProperty("Health",
     {
         reader >> m_Health;
@@ -358,61 +359,46 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 	        m_PrevHealth = m_Health;
 		}
 	});
-    MatchProperty("ImpulseDamageThreshold",
-        reader >> m_TravelImpulseDamage; );
-    MatchProperty("StableVelocityThreshold",
-        reader >> m_StableVel; );
-    MatchProperty("StableRecoveryDelay",
-        reader >> m_StableRecoverDelay; );
-    MatchProperty("AimAngle",
-        reader >> m_AimAngle; );
-    MatchProperty("AimRange",
-        reader >> m_AimRange; );
-    MatchProperty("AimDistance",
-        reader >> m_AimDistance; );
-    MatchProperty("SharpAimDelay",
-        reader >> m_SharpAimDelay; );
-    MatchProperty("SightDistance",
-        reader >> m_SightDistance; );
-    MatchProperty("Perceptiveness",
-        reader >> m_Perceptiveness; );
-    MatchProperty("PainThreshold",
-        reader >> m_PainThreshold; );
-	MatchProperty("CanRevealUnseen",
-		reader >> m_CanRevealUnseen; );
-    MatchProperty("CharHeight",
-        reader >> m_CharHeight; );
-    MatchProperty("HolsterOffset",
-        reader >> m_HolsterOffset; );
-	MatchProperty("ReloadOffset",
-        reader >> m_ReloadOffset; );
+    MatchProperty("ImpulseDamageThreshold", { reader >> m_TravelImpulseDamage; });
+    MatchProperty("StableVelocityThreshold", { reader >> m_StableVel; });
+    MatchProperty("StableRecoveryDelay", { reader >> m_StableRecoverDelay; });
+    MatchProperty("AimAngle", { reader >> m_AimAngle; });
+    MatchProperty("AimRange", { reader >> m_AimRange; });
+    MatchProperty("AimDistance", { reader >> m_AimDistance; });
+    MatchProperty("SharpAimDelay", { reader >> m_SharpAimDelay; });
+    MatchProperty("SightDistance", { reader >> m_SightDistance; });
+    MatchProperty("Perceptiveness", { reader >> m_Perceptiveness; });
+    MatchProperty("PainThreshold", { reader >> m_PainThreshold; });
+	MatchProperty("CanRevealUnseen", { reader >> m_CanRevealUnseen; });
+    MatchProperty("CharHeight", { reader >> m_CharHeight; });
+    MatchProperty("HolsterOffset", { reader >> m_HolsterOffset; });
+	MatchProperty("ReloadOffset", { reader >> m_ReloadOffset; });
     MatchForwards("AddInventoryDevice") MatchProperty("AddInventory",
     {
         MovableObject *pInvMO = dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader));
 		if (!pInvMO) { reader.ReportError("Object added to inventory is broken."); }
         AddToInventoryBack(pInvMO);
     });
-    MatchProperty("MaxInventoryMass",
-        reader >> m_MaxInventoryMass; );
+    MatchProperty("MaxInventoryMass", { reader >> m_MaxInventoryMass; });
 	MatchProperty("AIMode", {
 		int mode;
 		reader >> mode;
 		m_AIMode = static_cast<AIMode>(mode);
-	}); MatchProperty("SpecialBehaviour_AddAISceneWaypoint", {
+	});
+	MatchProperty("SpecialBehaviour_AddAISceneWaypoint", {
 		Vector waypointToAdd;
 		reader >> waypointToAdd;
 		AddAISceneWaypoint(waypointToAdd);
-	}); MatchProperty("PieMenu", {
+	});
+	MatchProperty("PieMenu", {
 		m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
 		m_PieMenu->Create(this);
-    }); MatchProperty("Organic", {
-        reader >> m_Organic;
-    }); MatchProperty("Mechanical", {
-        reader >> m_Mechanical;
-    }); MatchProperty("AIBaseDigStrength", {
-        reader >> m_AIBaseDigStrength;
     });
+    MatchProperty("Organic", { reader >> m_Organic; });
+    MatchProperty("Mechanical", { reader >> m_Mechanical; });
+    MatchProperty("AIBaseDigStrength", { reader >> m_AIBaseDigStrength; });
+    
 
     EndPropertyList;
 }

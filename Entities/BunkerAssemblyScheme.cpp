@@ -231,16 +231,11 @@ int BunkerAssemblyScheme::ReadProperty(const std::string_view &propName, Reader 
         newChild.SetTeam(m_Team);
         m_ChildObjects.push_back(newChild);
     });
-    MatchProperty("Limit",
-		reader >> m_Limit; );
-    MatchProperty("OneTypePerScene",
-		reader >> m_IsOneTypePerScene; );
-    MatchProperty("MaxDeployments",
-		reader >> m_MaxDeployments; );
-    MatchProperty("SymmetricScheme",
-		reader >> m_SymmetricScheme; );
-    MatchProperty("AssemblyGroup",
-		reader >> m_AssemblyGroup; );
+    MatchProperty("Limit", { reader >> m_Limit; });
+    MatchProperty("OneTypePerScene", { reader >> m_IsOneTypePerScene; });
+    MatchProperty("MaxDeployments", { reader >> m_MaxDeployments; });
+    MatchProperty("SymmetricScheme", { reader >> m_SymmetricScheme; });
+    MatchProperty("AssemblyGroup", { reader >> m_AssemblyGroup; });
 
     EndPropertyList;
 }

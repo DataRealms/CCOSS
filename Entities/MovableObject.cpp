@@ -300,46 +300,32 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 {
 	StartPropertyList(return SceneObject::ReadProperty(propName, reader));
     
-    MatchProperty("Mass", {
-		reader >> m_Mass;
-	}); MatchProperty("Velocity",
-		reader >> m_Vel; );
-	MatchProperty("Scale",
-		reader >> m_Scale; );
-	MatchProperty("GlobalAccScalar",
-		reader >> m_GlobalAccScalar; );
+    MatchProperty("Mass", { reader >> m_Mass; });
+	MatchProperty("Velocity", { reader >> m_Vel; });
+	MatchProperty("Scale", { reader >> m_Scale; });
+	MatchProperty("GlobalAccScalar", { reader >> m_GlobalAccScalar; });
 	MatchProperty("AirResistance",
 	{
 		reader >> m_AirResistance;
 		// Backwards compatibility after we made this value scaled over time
 		m_AirResistance /= 0.01666F;
 	});
-	MatchProperty("AirThreshold",
-		reader >> m_AirThreshold; );
-	MatchProperty("PinStrength",
-		reader >> m_PinStrength; );
-	MatchProperty("RestThreshold",
-		reader >> m_RestThreshold; );
-	MatchProperty("LifeTime",
-		reader >> m_Lifetime; );
+	MatchProperty("AirThreshold", { reader >> m_AirThreshold; });
+	MatchProperty("PinStrength", { reader >> m_PinStrength; });
+	MatchProperty("RestThreshold", { reader >> m_RestThreshold; });
+	MatchProperty("LifeTime", { reader >> m_Lifetime; });
 	MatchProperty("Age", {
 		double age;
 		reader >> age;
 		m_AgeTimer.SetElapsedSimTimeMS(age);
-	}); MatchProperty("Sharpness",
-		reader >> m_Sharpness; );
-	MatchProperty("HitsMOs",
-		reader >> m_HitsMOs; );
-	MatchProperty("GetsHitByMOs",
-		reader >> m_GetsHitByMOs; );
-	MatchProperty("IgnoresTeamHits",
-		reader >> m_IgnoresTeamHits; );
-	MatchProperty("IgnoresAtomGroupHits",
-		reader >> m_IgnoresAtomGroupHits; );
-	MatchProperty("IgnoresAGHitsWhenSlowerThan",
-		reader >> m_IgnoresAGHitsWhenSlowerThan; );
-    MatchProperty("IgnoresActorHits", 
-        reader >> m_IgnoresActorHits; );
+	});
+	MatchProperty("Sharpness", { reader >> m_Sharpness; });
+	MatchProperty("HitsMOs", { reader >> m_HitsMOs; });
+	MatchProperty("GetsHitByMOs", { reader >> m_GetsHitByMOs; });
+	MatchProperty("IgnoresTeamHits", { reader >> m_IgnoresTeamHits; });
+	MatchProperty("IgnoresAtomGroupHits", { reader >> m_IgnoresAtomGroupHits; });
+	MatchProperty("IgnoresAGHitsWhenSlowerThan", { reader >> m_IgnoresAGHitsWhenSlowerThan; });
+    MatchProperty("IgnoresActorHits",  { reader >> m_IgnoresActorHits; });
 	MatchProperty("RemoveOrphanTerrainRadius",
 	{
 		reader >> m_RemoveOrphanTerrainRadius;
@@ -352,14 +338,10 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 		if (m_RemoveOrphanTerrainMaxArea > MAXORPHANRADIUS * MAXORPHANRADIUS)
 			m_RemoveOrphanTerrainMaxArea = MAXORPHANRADIUS * MAXORPHANRADIUS;
 	});
-	MatchProperty("RemoveOrphanTerrainRate",
-		reader >> m_RemoveOrphanTerrainRate; );
-	MatchProperty("MissionCritical",
-		reader >> m_MissionCritical; );
-	MatchProperty("CanBeSquished",
-		reader >> m_CanBeSquished; );
-	MatchProperty("HUDVisible",
-		reader >> m_HUDVisible; );
+	MatchProperty("RemoveOrphanTerrainRate", { reader >> m_RemoveOrphanTerrainRate; });
+	MatchProperty("MissionCritical", { reader >> m_MissionCritical; });
+	MatchProperty("CanBeSquished", { reader >> m_CanBeSquished; });
+	MatchProperty("HUDVisible", { reader >> m_HUDVisible; });
 	MatchProperty("ScriptPath", {
 		std::string scriptPath = g_PresetMan.GetFullModulePath(reader.ReadPropValue());
         switch (LoadScript(scriptPath)) {
@@ -384,51 +366,36 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
                 RTEAbort("Reached default case while adding script in INI. This should never happen!");
                 break;
         }
-	}); MatchProperty("ScreenEffect", {
+	});
+	MatchProperty("ScreenEffect", {
         reader >> m_ScreenEffectFile;
         m_pScreenEffect = m_ScreenEffectFile.GetAsBitmap();
 		m_ScreenEffectHash = m_ScreenEffectFile.GetHash();
     });
-    MatchProperty("EffectStartTime",
-        reader >> m_EffectStartTime; );
-	MatchProperty("EffectRotAngle",
-		reader >> m_EffectRotAngle; );
-	MatchProperty("InheritEffectRotAngle",
-		reader >> m_InheritEffectRotAngle; );
-	MatchProperty("RandomizeEffectRotAngle",
-		reader >> m_RandomizeEffectRotAngle; );
-	MatchProperty("RandomizeEffectRotAngleEveryFrame",
-		reader >> m_RandomizeEffectRotAngleEveryFrame; );
-	MatchProperty("EffectStopTime",
-        reader >> m_EffectStopTime; );
-    MatchProperty("EffectStartStrength",
-    {
+    MatchProperty("EffectStartTime", { reader >> m_EffectStartTime; });
+	MatchProperty("EffectRotAngle", { reader >> m_EffectRotAngle; });
+	MatchProperty("InheritEffectRotAngle", { reader >> m_InheritEffectRotAngle; });
+	MatchProperty("RandomizeEffectRotAngle", { reader >> m_RandomizeEffectRotAngle; });
+	MatchProperty("RandomizeEffectRotAngleEveryFrame", { reader >> m_RandomizeEffectRotAngleEveryFrame; });
+	MatchProperty("EffectStopTime", { reader >> m_EffectStopTime; });
+    MatchProperty("EffectStartStrength", {
         float strength;
         reader >> strength;
         m_EffectStartStrength = std::floor((float)255 * strength);
     });
-    MatchProperty("EffectStopStrength",
-    {
+    MatchProperty("EffectStopStrength", {
         float strength;
         reader >> strength;
         m_EffectStopStrength = std::floor((float)255 * strength);
     });
-    MatchProperty("EffectAlwaysShows",
-        reader >> m_EffectAlwaysShows; );
-	MatchProperty("DamageOnCollision",
-		reader >> m_DamageOnCollision; );
-	MatchProperty("DamageOnPenetration",
-		reader >> m_DamageOnPenetration; );
-	MatchProperty("WoundDamageMultiplier",
-		reader >> m_WoundDamageMultiplier; );
-    MatchProperty("ApplyWoundDamageOnCollision",
-        reader >> m_ApplyWoundDamageOnCollision; );
-    MatchProperty("ApplyWoundBurstDamageOnCollision",
-        reader >> m_ApplyWoundBurstDamageOnCollision; );
-	MatchProperty("IgnoreTerrain",
-		reader >> m_IgnoreTerrain; );
-    MatchProperty("SimUpdatesBetweenScriptedUpdates",
-        reader >> m_SimUpdatesBetweenScriptedUpdates; );
+    MatchProperty("EffectAlwaysShows", { reader >> m_EffectAlwaysShows; });
+	MatchProperty("DamageOnCollision", { reader >> m_DamageOnCollision; });
+	MatchProperty("DamageOnPenetration", { reader >> m_DamageOnPenetration; });
+	MatchProperty("WoundDamageMultiplier", { reader >> m_WoundDamageMultiplier; });
+    MatchProperty("ApplyWoundDamageOnCollision", { reader >> m_ApplyWoundDamageOnCollision; });
+    MatchProperty("ApplyWoundBurstDamageOnCollision", { reader >> m_ApplyWoundBurstDamageOnCollision; });
+	MatchProperty("IgnoreTerrain", { reader >> m_IgnoreTerrain; });
+    MatchProperty("SimUpdatesBetweenScriptedUpdates", { reader >> m_SimUpdatesBetweenScriptedUpdates; });
 
     EndPropertyList;
 }

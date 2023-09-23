@@ -45,11 +45,9 @@ namespace RTE {
 	int SoundSet::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Serializable::ReadProperty(propName, reader));
 		
-		MatchProperty("SoundSelectionCycleMode", {
-			SetSoundSelectionCycleMode(ReadSoundSelectionCycleMode(reader));
-		}); MatchProperty("AddSound", {
-			AddSoundData(ReadAndGetSoundData(reader));
-		}); MatchProperty("AddSoundSet", {
+		MatchProperty("SoundSelectionCycleMode", { SetSoundSelectionCycleMode(ReadSoundSelectionCycleMode(reader)); });
+		MatchProperty("AddSound", { AddSoundData(ReadAndGetSoundData(reader)); });
+		MatchProperty("AddSoundSet", {
 			SoundSet soundSetToAdd;
 			reader >> soundSetToAdd;
 			AddSoundSet(soundSetToAdd);

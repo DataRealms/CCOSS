@@ -43,15 +43,10 @@ namespace RTE {
 	int GlobalScript::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Entity::ReadProperty(propName, reader));
 		
-		MatchProperty("ScriptPath", {
-			m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue());
-		}); MatchProperty("LuaClassName", {
-			reader >> m_LuaClassName;
-		}); MatchProperty("LateUpdate", {
-			reader >> m_LateUpdate;
-		}); MatchProperty("AddPieSlice", {
-			m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader))));
-		});
+		MatchProperty("ScriptPath", { m_ScriptPath = CorrectBackslashesInPath(reader.ReadPropValue()); });
+		MatchProperty("LuaClassName", { reader >> m_LuaClassName; });
+		MatchProperty("LateUpdate", { reader >> m_LateUpdate; });
+		MatchProperty("AddPieSlice", { m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader)))); });
 
 		EndPropertyList;
 	}

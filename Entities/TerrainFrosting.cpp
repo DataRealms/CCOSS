@@ -20,17 +20,12 @@ namespace RTE {
 	int TerrainFrosting::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Serializable::ReadProperty(propName, reader));
 		
-		MatchProperty("FrostingMaterial", {
-			reader >> m_FrostingMaterial;
-		}); MatchProperty("TargetMaterial", {
-			reader >> m_TargetMaterial;
-		}); MatchProperty("MinThickness", {
-			reader >> m_MinThickness;
-		}); MatchProperty("MaxThickness", {
-			reader >> m_MaxThickness;
-		}); MatchProperty("InAirOnly", {
-			reader >> m_InAirOnly;
-		});
+		MatchProperty("FrostingMaterial", { reader >> m_FrostingMaterial; });
+		MatchProperty("TargetMaterial", { reader >> m_TargetMaterial; });
+		MatchProperty("MinThickness", { reader >> m_MinThickness; });
+		MatchProperty("MaxThickness", { reader >> m_MaxThickness; });
+		MatchProperty("InAirOnly", { reader >> m_InAirOnly; });
+		
 		
 		EndPropertyList;
 	}

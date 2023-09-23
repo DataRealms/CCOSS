@@ -232,36 +232,21 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
     MatchProperty("CPUTeam",
         reader >> m_CPUTeam;
         SetCPUTeam(m_CPUTeam); );
-    MatchProperty("DeliveryDelay",
-        reader >> m_DeliveryDelay; );
-    MatchProperty("DefaultFogOfWar",
-	    reader >> m_DefaultFogOfWar; );
-    MatchProperty("DefaultRequireClearPathToOrbit",
-        reader >> m_DefaultRequireClearPathToOrbit; );
-    MatchProperty("DefaultDeployUnits",
-        reader >> m_DefaultDeployUnits; );
-    MatchProperty("DefaultGoldCakeDifficulty",
-        reader >> m_DefaultGoldCakeDifficulty; );
-    MatchProperty("DefaultGoldEasyDifficulty",
-        reader >> m_DefaultGoldEasyDifficulty; );
-    MatchProperty("DefaultGoldMediumDifficulty",
-        reader >> m_DefaultGoldMediumDifficulty; );
-    MatchProperty("DefaultGoldHardDifficulty",
-        reader >> m_DefaultGoldHardDifficulty; );
-    MatchProperty("DefaultGoldNutsDifficulty",
-        reader >> m_DefaultGoldNutsDifficulty; );
-	MatchProperty("DefaultGoldMaxDifficulty",
-        reader >> m_DefaultGoldMaxDifficulty; );
-    MatchProperty("FogOfWarSwitchEnabled",
-        reader >> m_FogOfWarSwitchEnabled; );
-    MatchProperty("DeployUnitsSwitchEnabled",
-        reader >> m_DeployUnitsSwitchEnabled; );
-    MatchProperty("GoldSwitchEnabled",
-        reader >> m_GoldSwitchEnabled; );
-	MatchProperty("RequireClearPathToOrbitSwitchEnabled",
-        reader >> m_RequireClearPathToOrbitSwitchEnabled; );
-	MatchProperty("BuyMenuEnabled",
-		reader >> m_BuyMenuEnabled; );
+    MatchProperty("DeliveryDelay", { reader >> m_DeliveryDelay; });
+    MatchProperty("DefaultFogOfWar", { reader >> m_DefaultFogOfWar; });
+    MatchProperty("DefaultRequireClearPathToOrbit", { reader >> m_DefaultRequireClearPathToOrbit; });
+    MatchProperty("DefaultDeployUnits", { reader >> m_DefaultDeployUnits; });
+    MatchProperty("DefaultGoldCakeDifficulty", { reader >> m_DefaultGoldCakeDifficulty; });
+    MatchProperty("DefaultGoldEasyDifficulty", { reader >> m_DefaultGoldEasyDifficulty; });
+    MatchProperty("DefaultGoldMediumDifficulty", { reader >> m_DefaultGoldMediumDifficulty; });
+    MatchProperty("DefaultGoldHardDifficulty", { reader >> m_DefaultGoldHardDifficulty; });
+    MatchProperty("DefaultGoldNutsDifficulty", { reader >> m_DefaultGoldNutsDifficulty; });
+	MatchProperty("DefaultGoldMaxDifficulty", { reader >> m_DefaultGoldMaxDifficulty; });
+    MatchProperty("FogOfWarSwitchEnabled", { reader >> m_FogOfWarSwitchEnabled; });
+    MatchProperty("DeployUnitsSwitchEnabled", { reader >> m_DeployUnitsSwitchEnabled; });
+    MatchProperty("GoldSwitchEnabled", { reader >> m_GoldSwitchEnabled; });
+	MatchProperty("RequireClearPathToOrbitSwitchEnabled", { reader >> m_RequireClearPathToOrbitSwitchEnabled; });
+	MatchProperty("BuyMenuEnabled", { reader >> m_BuyMenuEnabled; });
 	MatchForwards("Team1Tech")
     MatchForwards("Team2Tech")
     MatchForwards("Team3Tech")
@@ -273,10 +258,8 @@ int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
 				SetTeamTech(team, techName);
 			}
 		} );
-	MatchProperty("SpecialBehaviour_StartingGold",
-		reader >> m_StartingGold; );
-	MatchProperty("SpecialBehaviour_FogOfWarEnabled",
-		reader >> m_FogOfWarEnabled; );
+	MatchProperty("SpecialBehaviour_StartingGold", { reader >> m_StartingGold; });
+	MatchProperty("SpecialBehaviour_FogOfWarEnabled", { reader >> m_FogOfWarEnabled; });
 
     EndPropertyList;
 }

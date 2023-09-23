@@ -46,25 +46,16 @@ namespace RTE {
 		MatchProperty("GibParticle", {
 			m_GibParticle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 			RTEAssert(m_GibParticle, "Stream suggests allocating an unallocable type in Gib::Create!");
-		}); MatchProperty("Offset", {
-			reader >> m_Offset;
-		}); MatchProperty("Count", {
-			reader >> m_Count;
-		}); MatchProperty("Spread", {
-			reader >> m_Spread;
-		}); MatchProperty("MinVelocity", {
-			reader >> m_MinVelocity;
-		}); MatchProperty("MaxVelocity", {
-			reader >> m_MaxVelocity;
-		}); MatchProperty("LifeVariation", {
-			reader >> m_LifeVariation;
-		}); MatchProperty("InheritsVel", {
-			reader >> m_InheritsVel;
-		}); MatchProperty("IgnoresTeamHits", {
-			reader >> m_IgnoresTeamHits;
-		}); MatchProperty("SpreadMode", {
-			m_SpreadMode = static_cast<SpreadMode>(std::stoi(reader.ReadPropValue()));
 		});
+		MatchProperty("Offset", { reader >> m_Offset; });
+		MatchProperty("Count", { reader >> m_Count; });
+		MatchProperty("Spread", { reader >> m_Spread; });
+		MatchProperty("MinVelocity", { reader >> m_MinVelocity; });
+		MatchProperty("MaxVelocity", { reader >> m_MaxVelocity; });
+		MatchProperty("LifeVariation", { reader >> m_LifeVariation; });
+		MatchProperty("InheritsVel", { reader >> m_InheritsVel; });
+		MatchProperty("IgnoresTeamHits", { reader >> m_IgnoresTeamHits; });
+		MatchProperty("SpreadMode", { m_SpreadMode = static_cast<SpreadMode>(std::stoi(reader.ReadPropValue())); });
 
 		EndPropertyList;
 	}

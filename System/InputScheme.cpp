@@ -39,71 +39,39 @@ namespace RTE {
 	int InputScheme::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return Serializable::ReadProperty(propName, reader));
 		
-		MatchProperty("Device", {
-			SetDevice(static_cast<InputDevice>(std::stoi(reader.ReadPropValue())));
-		}); MatchProperty("Preset", {
-			SetPreset(static_cast<InputPreset>(std::stoi(reader.ReadPropValue())));
-		}); MatchProperty("LeftUp", {
-			reader >> m_InputMappings[InputElements::INPUT_L_UP];
-		}); MatchProperty("LeftDown", {
-			reader >> m_InputMappings[InputElements::INPUT_L_DOWN];
-		}); MatchProperty("LeftLeft", {
-			reader >> m_InputMappings[InputElements::INPUT_L_LEFT];
-		}); MatchProperty("LeftRight", {
-			reader >> m_InputMappings[InputElements::INPUT_L_RIGHT];
-		}); MatchProperty("Fire", {
-			reader >> m_InputMappings[InputElements::INPUT_FIRE];
-		}); MatchProperty("Aim", {
-			reader >> m_InputMappings[InputElements::INPUT_AIM];
-		}); MatchProperty("AimUp", {
-			reader >> m_InputMappings[InputElements::INPUT_AIM_UP];
-		}); MatchProperty("AimDown", {
-			reader >> m_InputMappings[InputElements::INPUT_AIM_DOWN];
-		}); MatchProperty("AimLeft", {
-			reader >> m_InputMappings[InputElements::INPUT_AIM_LEFT];
-		}); MatchProperty("AimRight", {
-			reader >> m_InputMappings[InputElements::INPUT_AIM_RIGHT];
-		}); MatchProperty("PieMenuAnalog", {
-			reader >> m_InputMappings[InputElements::INPUT_PIEMENU_ANALOG];
-		}); MatchProperty("PieMenuDigital", {
-			reader >> m_InputMappings[InputElements::INPUT_PIEMENU_DIGITAL];
-		}); MatchProperty("Jump", {
-			reader >> m_InputMappings[InputElements::INPUT_JUMP];
-		}); MatchProperty("Crouch", {
-			reader >> m_InputMappings[InputElements::INPUT_CROUCH];
-		}); MatchProperty("Next", {
-			reader >> m_InputMappings[InputElements::INPUT_NEXT];
-		}); MatchProperty("Prev", {
-			reader >> m_InputMappings[InputElements::INPUT_PREV];
-		}); MatchProperty("WeaponChangeNext", {
-			reader >> m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_NEXT];
-		}); MatchProperty("WeaponChangePrev", {
-			reader >> m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_PREV];
-		}); MatchProperty("WeaponPickup", {
-			reader >> m_InputMappings[InputElements::INPUT_WEAPON_PICKUP];
-		}); MatchProperty("WeaponDrop", {
-			reader >> m_InputMappings[InputElements::INPUT_WEAPON_DROP];
-		}); MatchProperty("WeaponReload", {
-			reader >> m_InputMappings[InputElements::INPUT_WEAPON_RELOAD];
-		}); MatchProperty("Start", {
-			reader >> m_InputMappings[InputElements::INPUT_START];
-		}); MatchProperty("Back", {
-			reader >> m_InputMappings[InputElements::INPUT_BACK];
-		}); MatchProperty("RightUp", {
-			reader >> m_InputMappings[InputElements::INPUT_R_UP];
-		}); MatchProperty("RightDown", {
-			reader >> m_InputMappings[InputElements::INPUT_R_DOWN];
-		}); MatchProperty("RightLeft", {
-			reader >> m_InputMappings[InputElements::INPUT_R_LEFT];
-		}); MatchProperty("RightRight", {
-			reader >> m_InputMappings[InputElements::INPUT_R_RIGHT];
-		}); MatchProperty("JoystickDeadzoneType", {
-			SetJoystickDeadzoneType(static_cast<DeadZoneType>(std::stoi(reader.ReadPropValue())));
-		}); MatchProperty("JoystickDeadzone", {
-			reader >> m_JoystickDeadzone;
-		}); MatchProperty("DigitalAimSpeed", {
-			reader >> m_DigitalAimSpeed;
-		});
+		MatchProperty("Device", { SetDevice(static_cast<InputDevice>(std::stoi(reader.ReadPropValue()))); });
+		MatchProperty("Preset", { SetPreset(static_cast<InputPreset>(std::stoi(reader.ReadPropValue()))); });
+		MatchProperty("LeftUp", { reader >> m_InputMappings[InputElements::INPUT_L_UP]; });
+		MatchProperty("LeftDown", { reader >> m_InputMappings[InputElements::INPUT_L_DOWN]; });
+		MatchProperty("LeftLeft", { reader >> m_InputMappings[InputElements::INPUT_L_LEFT]; });
+		MatchProperty("LeftRight", { reader >> m_InputMappings[InputElements::INPUT_L_RIGHT]; });
+		MatchProperty("Fire", { reader >> m_InputMappings[InputElements::INPUT_FIRE]; });
+		MatchProperty("Aim", { reader >> m_InputMappings[InputElements::INPUT_AIM]; });
+		MatchProperty("AimUp", { reader >> m_InputMappings[InputElements::INPUT_AIM_UP]; });
+		MatchProperty("AimDown", { reader >> m_InputMappings[InputElements::INPUT_AIM_DOWN]; });
+		MatchProperty("AimLeft", { reader >> m_InputMappings[InputElements::INPUT_AIM_LEFT]; });
+		MatchProperty("AimRight", { reader >> m_InputMappings[InputElements::INPUT_AIM_RIGHT]; });
+		MatchProperty("PieMenuAnalog", { reader >> m_InputMappings[InputElements::INPUT_PIEMENU_ANALOG]; });
+		MatchProperty("PieMenuDigital", { reader >> m_InputMappings[InputElements::INPUT_PIEMENU_DIGITAL]; });
+		MatchProperty("Jump", { reader >> m_InputMappings[InputElements::INPUT_JUMP]; });
+		MatchProperty("Crouch", { reader >> m_InputMappings[InputElements::INPUT_CROUCH]; });
+		MatchProperty("Next", { reader >> m_InputMappings[InputElements::INPUT_NEXT]; });
+		MatchProperty("Prev", { reader >> m_InputMappings[InputElements::INPUT_PREV]; });
+		MatchProperty("WeaponChangeNext", { reader >> m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_NEXT]; });
+		MatchProperty("WeaponChangePrev", { reader >> m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_PREV]; });
+		MatchProperty("WeaponPickup", { reader >> m_InputMappings[InputElements::INPUT_WEAPON_PICKUP]; });
+		MatchProperty("WeaponDrop", { reader >> m_InputMappings[InputElements::INPUT_WEAPON_DROP]; });
+		MatchProperty("WeaponReload", { reader >> m_InputMappings[InputElements::INPUT_WEAPON_RELOAD]; });
+		MatchProperty("Start", { reader >> m_InputMappings[InputElements::INPUT_START]; });
+		MatchProperty("Back", { reader >> m_InputMappings[InputElements::INPUT_BACK]; });
+		MatchProperty("RightUp", { reader >> m_InputMappings[InputElements::INPUT_R_UP]; });
+		MatchProperty("RightDown", { reader >> m_InputMappings[InputElements::INPUT_R_DOWN]; });
+		MatchProperty("RightLeft", { reader >> m_InputMappings[InputElements::INPUT_R_LEFT]; });
+		MatchProperty("RightRight", { reader >> m_InputMappings[InputElements::INPUT_R_RIGHT]; });
+		MatchProperty("JoystickDeadzoneType", { SetJoystickDeadzoneType(static_cast<DeadZoneType>(std::stoi(reader.ReadPropValue()))); });
+		MatchProperty("JoystickDeadzone", { reader >> m_JoystickDeadzone; });
+		MatchProperty("DigitalAimSpeed", { reader >> m_DigitalAimSpeed; });
+		
 		
 		EndPropertyList;
 	}

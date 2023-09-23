@@ -87,18 +87,15 @@ int SceneObject::SOPlacer::ReadProperty(const std::string_view &propName, Reader
         m_pObjectReference = dynamic_cast<const SceneObject *>(g_PresetMan.GetEntityPreset(reader));
         RTEAssert(m_pObjectReference, "Stream suggests allocating an unallocatable type in SOPlacer::Create!");
     });
-    MatchProperty("Offset",
-        reader >> m_Offset; );
+    MatchProperty("Offset", { reader >> m_Offset; });
     MatchProperty("Rotation",
     {
         Matrix rot;
         reader >> rot;
         m_RotAngle = rot.GetRadAngle();
     });
-    MatchProperty("HFlipped",
-        reader >> m_HFlipped; );
-    MatchProperty("Team",
-        reader >> m_Team; );
+    MatchProperty("HFlipped", { reader >> m_HFlipped; });
+    MatchProperty("Team", { reader >> m_Team; });
 
     EndPropertyList;
 }
@@ -264,15 +261,11 @@ int SceneObject::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     StartPropertyList(return Entity::ReadProperty(propName, reader)); 
     
-    MatchProperty("Position",
-        reader >> m_Pos; );
-    MatchForwards("GoldValue") MatchProperty("GoldCost",
-        reader >> m_OzValue; );
-    MatchProperty("Buyable",
-        reader >> m_Buyable; );
-	MatchProperty("BuyableMode", {
-		m_BuyableMode = static_cast<BuyableMode>(std::stoi(reader.ReadPropValue()));
-	});
+    MatchProperty("Position", { reader >> m_Pos; });
+    MatchForwards("GoldValue") MatchProperty("GoldCost", { reader >> m_OzValue; });
+    MatchProperty("Buyable", { reader >> m_Buyable; });
+	MatchProperty("BuyableMode", { m_BuyableMode = static_cast<BuyableMode>(std::stoi(reader.ReadPropValue())); });
+	
     MatchProperty("Team",
     {
         reader >> m_Team;
@@ -280,8 +273,7 @@ int SceneObject::ReadProperty(const std::string_view &propName, Reader &reader)
         // (actually, this rarely matters since tehre won't be an activity going when this is read!)
         SetTeam(m_Team);
     });
-    MatchProperty("PlacedByPlayer",
-        reader >> m_PlacedByPlayer; );
+    MatchProperty("PlacedByPlayer", { reader >> m_PlacedByPlayer; });
    
     EndPropertyList;
 }

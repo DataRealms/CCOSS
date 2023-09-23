@@ -100,22 +100,14 @@ int Emission::ReadProperty(const std::string_view &propName, Reader &reader)
 		m_pEmission = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 		RTEAssert(m_pEmission, "Stream suggests allocating an unallocatable type in AEmitter::Emission::Create!");
 	});
-	MatchProperty("ParticlesPerMinute",
-		reader >> m_PPM; );
-	MatchProperty("BurstSize",
-		reader >> m_BurstSize; );
-	MatchProperty("Spread",
-		reader >> m_Spread; );
-	MatchProperty("MinVelocity",
-		reader >> m_MinVelocity; );
-	MatchProperty("MaxVelocity",
-		reader >> m_MaxVelocity; );
-	MatchProperty("LifeVariation",
-		reader >> m_LifeVariation; );
-	MatchProperty("PushesEmitter",
-		reader >> m_PushesEmitter; );
-	MatchProperty("Offset",
-		reader >> m_Offset; );
+	MatchProperty("ParticlesPerMinute", { reader >> m_PPM; });
+	MatchProperty("BurstSize", { reader >> m_BurstSize; });
+	MatchProperty("Spread", { reader >> m_Spread; });
+	MatchProperty("MinVelocity", { reader >> m_MinVelocity; });
+	MatchProperty("MaxVelocity", { reader >> m_MaxVelocity; });
+	MatchProperty("LifeVariation", { reader >> m_LifeVariation; });
+	MatchProperty("PushesEmitter", { reader >> m_PushesEmitter; });
+	MatchProperty("Offset", { reader >> m_Offset; });
 	MatchProperty("InheritsVel",
 	{
 		reader >> m_InheritsVel;

@@ -56,23 +56,14 @@ namespace RTE {
 	int ThrownDevice::ReadProperty(const std::string_view &propName, Reader &reader) {
 		StartPropertyList(return HeldDevice::ReadProperty(propName, reader));
 		
-		MatchProperty("ActivationSound", {
-			reader >> m_ActivationSound;
-		}); MatchProperty("StartThrowOffset", {
-			reader >> m_StartThrowOffset;
-		}); MatchProperty("EndThrowOffset", {
-			reader >> m_EndThrowOffset;
-		}); MatchProperty("MinThrowVel", {
-			reader >> m_MinThrowVel;
-		}); MatchProperty("MaxThrowVel", {
-			reader >> m_MaxThrowVel;
-		}); MatchProperty("TriggerDelay", {
-			reader >> m_TriggerDelay;
-		}); MatchProperty("ActivatesWhenReleased", {
-			reader >> m_ActivatesWhenReleased;
-		}); MatchProperty("StrikerLever", {
-			m_StrikerLever = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
-		});
+		MatchProperty("ActivationSound", { reader >> m_ActivationSound; });
+		MatchProperty("StartThrowOffset", { reader >> m_StartThrowOffset; });
+		MatchProperty("EndThrowOffset", { reader >> m_EndThrowOffset; });
+		MatchProperty("MinThrowVel", { reader >> m_MinThrowVel; });
+		MatchProperty("MaxThrowVel", { reader >> m_MaxThrowVel; });
+		MatchProperty("TriggerDelay", { reader >> m_TriggerDelay; });
+		MatchProperty("ActivatesWhenReleased", { reader >> m_ActivatesWhenReleased; });
+		MatchProperty("StrikerLever", { m_StrikerLever = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader)); });
 
 		EndPropertyList;
 	}

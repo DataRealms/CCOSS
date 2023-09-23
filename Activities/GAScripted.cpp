@@ -119,9 +119,11 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader) {
     
     MatchProperty("ScriptPath", {
 		m_ScriptPath = g_PresetMan.GetFullModulePath(reader.ReadPropValue());
-    }); MatchProperty("LuaClassName", {
+    });
+    MatchProperty("LuaClassName", {
 		reader >> m_LuaClassName;
-    }); MatchProperty("AddPieSlice", {
+    });
+    MatchProperty("AddPieSlice", {
 		m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader)))); 
     });
 

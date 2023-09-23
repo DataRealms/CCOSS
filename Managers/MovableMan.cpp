@@ -116,16 +116,11 @@ int MovableMan::ReadProperty(const std::string_view &propName, Reader &reader)
 {
     StartPropertyList(return Serializable::ReadProperty(propName, reader));
     
-    MatchProperty("AddEffect",
-        g_PresetMan.GetEntityPreset(reader); );
-    MatchProperty("AddAmmo",
-        g_PresetMan.GetEntityPreset(reader); );
-    MatchProperty("AddDevice",
-        g_PresetMan.GetEntityPreset(reader); );
-    MatchProperty("AddActor",
-        g_PresetMan.GetEntityPreset(reader); );
-    MatchProperty("SplashRatio",
-        reader >> m_SplashRatio; );
+    MatchProperty("AddEffect", { g_PresetMan.GetEntityPreset(reader); });
+    MatchProperty("AddAmmo", { g_PresetMan.GetEntityPreset(reader); });
+    MatchProperty("AddDevice", { g_PresetMan.GetEntityPreset(reader); });
+    MatchProperty("AddActor", { g_PresetMan.GetEntityPreset(reader); });
+    MatchProperty("SplashRatio", { reader >> m_SplashRatio; });
     
     EndPropertyList;
 }

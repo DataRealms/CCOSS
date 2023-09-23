@@ -182,23 +182,17 @@ int HeldDevice::Create(const HeldDevice &reference)
 
 int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "HeldDeviceType")
-        reader >> m_HeldDeviceType;
-    else if (propName == "OneHanded")
-        reader >> m_OneHanded;
-	else if (propName == "DualWieldable")
-		reader >> m_DualWieldable;
-	else if (propName == "StanceOffset")
-        reader >> m_StanceOffset;
-    else if (propName == "SharpStanceOffset")
-        reader >> m_SharpStanceOffset;
-	else if (propName == "Supportable") {
-		reader >> m_Supportable;
-	} else if (propName == "SupportOffset") {
-        reader >> m_SupportOffset;
-    } else if (propName == "UseSupportOffsetWhileReloading") {
-        reader >> m_UseSupportOffsetWhileReloading;
-    } else if (propName == "PickupableBy") {
+    StartPropertyList(return Attachable::ReadProperty(propName, reader));
+
+    MatchProperty("HeldDeviceType", { reader >> m_HeldDeviceType; });
+    MatchProperty("OneHanded", { reader >> m_OneHanded; });
+	MatchProperty("DualWieldable", { reader >> m_DualWieldable; });
+	MatchProperty("StanceOffset", { reader >> m_StanceOffset; });
+    MatchProperty("SharpStanceOffset", { reader >> m_SharpStanceOffset; });
+	MatchProperty("Supportable", { reader >> m_Supportable; });
+	MatchProperty("SupportOffset", { reader >> m_SupportOffset; });
+    MatchProperty("UseSupportOffsetWhileReloading", { reader >> m_UseSupportOffsetWhileReloading; });
+    MatchProperty("PickupableBy", {
         std::string pickupableByValue = reader.ReadPropValue();
         if (pickupableByValue == "PickupableByEntries") {
             while (reader.NextProperty()) {
@@ -218,26 +212,20 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
         } else if (pickupableByValue == "None") {
             SetUnPickupable(true);
         }
-    } else if (propName == "GripStrengthMultiplier") {
-        reader >> m_GripStrengthMultiplier;
-    } else if (propName == "SharpLength")
-        reader >> m_MaxSharpLength;
-    else if (propName == "Loudness") {
-        reader >> m_Loudness;
-    } else if (propName == "GetsHitByMOsWhenHeld") {
-        reader >> m_GetsHitByMOsWhenHeld;
-    } else if (propName == "VisualRecoilMultiplier") {
-		reader >> m_VisualRecoilMultiplier;
-	} else if (propName == "SpecialBehaviour_Activated") {
-		reader >> m_Activated;
-	} else if (propName == "SpecialBehaviour_ActivationTimerElapsedSimTimeMS") {
+    });
+    MatchProperty("GripStrengthMultiplier", { reader >> m_GripStrengthMultiplier; });
+    MatchProperty("SharpLength", { reader >> m_MaxSharpLength; });
+    MatchProperty("Loudness", { reader >> m_Loudness; });
+    MatchProperty("GetsHitByMOsWhenHeld", { reader >> m_GetsHitByMOsWhenHeld; });
+    MatchProperty("VisualRecoilMultiplier", { reader >> m_VisualRecoilMultiplier; });
+	MatchProperty("SpecialBehaviour_Activated", { reader >> m_Activated; });
+	MatchProperty("SpecialBehaviour_ActivationTimerElapsedSimTimeMS", {
 		double elapsedSimTimeMS;
 		reader >> elapsedSimTimeMS;
 		m_ActivationTimer.SetElapsedSimTimeMS(elapsedSimTimeMS);
-	} else
-        return Attachable::ReadProperty(propName, reader);
+	});
 
-    return 0;
+    EndPropertyList;
 }
 
 

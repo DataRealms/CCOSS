@@ -60,16 +60,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Matrix::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "AngleDegrees") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("AngleDegrees", {
 			float degAngle;
 			reader >> degAngle;
 			SetDegAngle(degAngle);
-		} else if (propName == "AngleRadians") {
-			reader >> m_Rotation;
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		MatchProperty("AngleRadians", { reader >> m_Rotation; });
+		
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

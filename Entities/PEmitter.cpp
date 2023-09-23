@@ -117,70 +117,50 @@ namespace RTE {
 
 	int PEmitter::ReadProperty(const std::string_view &propName, Reader &reader)
 	{
-		if (propName == "AddEmission")
+		StartPropertyList(return MOSParticle::ReadProperty(propName, reader));
+		
+		MatchProperty("AddEmission",
 		{
 			Emission emission;
 			reader >> emission;
 			m_EmissionList.push_back(emission);
-		}
-		else if (propName == "EmissionSound")
-			reader >> m_EmissionSound;
-		else if (propName == "BurstSound")
-			reader >> m_BurstSound;
-		else if (propName == "EndSound")
-			reader >> m_EndSound;
-		else if (propName == "EmissionEnabled")
-			reader >> m_EmitEnabled;
-		else if (propName == "EmissionCount")
-			reader >> m_EmitCount;
-		else if (propName == "EmissionCountLimit")
-			reader >> m_EmitCountLimit;
-		else if (propName == "ParticlesPerMinute")
+		});
+		MatchProperty("EmissionSound", { reader >> m_EmissionSound; });
+		MatchProperty("BurstSound", { reader >> m_BurstSound; });
+		MatchProperty("EndSound", { reader >> m_EndSound; });
+		MatchProperty("EmissionEnabled", { reader >> m_EmitEnabled; });
+		MatchProperty("EmissionCount", { reader >> m_EmitCount; });
+		MatchProperty("EmissionCountLimit", { reader >> m_EmitCountLimit; });
+		MatchProperty("ParticlesPerMinute",
 		{
 			float ppm;
 			reader >> ppm;
 			// Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility
 			for (std::list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
 				(*eItr).m_PPM = ppm / m_EmissionList.size();
-		}
-		else if (propName == "NegativeThrottleMultiplier")
-			reader >> m_NegativeThrottleMultiplier;
-		else if (propName == "PositiveThrottleMultiplier")
-			reader >> m_PositiveThrottleMultiplier;
-		else if (propName == "Throttle")
-			reader >> m_Throttle;
-		else if (propName == "EmissionsIgnoreThis")
-			reader >> m_EmissionsIgnoreThis;
-		else if (propName == "BurstSize")
+		});
+		MatchProperty("NegativeThrottleMultiplier", { reader >> m_NegativeThrottleMultiplier; });
+		MatchProperty("PositiveThrottleMultiplier", { reader >> m_PositiveThrottleMultiplier; });
+		MatchProperty("Throttle", { reader >> m_Throttle; });
+		MatchProperty("EmissionsIgnoreThis", { reader >> m_EmissionsIgnoreThis; });
+		MatchProperty("BurstSize",
 		{
 			int burstSize;
 			reader >> burstSize;
 			// Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility
 			for (std::list<Emission>::iterator eItr = m_EmissionList.begin(); eItr != m_EmissionList.end(); ++eItr)
 				(*eItr).m_BurstSize = std::ceil((float)burstSize / (float)m_EmissionList.size());
-		}
-		else if (propName == "BurstScale")
-			reader >> m_BurstScale;
-		else if (propName == "BurstSpacing")
-			reader >> m_BurstSpacing;
-		else if (propName == "BurstTriggered")
-			reader >> m_BurstTriggered;
-		else if (propName == "EmissionAngle")
-			reader >> m_EmitAngle;
-		else if (propName == "EmissionOffset")
-			reader >> m_EmissionOffset;
-		else if (propName == "FlashScale")
-			reader >> m_FlashScale;
-		else if (propName == "FlashOnlyOnBurst")
-			reader >> m_FlashOnlyOnBurst;
-		else if (propName == "LoudnessOnEmit")
-			reader >> m_LoudnessOnEmit;
-		else
-		{
-			return MOSParticle::ReadProperty(propName, reader);
-		}
-
-		return 0;
+		});
+		MatchProperty("BurstScale", { reader >> m_BurstScale; });
+		MatchProperty("BurstSpacing", { reader >> m_BurstSpacing; });
+		MatchProperty("BurstTriggered", { reader >> m_BurstTriggered; });
+		MatchProperty("EmissionAngle", { reader >> m_EmitAngle; });
+		MatchProperty("EmissionOffset", { reader >> m_EmissionOffset; });
+		MatchProperty("FlashScale", { reader >> m_FlashScale; });
+		MatchProperty("FlashOnlyOnBurst", { reader >> m_FlashOnlyOnBurst; });
+		MatchProperty("LoudnessOnEmit", { reader >> m_LoudnessOnEmit; });
+		
+		EndPropertyList;
 	}
 
 

@@ -38,14 +38,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int MOSParticle::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Atom") {
+		StartPropertyList(return MOSprite::ReadProperty(propName, reader));
+		
+		MatchProperty("Atom", {
 			if (!m_Atom) { m_Atom = new Atom; }
 			reader >> *m_Atom;
 			m_Atom->SetOwner(this);
-		} else {
-			return MOSprite::ReadProperty(propName, reader);
-		}
-		return 0;
+		}); 
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

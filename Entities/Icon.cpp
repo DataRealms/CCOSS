@@ -41,14 +41,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Icon::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "BitmapFile") {
-			reader >> m_BitmapFile;
-		} else if (propName == "FrameCount") {
-			reader >> m_FrameCount;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-		return 0;
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("BitmapFile", { reader >> m_BitmapFile; });
+		MatchProperty("FrameCount", { reader >> m_FrameCount; });
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

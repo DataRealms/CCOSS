@@ -68,35 +68,26 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Round::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Particle") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("Particle", {
 			m_Particle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 			RTEAssert(m_Particle, "Stream suggests allocating an unallocable type in Round::Create!");
-		} else if (propName == "ParticleCount") {
-			reader >> m_ParticleCount;
-		} else if (propName == "FireVelocity") {
-			reader >> m_FireVel;
-		} else if (propName == "InheritsFirerVelocity") {
-			reader >> m_InheritsFirerVelocity;
-		} else if (propName == "Separation") {
-			reader >> m_Separation;
-		} else if (propName == "LifeVariation") {
-			reader >> m_LifeVariation;
-		} else if (propName == "Shell") {
-			m_Shell = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
-		} else if (propName == "ShellVelocity") {
-			reader >> m_ShellVel;
-		} else if (propName == "FireSound") {
-			reader >> m_FireSound;
-		} else if (propName == "AILifeTime") {
-			reader >> m_AILifeTime;
-		} else if (propName == "AIFireVel") {
-			reader >> m_AIFireVel;
-		} else if (propName == "AIPenetration") {
-			reader >> m_AIPenetration;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		MatchProperty("ParticleCount", { reader >> m_ParticleCount; });
+		MatchProperty("FireVelocity", { reader >> m_FireVel; });
+		MatchProperty("InheritsFirerVelocity", { reader >> m_InheritsFirerVelocity; });
+		MatchProperty("Separation", { reader >> m_Separation; });
+		MatchProperty("LifeVariation", { reader >> m_LifeVariation; });
+		MatchProperty("Shell", { m_Shell = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader)); });
+		MatchProperty("ShellVelocity", { reader >> m_ShellVel; });
+		MatchProperty("FireSound", { reader >> m_FireSound; });
+		MatchProperty("AILifeTime", { reader >> m_AILifeTime; });
+		MatchProperty("AIFireVel", { reader >> m_AIFireVel; });
+		MatchProperty("AIPenetration", { reader >> m_AIPenetration; });
+		
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

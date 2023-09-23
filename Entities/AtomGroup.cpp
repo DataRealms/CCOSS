@@ -120,7 +120,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int AtomGroup::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Material") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("Material", {
 			Material mat;
 			mat.Reset();
 			reader >> mat;
@@ -131,19 +133,17 @@ namespace RTE {
 				m_Material = g_SceneMan.GetMaterialFromID(g_MaterialAir);
 				RTEAssert(m_Material, "Failed to find matching Material preset \"" + mat.GetPresetName() + "\" or even fall back to \"Air\" " + GetFormattedReaderPosition() + ".\nAborting!");
 			}
-		} else if (propName == "AutoGenerate") {
-			reader >> m_AutoGenerate;
-		} else if (propName == "Resolution") {
-			reader >> m_Resolution;
-		} else if (propName == "Depth") {
-			reader >> m_Depth;
-		} else if (propName == "AddAtom") {
+		});
+		MatchProperty("AutoGenerate", { reader >> m_AutoGenerate; });
+		MatchProperty("Resolution", { reader >> m_Resolution; });
+		MatchProperty("Depth", { reader >> m_Depth; });
+		MatchProperty("AddAtom", {
 			Atom *atom = new Atom;
 			reader >> *atom;
 			m_Atoms.push_back(atom);
-		} else if (propName == "JointOffset") {
-			reader >> m_JointOffset;
-		} else if (propName == "AreaDistributionType") {
+		});
+		MatchProperty("JointOffset", { reader >> m_JointOffset; });
+		MatchProperty("AreaDistributionType", {
 			std::string areaDistributionTypeString = reader.ReadPropValue();
 			auto itr = c_AreaDistributionTypeMap.find(areaDistributionTypeString);
 			if (itr != c_AreaDistributionTypeMap.end()) {
@@ -155,12 +155,11 @@ namespace RTE {
 					reader.ReportError("AreaDistributionType " + areaDistributionTypeString + " is invalid.");
 				}
 			}
-		} else if (propName == "AreaDistributionSurfaceAreaMultiplier") {
-			reader >> m_AreaDistributionSurfaceAreaMultiplier;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		MatchProperty("AreaDistributionSurfaceAreaMultiplier", { reader >> m_AreaDistributionSurfaceAreaMultiplier; });
+		
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -58,33 +58,39 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int TerrainObject::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "FGColorFile") {
+		StartPropertyList(return SceneObject::ReadProperty(propName, reader));
+		
+		MatchProperty("FGColorFile", {
 			reader >> m_FGColorFile;
 			m_FGColorBitmap = m_FGColorFile.GetAsBitmap();
-		} else if (propName == "BGColorFile") {
+		});
+		MatchProperty("BGColorFile", {
 			reader >> m_BGColorFile;
 			m_BGColorBitmap = m_BGColorFile.GetAsBitmap();
-		} else if (propName == "MaterialFile") {
+		});
+		MatchProperty("MaterialFile", {
 			reader >> m_MaterialFile;
 			m_MaterialBitmap = m_MaterialFile.GetAsBitmap();
-		} else if (propName == "BitmapOffset") {
+		});
+		MatchProperty("BitmapOffset", {
 			reader >> m_BitmapOffset;
 			m_OffsetDefined = true;
-		} else if (propName == "AddChildObject") {
+		});
+		MatchProperty("AddChildObject", {
 			SceneObject::SOPlacer newChildObject;
 			reader >> newChildObject;
 			newChildObject.SetTeam(m_Team);
 			m_ChildObjects.emplace_back(newChildObject);
-		} else if (propName == "ClearChildObjects") {
+		});
+		MatchProperty("ClearChildObjects", {
 			bool clearChildObjects;
 			reader >> clearChildObjects;
 			if (clearChildObjects) {
 				m_ChildObjects.clear();
 			}
-		} else {
-			return SceneObject::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

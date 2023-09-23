@@ -67,22 +67,19 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int MOPixel::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Atom") {
+		StartPropertyList(return MovableObject::ReadProperty(propName, reader));
+		
+		MatchProperty("Atom", {
 			if (!m_Atom) { m_Atom = new Atom; }
 			reader >> m_Atom;
 			m_Atom->SetOwner(this);
-		} else if (propName == "Color") {
-			reader >> m_Color;
-		} else if (propName == "MinLethalRange") {
-			reader >> m_MinLethalRange;
-		} else if (propName == "MaxLethalRange") {
-			reader >> m_MaxLethalRange;
-		} else if (propName == "Staininess") {
-			reader >> m_Staininess;
-		} else {
-			return MovableObject::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		MatchProperty("Color", { reader >> m_Color; });
+		MatchProperty("MinLethalRange", { reader >> m_MinLethalRange; });
+		MatchProperty("MaxLethalRange", { reader >> m_MaxLethalRange; });
+		MatchProperty("Staininess", { reader >> m_Staininess; });
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

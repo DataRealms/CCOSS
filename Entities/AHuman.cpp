@@ -241,31 +241,21 @@ int AHuman::Create(const AHuman &reference) {
 //                  false is returned, and the reader's position is untouched.
 
 int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
-    if (propName == "ThrowPrepTime") {
-        reader >> m_ThrowPrepTime;
-    } else if (propName == "Head") {
-        SetHead(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-	} else if (propName == "LookToAimRatio") {
-		reader >> m_LookToAimRatio;
-    } else if (propName == "Jetpack") {
-        SetJetpack(dynamic_cast<AEJetpack *>(g_PresetMan.ReadReflectedPreset(reader)));
-	} else if (propName == "FGArmFlailScalar") {
-		reader >> m_FGArmFlailScalar;
-	} else if (propName == "BGArmFlailScalar") {
-		reader >> m_BGArmFlailScalar;
-	} else if (propName == "ArmSwingRate") {
-		reader >> m_ArmSwingRate;
-	} else if (propName == "DeviceArmSwayRate") {
-		reader >> m_DeviceArmSwayRate;
-    } else if (propName == "FGArm") {
-        SetFGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "BGArm") {
-        SetBGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "FGLeg") {
-        SetFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "BGLeg") {
-        SetBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "HandGroup") {
+    StartPropertyList(return Actor::ReadProperty(propName, reader));
+    
+    MatchProperty("ThrowPrepTime", { reader >> m_ThrowPrepTime; });
+    MatchProperty("Head", { SetHead(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader))); });
+	MatchProperty("LookToAimRatio", { reader >> m_LookToAimRatio; });
+    MatchProperty("Jetpack", { SetJetpack(dynamic_cast<AEJetpack *>(g_PresetMan.ReadReflectedPreset(reader))); });
+	MatchProperty("FGArmFlailScalar", { reader >> m_FGArmFlailScalar; });
+	MatchProperty("BGArmFlailScalar", { reader >> m_BGArmFlailScalar; });
+	MatchProperty("ArmSwingRate", { reader >> m_ArmSwingRate; });
+	MatchProperty("DeviceArmSwayRate", { reader >> m_DeviceArmSwayRate; });
+    MatchProperty("FGArm", { SetFGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("BGArm", { SetBGArm(dynamic_cast<Arm *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("FGLeg", { SetFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("BGLeg", { SetBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("HandGroup", {
         delete m_pFGHandGroup;
         delete m_pBGHandGroup;
         m_pFGHandGroup = new AtomGroup();
@@ -274,56 +264,44 @@ int AHuman::ReadProperty(const std::string_view &propName, Reader &reader) {
         m_pBGHandGroup->Create(*m_pFGHandGroup);
         m_pFGHandGroup->SetOwner(this);
         m_pBGHandGroup->SetOwner(this);
-    } else if (propName == "FGFootGroup") {
+    });
+    MatchProperty("FGFootGroup", {
         delete m_pFGFootGroup;
         m_pFGFootGroup = new AtomGroup();
         reader >> m_pFGFootGroup;
         m_pFGFootGroup->SetOwner(this);
         m_BackupFGFootGroup = new AtomGroup(*m_pFGFootGroup);
         m_BackupFGFootGroup->RemoveAllAtoms();
-    } else if (propName == "BGFootGroup") {
+    });
+    MatchProperty("BGFootGroup", {
         delete m_pBGFootGroup;
         m_pBGFootGroup = new AtomGroup();
         reader >> m_pBGFootGroup;
         m_pBGFootGroup->SetOwner(this);
         m_BackupBGFootGroup = new AtomGroup(*m_pBGFootGroup);
         m_BackupBGFootGroup->RemoveAllAtoms();
-    } else if (propName == "StrideSound") {
+    });
+    MatchProperty("StrideSound", {
 		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;
-    } else if (propName == "StandLimbPath") {
-        reader >> m_Paths[FGROUND][STAND];
-    } else if (propName == "StandLimbPathBG") {
-        reader >> m_Paths[BGROUND][STAND];
-    } else if (propName == "WalkLimbPath") {
-        reader >> m_Paths[FGROUND][WALK];
-    } else if (propName == "CrouchLimbPath") {
-        reader >> m_Paths[FGROUND][CROUCH];
-    } else if (propName == "CrouchLimbPathBG") {
-        reader >> m_Paths[BGROUND][CROUCH];
-    } else if (propName == "CrawlLimbPath") {
-        reader >> m_Paths[FGROUND][CRAWL];
-    } else if (propName == "ArmCrawlLimbPath") {
-        reader >> m_Paths[FGROUND][ARMCRAWL];
-    } else if (propName == "ClimbLimbPath") {
-        reader >> m_Paths[FGROUND][CLIMB];
-    } else if (propName == "JumpLimbPath") {
-        reader >> m_Paths[FGROUND][JUMP];
-    } else if (propName == "DislodgeLimbPath") {
-        reader >> m_Paths[FGROUND][DISLODGE];
-    } else if (propName == "StandRotAngleTarget") {
-        reader >> m_RotAngleTargets[STAND];
-    } else if (propName == "WalkRotAngleTarget") {
-        reader >> m_RotAngleTargets[WALK];
-    } else if (propName == "CrouchRotAngleTarget") {
-        reader >> m_RotAngleTargets[CROUCH];
-    } else if (propName == "JumpRotAngleTarget") {
-        reader >> m_RotAngleTargets[JUMP];
-    } else {
-        return Actor::ReadProperty(propName, reader);
-    }
+    });
+    MatchProperty("StandLimbPath", { reader >> m_Paths[FGROUND][STAND]; });
+    MatchProperty("StandLimbPathBG", { reader >> m_Paths[BGROUND][STAND]; });
+    MatchProperty("WalkLimbPath", { reader >> m_Paths[FGROUND][WALK]; });
+    MatchProperty("CrouchLimbPath", { reader >> m_Paths[FGROUND][CROUCH]; });
+    MatchProperty("CrouchLimbPathBG", { reader >> m_Paths[BGROUND][CROUCH]; });
+    MatchProperty("CrawlLimbPath", { reader >> m_Paths[FGROUND][CRAWL]; });
+    MatchProperty("ArmCrawlLimbPath", { reader >> m_Paths[FGROUND][ARMCRAWL]; });
+    MatchProperty("ClimbLimbPath", { reader >> m_Paths[FGROUND][CLIMB]; });
+    MatchProperty("JumpLimbPath", { reader >> m_Paths[FGROUND][JUMP]; });
+    MatchProperty("DislodgeLimbPath", { reader >> m_Paths[FGROUND][DISLODGE]; });
+    MatchProperty("StandRotAngleTarget", { reader >> m_RotAngleTargets[STAND]; });
+    MatchProperty("WalkRotAngleTarget", { reader >> m_RotAngleTargets[WALK]; });
+    MatchProperty("CrouchRotAngleTarget", { reader >> m_RotAngleTargets[CROUCH]; });
+    MatchProperty("JumpRotAngleTarget", { reader >> m_RotAngleTargets[JUMP]; });
+    
 
-    return 0;
+    EndPropertyList;
 }
 
 

@@ -114,33 +114,21 @@ int ACDropShip::Create(const ACDropShip &reference) {
 //                  false is returned, and the reader's position is untouched.
 
 int ACDropShip::ReadProperty(const std::string_view &propName, Reader &reader) {
-    if (propName == "RThruster" || propName == "RightThruster" || propName == "RightEngine") {
-        SetRightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "LThruster" || propName == "LeftThruster" || propName == "LeftEngine") {
-        SetLeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "URThruster" || propName == "UpRightThruster") {
-        SetURightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "ULThruster" || propName == "UpLeftThruster") {
-        SetULeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "RHatchDoor" || propName == "RightHatchDoor") {
-        SetRightHatch(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "LHatchDoor" || propName == "LeftHatchDoor") {
-        SetLeftHatch(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "HatchDoorSwingRange") {
-        reader >> m_HatchSwingRange;
-    } else if (propName == "AutoStabilize") {
-        reader >> m_AutoStabilize;
-    } else if (propName == "MaxEngineAngle") {
-        reader >> m_MaxEngineAngle;
-	} else if (propName == "LateralControlSpeed") {
-		reader >> m_LateralControlSpeed;
-	} else if (propName == "HoverHeightModifier") {
-		reader >> m_HoverHeightModifier;
-    } else {
-        return ACraft::ReadProperty(propName, reader);
-    }
-
-    return 0;
+    StartPropertyList(return ACraft::ReadProperty(propName, reader));
+    
+    MatchForwards("RThruster") MatchForwards("RightThruster") MatchProperty("RightEngine", { SetRightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("LThruster") MatchForwards("LeftThruster") MatchProperty("LeftEngine", { SetLeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("URThruster") MatchProperty("UpRightThruster", { SetURightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("ULThruster") MatchProperty("UpLeftThruster", { SetULeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("RHatchDoor") MatchProperty("RightHatchDoor", { SetRightHatch(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("LHatchDoor") MatchProperty("LeftHatchDoor", { SetLeftHatch(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("HatchDoorSwingRange", { reader >> m_HatchSwingRange; });
+    MatchProperty("AutoStabilize", { reader >> m_AutoStabilize; });
+    MatchProperty("MaxEngineAngle", { reader >> m_MaxEngineAngle; });
+	MatchProperty("LateralControlSpeed", { reader >> m_LateralControlSpeed; });
+	MatchProperty("HoverHeightModifier", { reader >> m_HoverHeightModifier; });
+    
+    EndPropertyList;
 }
 
 

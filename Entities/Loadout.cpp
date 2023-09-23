@@ -78,10 +78,13 @@ int Loadout::Create(const Loadout &reference)
 
 int Loadout::ReadProperty(const std::string_view &propName, Reader &reader)
 {
+    StartPropertyList(return Entity::ReadProperty(propName, reader));
+
     // Need to load all this stuff without the assumption that it all is available. Mods might have changed etc so things might still not be around, and that's ok.
-    if (propName == "DeliveryCraft")
-    {
-        std::string className, presetName;
+    MatchProperty("DeliveryCraft",
+        {
+            std::string className;
+            std::string presetName;
         // Load class name and then preset instance name
         reader >> className;
         // Ignore the property name, just interested in the value
@@ -95,10 +98,11 @@ int Loadout::ReadProperty(const std::string_view &propName, Reader &reader)
             m_Complete = false;
         // Artificially end reading this property since we got all we needed
         reader.NextProperty();
-    }
-    else if (propName == "AddCargoItem")
+    });
+    MatchProperty("AddCargoItem",
     {
-        std::string className, presetName;
+        std::string className;
+        std::string presetName;
         // Load class name and then preset instance name
         reader >> className;
         // Ignore the property name, just interested in the value
@@ -118,11 +122,9 @@ int Loadout::ReadProperty(const std::string_view &propName, Reader &reader)
         reader.NextProperty();
 
         pCargo = 0;
-    }
-    else
-        return Entity::ReadProperty(propName, reader);
+    });
 
-    return 0;
+    EndPropertyList;
 }
 
 

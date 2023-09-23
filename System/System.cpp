@@ -1,6 +1,7 @@
 ﻿#include "System.h"
+
+#include "RTETools.h"
 #include "unzip.h"
-#include "boost/functional/hash.hpp"
 
 #ifdef _WIN32
 #include "Windows.h"
@@ -78,17 +79,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool System::PathExistsCaseSensitive(const std::string &pathToCheck) {
-		// Use boost::hash for compiler independent hashing.
+		// Use Hash for compiler independent hashing.
 		if (s_CaseSensitive) {
 			if (s_WorkingTree.empty()) {
 				for (const std::filesystem::directory_entry &directoryEntry : std::filesystem::recursive_directory_iterator(s_WorkingDirectory, std::filesystem::directory_options::follow_directory_symlink)) {
-					s_WorkingTree.emplace_back(boost::hash<std::string>()(directoryEntry.path().generic_string().substr(s_WorkingDirectory.length())));
+					s_WorkingTree.emplace_back(Hash(directoryEntry.path().generic_string().substr(s_WorkingDirectory.length())));
 				}
 			}
-			if (std::find(s_WorkingTree.begin(), s_WorkingTree.end(), boost::hash<std::string>()(pathToCheck)) != s_WorkingTree.end()) {
+			if (std::find(s_WorkingTree.begin(), s_WorkingTree.end(), Hash(pathToCheck)) != s_WorkingTree.end()) {
 				return true;
 			} else if (std::filesystem::exists(pathToCheck) && std::filesystem::last_write_time(pathToCheck) > s_ProgramStartTime) {
-				s_WorkingTree.emplace_back(boost::hash<std::string>()(pathToCheck));
+				s_WorkingTree.emplace_back(Hash(pathToCheck));
 				return true;
 			}
 			return false;

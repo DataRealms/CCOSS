@@ -171,7 +171,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int PieMenu::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "IconSeparatorMode") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("IconSeparatorMode", {
 			std::string iconSeparatorModeString = reader.ReadPropValue();
 			auto itr = c_IconSeparatorModeMap.find(iconSeparatorModeString);
 			if (itr != c_IconSeparatorModeMap.end()) {
@@ -183,32 +185,24 @@ namespace RTE {
 					reader.ReportError("IconSeparatorMode " + iconSeparatorModeString + " is invalid.");
 				}
 			}
-		} else if (propName == "FullInnerRadius") {
-			reader >> m_FullInnerRadius;
-		} else if (propName == "BackgroundThickness") {
-			reader >> m_BackgroundThickness;
-		} else if (propName == "BackgroundSeparatorSize") {
-			reader >> m_BackgroundSeparatorSize;
-		} else if (propName == "DrawBackgroundTransparent") {
-			reader >> m_DrawBackgroundTransparent;
-		} else if (propName == "BackgroundColor") {
-			reader >> m_BackgroundColor;
-		} else if (propName == "BackgroundBorderColor") {
-			reader >> m_BackgroundBorderColor;
-		} else if (propName == "SelectedItemBackgroundColor") {
-			reader >> m_SelectedItemBackgroundColor;
-		} else if (propName == "AddPieSlice") {
+		});
+		MatchProperty("FullInnerRadius", { reader >> m_FullInnerRadius; });
+		MatchProperty("BackgroundThickness", { reader >> m_BackgroundThickness; });
+		MatchProperty("BackgroundSeparatorSize", { reader >> m_BackgroundSeparatorSize; });
+		MatchProperty("DrawBackgroundTransparent", { reader >> m_DrawBackgroundTransparent; });
+		MatchProperty("BackgroundColor", { reader >> m_BackgroundColor; });
+		MatchProperty("BackgroundBorderColor", { reader >> m_BackgroundBorderColor; });
+		MatchProperty("SelectedItemBackgroundColor", { reader >> m_SelectedItemBackgroundColor; });
+		MatchProperty("AddPieSlice", {
 			if (m_CurrentPieSlices.size() == 4 * PieQuadrant::c_PieQuadrantSlotCount) {
 				reader.ReportError("Pie menus cannot have more than " + std::to_string(4 * PieQuadrant::c_PieQuadrantSlotCount) + " slices. Use sub-pie menus to better organize your pie slices.");
 			}
 			if (!AddPieSlice(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader)), this)) {
 				reader.ReportError("Tried to add pie slice but that direction was full. Set direction to None if you don't care where the pie slice ends up.");
 			}
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
+		});
 
-		return 0;
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

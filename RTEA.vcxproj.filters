@@ -43,6 +43,9 @@
     <Filter Include="external\tracy">
       <UniqueIdentifier>{21b72644-6ffe-4931-909e-130c40fd684f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="System\Base64">
+      <UniqueIdentifier>{6f517ec6-8c53-4d34-b320-c408e1fd374d}</UniqueIdentifier>
+    </Filter>
     <Filter Include="System\glad">
       <UniqueIdentifier>{a92cf676-7096-4641-ae98-d02861c1acde}</UniqueIdentifier>
     </Filter>
@@ -600,14 +603,21 @@
     <ClInclude Include="System\RTEStackTrace.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="Entities\AEJetpack.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
     <ClInclude Include="System\Shader.h">
       <Filter>System</Filter>
     </ClInclude>
     <ClInclude Include="System\GLCheck.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="Menus\SaveLoadMenuGUI.h" />
-    <ClInclude Include="System\Base64\base64.h" />
+    <ClInclude Include="Menus\SaveLoadMenuGUI.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Base64\base64.h">
+      <Filter>System\Base64</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1166,10 +1176,17 @@
     <ClCompile Include="System\GLCheck.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="Menus\SaveLoadMenuGUI.cpp" />
-    <ClCompile Include="System\Base64\base64.cpp" />
     <ClCompile Include="external\sources\tracy\public\TracyClient.cpp">
       <Filter>external\tracy</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\AEJetpack.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SaveLoadMenuGUI.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Base64\base64.cpp">
+      <Filter>System\Base64</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

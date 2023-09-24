@@ -425,7 +425,7 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, AEJetpack) {
 		return ConcreteTypeLuaClassDefinition(AEJetpack, AEmitter)
 
-		.property("JetPackType", &AEJetpack::GetJetpackType, &AEJetpack::SetJetpackType)
+		.property("JetpackType", &AEJetpack::GetJetpackType, &AEJetpack::SetJetpackType)
 		.property("JetTimeTotal", &AEJetpack::GetJetTimeTotal, &AEJetpack::SetJetTimeTotal)
 		.property("JetTimeLeft", &AEJetpack::GetJetTimeLeft)
 		.property("JetReplenishRate", &AEJetpack::GetJetReplenishRate, &AEJetpack::SetJetReplenishRate)

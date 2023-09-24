@@ -74,7 +74,6 @@ namespace RTE {
 		MatchForwards("JumpAngleRange") MatchProperty("JetAngleRange", { reader >> m_JetAngleRange; });
 		MatchProperty("CanAdjustAngleWhileFiring", { reader >> m_CanAdjustAngleWhileFiring; });
 		MatchProperty("AdjustsThrottleForWeight", { reader >> m_AdjustsThrottleForWeight; });
-        
 
 		EndPropertyList;
 	}
@@ -187,6 +186,9 @@ namespace RTE {
 	void AEJetpack::Burst(Actor& parentActor, float fuelUseMultiplier) {
 		parentActor.SetMovementState(Actor::JUMP);
 		
+		// TODO - find a better solution! This stops the actor getting stuck, but it's awful...
+		parentActor.ForceDeepCheck();
+
 		TriggerBurst();
 		EnableEmission(true);
 		AlarmOnEmit(m_Team); // Jetpacks are noisy!

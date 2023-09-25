@@ -1231,6 +1231,14 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 
     std::list<Vector>& GetScenePath();
 
+    /// <summary>
+    /// Returns whether two position represent the same path nodes.
+    /// </summary>
+    /// <param name="pos1">First coordinates to compare.</param>
+    /// <param name="pos2">Second coordinates to compare.</param>
+    /// <returns>Whether both coordinates represent the same path node.</returns>
+    bool PositionsAreTheSamePathNode(const Vector &pos1, const Vector &pos2) const;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Lock

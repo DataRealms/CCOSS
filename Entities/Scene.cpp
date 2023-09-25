@@ -3037,6 +3037,14 @@ std::list<Vector>& Scene::GetScenePath() {
     return s_ScenePath;
 }
 
+bool Scene::PositionsAreTheSamePathNode(const Vector &pos1, const Vector &pos2) const {
+    if (const std::unique_ptr<PathFinder> &pathFinder = const_cast<Scene*>(this)->GetPathFinder(Activity::Teams::NoTeam)) {
+        return pathFinder->PositionsAreTheSamePathNode(pos1, pos2);
+    }
+    
+    return false;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Lock
 //////////////////////////////////////////////////////////////////////////////////////////

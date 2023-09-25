@@ -49,7 +49,7 @@ T H O M A S   " C A U S E L E S S "   M A R C H
 W A Z U B A B A
 Z E T A
 
-Audio Design
+Audio Design And Music
 G O S T S
 M O S S
 P A W N I S H O O V Y
@@ -107,7 +107,7 @@ Lua AI Implementation
 S T E F A N   " A B D U L   A L H A Z R E D "   W I N B E R G
 
 Intro and Main Menu Music Composition and Production
-R O B E R T   S T J � R N S T R � M   &   J O N A S   R � R L I N G,   H U B N E S T E R   I N D U S T R I E S
+R O B E R T   S T J Ä R N S T R Ö M   &   J O N A S   R Ö R L I N G,   H U B N E S T E R   I N D U S T R I E S
 
 Campaign Menu, Launch Trailer, and In-game Music Composition and Production
 D A N N Y   B A R A N O W S K Y ,   D B   S O U N D W O R K S
@@ -139,6 +139,6 @@ SDL2, FMOD, ALLEGRO, LUA, LUAJIT, LUABIND, MICROPATHER, RAKNET, LZ4, LIBPNG, ZLI
 FMOD Studio by Firelight Technologies Pty Ltd.
 
 
-Cortex Command is TM and � 2023 Data Realms, LLC)";
+Cortex Command is TM and © 2023 Data Realms, LLC)";
 
 #endif

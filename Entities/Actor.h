@@ -147,6 +147,10 @@ ClassInfoGetters;
 
     void Reset() override { Clear(); MOSRotating::Reset(); m_MOType = MovableObject::TypeActor; }
 
+    /// <summary>
+    /// Cleans up and destroys the script state of this object, calling the Destroy callback in lua
+    /// </summary>
+    void DestroyScriptState();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Destroy

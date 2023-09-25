@@ -92,6 +92,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`JetTimeTotal`  
 	`JetTimeLeft`  
 
+- Improved loading times on large maps.
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -107,6 +109,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed a rare crash bug that could occur when under extreme CPU load.
 
 - Fixed a bug where dropships that were non-empty would slowly drop down over time.
+
+- Fixed a bug where AI pathfinding would choose unoptimal routes.
+
+- Fixed a crash that could occur when scripted objects were deleted, particularly when switching scene.
 
 </details>
 

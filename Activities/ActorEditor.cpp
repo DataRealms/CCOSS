@@ -323,6 +323,9 @@ bool ActorEditor::LoadActor(const Entity *pActorToLoad)
         return false;
 
     // Replace the old one
+    if (MovableObject* asMo = dynamic_cast<MovableObject*>(m_pEditedActor)) {
+        asMo->DestroyScriptState();
+    }
     delete m_pEditedActor;
     // Make a copy of the picked object reference
     m_pEditedActor = dynamic_cast<Actor *>(pActorToLoad->Clone());

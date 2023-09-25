@@ -611,6 +611,18 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includePositive
 	return damage;
 }
 
+void MOSRotating::DestroyScriptState() {
+    for (std::list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) {
+        (*itr)->DestroyScriptState();
+    }
+
+    for (std::list<Attachable *>::const_iterator itr = m_Attachables.begin(); itr != m_Attachables.end(); ++itr) {
+        (*itr)->DestroyScriptState();
+    }
+
+    MovableObject::DestroyScriptState();
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -623,7 +635,10 @@ void MOSRotating::Destroy(bool notInherited)
     delete m_pAtomGroup;
     delete m_pDeepGroup;
 
-    for (std::list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) { delete (*itr); }
+    for (std::list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) { 
+        delete (*itr); 
+    }
+
     for (std::list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr) {
         if (m_HardcodedAttachableUniqueIDsAndRemovers.find((*aItr)->GetUniqueID()) == m_HardcodedAttachableUniqueIDsAndRemovers.end()) {
             delete (*aItr);

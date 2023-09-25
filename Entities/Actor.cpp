@@ -482,6 +482,13 @@ int Actor::Save(Writer &writer) const
     return 0;
 }
 
+void Actor::DestroyScriptState() {
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr) {
+        (*itr)->DestroyScriptState();
+    }
+
+    MOSRotating::DestroyScriptState();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
@@ -496,11 +503,14 @@ void Actor::Destroy(bool notInherited)
 	delete m_DeathSound;
 	delete m_AlarmSound;
 
-    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr) {
         delete (*itr);
+    }
 
-    if (!notInherited)
+    if (!notInherited) {
         MOSRotating::Destroy();
+    }
+    
     Clear();
 }
 
@@ -789,7 +799,8 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
 void Actor::RemoveInventoryItem(const std::string &moduleName, const std::string &presetName) {
 	for (std::deque<MovableObject*>::iterator inventoryIterator = m_Inventory.begin(); inventoryIterator != m_Inventory.end(); ++inventoryIterator) {
 		if ((moduleName.empty() || (*inventoryIterator)->GetModuleName() == moduleName) && (*inventoryIterator)->GetPresetName() == presetName) {
-			delete (*inventoryIterator);
+            (*inventoryIterator)->DestroyScriptState();
+            delete (*inventoryIterator);
 			m_Inventory.erase(inventoryIterator);
 			break;
 		}

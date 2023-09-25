@@ -308,8 +308,9 @@ void GameActivity::Destroy(bool notInherited)
 
     for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
-        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr) {
             delete itr->pCraft;
+        }
         m_Deliveries[team].clear();
     }
 
@@ -877,8 +878,10 @@ int GameActivity::Start()
         m_Deliveries[team].clear();
 
         // Clear delivery queues
-        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr) {
             delete itr->pCraft;
+        }
+
         m_Deliveries[team].clear();
 /* This is taken care of by the individual Activity logic
         // See if there are specified landing zone areas defined in the scene
@@ -1110,8 +1113,12 @@ void GameActivity::End()
     {
         if (!m_TeamActive[team])
             continue;
-        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr) {
+            if (MovableObject* asMo = dynamic_cast<MovableObject*>(itr->pCraft)) {
+                asMo->DestroyScriptState();
+            }
             delete itr->pCraft;
+        }
         m_Deliveries[team].clear();
     }
 

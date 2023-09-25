@@ -2261,6 +2261,9 @@ SceneObject * Scene::GetResidentBrain(int player) const
 
 void Scene::SetResidentBrain(int player, SceneObject *pNewBrain)
 {
+    if (MovableObject* asMo = dynamic_cast<MovableObject*>(m_ResidentBrains[player])) {
+        asMo->DestroyScriptState();
+    }
     delete m_ResidentBrains[player];
     m_ResidentBrains[player] = pNewBrain;
 }

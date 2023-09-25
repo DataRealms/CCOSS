@@ -744,6 +744,11 @@ ClassInfoGetters;
     /// <returns>The amount of damage caused by these wounds, taking damage multipliers into account.</returns>
     virtual float RemoveWounds(int numberOfWoundsToRemove, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables);
 
+    /// <summary>
+    /// Cleans up and destroys the script state of this object, calling the Destroy callback in lua
+    /// </summary>
+    void DestroyScriptState();
+
 	/// <summary>
 	/// Gets a const reference to this MOSRotating's map of string values.
 	/// </summary>

@@ -490,7 +490,7 @@ int MovableObject::Save(Writer &writer) const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MovableObject::Destroy(bool notInherited) {
+void MovableObject::DestroyScriptState() {
     if (ObjectScriptsInitialized()) {
         RunScriptedFunctionInAppropriateScripts("Destroy");
 
@@ -503,14 +503,22 @@ void MovableObject::Destroy(bool notInherited) {
             // Shouldn't ever happen (destruction is delayed in movableman to happen in singlethreaded manner), but lets check just in case
             if (g_LuaMan.GetThreadLuaStateOverride() || !g_LuaMan.GetMasterScriptState().GetMutex().try_lock()) {
                 RTEAbort("Failed to destroy object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
-            } else {
+            }
+            else {
                 std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex(), std::adopt_lock);
                 g_LuaMan.GetMasterScriptState().RunScriptString(m_ScriptObjectName + " = nil;");
             }
         }
     }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::Destroy(bool notInherited) {
 	g_MovableMan.UnregisterObject(this);
-    if (!notInherited) { SceneObject::Destroy(); }
+    if (!notInherited) { 
+        SceneObject::Destroy(); 
+    }
     Clear();
 }
 

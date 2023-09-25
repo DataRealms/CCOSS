@@ -278,7 +278,7 @@ public:
 	/// Gets the adjusted throttle multiplier that is factored into the emission rate of this PEmitter.
 	/// </summary>
 	/// <returns>The throttle strength as a multiplier.</returns>
-	float GetThrottleFactor() const { return 1.0F - std::abs(m_Throttle) + (m_Throttle < 0.0F ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier) * std::abs(m_Throttle); }
+	float GetThrottleFactor() const { return LERP(-1.0f, 1.0f, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, m_Throttle); }
 
 	/*
 	//////////////////////////////////////////////////////////////////////////////////////////

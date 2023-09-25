@@ -355,7 +355,7 @@ bool SceneEditorGUI::TestBrainResidence(bool noBrainIsOK)
     }
 
     // Block on our path request completing
-    while (!m_PathRequest->complete) {};
+    while (m_PathRequest && !m_PathRequest->complete) {};
 
 	// Nope! Not valid spot for this brain we found, need to force user to re-place it
     if (m_BrainSkyPathCost > MAXBRAINPATHCOST && m_RequireClearPathToOrbit)

@@ -60,6 +60,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Activity` INI and Lua (R/W) property `AllowsUserSaving`, which can be used to enable/disable manual user saving/loading. This defaults to true for all `GAScripted` with an `OnSave()` function, but false otherwise. Lua `ActivityMan::SaveGame()` function now forces a save even if `AllowsUserSaving` is disabled. This allows mods and scripted gamemodes to handle saving in their own way (for example, only allowing saving at set points).
 
+- New `AEmitter` and `PEmitter` Lua functions:  
+	`JustStartedEmitting()`, which returns whether the emitter just started emitting this frame.  
+	`WasEmitting()`, which returns whether the emitter was emitting last frame.  
+
 </details>
 
 <details><summary><b>Changed</b></summary>

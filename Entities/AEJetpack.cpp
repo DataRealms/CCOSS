@@ -158,12 +158,13 @@ namespace RTE {
 			Recharge(parentActor);
 		}
 
-		float maxAngle = c_HalfPI * m_JetAngleRange;
+		m_JetTimeLeft = std::clamp(m_JetTimeLeft, 0.0f, m_JetTimeTotal);
 
 		// If pie menu is on, keep the angle to what it was before.
 		bool canAdjustAngle = !controller.IsState(PIE_MENU_ACTIVE) && (m_CanAdjustAngleWhileFiring || !IsEmitting());
 		if (canAdjustAngle) {
 			// Direct the jetpack nozzle according to either analog stick input or aim angle.
+			float maxAngle = c_HalfPI * m_JetAngleRange;
             const float analogDeadzone = 0.1F;
 			if (controller.GetAnalogMove().MagnitudeIsGreaterThan(analogDeadzone)) {
 				float jetAngle = std::clamp(controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
@@ -217,7 +218,7 @@ namespace RTE {
 		if (parentActor.GetMovementState() == Actor::JUMP) {
 			parentActor.SetMovementState(Actor::STAND);
 		}
-		m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * m_JetReplenishRate, m_JetTimeTotal);
+		m_JetTimeLeft += g_TimerMan.GetDeltaTimeMS() * m_JetReplenishRate;
 	}
 
 }

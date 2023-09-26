@@ -722,6 +722,8 @@ protected:
     float m_LoudnessOnEmit;
     // Whether to only display flash on bursts, and not on any emission frame.
     bool m_FlashOnlyOnBurst;
+	// Whether the burst sound should always play until completion, or whether it stops when this emitter stops emitting
+	bool m_SustainBurstSound;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -564,8 +564,6 @@ void AEmitter::Update()
 		if (m_EmitCountLimit > 0 && m_EmitCount > m_EmitCountLimit) { EnableEmission(false); }
 
 		if (m_BurstTriggered) { m_BurstTriggered = false; }
-
-        m_WasEmitting = true;
     }
     // Do stuff to stop emission
 	else
@@ -574,7 +572,6 @@ void AEmitter::Update()
 		{
 			if (m_EmissionSound) { m_EmissionSound->Stop(); }
 			if (m_EndSound) { m_EndSound->Play(m_Pos); }
-			m_WasEmitting = false;
 		}
 	}
 }

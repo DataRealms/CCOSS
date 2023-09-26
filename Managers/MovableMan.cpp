@@ -1695,7 +1695,7 @@ void MovableMan::Update()
         }
 
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
-        for (MovableObject* particle : m_Particles) {
+        for (MovableObject *particle : m_Particles) {
             particle->Update();
 
             g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
@@ -1710,6 +1710,16 @@ void MovableMan::Update()
             }
         }
 		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
+
+        for (Actor *actor : m_Actors) {
+            actor->PostUpdate();
+        }
+        for (MovableObject *item : m_Items) {
+            item->PostUpdate();
+        }
+        for (MovableObject *particle : m_Particles) {
+            particle->PostUpdate();
+        }
     }
 
 

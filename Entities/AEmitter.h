@@ -109,7 +109,7 @@ ClassInfoGetters;
 	/// Returns whether this emitter was emitting last frame.
 	/// </summary>
 	/// <returns>Whether this emitter was emitting last frame.</returns>
-	bool WasEmitting() const { return m_EmitEnabled; }
+	bool WasEmitting() const { return m_WasEmitting; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -508,6 +508,7 @@ ClassInfoGetters;
 // Return value:    None.
 
 	void Update() override;
+	void PostUpdate() override { m_WasEmitting = m_EmitEnabled; Attachable::PostUpdate(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

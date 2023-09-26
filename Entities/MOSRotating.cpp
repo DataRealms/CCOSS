@@ -1643,6 +1643,20 @@ void MOSRotating::Update() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void MOSRotating::PostUpdate() {
+    for (std::list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) {
+        (*itr)->PostUpdate();
+    }
+
+    for (std::list<Attachable *>::const_iterator itr = m_Attachables.begin(); itr != m_Attachables.end(); ++itr) {
+        (*itr)->PostUpdate();
+    }
+
+    MovableObject::PostUpdate();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO) {
     if (pOverlapMO == this || !m_GetsHitByMOs || !pOverlapMO->GetsHitByMOs()) {
         return false;

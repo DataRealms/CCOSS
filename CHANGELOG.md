@@ -118,6 +118,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Fixed a crash that could occur when scripted objects were deleted, particularly when switching scene.
 
+- Fixed a bug where an emitter's burst sound would cut out as soon as the emitter stopped firing.
+
 </details>
 
 <details><summary><b>Removed</b></summary>

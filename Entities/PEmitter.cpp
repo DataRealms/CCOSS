@@ -487,7 +487,6 @@ namespace RTE {
 		else if (m_WasEmitting)
 		{
 			m_EmissionSound.Stop();
-			m_BurstSound.Stop();
 			m_EndSound.Play(m_Pos);
 			m_WasEmitting = false;
 		}

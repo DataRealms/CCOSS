@@ -573,7 +573,6 @@ void AEmitter::Update()
 		if (m_WasEmitting)
 		{
 			if (m_EmissionSound) { m_EmissionSound->Stop(); }
-			if (m_BurstSound) { m_BurstSound->Stop(); }
 			if (m_EndSound) { m_EndSound->Play(m_Pos); }
 			m_WasEmitting = false;
 		}

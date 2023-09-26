@@ -1583,7 +1583,7 @@ void SceneEditorGUI::UpdateBrainSkyPathAndCost(Vector brainPos) {
             return;
         }
 
-        if (g_SceneMan.GetScene()->PositionsAreTheSamePathNode(const_cast<Vector&>(m_PathRequest->startPos), brainPos)) {
+        if (g_SceneMan.GetScene()->PositionsAreTheSamePathNode(const_cast<Vector&>(m_PathRequest->targetPos), brainPos)) {
             // No need to recalculate
             return;
         }
@@ -1609,7 +1609,7 @@ void SceneEditorGUI::UpdateBrainSkyPathAndCost(Vector brainPos) {
 	}
 
 	Activity::Teams team = static_cast<Activity::Teams>(g_ActivityMan.GetActivity()->GetTeamOfPlayer(m_pController->GetPlayer()));
-    m_PathRequest = g_SceneMan.GetScene()->CalculatePathAsync(brainPos, Vector(orbitPosX, 0), c_PathFindingDefaultDigStrength, team, 
+    m_PathRequest = g_SceneMan.GetScene()->CalculatePathAsync(Vector(orbitPosX, 0), brainPos, c_PathFindingDefaultDigStrength, team,
         [&](std::shared_ptr<volatile PathRequest> pathRequest) {
             m_BrainSkyPath = const_cast<std::list<Vector>&>(pathRequest->path);
             m_BrainSkyPathCost = pathRequest->totalCost;

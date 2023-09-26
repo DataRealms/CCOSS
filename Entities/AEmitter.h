@@ -105,6 +105,12 @@ ClassInfoGetters;
 
     bool IsEmitting() const { return m_EmitEnabled; }
 
+	/// <summary>
+	/// Returns whether this emitter was emitting last frame.
+	/// </summary>
+	/// <returns>Whether this emitter was emitting last frame.</returns>
+	bool WasEmitting() const { return m_EmitEnabled; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ResetEmissionTimers
@@ -647,6 +653,12 @@ ClassInfoGetters;
 	/// </summary>
 	/// <param name="newSound">The new SoundContainer for this AEmitter's end sound.</param>
 	void SetEndSound(SoundContainer *newSound) { m_EndSound = newSound; }
+
+	/// <summary>
+	/// Returns whether this emitter just started emitting this frame.
+	/// </summary>
+	/// <returns>Whether this emitter just started emitting this frame.</returns>
+	bool JustStartedEmitting() const { return !m_WasEmitting && m_EmitEnabled; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

@@ -118,6 +118,12 @@ public:
 
 	bool IsEmitting() const { return m_EmitEnabled; }
 
+	/// <summary>
+	/// Returns whether this emitter was emitting last frame.
+	/// </summary>
+	/// <returns>Whether this emitter was emitting last frame.</returns>
+	bool WasEmitting() const { return m_EmitEnabled; }
+
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          ResetEmissionTimers
@@ -489,6 +495,12 @@ public:
 	/// </summary>
 	/// <param name="newValue">New number of emissions left.</param>
 	void SetEmitCountLimit(long newValue) { m_EmitCountLimit = newValue; }
+
+	/// <summary>
+	/// Returns whether this emitter just started emitting this frame.
+	/// </summary>
+	/// <returns>Whether this emitter just started emitting this frame.</returns>
+	bool JustStartedEmitting() const { return !m_WasEmitting && m_EmitEnabled; }
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Protected member variable and method declarations

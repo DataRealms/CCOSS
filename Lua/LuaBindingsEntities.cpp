@@ -410,6 +410,7 @@ namespace RTE {
 		.def_readwrite("Emissions", &AEmitter::m_EmissionList, luabind::return_stl_iterator)
 
 		.def("IsEmitting", &AEmitter::IsEmitting)
+		.def("WasEmitting", &AEmitter::WasEmitting)
 		.def("EnableEmission", &AEmitter::EnableEmission)
 		.def("GetEmitVector", &AEmitter::GetEmitVector)
 		.def("GetRecoilVector", &AEmitter::GetRecoilVector)
@@ -417,7 +418,8 @@ namespace RTE {
 		.def("TriggerBurst", &AEmitter::TriggerBurst)
 		.def("IsSetToBurst", &AEmitter::IsSetToBurst)
 		.def("CanTriggerBurst", &AEmitter::CanTriggerBurst)
-		.def("GetScaledThrottle", &AEmitter::GetScaledThrottle);
+		.def("GetScaledThrottle", &AEmitter::GetScaledThrottle)
+		.def("JustStartedEmitting", &AEmitter::JustStartedEmitting);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1098,13 +1100,15 @@ namespace RTE {
 		.def_readwrite("Emissions", &PEmitter::m_EmissionList, luabind::return_stl_iterator)
 
 		.def("IsEmitting", &PEmitter::IsEmitting)
+		.def("WasEmitting", &PEmitter::WasEmitting)
 		.def("EnableEmission", &PEmitter::EnableEmission)
 		.def("GetEmitVector", &PEmitter::GetEmitVector)
 		.def("GetRecoilVector", &PEmitter::GetRecoilVector)
 		.def("EstimateImpulse", &PEmitter::EstimateImpulse)
 		.def("TriggerBurst", &PEmitter::TriggerBurst)
 		.def("IsSetToBurst", &PEmitter::IsSetToBurst)
-		.def("CanTriggerBurst", &PEmitter::CanTriggerBurst);
+		.def("CanTriggerBurst", &PEmitter::CanTriggerBurst)
+		.def("JustStartedEmitting", &PEmitter::JustStartedEmitting);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

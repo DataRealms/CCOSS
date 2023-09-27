@@ -26,6 +26,7 @@ namespace RTE {
 		m_TerrainDebris.clear();
 		m_TerrainObjects.clear();
 		m_UpdatedMaterialAreas.clear();
+		m_OrbitDirection = Directions::Up;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,6 +70,8 @@ namespace RTE {
 			m_TerrainObjects.emplace_back(terrainObject);
 		}
 
+		m_OrbitDirection = reference.m_OrbitDirection;
+
 		return 0;
 	}
 
@@ -100,6 +103,21 @@ namespace RTE {
 			std::unique_ptr<TerrainObject> terrainObject = std::make_unique<TerrainObject>();
 			reader >> terrainObject.get();
 			m_TerrainObjects.emplace_back(terrainObject.release());
+		});
+		MatchProperty("OrbitDirection", {
+			std::string orbitDirection;
+			reader >> orbitDirection;
+			if (orbitDirection == "Up") {
+				m_OrbitDirection = Directions::Up;
+			} else if (orbitDirection == "Down") {
+				m_OrbitDirection = Directions::Down;
+			} else if (orbitDirection == "Left") {
+				m_OrbitDirection = Directions::Left;
+			} else if (orbitDirection == "Right") {
+				m_OrbitDirection = Directions::Right;
+			} else {
+				reader.ReportError("Unknown OrbitDirection '" + orbitDirection + "'!");
+			}
 		});
 		
 		EndPropertyList;
@@ -136,6 +154,24 @@ namespace RTE {
 				writer.ObjectEnd();
 			}
 		}
+
+		writer.NewProperty("OrbitDirection");
+		switch (m_OrbitDirection) {
+		default:
+		case Directions::Up:
+			writer << "Up";
+			break;
+		case Directions::Down:
+			writer << "Down";
+			break;
+		case Directions::Left:
+			writer << "Left";
+			break;
+		case Directions::Right:
+			writer << "Right";
+			break;
+		}
+
 		return 0;
 	}
 

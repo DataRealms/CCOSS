@@ -1589,27 +1589,72 @@ void SceneEditorGUI::UpdateBrainSkyPathAndCost(Vector brainPos) {
         }
     }
 
-    int offsetX = 0;
-	int spacing = 20;
-	int orbitPosX = brainPos.GetFloorIntX();
+    Vector orbitPos;
 
-	// If the ceiling directly above is blocked, search the surroundings for gaps.
-	for (int i = 0; i < g_SceneMan.GetSceneWidth() / spacing; i++) {
-		orbitPosX = brainPos.GetFloorIntX() + offsetX;
-        if (!g_SceneMan.IsWithinBounds(orbitPosX, 0)) { 
-            offsetX *= -1; 
-            orbitPosX = brainPos.GetFloorIntX() + offsetX;
+    int staticPos;
+    int checkPos;
+    int lengthToCheck;
+
+    // If the ceiling directly above is blocked, search the surroundings for gaps.
+    Directions orbitDirection = g_SceneMan.GetTerrain()->GetOrbitDirection();
+    switch (orbitDirection) {
+    default:
+    case Directions::Up:
+        checkPos = brainPos.GetFloorIntX();
+        staticPos = 0;
+        lengthToCheck = g_SceneMan.GetSceneWidth();
+        break;
+    case Directions::Down:
+        checkPos = brainPos.GetFloorIntX();
+        staticPos = g_SceneMan.GetSceneHeight();
+        lengthToCheck = g_SceneMan.GetSceneWidth();
+        break;
+    case Directions::Left:
+        checkPos = brainPos.GetFloorIntY();
+        staticPos = 0;
+        lengthToCheck = g_SceneMan.GetSceneHeight();
+        break;
+    case Directions::Right:
+        checkPos = brainPos.GetFloorIntY();
+        staticPos = g_SceneMan.GetSceneWidth();
+        lengthToCheck = g_SceneMan.GetSceneHeight();
+        break;
+    }
+
+    auto getVector = [&](int pos) {
+        switch (orbitDirection) {
+        default:
+        case Directions::Up:
+            return Vector(pos, 0);
+        case Directions::Down:
+            return Vector(pos, g_SceneMan.GetSceneHeight());
+        case Directions::Left:
+            return Vector(0, pos);
+        case Directions::Right:
+            return Vector(g_SceneMan.GetSceneWidth(), pos);
+        }
+    };
+
+    int offset = 0;
+	int spacing = 20;
+	for (int i = 0; i < lengthToCheck / spacing; i++) {
+        int offsetCheckPos = checkPos + offset;
+        orbitPos = getVector(offsetCheckPos);
+        if (!g_SceneMan.IsWithinBounds(orbitPos.GetFloorIntX(), orbitPos.GetFloorIntY())) {
+            offset *= -1; 
+            offsetCheckPos = checkPos + offset;
+            orbitPos = getVector(offsetCheckPos);
         }
 
-		if (g_SceneMan.GetTerrMatter(orbitPosX, 0) == g_MaterialAir) {
+		if (g_SceneMan.GetTerrMatter(orbitPos.GetFloorIntX(), orbitPos.GetFloorIntY()) == g_MaterialAir) {
 			break;
 		} else {
-			offsetX = i * (i % 2 == 0 ? spacing : -spacing);
+			offset = i * (i % 2 == 0 ? spacing : -spacing);
 		}
 	}
 
 	Activity::Teams team = static_cast<Activity::Teams>(g_ActivityMan.GetActivity()->GetTeamOfPlayer(m_pController->GetPlayer()));
-    m_PathRequest = g_SceneMan.GetScene()->CalculatePathAsync(Vector(orbitPosX, 0), brainPos, c_PathFindingDefaultDigStrength, team,
+    m_PathRequest = g_SceneMan.GetScene()->CalculatePathAsync(orbitPos, brainPos, c_PathFindingDefaultDigStrength, team,
         [&](std::shared_ptr<volatile PathRequest> pathRequest) {
             m_BrainSkyPath = const_cast<std::list<Vector>&>(pathRequest->path);
             m_BrainSkyPathCost = pathRequest->totalCost;

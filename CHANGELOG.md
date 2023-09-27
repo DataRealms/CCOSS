@@ -66,6 +66,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `AEmitter` and `PEmitter` INI property `SustainBurstSound`, which determines whether the burst sound should sustain and play until completion even when the emitter stops emitting, or if it cuts out with the emitter. Defaults to false.  
 
+- New `SLTerrain` INI property `OrbitDirection`, which defines which direction is considered to be orbit, for the sake of brain-path-to-orbit, dropship spawn/return location, etc. Can be any of `Up`, `Down`, `Left` or `Right`. Defaults to `Up`.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

@@ -1131,19 +1131,19 @@ void ACrab::PreControllerUpdate()
         }
         // Correct angle based on flip
         m_AimAngle = FacingAngle(m_AimAngle);
+
+        // Clamp the analog aim too, so it doesn't feel "sticky" at the edges of the aim limit
+        if (m_Controller.IsPlayerControlled()) {
+            float mouseAngle = g_UInputMan.AnalogAimValues(m_Controller.GetPlayer()).GetAbsRadAngle();
+            Clamp(mouseAngle, FacingAngle(adjustedAimRangeUpperLimit), FacingAngle(adjustedAimRangeLowerLimit));
+            g_UInputMan.SetMouseValueAngle(mouseAngle, m_Controller.GetPlayer());
+        }
     }
     else
         m_AimState = AIMSTILL;
 
     // Clamp aim angle so it's within adjusted limit ranges, for all control types
     Clamp(m_AimAngle, adjustedAimRangeUpperLimit, adjustedAimRangeLowerLimit);
-
-    // Clamp the analog aim too, so it doesn't feel "sticky" at the edges of the aim limit
-    if (m_Controller.IsPlayerControlled()) {
-        float mouseAngle = g_UInputMan.AnalogAimValues(m_Controller.GetPlayer()).GetAbsRadAngle();
-        Clamp(mouseAngle, FacingAngle(adjustedAimRangeUpperLimit), FacingAngle(adjustedAimRangeLowerLimit));
-        g_UInputMan.SetMouseValueAngle(mouseAngle, m_Controller.GetPlayer());
-    }
 
     //////////////////////////////
     // Sharp aim calculation

@@ -163,7 +163,14 @@ namespace RTE {
 			return;
 		}
 
-		if (m_ControlledActor) { m_Team = m_ControlledActor->GetTeam(); }
+		if (m_ControlledActor) { 
+			m_Team = m_ControlledActor->GetTeam();
+
+			if (m_ControlledActor->GetHealth() == 0.0f || m_ControlledActor->GetStatus() == Actor::DYING || m_ControlledActor->GetStatus() == Actor::DEAD) {
+				// Keep old states so jetpacks stay on etc
+				return;
+			}
+		}
 
 		switch (m_InputMode) {
 			case InputMode::CIM_PLAYER:

@@ -1425,7 +1425,6 @@ void Actor::Update()
 
 	if (m_Status != DYING && m_Status != DEAD && m_Health <= 0) {
 		if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
-		m_Controller.SetDisabled(true);
         DropAllInventory();
         m_Status = DYING;
 		m_DeathTmr.Reset();

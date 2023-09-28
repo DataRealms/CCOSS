@@ -2073,6 +2073,16 @@ void MovableMan::PreControllerUpdate()
         actor->PreControllerUpdate();
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
+
+    for (MovableObject* item : m_Items) {
+        item->PreControllerUpdate();
+    }
+
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
+    for (MovableObject* particle : m_Particles) {
+        particle->PreControllerUpdate();
+    }
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -91,9 +91,6 @@ void MOSRotating::Clear()
     m_NoSetDamageMultiplier = true;
 	m_FlashWhiteTimer.Reset();
 	m_FlashWhiteTimer.SetRealTimeLimitMS(0);
-    m_StringValueMap.clear();
-    m_NumberValueMap.clear();
-    m_ObjectValueMap.clear();
 }
 
 
@@ -271,10 +268,6 @@ int MOSRotating::Create(const MOSRotating &reference) {
     for (const Gib &gib : reference.m_Gibs) {
         m_Gibs.push_back(gib);
     }
-
-    m_StringValueMap = reference.m_StringValueMap;
-    m_NumberValueMap = reference.m_NumberValueMap;
-    m_ObjectValueMap = reference.m_ObjectValueMap;
 
     m_GibImpulseLimit = reference.m_GibImpulseLimit;
     m_GibWoundLimit = reference.m_GibWoundLimit;

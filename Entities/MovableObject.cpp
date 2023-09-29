@@ -83,6 +83,9 @@ void MovableObject::Clear()
     m_IsTraveling = false;
     m_AllLoadedScripts.clear();
     m_FunctionsAndScripts.clear();
+    m_StringValueMap.clear();
+    m_NumberValueMap.clear();
+    m_ObjectValueMap.clear();
     m_ThreadedLuaState = nullptr;
     m_HasSinglethreadedScripts = false;
     m_ScriptObjectName.clear();
@@ -281,6 +284,10 @@ int MovableObject::Create(const MovableObject &reference)
 
 	m_SimUpdatesBetweenScriptedUpdates = reference.m_SimUpdatesBetweenScriptedUpdates;
 	m_SimUpdatesSinceLastScriptedUpdate = reference.m_SimUpdatesSinceLastScriptedUpdate;
+
+    m_StringValueMap = reference.m_StringValueMap;
+    m_NumberValueMap = reference.m_NumberValueMap;
+    m_ObjectValueMap = reference.m_ObjectValueMap;
 
 	m_UniqueID = MovableObject::GetNextUniqueID();
 	g_MovableMan.RegisterObject(this);

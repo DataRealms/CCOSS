@@ -902,7 +902,7 @@ void ACraft::Update()
     /////////////////////////////////////////
     // Check for having gone into orbit
 
-    if (m_Pos.m_Y < -m_CharHeight)
+    if (m_Pos.m_Y < -m_CharHeight || m_Pos.m_Y > g_SceneMan.GetSceneHeight() + m_CharHeight)
     {
         g_ActivityMan.GetActivity()->HandleCraftEnteringOrbit(this);
         // Play fading away thruster sound

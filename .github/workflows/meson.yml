@@ -119,7 +119,7 @@ jobs:
     name: MacOS Build
 
     env: 
-      DEVELOPER_DIR: /Applications/Xcode_11.7.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_12.4.app/Contents/Developer
         
     steps:
       - uses: actions/checkout@v3

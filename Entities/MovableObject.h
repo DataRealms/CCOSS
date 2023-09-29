@@ -2126,15 +2126,16 @@ protected:
 
 private:
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          Clear
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Clears all the member variables of this MovableObject, effectively
-//                  resetting the members of this abstraction level only.
-// Arguments:       None.
-// Return value:    None.
-
+    /// <summary>
+    /// Clears all the member variables of this MovableObject, effectively resetting the members of this abstraction level only.
+    /// </summary>
     void Clear();
+
+    /// <summary>
+    /// Handles reading for custom values, dealing with the various types of custom values.
+    /// </summary>
+    /// <param name="reader">A Reader lined up to the custom value type to be read.</param>
+    void ReadCustomValueProperty(Reader& reader);
 
     /// <summary>
     /// Returns the script state to use for a given script path.

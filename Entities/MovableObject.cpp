@@ -397,10 +397,30 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
     MatchProperty("ApplyWoundBurstDamageOnCollision", { reader >> m_ApplyWoundBurstDamageOnCollision; });
 	MatchProperty("IgnoreTerrain", { reader >> m_IgnoreTerrain; });
     MatchProperty("SimUpdatesBetweenScriptedUpdates", { reader >> m_SimUpdatesBetweenScriptedUpdates; });
+    MatchProperty("AddCustomValue", { ReadCustomValueProperty(reader); });
 
     EndPropertyList;
 }
 
+void MovableObject::ReadCustomValueProperty(Reader& reader) {
+    std::string customValueType;
+    reader >> customValueType;
+    std::string customKey = reader.ReadPropName();
+    std::string customValue = reader.ReadPropValue();
+    if (customValueType == "NumberValue") {
+        try {
+            SetNumberValue(customKey, std::stod(customValue));
+        } catch (const std::invalid_argument) {
+            reader.ReportError("Tried to read a non-number value for SetNumberValue.");
+        }
+    } else if (customValueType == "StringValue") {
+        SetStringValue(customKey, customValue);
+    } else {
+        reader.ReportError("Invalid CustomValue type " + customValueType);
+    }
+    // Artificially end reading this property since we got all we needed
+    reader.NextProperty();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Save
@@ -485,6 +505,16 @@ int MovableObject::Save(Writer &writer) const
     writer << m_IgnoreTerrain;
     writer.NewProperty("SimUpdatesBetweenScriptedUpdates");
     writer << m_SimUpdatesBetweenScriptedUpdates;
+
+    for (const auto &[key, value] : m_NumberValueMap) {
+        writer.ObjectStart("AddCustomValue = NumberValue");
+        writer.NewPropertyWithValue(key, value);
+    }
+
+    for (const auto &[key, value] : m_StringValueMap) {
+        writer.ObjectStart("AddCustomValue = StringValue");
+        writer.NewPropertyWithValue(key, value);
+    }
 
     return 0;
 }

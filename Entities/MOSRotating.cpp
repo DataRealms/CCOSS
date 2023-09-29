@@ -374,33 +374,10 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 	MatchProperty("DamageMultiplier", {
 		reader >> m_DamageMultiplier;
         m_NoSetDamageMultiplier = false;
-    });
-    MatchProperty("AddCustomValue", { ReadCustomValueProperty(reader); });
-    
+    }); 
     
     EndPropertyList;
 }
-
-void MOSRotating::ReadCustomValueProperty(Reader &reader) {
-    std::string customValueType;
-    reader >> customValueType;
-    std::string customKey = reader.ReadPropName();
-    std::string customValue = reader.ReadPropValue();
-    if (customValueType == "NumberValue") {
-        try {
-            SetNumberValue(customKey, std::stod(customValue));
-        } catch (const std::invalid_argument) {
-            reader.ReportError("Tried to read a non-number value for SetNumberValue.");
-        }
-    } else if (customValueType == "StringValue") {
-        SetStringValue(customKey, customValue);
-    } else {
-        reader.ReportError("Invalid CustomValue type " + customValueType);
-    }
-    // Artificially end reading this property since we got all we needed
-    reader.NextProperty();
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Save

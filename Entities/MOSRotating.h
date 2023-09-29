@@ -972,13 +972,6 @@ private:
 
     void Clear();
 
-    /// <summary>
-    /// Handles reading for custom values, dealing with the various types of custom values.
-    /// </summary>
-    /// <param name="reader">A Reader lined up to the custom value type to be read.</param>
-    void ReadCustomValueProperty(Reader &reader);
-
-
     // Disallow the use of some implicit methods.
 	MOSRotating(const MOSRotating &reference) = delete;
 	MOSRotating& operator=(const MOSRotating &rhs) = delete;

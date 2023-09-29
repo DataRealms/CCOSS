@@ -105,6 +105,12 @@ ClassInfoGetters;
 
     bool IsEmitting() const { return m_EmitEnabled; }
 
+	/// <summary>
+	/// Returns whether this emitter was emitting last frame.
+	/// </summary>
+	/// <returns>Whether this emitter was emitting last frame.</returns>
+	bool WasEmitting() const { return m_WasEmitting; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          ResetEmissionTimers
@@ -266,7 +272,19 @@ ClassInfoGetters;
 	/// Gets the adjusted throttle multiplier that is factored into the emission rate of this AEmitter.
 	/// </summary>
 	/// <returns>The throttle strength as a multiplier.</returns>
-	float GetThrottleFactor() const { return 1.0F - std::abs(m_Throttle) + (m_Throttle < 0 ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier) * std::abs(m_Throttle); }
+	float GetThrottleFactor() const { return LERP(-1.0f, 1.0f, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, m_Throttle); }
+
+	/// <summary>
+	/// Returns a scaled throttle value that represents a linear increase of force.
+	/// Because of (bad) reasons, throttle is in the range -1.0F to 1.0F, where -1.0F is "minimum force" and 1.0F is "maximum force".
+	/// 0.0F is "whoever the fuck knows?" force. As such, multiplying throttle by 2 does not mean twice the force emitted, instead it means "whoever the fuck knows?" additional force emitted.
+	/// All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy. All work and no play makes Jack a dull boy.
+	/// ...this helper function lets us apply a scale to throttle and get a sensible result.
+	/// </summary>
+	/// <param name="throttle">The throttle value to be considered.</param>
+	/// <param name="multiplier">The multiplier to scale by, in terms of absolute force emitted.</param>
+	/// <returns>Adjusted throttle value scaled by the multiplier value.</returns>
+	float GetScaledThrottle(float throttle, float multiplier) const;
 
 	/// <summary>
 	/// Gets the negative throttle multiplier of this AEmitter.
@@ -490,6 +508,7 @@ ClassInfoGetters;
 // Return value:    None.
 
 	void Update() override;
+	void PostUpdate() override { m_WasEmitting = m_EmitEnabled; Attachable::PostUpdate(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -636,6 +655,12 @@ ClassInfoGetters;
 	/// <param name="newSound">The new SoundContainer for this AEmitter's end sound.</param>
 	void SetEndSound(SoundContainer *newSound) { m_EndSound = newSound; }
 
+	/// <summary>
+	/// Returns whether this emitter just started emitting this frame.
+	/// </summary>
+	/// <returns>Whether this emitter just started emitting this frame.</returns>
+	bool JustStartedEmitting() const { return !m_WasEmitting && m_EmitEnabled; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -697,6 +722,8 @@ protected:
     float m_LoudnessOnEmit;
     // Whether to only display flash on bursts, and not on any emission frame.
     bool m_FlashOnlyOnBurst;
+	// Whether the burst sound should always play until completion, or whether it stops when this emitter stops emitting
+	bool m_SustainBurstSound;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

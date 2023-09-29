@@ -155,46 +155,37 @@ int ACRocket::Create(const ACRocket &reference) {
 //                  false is returned, and the reader's position is untouched.
 
 int ACRocket::ReadProperty(const std::string_view &propName, Reader &reader) {
-    if (propName == "RLeg" || propName == "RightLeg") {
-        SetRightLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "LLeg" || propName == "LeftLeg") {
-        SetLeftLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "RFootGroup" || propName == "RightFootGroup") {
+    StartPropertyList(return ACraft::ReadProperty(propName, reader));
+    
+    MatchForwards("RLeg") MatchProperty("RightLeg", { SetRightLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("LLeg") MatchProperty("LeftLeg", { SetLeftLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("RFootGroup") MatchProperty("RightFootGroup", {
         delete m_pRFootGroup;
         m_pRFootGroup = new AtomGroup();
         reader >> m_pRFootGroup;
         m_pRFootGroup->SetOwner(this);
-    } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
+    }); 
+    MatchForwards("LFootGroup") MatchProperty("LeftFootGroup", {
         delete m_pLFootGroup;
         m_pLFootGroup = new AtomGroup();
         reader >> m_pLFootGroup;
         m_pLFootGroup->SetOwner(this);
-    } else if (propName == "MThruster" || propName == "MainThruster") {
-        SetMainThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "RThruster" || propName == "RightThruster") {
-        SetRightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "LThruster" || propName == "LeftThruster") {
-        SetLeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "URThruster" || propName == "UpRightThruster") {
-        SetURightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "ULThruster" || propName == "UpLeftThruster") {
-        SetULeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "RaisedGearLimbPath") {
-        reader >> m_Paths[RIGHT][RAISED];
-    } else if (propName == "LoweredGearLimbPath") {
-        reader >> m_Paths[RIGHT][LOWERED];
-    } else if (propName == "LoweringGearLimbPath") {
-        reader >> m_Paths[RIGHT][LOWERING];
-    } else if (propName == "RaisingGearLimbPath") {
-        reader >> m_Paths[RIGHT][RAISING];
-    } else if (propName == "MaxGimbalAngle") {
+    }); 
+    MatchForwards("MThruster") MatchProperty("MainThruster", { SetMainThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("RThruster") MatchProperty("RightThruster", { SetRightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("LThruster") MatchProperty("LeftThruster", { SetLeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("URThruster") MatchProperty("UpRightThruster", { SetURightThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("ULThruster") MatchProperty("UpLeftThruster", { SetULeftThruster(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("RaisedGearLimbPath", { reader >> m_Paths[RIGHT][RAISED]; });
+    MatchProperty("LoweredGearLimbPath", { reader >> m_Paths[RIGHT][LOWERED]; });
+    MatchProperty("LoweringGearLimbPath", { reader >> m_Paths[RIGHT][LOWERING]; });
+    MatchProperty("RaisingGearLimbPath", { reader >> m_Paths[RIGHT][RAISING]; });
+    MatchProperty("MaxGimbalAngle", {
 		reader >> m_MaxGimbalAngle;
 		m_MaxGimbalAngle *= (c_PI / 180.0F);
-    } else {
-        return ACraft::ReadProperty(propName, reader);
-    }
+    });
 
-    return 0;
+    EndPropertyList;
 }
 
 

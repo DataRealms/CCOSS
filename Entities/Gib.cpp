@@ -41,31 +41,23 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Gib::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "GibParticle") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("GibParticle", {
 			m_GibParticle = dynamic_cast<const MovableObject *>(g_PresetMan.GetEntityPreset(reader));
 			RTEAssert(m_GibParticle, "Stream suggests allocating an unallocable type in Gib::Create!");
-		} else if (propName == "Offset") {
-			reader >> m_Offset;
-		} else if (propName == "Count") {
-			reader >> m_Count;
-		} else if (propName == "Spread") {
-			reader >> m_Spread;
-		} else if (propName == "MinVelocity") {
-			reader >> m_MinVelocity;
-		} else if (propName == "MaxVelocity") {
-			reader >> m_MaxVelocity;
-		} else if (propName == "LifeVariation") {
-			reader >> m_LifeVariation;
-		} else if (propName == "InheritsVel") {
-			reader >> m_InheritsVel;
-		} else if (propName == "IgnoresTeamHits") {
-			reader >> m_IgnoresTeamHits;
-		} else if (propName == "SpreadMode") {
-			m_SpreadMode = static_cast<SpreadMode>(std::stoi(reader.ReadPropValue()));
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		MatchProperty("Offset", { reader >> m_Offset; });
+		MatchProperty("Count", { reader >> m_Count; });
+		MatchProperty("Spread", { reader >> m_Spread; });
+		MatchProperty("MinVelocity", { reader >> m_MinVelocity; });
+		MatchProperty("MaxVelocity", { reader >> m_MaxVelocity; });
+		MatchProperty("LifeVariation", { reader >> m_LifeVariation; });
+		MatchProperty("InheritsVel", { reader >> m_InheritsVel; });
+		MatchProperty("IgnoresTeamHits", { reader >> m_IgnoresTeamHits; });
+		MatchProperty("SpreadMode", { m_SpreadMode = static_cast<SpreadMode>(std::stoi(reader.ReadPropValue())); });
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

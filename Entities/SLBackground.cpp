@@ -93,39 +93,33 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SLBackground::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "FrameCount") {
-			reader >> m_FrameCount;
-		} else if (propName == "SpriteAnimMode") {
+		StartPropertyList(return SceneLayer::ReadProperty(propName, reader));
+		
+		MatchProperty("FrameCount", { reader >> m_FrameCount; });
+		MatchProperty("SpriteAnimMode", {
 			m_SpriteAnimMode = static_cast<SpriteAnimMode>(std::stoi(reader.ReadPropValue()));
 			if (m_SpriteAnimMode < SpriteAnimMode::NOANIM || m_SpriteAnimMode > SpriteAnimMode::ALWAYSPINGPONG) { reader.ReportError("Invalid SLBackground sprite animation mode!"); }
-		} else if (propName == "SpriteAnimDuration") {
-			reader >> m_SpriteAnimDuration;
-		} else if (propName == "IsAnimatedManually") {
-			reader >> m_IsAnimatedManually;
-		} else if (propName == "DrawTransparent") {
-			reader >> m_DrawMasked;
-		} else if (propName == "ScrollRatio") {
+		});
+		MatchProperty("SpriteAnimDuration", { reader >> m_SpriteAnimDuration; });
+		MatchProperty("IsAnimatedManually", { reader >> m_IsAnimatedManually; });
+		MatchProperty("DrawTransparent", { reader >> m_DrawMasked; });
+		MatchProperty("ScrollRatio", {
 			// Actually read the ScrollInfo, not the ratio. The ratios will be initialized later.
 			reader >> m_ScrollInfo;
-		} else if (propName == "ScaleFactor") {
+		});
+		MatchProperty("ScaleFactor", {
 			reader >> m_ScaleFactor;
 			SetScaleFactor(m_ScaleFactor);
-		} else if (propName == "IgnoreAutoScaling") {
-			reader >> m_IgnoreAutoScale;
-		} else if (propName == "OriginPointOffset") {
-			reader >> m_OriginOffset;
-		} else if (propName == "CanAutoScrollX") {
-			reader >> m_CanAutoScrollX;
-		} else if (propName == "CanAutoScrollY") {
-			reader >> m_CanAutoScrollY;
-		} else if (propName == "AutoScrollStepInterval") {
-			reader >> m_AutoScrollStepInterval;
-		} else if (propName == "AutoScrollStep") {
-			reader >> m_AutoScrollStep;
-		} else {
-			return SceneLayer::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		MatchProperty("IgnoreAutoScaling", { reader >> m_IgnoreAutoScale; });
+		MatchProperty("OriginPointOffset", { reader >> m_OriginOffset; });
+		MatchProperty("CanAutoScrollX", { reader >> m_CanAutoScrollX; });
+		MatchProperty("CanAutoScrollY", { reader >> m_CanAutoScrollY; });
+		MatchProperty("AutoScrollStepInterval", { reader >> m_AutoScrollStepInterval; });
+		MatchProperty("AutoScrollStep", { reader >> m_AutoScrollStep; });
+		
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

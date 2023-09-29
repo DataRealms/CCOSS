@@ -78,10 +78,13 @@ int Loadout::Create(const Loadout &reference)
 
 int Loadout::ReadProperty(const std::string_view &propName, Reader &reader)
 {
+    StartPropertyList(return Entity::ReadProperty(propName, reader));
+
     // Need to load all this stuff without the assumption that it all is available. Mods might have changed etc so things might still not be around, and that's ok.
-    if (propName == "DeliveryCraft")
-    {
-        std::string className, presetName;
+    MatchProperty("DeliveryCraft",
+        {
+            std::string className;
+            std::string presetName;
         // Load class name and then preset instance name
         reader >> className;
         // Ignore the property name, just interested in the value
@@ -95,10 +98,11 @@ int Loadout::ReadProperty(const std::string_view &propName, Reader &reader)
             m_Complete = false;
         // Artificially end reading this property since we got all we needed
         reader.NextProperty();
-    }
-    else if (propName == "AddCargoItem")
+    });
+    MatchProperty("AddCargoItem",
     {
-        std::string className, presetName;
+        std::string className;
+        std::string presetName;
         // Load class name and then preset instance name
         reader >> className;
         // Ignore the property name, just interested in the value
@@ -118,11 +122,9 @@ int Loadout::ReadProperty(const std::string_view &propName, Reader &reader)
         reader.NextProperty();
 
         pCargo = 0;
-    }
-    else
-        return Entity::ReadProperty(propName, reader);
+    });
 
-    return 0;
+    EndPropertyList;
 }
 
 
@@ -191,7 +193,7 @@ Actor * Loadout::CreateFirstActor(int nativeModule, float foreignMult, float nat
         // Go through the list of things ordered, and give any actors all the items that is present after them,
         // until the next actor. Also, the first actor gets all stuff in the list above him.
         MovableObject *pInventoryObject = 0;
-        Actor *pActor = 0;
+        Actor *pActor = nullptr;
         std::list<MovableObject *> tempCargo;
         for (std::list<const SceneObject *>::const_iterator itr = m_CargoItems.begin(); itr != m_CargoItems.end(); ++itr)
         {
@@ -223,7 +225,7 @@ Actor * Loadout::CreateFirstActor(int nativeModule, float foreignMult, float nat
                     costTally -= pActor->GetGoldValue(nativeModule, foreignMult, nativeMult);
                     // Also stop going through the list; we only need ONE Actor.. so destroy the instance we jsut created of a second one.
                     delete pActor;
-                    pActor = 0;
+                    pActor = nullptr;
                     // STOP!
                     break;
                 }

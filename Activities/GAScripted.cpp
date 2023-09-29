@@ -115,17 +115,19 @@ int GAScripted::Create(const GAScripted &reference) {
 //                  false is returned, and the reader's position is untouched.
 
 int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader) {
-	if (propName == "ScriptPath") {
+	StartPropertyList(return GameActivity::ReadProperty(propName, reader));
+    
+    MatchProperty("ScriptPath", {
 		m_ScriptPath = g_PresetMan.GetFullModulePath(reader.ReadPropValue());
-	} else if (propName == "LuaClassName") {
+    });
+    MatchProperty("LuaClassName", {
 		reader >> m_LuaClassName;
-	} else if (propName == "AddPieSlice") {
-		m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader))));
-    } else {
-		return GameActivity::ReadProperty(propName, reader);
-	}
+    });
+    MatchProperty("AddPieSlice", {
+		m_PieSlicesToAdd.emplace_back(std::unique_ptr<PieSlice>(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader)))); 
+    });
 
-    return 0;
+    EndPropertyList;
 }
 
 

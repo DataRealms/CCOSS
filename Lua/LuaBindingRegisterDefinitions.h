@@ -107,6 +107,7 @@ namespace RTE {
 		LuaBindingRegisterFunctionDeclarationForType(Actor);
 		LuaBindingRegisterFunctionDeclarationForType(ADoor);
 		LuaBindingRegisterFunctionDeclarationForType(AEmitter);
+		LuaBindingRegisterFunctionDeclarationForType(AEJetpack);
 		LuaBindingRegisterFunctionDeclarationForType(AHuman);
 		LuaBindingRegisterFunctionDeclarationForType(Arm);
 		LuaBindingRegisterFunctionDeclarationForType(Attachable);

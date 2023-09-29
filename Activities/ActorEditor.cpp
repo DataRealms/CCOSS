@@ -93,18 +93,13 @@ int ActorEditor::Create(const ActorEditor &reference)
 
 int ActorEditor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
+    StartPropertyList(return EditorActivity::ReadProperty(propName, reader));
 /*
-    if (propName == "CPUTeam")
-        reader >> m_CPUTeam;
-    else if (propName == "Difficulty")
-        reader >> m_Difficulty;
-    else if (propName == "DeliveryDelay")
-        reader >> m_DeliveryDelay;
-    else
+    MatchProperty("CPUTeam", { reader >> m_CPUTeam; });
+    MatchProperty("Difficulty", { reader >> m_Difficulty; });
+    MatchProperty("DeliveryDelay", { reader >> m_DeliveryDelay; });
 */
-        return EditorActivity::ReadProperty(propName, reader);
-
-    return 0;
+    EndPropertyList;
 }
 
 
@@ -226,9 +221,7 @@ void ActorEditor::Update()
     if (m_pEditedActor)
     {
         m_pEditedActor->SetPos(g_SceneMan.GetSceneDim() * 0.5);
-        m_pEditedActor->PreControllerUpdate();
-        m_pEditedActor->GetController()->Update();
-        m_pEditedActor->Update();
+        m_pEditedActor->FullUpdate();
         g_CameraMan.SetScrollTarget(m_pEditedActor->GetPos());
     }
 
@@ -328,6 +321,9 @@ bool ActorEditor::LoadActor(const Entity *pActorToLoad)
         return false;
 
     // Replace the old one
+    if (MovableObject* asMo = dynamic_cast<MovableObject*>(m_pEditedActor)) {
+        asMo->DestroyScriptState();
+    }
     delete m_pEditedActor;
     // Make a copy of the picked object reference
     m_pEditedActor = dynamic_cast<Actor *>(pActorToLoad->Clone());

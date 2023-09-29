@@ -163,7 +163,14 @@ namespace RTE {
 			return;
 		}
 
-		if (m_ControlledActor) { m_Team = m_ControlledActor->GetTeam(); }
+		if (m_ControlledActor) { 
+			m_Team = m_ControlledActor->GetTeam();
+
+			if (m_ControlledActor->GetHealth() == 0.0f || m_ControlledActor->GetStatus() == Actor::DYING || m_ControlledActor->GetStatus() == Actor::DEAD) {
+				// Keep old states so jetpacks stay on etc
+				return;
+			}
+		}
 
 		switch (m_InputMode) {
 			case InputMode::CIM_PLAYER:
@@ -291,11 +298,11 @@ namespace RTE {
 		m_ControlStates[ControlState::PRESS_DOWN] = g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_L_DOWN) || g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_AIM_DOWN);
 
 		m_ControlStates[ControlState::PRIMARY_ACTION] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_FIRE);
-		m_ControlStates[ControlState::SECONDARY_ACTION] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU);
+		m_ControlStates[ControlState::SECONDARY_ACTION] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU_DIGITAL);
 		m_ControlStates[ControlState::PRESS_PRIMARY] = g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_FIRE);
-		m_ControlStates[ControlState::PRESS_SECONDARY] = g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_PIEMENU);
+		m_ControlStates[ControlState::PRESS_SECONDARY] = g_UInputMan.ElementPressed(m_Player, InputElements::INPUT_PIEMENU_DIGITAL);
 		m_ControlStates[ControlState::RELEASE_PRIMARY] = g_UInputMan.ElementReleased(m_Player, InputElements::INPUT_FIRE);
-		m_ControlStates[ControlState::RELEASE_SECONDARY] = g_UInputMan.ElementReleased(m_Player, InputElements::INPUT_PIEMENU);
+		m_ControlStates[ControlState::RELEASE_SECONDARY] = g_UInputMan.ElementReleased(m_Player, InputElements::INPUT_PIEMENU_DIGITAL);
 
 		UpdatePlayerAnalogInput();
 	}
@@ -374,21 +381,27 @@ namespace RTE {
 		}
 
 		// PIE MENU ACTIVE
-		if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU)) {
+		if (g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU_ANALOG) || g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU_DIGITAL)) {
 			if (m_ControlledActor && m_ControlledActor->GetPieMenu()->IsInNormalAnimationMode() && !m_ControlledActor->GetPieMenu()->IsVisible()) {
 				m_ControlStates[ControlState::PIE_MENU_OPENED] = true;
 			}
 			m_ControlStates[ControlState::PIE_MENU_ACTIVE] = true;
+			m_ControlStates[ControlState::PIE_MENU_ACTIVE_ANALOG] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU_ANALOG);
+			m_ControlStates[ControlState::PIE_MENU_ACTIVE_DIGITAL] = g_UInputMan.ElementHeld(m_Player, InputElements::INPUT_PIEMENU_DIGITAL);
+
 			// Make sure that firing and aiming are ignored while the pie menu is open, since it consumes those inputs.
 			m_ControlStates[ControlState::WEAPON_FIRE] = false;
 			m_ControlStates[ControlState::AIM_UP] = false;
 			m_ControlStates[ControlState::AIM_DOWN] = false;
 			
-			if (IsKeyboardOnlyControlled()) {
+			if (m_ControlStates[ControlState::PIE_MENU_ACTIVE_DIGITAL]) {
 				m_ControlStates[ControlState::MOVE_RIGHT] = false;
 				m_ControlStates[ControlState::MOVE_LEFT] = false;
 				m_ControlStates[ControlState::MOVE_UP] = false;
 				m_ControlStates[ControlState::MOVE_DOWN] = false;
+				m_ControlStates[ControlState::BODY_JUMP] = false;
+				m_ControlStates[ControlState::BODY_JUMPSTART] = false;
+				m_ControlStates[ControlState::BODY_CROUCH] = false;
 			}
 		}
 	}
@@ -407,7 +420,7 @@ namespace RTE {
 			m_AnalogMove = move;
 		} 
 		
-		if (!pieMenuActive) {
+		if (!pieMenuActive || m_ControlStates[ControlState::PIE_MENU_ACTIVE_DIGITAL]) {
 			m_AnalogAim = aim;
 		} else {
 			m_AnalogCursor = aim;
@@ -432,7 +445,7 @@ namespace RTE {
 		}
 
 		// Disable sharp aim while moving - this also helps with keyboard vs mouse fighting when moving and aiming in opposite directions
-		if (m_ControlStates[ControlState::BODY_JUMP] || (pieMenuActive && !m_ControlStates[ControlState::SECONDARY_ACTION])) {
+		if (m_ControlStates[ControlState::BODY_JUMP] && !pieMenuActive) {
 			if (IsMouseControlled()) {
 				g_UInputMan.SetMouseValueMagnitude(0.3F);
 			}

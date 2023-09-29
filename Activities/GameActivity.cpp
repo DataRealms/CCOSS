@@ -227,57 +227,41 @@ int GameActivity::Create(const GameActivity &reference)
 
 int GameActivity::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "CPUTeam")
-    {
+    StartPropertyList(return Activity::ReadProperty(propName, reader));
+
+    MatchProperty("CPUTeam",
         reader >> m_CPUTeam;
-        SetCPUTeam(m_CPUTeam);
-    }
-    else if (propName == "DeliveryDelay")
-        reader >> m_DeliveryDelay;
-    else if (propName == "DefaultFogOfWar")
-	    reader >> m_DefaultFogOfWar;
-    else if (propName == "DefaultRequireClearPathToOrbit")
-        reader >> m_DefaultRequireClearPathToOrbit;
-    else if (propName == "DefaultDeployUnits")
-        reader >> m_DefaultDeployUnits;
-    else if (propName == "DefaultGoldCakeDifficulty")
-        reader >> m_DefaultGoldCakeDifficulty;
-    else if (propName == "DefaultGoldEasyDifficulty")
-        reader >> m_DefaultGoldEasyDifficulty;
-    else if (propName == "DefaultGoldMediumDifficulty")
-        reader >> m_DefaultGoldMediumDifficulty;
-    else if (propName == "DefaultGoldHardDifficulty")
-        reader >> m_DefaultGoldHardDifficulty;
-    else if (propName == "DefaultGoldNutsDifficulty")
-        reader >> m_DefaultGoldNutsDifficulty;
-	else if (propName == "DefaultGoldMaxDifficulty")
-        reader >> m_DefaultGoldMaxDifficulty;
-    else if (propName == "FogOfWarSwitchEnabled")
-        reader >> m_FogOfWarSwitchEnabled;
-    else if (propName == "DeployUnitsSwitchEnabled")
-        reader >> m_DeployUnitsSwitchEnabled;
-    else if (propName == "GoldSwitchEnabled")
-        reader >> m_GoldSwitchEnabled;
-	else if (propName == "RequireClearPathToOrbitSwitchEnabled")
-        reader >> m_RequireClearPathToOrbitSwitchEnabled;
-	else if (propName == "BuyMenuEnabled") {
-		reader >> m_BuyMenuEnabled;
-	} else if (propName == "Team1Tech" || propName == "Team2Tech" || propName == "Team3Tech" || propName == "Team4Tech") {
+        SetCPUTeam(m_CPUTeam); );
+    MatchProperty("DeliveryDelay", { reader >> m_DeliveryDelay; });
+    MatchProperty("DefaultFogOfWar", { reader >> m_DefaultFogOfWar; });
+    MatchProperty("DefaultRequireClearPathToOrbit", { reader >> m_DefaultRequireClearPathToOrbit; });
+    MatchProperty("DefaultDeployUnits", { reader >> m_DefaultDeployUnits; });
+    MatchProperty("DefaultGoldCakeDifficulty", { reader >> m_DefaultGoldCakeDifficulty; });
+    MatchProperty("DefaultGoldEasyDifficulty", { reader >> m_DefaultGoldEasyDifficulty; });
+    MatchProperty("DefaultGoldMediumDifficulty", { reader >> m_DefaultGoldMediumDifficulty; });
+    MatchProperty("DefaultGoldHardDifficulty", { reader >> m_DefaultGoldHardDifficulty; });
+    MatchProperty("DefaultGoldNutsDifficulty", { reader >> m_DefaultGoldNutsDifficulty; });
+	MatchProperty("DefaultGoldMaxDifficulty", { reader >> m_DefaultGoldMaxDifficulty; });
+    MatchProperty("FogOfWarSwitchEnabled", { reader >> m_FogOfWarSwitchEnabled; });
+    MatchProperty("DeployUnitsSwitchEnabled", { reader >> m_DeployUnitsSwitchEnabled; });
+    MatchProperty("GoldSwitchEnabled", { reader >> m_GoldSwitchEnabled; });
+	MatchProperty("RequireClearPathToOrbitSwitchEnabled", { reader >> m_RequireClearPathToOrbitSwitchEnabled; });
+	MatchProperty("BuyMenuEnabled", { reader >> m_BuyMenuEnabled; });
+	MatchForwards("Team1Tech")
+    MatchForwards("Team2Tech")
+    MatchForwards("Team3Tech")
+    MatchProperty("Team4Tech",
 		for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; team++) {
 			if (propName == "Team" + std::to_string(team + 1) + "Tech") {
 				std::string techName;
 				reader >> techName;
 				SetTeamTech(team, techName);
 			}
-		}
-	} else if (propName == "SpecialBehaviour_StartingGold") {
-		reader >> m_StartingGold;
-	} else if (propName == "SpecialBehaviour_FogOfWarEnabled") {
-		reader >> m_FogOfWarEnabled;
-	} else
-        return Activity::ReadProperty(propName, reader);
+		} );
+	MatchProperty("SpecialBehaviour_StartingGold", { reader >> m_StartingGold; });
+	MatchProperty("SpecialBehaviour_FogOfWarEnabled", { reader >> m_FogOfWarEnabled; });
 
-    return 0;
+    EndPropertyList;
 }
 
 
@@ -324,8 +308,9 @@ void GameActivity::Destroy(bool notInherited)
 
     for (int team = Teams::TeamOne; team < Teams::MaxTeamCount; ++team)
     {
-        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr) {
             delete itr->pCraft;
+        }
         m_Deliveries[team].clear();
     }
 
@@ -893,8 +878,10 @@ int GameActivity::Start()
         m_Deliveries[team].clear();
 
         // Clear delivery queues
-        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr) {
             delete itr->pCraft;
+        }
+
         m_Deliveries[team].clear();
 /* This is taken care of by the individual Activity logic
         // See if there are specified landing zone areas defined in the scene
@@ -1126,8 +1113,12 @@ void GameActivity::End()
     {
         if (!m_TeamActive[team])
             continue;
-        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr)
+        for (std::deque<Delivery>::iterator itr = m_Deliveries[team].begin(); itr != m_Deliveries[team].end(); ++itr) {
+            if (MovableObject* asMo = dynamic_cast<MovableObject*>(itr->pCraft)) {
+                asMo->DestroyScriptState();
+            }
             delete itr->pCraft;
+        }
         m_Deliveries[team].clear();
     }
 

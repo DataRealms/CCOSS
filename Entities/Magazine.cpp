@@ -114,25 +114,19 @@ int Magazine::Create(const Magazine &reference)
 
 int Magazine::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "RoundCount")
-    {
+    StartPropertyList(return Attachable::ReadProperty(propName, reader));
+
+    MatchProperty("RoundCount", {
         reader >> m_RoundCount;
         m_FullCapacity = m_RoundCount;
-    }
-    else if (propName == "RTTRatio")
-        reader >> m_RTTRatio;
-    else if (propName == "RegularRound")
-        m_pRegularRound = dynamic_cast<const Round *>(g_PresetMan.GetEntityPreset(reader));
-    else if (propName == "TracerRound")
-        m_pTracerRound = dynamic_cast<const Round *>(g_PresetMan.GetEntityPreset(reader));
-    else if (propName == "Discardable")
-        reader >> m_Discardable;
-    else if (propName == "AIBlastRadius")
-        reader >> m_AIBlastRadius;
-    else
-        return Attachable::ReadProperty(propName, reader);
+    });
+    MatchProperty("RTTRatio", { reader >> m_RTTRatio; });
+    MatchProperty("RegularRound", { m_pRegularRound = dynamic_cast<const Round*>(g_PresetMan.GetEntityPreset(reader)); });
+    MatchProperty("TracerRound", { m_pTracerRound = dynamic_cast<const Round*>(g_PresetMan.GetEntityPreset(reader)); });
+    MatchProperty("Discardable", { reader >> m_Discardable; });
+    MatchProperty("AIBlastRadius", { reader >> m_AIBlastRadius; });
 
-    return 0;
+    EndPropertyList;
 }
 
 

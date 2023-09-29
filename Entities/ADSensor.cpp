@@ -26,16 +26,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int ADSensor::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "StartOffset") {
-			reader >> m_StartOffset;
-		} else if (propName == "SensorRay") {
-			reader >> m_SensorRay;
-		} else if (propName == "SkipPixels") {
-			reader >> m_Skip;
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("StartOffset", { reader >> m_StartOffset; });
+		MatchProperty("SensorRay", { reader >> m_SensorRay; });
+		MatchProperty("SkipPixels", { reader >> m_Skip; });
+
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

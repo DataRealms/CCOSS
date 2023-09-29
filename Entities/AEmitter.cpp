@@ -59,6 +59,7 @@ void AEmitter::Clear()
     m_AvgBurstImpulse = -1.0F;
     m_AvgImpulse = -1.0F;
     m_FlashOnlyOnBurst = true;
+    m_SustainBurstSound = false;
     m_LoudnessOnEmit = 1.0F;
 }
 
@@ -99,6 +100,7 @@ int AEmitter::Create(const AEmitter &reference) {
     m_EmitDamage = reference.m_EmitDamage;
     m_FlashScale = reference.m_FlashScale;
     m_FlashOnlyOnBurst = reference.m_FlashOnlyOnBurst;
+    m_SustainBurstSound = reference.m_SustainBurstSound;
     m_LoudnessOnEmit = reference.m_LoudnessOnEmit;
 
     return 0;
@@ -114,72 +116,59 @@ int AEmitter::Create(const AEmitter &reference) {
 //                  false is returned, and the reader's position is untouched.
 
 int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
-    if (propName == "AddEmission") {
+    StartPropertyList(return Attachable::ReadProperty(propName, reader));
+    
+    MatchProperty("AddEmission", {
         Emission * emission = new Emission();
         reader >> *emission;
         m_EmissionList.push_back(emission);
-    } else if (propName == "EmissionSound") {
+    });
+    MatchProperty("EmissionSound", {
 		m_EmissionSound = new SoundContainer;
         reader >> m_EmissionSound;
-    } else if (propName == "BurstSound") {
+    });
+    MatchProperty("BurstSound", {
 		m_BurstSound = new SoundContainer;
         reader >> m_BurstSound;
-    } else if (propName == "EndSound") {
+    });
+    MatchProperty("EndSound", {
 		m_EndSound = new SoundContainer;
         reader >> m_EndSound;
-    } else if (propName == "EmissionEnabled") {
-        reader >> m_EmitEnabled;
-    } else if (propName == "EmissionCount") {
-        reader >> m_EmitCount;
-    } else if (propName == "EmissionCountLimit") {
-        reader >> m_EmitCountLimit;
-    } else if (propName == "ParticlesPerMinute") {
+    });
+    MatchProperty("EmissionEnabled", { reader >> m_EmitEnabled; });
+    MatchProperty("EmissionCount", { reader >> m_EmitCount; });
+    MatchProperty("EmissionCountLimit", { reader >> m_EmitCountLimit; });
+    MatchProperty("ParticlesPerMinute", {
         float ppm;
         reader >> ppm;
         // Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility.
         for (Emission *emission : m_EmissionList) { emission->m_PPM = ppm / static_cast<float>(m_EmissionList.size()); }
-    } else if (propName == "NegativeThrottleMultiplier") {
-        reader >> m_NegativeThrottleMultiplier;
-    } else if (propName == "PositiveThrottleMultiplier") {
-        reader >> m_PositiveThrottleMultiplier;
-    } else if (propName == "Throttle") {
-        reader >> m_Throttle;
-    } else if (propName == "EmissionsIgnoreThis") {
-        reader >> m_EmissionsIgnoreThis;
-    } else if (propName == "BurstSize") {
+    });
+    MatchProperty("NegativeThrottleMultiplier", { reader >> m_NegativeThrottleMultiplier; });
+    MatchProperty("PositiveThrottleMultiplier", { reader >> m_PositiveThrottleMultiplier; });
+    MatchProperty("Throttle", { reader >> m_Throttle; });
+    MatchProperty("EmissionsIgnoreThis", { reader >> m_EmissionsIgnoreThis; });
+    MatchProperty("BurstSize", {
         int burstSize;
         reader >> burstSize;
         // Go through all emissions and set the rate so that it emulates the way it used to work, for mod backwards compatibility.
         for (Emission *emission : m_EmissionList) { emission->m_BurstSize = std::ceil(static_cast<float>(burstSize) / static_cast<float>(m_EmissionList.size())); }
-    } else if (propName == "BurstScale") {
-        reader >> m_BurstScale;
-    } else if (propName == "BurstDamage") {
-        reader >> m_BurstDamage;
-    } else if (propName == "EmitterDamageMultiplier") {
-		reader >> m_EmitterDamageMultiplier;
-    } else if (propName == "BurstSpacing") {
-        reader >> m_BurstSpacing;
-    } else if (propName == "BurstTriggered") {
-        reader >> m_BurstTriggered;
-    } else if (propName == "EmissionAngle") {
-        reader >> m_EmitAngle;
-    } else if (propName == "EmissionOffset") {
-        reader >> m_EmissionOffset;
-    } else if (propName == "EmissionDamage") {
-        reader >> m_EmitDamage;
-    } else if (propName == "Flash") {
-        SetFlash(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "FlashScale") {
-        reader >> m_FlashScale;
-    } else if (propName == "FlashOnlyOnBurst") {
-        reader >> m_FlashOnlyOnBurst;
-    } else if (propName == "LoudnessOnEmit") {
-        reader >> m_LoudnessOnEmit;
-    } else {
-        return Attachable::ReadProperty(propName, reader);
-    }
+    });
+    MatchProperty("BurstScale", { reader >> m_BurstScale; });
+    MatchProperty("BurstDamage", { reader >> m_BurstDamage; });
+    MatchProperty("EmitterDamageMultiplier", { reader >> m_EmitterDamageMultiplier; });
+    MatchProperty("BurstSpacing", { reader >> m_BurstSpacing; });
+    MatchProperty("BurstTriggered", { reader >> m_BurstTriggered; });
+    MatchProperty("EmissionAngle", { reader >> m_EmitAngle; });
+    MatchProperty("EmissionOffset", { reader >> m_EmissionOffset; });
+    MatchProperty("EmissionDamage", { reader >> m_EmitDamage; });
+    MatchProperty("Flash", { SetFlash(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("FlashScale", { reader >> m_FlashScale; });
+    MatchProperty("FlashOnlyOnBurst", { reader >> m_FlashOnlyOnBurst; });
+    MatchProperty("SustainBurstSound", { reader >> m_SustainBurstSound; });
+    MatchProperty("LoudnessOnEmit", { reader >> m_LoudnessOnEmit; });
 
-    return 0;
+    EndPropertyList;
 }
 
 
@@ -240,6 +229,8 @@ int AEmitter::Save(Writer &writer) const
     writer << m_FlashScale;
     writer.NewProperty("FlashOnlyOnBurst");
     writer << m_FlashOnlyOnBurst;
+    writer.NewProperty("SustainBurstSound");
+	writer << m_SustainBurstSound;
     writer.NewProperty("LoudnessOnEmit");
     writer << m_LoudnessOnEmit;
 
@@ -375,6 +366,13 @@ int AEmitter::GetTotalBurstSize() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+float AEmitter::GetScaledThrottle(float throttle, float multiplier) const {
+    float throttleFactor = LERP(-1.0f, 1.0f, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, throttle);
+    return LERP(m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, -1.0f, 1.0f, throttleFactor * multiplier);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void AEmitter::SetFlash(Attachable *newFlash) {
     if (m_pFlash && m_pFlash->IsAttached()) { RemoveAndDeleteAttachable(m_pFlash); }
     if (newFlash == nullptr) {
@@ -496,7 +494,7 @@ void AEmitter::Update()
 				float scale = 1.0F;
                 // Add extra emissions if bursting.
 				if (m_BurstTriggered) {
-					emissionCount += (*eItr)->GetBurstSize() * throttleFactor;
+					emissionCount += (*eItr)->GetBurstSize() * std::floor(throttleFactor);
 					scale = m_BurstScale;
 				}
 				emissionCountTotal += emissionCount;
@@ -570,8 +568,6 @@ void AEmitter::Update()
 		if (m_EmitCountLimit > 0 && m_EmitCount > m_EmitCountLimit) { EnableEmission(false); }
 
 		if (m_BurstTriggered) { m_BurstTriggered = false; }
-
-        m_WasEmitting = true;
     }
     // Do stuff to stop emission
 	else
@@ -579,9 +575,8 @@ void AEmitter::Update()
 		if (m_WasEmitting)
 		{
 			if (m_EmissionSound) { m_EmissionSound->Stop(); }
-			if (m_BurstSound) { m_BurstSound->Stop(); }
+            if (m_BurstSound && !m_SustainBurstSound) { m_BurstSound->Stop(); }
 			if (m_EndSound) { m_EndSound->Play(m_Pos); }
-			m_WasEmitting = false;
 		}
 	}
 }

@@ -96,26 +96,23 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Atom::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Offset") {
-			reader >> m_Offset;
-		} else if (propName == "OriginalOffset") {
-			reader >> m_OriginalOffset;
-		} else if (propName == "Material") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("Offset", { reader >> m_Offset; });
+		MatchProperty("OriginalOffset", { reader >> m_OriginalOffset; });
+		MatchProperty("Material", {
 			Material mat;
 			mat.Reset();
 			reader >> mat;
 			m_Material = g_SceneMan.AddMaterialCopy(&mat);
 			if (!m_Material) { RTEAbort("Failed to store material \"" + mat.GetPresetName() + "\". Aborting!"); }
-		} else if (propName == "TrailColor") {
-			reader >> m_TrailColor;
-		} else if (propName == "TrailLength") {
-			reader >> m_TrailLength;
-		} else if (propName == "TrailLengthVariation") {
-			reader >> m_TrailLengthVariation;
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		MatchProperty("TrailColor", { reader >> m_TrailColor; });
+		MatchProperty("TrailLength", { reader >> m_TrailLength; });
+		MatchProperty("TrailLengthVariation", { reader >> m_TrailLengthVariation; });
+		
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -241,6 +238,9 @@ namespace RTE {
 				return true;
 			}
 			if ((m_OwnerMO->IgnoresAtomGroupHits() && dynamic_cast<const MOSRotating *>(hitMO)) || (hitMO->IgnoresAtomGroupHits() && dynamic_cast<const MOSRotating *>(m_OwnerMO))) {
+				return true;
+			}
+			if ((m_OwnerMO->GetIgnoresActorHits() && dynamic_cast<const Actor*>(hitMO)) || (hitMO->GetIgnoresActorHits() && dynamic_cast<const Actor*>(m_OwnerMO))) {
 				return true;
 			}
 		}

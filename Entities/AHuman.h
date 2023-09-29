@@ -24,7 +24,7 @@ struct BITMAP;
 namespace RTE
 {
 
-class AEmitter;
+class AEJetpack;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -48,20 +48,6 @@ enum UpperBodyState
     DEHOLSTERING_BELT,
     THROWING_PREP,
     THROWING_RELEASE
-};
-
-enum MovementState
-{
-    NOMOVE = 0,
-    STAND,
-    WALK,
-    CROUCH,
-    CRAWL,
-    ARMCRAWL,
-    CLIMB,
-    JUMP,
-    DISLODGE,
-    MOVEMENTSTATECOUNT
 };
 
 enum ProneState
@@ -231,13 +217,13 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
     /// Gets the jetpack of this AHuman.
     /// </summary>
     /// <returns>A pointer to the jetpack of this AHuman. Ownership is NOT transferred.</returns>
-    AEmitter * GetJetpack() const { return m_pJetpack; }
+    AEJetpack * GetJetpack() const { return m_pJetpack; }
 
     /// <summary>
     /// Sets the jetpack for this AHuman.
     /// </summary>
     /// <param name="newJetpack">The new jetpack to use.</param>
-    void SetJetpack(AEmitter *newJetpack);
+    void SetJetpack(AEJetpack *newJetpack);
 
     /// <summary>
     /// Gets the foreground Arm of this AHuman.
@@ -311,73 +297,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
     /// <param name="newFoot">The new foot for this AHuman's background Leg to use.</param>
     void SetBGFoot(Attachable *newFoot) { if (m_pBGLeg && m_pBGLeg->IsAttached()) { m_pBGLeg->SetFoot(newFoot); } }
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetJetTimeTotal
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the amount of time this' jetpack can fire when filled, in ms.
-// Arguments:       None.
-// Return value:    The amount of time this' jetpack can fire when it's at max.
-
-    float GetJetTimeTotal() const { return m_JetTimeTotal; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          GetJetTimeLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the amount of time this' jetpack can still fire until out, in ms.
-// Arguments:       None.
-// Return value:    The amount of time this' jetpack can still fire before running out.
-
-    float GetJetTimeLeft() const { return m_JetTimeLeft; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetJetTimeTotal
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the amount of time this' jetpack can fire when filled, in ms.
-// Arguments:       The amount of time this' jetpack can fire when it's at max.
-// Return value:    None.
-
-    void SetJetTimeTotal(float newValue) { m_JetTimeTotal = newValue; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          SetJetTimeLeft
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the amount of time this' jetpack can still fire until out, in ms.
-// Arguments:       The amount of time this' jetpack can still fire before running out.
-// Return value:    None.
-
-	void SetJetTimeLeft(float newValue) { m_JetTimeLeft = newValue < m_JetTimeTotal ? newValue : m_JetTimeTotal; }
-
-	/// <summary>
-	/// Gets the rate at which this AHuman's jetpack is replenished during downtime.
-	/// </summary>
-	/// <returns>The rate at which the jetpack is replenished.</returns>
-	float GetJetReplenishRate() const { return m_JetReplenishRate; }
-
-
-	/// <summary>
-	/// Sets the rate at which this AHuman's jetpack is replenished during downtime.
-	/// </summary>
-	/// <param name="newValue">The rate at which the jetpack is replenished.</param>
-	void SetJetReplenishRate(float newValue) { m_JetReplenishRate = newValue; }
-
-
-	/// <summary>
-	/// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
-	/// </summary>
-	/// <returns>The ratio at which this jetpack follows the aim angle of the user.</returns>
-	float GetJetAngleRange() const { return m_JetAngleRange; }
-
-	/// <summary>
-	/// Sets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
-	/// </summary>
-	/// <param name="newValue">The ratio at which this jetpack follows the aim angle of the user.</param>
-	void SetJetAngleRange(float newValue) { m_JetAngleRange = newValue; }
-
 	/// Gets this AHuman's UpperBodyState.
 	/// </summary>
 	/// <returns>This AHuman's UpperBodyState.</returns>
@@ -388,17 +307,6 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	/// </summary>
 	/// <param name="newUpperBodyState">This AHuman's new UpperBodyState.</param>
 	void SetUpperBodyState(UpperBodyState newUpperBodyState) { m_ArmsState = newUpperBodyState; }
-
-	/// Gets this AHuman's MovementState.
-	/// </summary>
-	/// <returns>This AHuman's MovementState.</returns>
-	MovementState GetMovementState() const { return m_MoveState; }
-
-	/// <summary>
-	/// Sets this AHuman's MovementState to the new state.
-	/// </summary>
-	/// <param name="newMovementState">This AHuman's new MovementState.</param>
-	void SetMovementState(MovementState newMovementState) { m_MoveState = newMovementState; }
 
 	/// Gets this AHuman's ProneState.
 	/// </summary>
@@ -795,6 +703,12 @@ DefaultPieMenuNameGetter("Default Human Pie Menu");
 	void SetWalkAngle(AHuman::Layer whichLayer, float angle) { m_WalkAngle[whichLayer] = Matrix(angle); }
 
 	/// <summary>
+	/// Gets whether this AHuman has just taken a stride this frame.
+	/// </summary>
+	/// <returns>Whether this AHuman has taken a stride this frame or not.</returns>
+    bool StrideFrame() const { return m_StrideFrame; }
+
+	/// <summary>
 	/// Gets whether this AHuman is currently attempting to climb something, using arms.
 	/// </summary>
 	/// <returns>Whether this AHuman is currently climbing or not.</returns>
@@ -1005,14 +919,7 @@ protected:
     // The sound of the actor taking a step (think robot servo)
     SoundContainer *m_StrideSound;
     // Jetpack booster.
-    AEmitter *m_pJetpack;
-    // The max total time, in ms, that the jetpack can be used without pause
-    float m_JetTimeTotal;
-    // How much time left the jetpack can go, in ms
-    float m_JetTimeLeft;
-	float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
-	// Ratio at which the jetpack angle follows aim angle
-	float m_JetAngleRange;
+    AEJetpack *m_pJetpack;
 	bool m_CanActivateBGItem; //!< A flag for whether or not the BG item is waiting to be activated separately. Used for dual-wielding. TODO: Should this be able to be toggled off per actor, device, or controller?
 	bool m_TriggerPulled; //!< Internal flag for whether this AHuman is currently holding down the trigger of a HDFirearm. Used for dual-wielding.
 	bool m_WaitingToReloadOffhand; //!< A flag for whether or not the offhand HeldDevice is waiting to be reloaded.
@@ -1036,6 +943,8 @@ protected:
     bool m_Aiming;
     // Whether the BG Arm is helping with locomotion or not.
     bool m_ArmClimbing[2];
+    // Whether a stride was taken this frame or not.
+    bool m_StrideFrame = false;
     // Controls the start of leg synch.
     bool m_StrideStart;
     // Times the stride to see if it is taking too long and needs restart

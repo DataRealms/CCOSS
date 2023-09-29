@@ -13,6 +13,9 @@ namespace RTE {
 
 	class LuabindObjectWrapper;
 
+	/// <summary>
+	/// A single lua state. Multiple of these can exist at once for multithreaded scripting.
+	/// </summary>
 	class LuaStateWrapper {
 	public:
 #pragma region Creation
@@ -262,7 +265,7 @@ namespace RTE {
 	typedef std::array<LuaStateWrapper, c_NumThreadedLuaStates> LuaStatesArray;
 
 	/// <summary>
-	/// The singleton manager of the master Lua script state.
+	/// The singleton manager of each Lua state.
 	/// </summary>
 	class LuaMan : public Singleton<LuaMan> {
 		friend class SettingsMan;

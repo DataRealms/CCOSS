@@ -179,37 +179,27 @@ int BunkerAssembly::Create(const BunkerAssembly &reference)
 
 int BunkerAssembly::ReadProperty(const std::string_view &propName, Reader &reader)
 {
+    StartPropertyList(return SceneObject::ReadProperty(propName, reader));
+    
     // Ignore TerrainObject's specific properties, but don't let parent class process them
-	if (propName == "FGColorFile")
-    {
-    }
-    else if (propName == "MaterialFile")
-    {
-    }
-    else if (propName == "BGColorFile")
-    {
-    }
-    else if (propName == "BitmapOffset")
-    {
-    }
-    else if (propName == "Location")
-    {
-    }
-    else if (propName == "AddChildObject")
-    {
-    }
-    else if (propName == "SymmetricAssembly")
+	MatchProperty("FGColorFile", { });
+    MatchProperty("MaterialFile", { });
+    MatchProperty("BGColorFile", { });
+    MatchProperty("BitmapOffset", { });
+    MatchProperty("Location", { });
+    MatchProperty("AddChildObject", { });
+    
+    MatchProperty("SymmetricAssembly",
     {
 		reader >> m_SymmetricAssembly;
-    }
-    else if (propName == "PlaceObject")
+    });
+    MatchProperty("PlaceObject",
     {
         SceneObject *pSO = dynamic_cast<SceneObject *>(g_PresetMan.ReadReflectedPreset(reader));
         if (pSO)
 			AddPlacedObject(pSO);
-    }
-    else if (propName == "ParentScheme")
-    {
+    });
+    MatchProperty("ParentScheme", {
 		//Add to group like Entity::ReadProperty does
         std::string parentScheme;
         reader >> parentScheme;
@@ -261,10 +251,9 @@ int BunkerAssembly::ReadProperty(const std::string_view &propName, Reader &reade
 			std::snprintf(s, sizeof(s), "Required BunkerAssemblyScheme '%s%' not found when trying to load BunkerAssembly '%s'! BunkerAssemblySchemes MUST be defined before dependent BunkerAssmeblies.", parentScheme.c_str(), m_PresetName.c_str());
 			RTEAbort(s);
 		}
-	} else
-        return SceneObject::ReadProperty(propName, reader);
+	});
 
-    return 0;
+    EndPropertyList;
 }
 
 

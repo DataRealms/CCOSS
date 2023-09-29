@@ -37,6 +37,15 @@
     <Filter Include="System\StackWalker">
       <UniqueIdentifier>{a8668dc1-51c5-418d-91bf-7ee92f008cb1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{c24dc7b0-ca0d-4709-a41b-c44fe77bd6ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\tracy">
+      <UniqueIdentifier>{21b72644-6ffe-4931-909e-130c40fd684f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="System\Base64">
+      <UniqueIdentifier>{6f517ec6-8c53-4d34-b320-c408e1fd374d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\Box.h">
@@ -591,7 +600,15 @@
     <ClInclude Include="System\RTEStackTrace.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="Menus\SaveLoadMenuGUI.h" />
+    <ClInclude Include="Entities\AEJetpack.h">
+      <Filter>Entities</Filter>
+    </ClInclude>
+    <ClInclude Include="Menus\SaveLoadMenuGUI.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Base64\base64.h">
+      <Filter>System\Base64</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1141,7 +1158,18 @@
     <ClCompile Include="System\RTEStackTrace.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="Menus\SaveLoadMenuGUI.cpp" />
+    <ClCompile Include="external\sources\tracy\public\TracyClient.cpp">
+      <Filter>external\tracy</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\AEJetpack.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SaveLoadMenuGUI.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Base64\base64.cpp">
+      <Filter>System\Base64</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\ccicon.ico">

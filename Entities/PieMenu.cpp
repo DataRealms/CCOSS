@@ -171,7 +171,9 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int PieMenu::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "IconSeparatorMode") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("IconSeparatorMode", {
 			std::string iconSeparatorModeString = reader.ReadPropValue();
 			auto itr = c_IconSeparatorModeMap.find(iconSeparatorModeString);
 			if (itr != c_IconSeparatorModeMap.end()) {
@@ -183,32 +185,24 @@ namespace RTE {
 					reader.ReportError("IconSeparatorMode " + iconSeparatorModeString + " is invalid.");
 				}
 			}
-		} else if (propName == "FullInnerRadius") {
-			reader >> m_FullInnerRadius;
-		} else if (propName == "BackgroundThickness") {
-			reader >> m_BackgroundThickness;
-		} else if (propName == "BackgroundSeparatorSize") {
-			reader >> m_BackgroundSeparatorSize;
-		} else if (propName == "DrawBackgroundTransparent") {
-			reader >> m_DrawBackgroundTransparent;
-		} else if (propName == "BackgroundColor") {
-			reader >> m_BackgroundColor;
-		} else if (propName == "BackgroundBorderColor") {
-			reader >> m_BackgroundBorderColor;
-		} else if (propName == "SelectedItemBackgroundColor") {
-			reader >> m_SelectedItemBackgroundColor;
-		} else if (propName == "AddPieSlice") {
+		});
+		MatchProperty("FullInnerRadius", { reader >> m_FullInnerRadius; });
+		MatchProperty("BackgroundThickness", { reader >> m_BackgroundThickness; });
+		MatchProperty("BackgroundSeparatorSize", { reader >> m_BackgroundSeparatorSize; });
+		MatchProperty("DrawBackgroundTransparent", { reader >> m_DrawBackgroundTransparent; });
+		MatchProperty("BackgroundColor", { reader >> m_BackgroundColor; });
+		MatchProperty("BackgroundBorderColor", { reader >> m_BackgroundBorderColor; });
+		MatchProperty("SelectedItemBackgroundColor", { reader >> m_SelectedItemBackgroundColor; });
+		MatchProperty("AddPieSlice", {
 			if (m_CurrentPieSlices.size() == 4 * PieQuadrant::c_PieQuadrantSlotCount) {
 				reader.ReportError("Pie menus cannot have more than " + std::to_string(4 * PieQuadrant::c_PieQuadrantSlotCount) + " slices. Use sub-pie menus to better organize your pie slices.");
 			}
 			if (!AddPieSlice(dynamic_cast<PieSlice *>(g_PresetMan.ReadReflectedPreset(reader)), this)) {
 				reader.ReportError("Tried to add pie slice but that direction was full. Set direction to None if you don't care where the pie slice ends up.");
 			}
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
+		});
 
-		return 0;
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -611,7 +605,7 @@ namespace RTE {
 							PrepareAnalogCursorForEnableOrDisable(true);
 							m_CursorInVisiblePosition = true;
 						} else {
-							bool shouldClearHoveredSlice = controller->IsMouseControlled() || controller->IsGamepadControlled();
+							bool shouldClearHoveredSlice = controller->IsState(ControlState::PIE_MENU_ACTIVE_ANALOG);
 							// If a keyboard-only sub-PieMenu is exited by going off the sides, the parent PieMenu should handle input so the next PieSlice can be naturally stepped to.
 							if (activeSubPieMenuDirection != Directions::None) {
 								for (const auto &[controlState, controlStateDirection] : c_ControlStateDirections) {
@@ -629,9 +623,9 @@ namespace RTE {
 					}
 				}
 				if (!m_ActiveSubPieMenu && !skipInputBecauseActiveSubPieMenuWasJustDisabled) {
-					if (controller->IsMouseControlled() || controller->IsGamepadControlled()) {
-						anyInput = HandleAnalogInput();
-					} else {
+					if (controller->IsState(PIE_MENU_ACTIVE_ANALOG)) {
+						anyInput = HandleAnalogInput(controller->GetAnalogCursor());
+					} else if (controller->IsState(PIE_MENU_ACTIVE_DIGITAL)) {
 						anyInput = HandleDigitalInput();
 					}
 				}
@@ -717,13 +711,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool PieMenu::HandleAnalogInput() {
+	bool PieMenu::HandleAnalogInput(const Vector &input) {
 		const Controller *controller = GetController();
 		const PieSlice *pieSliceToSelect = nullptr;
 
-		if (controller->GetAnalogCursor().MagnitudeIsGreaterThan(0.5F)) {
+		if (input.MagnitudeIsGreaterThan(0.5F)) {
 			m_CursorInVisiblePosition = true;
-			float normalizedCursorAngle = NormalizeAngleBetween0And2PI(controller->GetAnalogCursor().GetAbsRadAngle());
+			float normalizedCursorAngle = NormalizeAngleBetween0And2PI(input.GetAbsRadAngle());
 			m_CursorAngle = normalizedCursorAngle;
 
 			for (const PieSlice *pieSlice : m_CurrentPieSlices) {
@@ -749,6 +743,12 @@ namespace RTE {
 		const Controller *controller = GetController();
 		if (!controller) {
 			return false;
+		}
+
+		// Don't allow our analog move to interfere with us - joystick-to-digital input is really awkward and doesn't feel nice
+		if (controller->GetAnalogMove().MagnitudeIsGreaterThan(0.1F)) {
+			// So instead use the analog input, but use our move instead of our cursor
+			return HandleAnalogInput(controller->GetAnalogMove());
 		}
 
 		auto GetPieQuadrantContainingHoveredSlice = [this]() {

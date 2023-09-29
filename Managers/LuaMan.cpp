@@ -1,6 +1,7 @@
 #include "LuaMan.h"
 #include "LuabindObjectWrapper.h"
 #include "LuaBindingRegisterDefinitions.h"
+#include "tracy/TracyLua.hpp"
 
 namespace RTE {
 
@@ -20,6 +21,7 @@ namespace RTE {
 	void LuaStateWrapper::Initialize() {
 		m_State = luaL_newstate();
 		luabind::open(m_State);
+		tracy::LuaRegister(m_State);
 
 		const luaL_Reg libsToLoad[] = {
 			{ LUA_COLIBNAME, luaopen_base },
@@ -53,7 +55,7 @@ namespace RTE {
 		luabind::module(m_State)[
 			luabind::class_<LuaStateWrapper>("LuaManager")
 				.property("TempEntity", &LuaStateWrapper::GetTempEntity)
-				.def("TempEntities", &LuaStateWrapper::GetTempEntityVector, luabind::return_stl_iterator)
+				.property("TempEntities", &LuaStateWrapper::GetTempEntityVector, luabind::return_stl_iterator)
 				.def("SelectRand", &LuaStateWrapper::SelectRand)
 				.def("RangeRand", &LuaStateWrapper::RangeRand)
 				.def("PosRand", &LuaStateWrapper::PosRand)
@@ -102,6 +104,7 @@ namespace RTE {
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Attachable),
 			RegisterLuaBindingsOfAbstractType(EntityLuaBindings, Emission),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, AEmitter),
+			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, AEJetpack),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, PEmitter),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, Actor),
 			RegisterLuaBindingsOfConcreteType(EntityLuaBindings, ADoor),
@@ -482,7 +485,7 @@ namespace RTE {
 			}
 			scriptString << " then ";
 		}
-		if (!functionEntityArguments.empty()) { scriptString << "local entityArguments = LuaMan.TempEntities(); "; }
+		if (!functionEntityArguments.empty()) { scriptString << "local entityArguments = LuaMan.TempEntities; "; }
 
 		// Lock here, even though we also lock in RunScriptString(), to ensure that the temp entity vector isn't stomped by separate threads.
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);

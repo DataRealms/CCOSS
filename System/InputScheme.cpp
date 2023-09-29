@@ -37,72 +37,43 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int InputScheme::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Device") {
-			SetDevice(static_cast<InputDevice>(std::stoi(reader.ReadPropValue())));
-		} else if (propName == "Preset") {
-			SetPreset(static_cast<InputPreset>(std::stoi(reader.ReadPropValue())));
-		} else if (propName == "LeftUp") {
-			reader >> m_InputMappings[InputElements::INPUT_L_UP];
-		} else if (propName == "LeftDown") {
-			reader >> m_InputMappings[InputElements::INPUT_L_DOWN];
-		} else if (propName == "LeftLeft") {
-			reader >> m_InputMappings[InputElements::INPUT_L_LEFT];
-		} else if (propName == "LeftRight") {
-			reader >> m_InputMappings[InputElements::INPUT_L_RIGHT];
-		} else if (propName == "Fire") {
-			reader >> m_InputMappings[InputElements::INPUT_FIRE];
-		} else if (propName == "Aim") {
-			reader >> m_InputMappings[InputElements::INPUT_AIM];
-		} else if (propName == "AimUp") {
-			reader >> m_InputMappings[InputElements::INPUT_AIM_UP];
-		} else if (propName == "AimDown") {
-			reader >> m_InputMappings[InputElements::INPUT_AIM_DOWN];
-		} else if (propName == "AimLeft") {
-			reader >> m_InputMappings[InputElements::INPUT_AIM_LEFT];
-		} else if (propName == "AimRight") {
-			reader >> m_InputMappings[InputElements::INPUT_AIM_RIGHT];
-		} else if (propName == "PieMenu") {
-			reader >> m_InputMappings[InputElements::INPUT_PIEMENU];
-		} else if (propName == "Jump") {
-			reader >> m_InputMappings[InputElements::INPUT_JUMP];
-		} else if (propName == "Crouch") {
-			reader >> m_InputMappings[InputElements::INPUT_CROUCH];
-		} else if (propName == "Next") {
-			reader >> m_InputMappings[InputElements::INPUT_NEXT];
-		} else if (propName == "Prev") {
-			reader >> m_InputMappings[InputElements::INPUT_PREV];
-		} else if (propName == "WeaponChangeNext") {
-			reader >> m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_NEXT];
-		} else if (propName == "WeaponChangePrev") {
-			reader >> m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_PREV];
-		} else if (propName == "WeaponPickup") {
-			reader >> m_InputMappings[InputElements::INPUT_WEAPON_PICKUP];
-		} else if (propName == "WeaponDrop") {
-			reader >> m_InputMappings[InputElements::INPUT_WEAPON_DROP];
-		} else if (propName == "WeaponReload") {
-			reader >> m_InputMappings[InputElements::INPUT_WEAPON_RELOAD];
-		} else if (propName == "Start") {
-			reader >> m_InputMappings[InputElements::INPUT_START];
-		} else if (propName == "Back") {
-			reader >> m_InputMappings[InputElements::INPUT_BACK];
-		} else if (propName == "RightUp") {
-			reader >> m_InputMappings[InputElements::INPUT_R_UP];
-		} else if (propName == "RightDown") {
-			reader >> m_InputMappings[InputElements::INPUT_R_DOWN];
-		} else if (propName == "RightLeft") {
-			reader >> m_InputMappings[InputElements::INPUT_R_LEFT];
-		} else if (propName == "RightRight") {
-			reader >> m_InputMappings[InputElements::INPUT_R_RIGHT];
-		} else if (propName == "JoystickDeadzoneType") {
-			SetJoystickDeadzoneType(static_cast<DeadZoneType>(std::stoi(reader.ReadPropValue())));
-		} else if (propName == "JoystickDeadzone") {
-			reader >> m_JoystickDeadzone;
-		} else if (propName == "DigitalAimSpeed") {
-			reader >> m_DigitalAimSpeed;
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("Device", { SetDevice(static_cast<InputDevice>(std::stoi(reader.ReadPropValue()))); });
+		MatchProperty("Preset", { SetPreset(static_cast<InputPreset>(std::stoi(reader.ReadPropValue()))); });
+		MatchProperty("LeftUp", { reader >> m_InputMappings[InputElements::INPUT_L_UP]; });
+		MatchProperty("LeftDown", { reader >> m_InputMappings[InputElements::INPUT_L_DOWN]; });
+		MatchProperty("LeftLeft", { reader >> m_InputMappings[InputElements::INPUT_L_LEFT]; });
+		MatchProperty("LeftRight", { reader >> m_InputMappings[InputElements::INPUT_L_RIGHT]; });
+		MatchProperty("Fire", { reader >> m_InputMappings[InputElements::INPUT_FIRE]; });
+		MatchProperty("Aim", { reader >> m_InputMappings[InputElements::INPUT_AIM]; });
+		MatchProperty("AimUp", { reader >> m_InputMappings[InputElements::INPUT_AIM_UP]; });
+		MatchProperty("AimDown", { reader >> m_InputMappings[InputElements::INPUT_AIM_DOWN]; });
+		MatchProperty("AimLeft", { reader >> m_InputMappings[InputElements::INPUT_AIM_LEFT]; });
+		MatchProperty("AimRight", { reader >> m_InputMappings[InputElements::INPUT_AIM_RIGHT]; });
+		MatchProperty("PieMenuAnalog", { reader >> m_InputMappings[InputElements::INPUT_PIEMENU_ANALOG]; });
+		MatchProperty("PieMenuDigital", { reader >> m_InputMappings[InputElements::INPUT_PIEMENU_DIGITAL]; });
+		MatchProperty("Jump", { reader >> m_InputMappings[InputElements::INPUT_JUMP]; });
+		MatchProperty("Crouch", { reader >> m_InputMappings[InputElements::INPUT_CROUCH]; });
+		MatchProperty("Next", { reader >> m_InputMappings[InputElements::INPUT_NEXT]; });
+		MatchProperty("Prev", { reader >> m_InputMappings[InputElements::INPUT_PREV]; });
+		MatchProperty("WeaponChangeNext", { reader >> m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_NEXT]; });
+		MatchProperty("WeaponChangePrev", { reader >> m_InputMappings[InputElements::INPUT_WEAPON_CHANGE_PREV]; });
+		MatchProperty("WeaponPickup", { reader >> m_InputMappings[InputElements::INPUT_WEAPON_PICKUP]; });
+		MatchProperty("WeaponDrop", { reader >> m_InputMappings[InputElements::INPUT_WEAPON_DROP]; });
+		MatchProperty("WeaponReload", { reader >> m_InputMappings[InputElements::INPUT_WEAPON_RELOAD]; });
+		MatchProperty("Start", { reader >> m_InputMappings[InputElements::INPUT_START]; });
+		MatchProperty("Back", { reader >> m_InputMappings[InputElements::INPUT_BACK]; });
+		MatchProperty("RightUp", { reader >> m_InputMappings[InputElements::INPUT_R_UP]; });
+		MatchProperty("RightDown", { reader >> m_InputMappings[InputElements::INPUT_R_DOWN]; });
+		MatchProperty("RightLeft", { reader >> m_InputMappings[InputElements::INPUT_R_LEFT]; });
+		MatchProperty("RightRight", { reader >> m_InputMappings[InputElements::INPUT_R_RIGHT]; });
+		MatchProperty("JoystickDeadzoneType", { SetJoystickDeadzoneType(static_cast<DeadZoneType>(std::stoi(reader.ReadPropValue()))); });
+		MatchProperty("JoystickDeadzone", { reader >> m_JoystickDeadzone; });
+		MatchProperty("DigitalAimSpeed", { reader >> m_DigitalAimSpeed; });
+		
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,7 +95,8 @@ namespace RTE {
 			writer.NewPropertyWithValue("AimDown", m_InputMappings[InputElements::INPUT_AIM_DOWN]);
 			writer.NewPropertyWithValue("AimLeft", m_InputMappings[InputElements::INPUT_AIM_LEFT]);
 			writer.NewPropertyWithValue("AimRight", m_InputMappings[InputElements::INPUT_AIM_RIGHT]);
-			writer.NewPropertyWithValue("PieMenu", m_InputMappings[InputElements::INPUT_PIEMENU]);
+			writer.NewPropertyWithValue("PieMenuAnalog", m_InputMappings[InputElements::INPUT_PIEMENU_ANALOG]);
+			writer.NewPropertyWithValue("PieMenuDigital", m_InputMappings[InputElements::INPUT_PIEMENU_DIGITAL]);
 			writer.NewPropertyWithValue("Jump", m_InputMappings[InputElements::INPUT_JUMP]);
 			writer.NewPropertyWithValue("Crouch", m_InputMappings[InputElements::INPUT_CROUCH]);
 			writer.NewPropertyWithValue("Next", m_InputMappings[InputElements::INPUT_NEXT]);
@@ -199,7 +171,7 @@ namespace RTE {
 				m_InputMappings[InputElements::INPUT_AIM].SetKey(SDL_SCANCODE_KP_2);
 				m_InputMappings[InputElements::INPUT_AIM_UP].SetKey(SDL_SCANCODE_UP);
 				m_InputMappings[InputElements::INPUT_AIM_DOWN].SetKey(SDL_SCANCODE_DOWN);
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetKey(SDL_SCANCODE_KP_3);
+				m_InputMappings[InputElements::INPUT_PIEMENU_DIGITAL].SetKey(SDL_SCANCODE_KP_3);
 				m_InputMappings[InputElements::INPUT_JUMP].SetKey(SDL_SCANCODE_KP_ENTER);
 				m_InputMappings[InputElements::INPUT_CROUCH].SetKey(SDL_SCANCODE_KP_0);
 				m_InputMappings[InputElements::INPUT_NEXT].SetKey(SDL_SCANCODE_KP_5);
@@ -219,7 +191,7 @@ namespace RTE {
 				m_InputMappings[InputElements::INPUT_AIM].SetKey(SDL_SCANCODE_J);
 				m_InputMappings[InputElements::INPUT_AIM_UP].SetKey(SDL_SCANCODE_W);
 				m_InputMappings[InputElements::INPUT_AIM_DOWN].SetKey(SDL_SCANCODE_S);
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetKey(SDL_SCANCODE_K);
+				m_InputMappings[InputElements::INPUT_PIEMENU_DIGITAL].SetKey(SDL_SCANCODE_K);
 				m_InputMappings[InputElements::INPUT_JUMP].SetKey(SDL_SCANCODE_L);
 				m_InputMappings[InputElements::INPUT_CROUCH].SetKey(SDL_SCANCODE_C);
 				m_InputMappings[InputElements::INPUT_NEXT].SetKey(SDL_SCANCODE_U);
@@ -241,7 +213,7 @@ namespace RTE {
 				m_InputMappings[InputElements::INPUT_AIM_DOWN].SetPresetDescription("Mouse Move");
 				m_InputMappings[InputElements::INPUT_AIM_LEFT].SetPresetDescription("Mouse Move");
 				m_InputMappings[InputElements::INPUT_AIM_RIGHT].SetPresetDescription("Mouse Move");
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetMouseButton(MouseButtons::MOUSE_RIGHT);
+				m_InputMappings[InputElements::INPUT_PIEMENU_ANALOG].SetMouseButton(MouseButtons::MOUSE_RIGHT);
 				m_InputMappings[InputElements::INPUT_JUMP].SetKey(SDL_SCANCODE_W);
 				m_InputMappings[InputElements::INPUT_CROUCH].SetKey(SDL_SCANCODE_S);
 				m_InputMappings[InputElements::INPUT_NEXT].SetKey(SDL_SCANCODE_E);
@@ -262,7 +234,7 @@ namespace RTE {
 				m_InputMappings[InputElements::INPUT_AIM_DOWN].SetJoyButton(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
 				m_InputMappings[InputElements::INPUT_FIRE].SetJoyButton(SDL_CONTROLLER_BUTTON_B);
 				m_InputMappings[InputElements::INPUT_AIM].SetJoyButton(SDL_CONTROLLER_BUTTON_Y);
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetJoyButton(SDL_CONTROLLER_BUTTON_A);
+				m_InputMappings[InputElements::INPUT_PIEMENU_DIGITAL].SetJoyButton(SDL_CONTROLLER_BUTTON_A);
 				m_InputMappings[InputElements::INPUT_JUMP].SetJoyButton(SDL_CONTROLLER_BUTTON_X);
 				m_InputMappings[InputElements::INPUT_NEXT].SetJoyButton(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
 				m_InputMappings[InputElements::INPUT_PREV].SetJoyButton(SDL_CONTROLLER_BUTTON_LEFTSHOULDER);
@@ -288,8 +260,8 @@ namespace RTE {
 				m_InputMappings[InputElements::INPUT_AIM].SetJoyButton(SDL_CONTROLLER_BUTTON_X);
 				m_InputMappings[InputElements::INPUT_AIM].SetPresetDescription("Square Button");
 				// Pie menu also cancels buy menu, which makes sense for the B button.
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetJoyButton(SDL_CONTROLLER_BUTTON_B);
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetPresetDescription("Circle Button");
+				m_InputMappings[InputElements::INPUT_PIEMENU_DIGITAL].SetJoyButton(SDL_CONTROLLER_BUTTON_B);
+				m_InputMappings[InputElements::INPUT_PIEMENU_DIGITAL].SetPresetDescription("Circle Button");
 				m_InputMappings[InputElements::INPUT_JUMP].SetJoyButton(SDL_CONTROLLER_BUTTON_Y);
 				m_InputMappings[InputElements::INPUT_JUMP].SetPresetDescription("Triangle Button");
 				m_InputMappings[InputElements::INPUT_NEXT].SetJoyButton(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
@@ -319,8 +291,8 @@ namespace RTE {
 				m_InputMappings[InputElements::INPUT_R_RIGHT].SetPresetDescription("R. Stick Right");
 				m_InputMappings[InputElements::INPUT_FIRE].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERRIGHT, JoyDirections::JOYDIR_TWO);
 				m_InputMappings[InputElements::INPUT_FIRE].SetPresetDescription("R. Trigger");
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERLEFT, JoyDirections::JOYDIR_TWO);
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetPresetDescription("L. Trigger");
+				m_InputMappings[InputElements::INPUT_PIEMENU_ANALOG].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERLEFT, JoyDirections::JOYDIR_TWO);
+				m_InputMappings[InputElements::INPUT_PIEMENU_ANALOG].SetPresetDescription("L. Trigger");
 				m_InputMappings[InputElements::INPUT_JUMP].SetDirection(SDL_CONTROLLER_AXIS_LEFTY, JoyDirections::JOYDIR_ONE);
 				m_InputMappings[InputElements::INPUT_JUMP].SetPresetDescription("L. Stick Up");
 				m_InputMappings[InputElements::INPUT_CROUCH].SetDirection(SDL_CONTROLLER_AXIS_LEFTY, JoyDirections::JOYDIR_TWO);
@@ -342,8 +314,8 @@ namespace RTE {
 				m_InputMappings[InputElements::INPUT_AIM].SetJoyButton(SDL_CONTROLLER_BUTTON_X);
 				m_InputMappings[InputElements::INPUT_AIM].SetPresetDescription("X Button");
 				// Pie menu also cancels buy menu, which makes sense for the B button.
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetJoyButton(SDL_CONTROLLER_BUTTON_B);
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetPresetDescription("B Button");
+				m_InputMappings[InputElements::INPUT_PIEMENU_DIGITAL].SetJoyButton(SDL_CONTROLLER_BUTTON_B);
+				m_InputMappings[InputElements::INPUT_PIEMENU_DIGITAL].SetPresetDescription("B Button");
 				m_InputMappings[InputElements::INPUT_JUMP].SetJoyButton(SDL_CONTROLLER_BUTTON_Y);
 				m_InputMappings[InputElements::INPUT_JUMP].SetPresetDescription("Y Button");
 				m_InputMappings[InputElements::INPUT_NEXT].SetJoyButton(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
@@ -373,8 +345,8 @@ namespace RTE {
 				m_InputMappings[InputElements::INPUT_R_RIGHT].SetPresetDescription("R. Stick Right");
 				m_InputMappings[InputElements::INPUT_FIRE].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERRIGHT, JoyDirections::JOYDIR_TWO);
 				m_InputMappings[InputElements::INPUT_FIRE].SetPresetDescription("R. Trigger");
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERLEFT, JoyDirections::JOYDIR_TWO);
-				m_InputMappings[InputElements::INPUT_PIEMENU].SetPresetDescription("L. Trigger");
+				m_InputMappings[InputElements::INPUT_PIEMENU_ANALOG].SetDirection(SDL_CONTROLLER_AXIS_TRIGGERLEFT, JoyDirections::JOYDIR_TWO);
+				m_InputMappings[InputElements::INPUT_PIEMENU_ANALOG].SetPresetDescription("L. Trigger");
 				m_InputMappings[InputElements::INPUT_JUMP].SetDirection(SDL_CONTROLLER_AXIS_LEFTY, JoyDirections::JOYDIR_ONE);
 				m_InputMappings[InputElements::INPUT_JUMP].SetPresetDescription("L. Stick Up");
 				m_InputMappings[InputElements::INPUT_CROUCH].SetDirection(SDL_CONTROLLER_AXIS_LEFTY, JoyDirections::JOYDIR_TWO);

@@ -57,39 +57,31 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int MetaPlayer::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "Name") {
-			reader >> m_Name;
-		} else if (propName == "Team") {
-			reader >> m_Team;
-		} else if (propName == "Human") {
-			reader >> m_Human;
-		} else if (propName == "InGamePlayer") {
-			reader >> m_InGamePlayer;
-		} else if (propName == "Aggressiveness") {
-			reader >> m_Aggressiveness;
-		} else if (propName == "GameOverRound") {
+		StartPropertyList(return Entity::ReadProperty(propName, reader));
+		
+		MatchProperty("Name", { reader >> m_Name; });
+		MatchProperty("Team", { reader >> m_Team; });
+		MatchProperty("Human", { reader >> m_Human; });
+		MatchProperty("InGamePlayer", { reader >> m_InGamePlayer; });
+		MatchProperty("Aggressiveness", { reader >> m_Aggressiveness; });
+		MatchProperty("GameOverRound", {
 			reader >> m_GameOverRound;
 		// Need to match the name to the index
-		} else if (propName == "NativeTechModule") {
+		});
+		MatchProperty("NativeTechModule", {
 			m_NativeTechModule = g_PresetMan.GetModuleID(reader.ReadPropValue());
 			// Default to no native tech if the one we're looking for couldn't be found
 			if (m_NativeTechModule < 0) { m_NativeTechModule = 0; }
-		} else if (propName == "NativeCostMultiplier") {
-			reader >> m_NativeCostMult;
-		} else if (propName == "ForeignCostMultiplier") {
-			reader >> m_ForeignCostMult;
-		} else if (propName == "BrainPool") {
-			reader >> m_BrainPool;
-		} else if (propName == "Funds") {
-			reader >> m_Funds;
-		} else if (propName == "OffensiveBudget") {
-			reader >> m_OffensiveBudget;
-		} else if (propName == "OffensiveTarget") {
-			reader >> m_OffensiveTarget;
-		} else {
-			return Entity::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		MatchProperty("NativeCostMultiplier", { reader >> m_NativeCostMult; });
+		MatchProperty("ForeignCostMultiplier", { reader >> m_ForeignCostMult; });
+		MatchProperty("BrainPool", { reader >> m_BrainPool; });
+		MatchProperty("Funds", { reader >> m_Funds; });
+		MatchProperty("OffensiveBudget", { reader >> m_OffensiveBudget; });
+		MatchProperty("OffensiveTarget", { reader >> m_OffensiveTarget; });
+		
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

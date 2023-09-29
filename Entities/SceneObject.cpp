@@ -80,27 +80,24 @@ int SceneObject::SOPlacer::Create(const SOPlacer &reference)
 
 int SceneObject::SOPlacer::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "PlacedObject")
+    StartPropertyList(return Serializable::ReadProperty(propName, reader));
+    
+    MatchProperty("PlacedObject",
     {
         m_pObjectReference = dynamic_cast<const SceneObject *>(g_PresetMan.GetEntityPreset(reader));
         RTEAssert(m_pObjectReference, "Stream suggests allocating an unallocatable type in SOPlacer::Create!");
-    }
-    else if (propName == "Offset")
-        reader >> m_Offset;
-    else if (propName == "Rotation")
+    });
+    MatchProperty("Offset", { reader >> m_Offset; });
+    MatchProperty("Rotation",
     {
         Matrix rot;
         reader >> rot;
         m_RotAngle = rot.GetRadAngle();
-    }
-    else if (propName == "HFlipped")
-        reader >> m_HFlipped;
-    else if (propName == "Team")
-        reader >> m_Team;
-    else
-        return Serializable::ReadProperty(propName, reader);
+    });
+    MatchProperty("HFlipped", { reader >> m_HFlipped; });
+    MatchProperty("Team", { reader >> m_Team; });
 
-    return 0;
+    EndPropertyList;
 }
 
 
@@ -262,30 +259,23 @@ int SceneObject::Create(const SceneObject &reference)
 
 int SceneObject::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "Position")
-        reader >> m_Pos;
-    else if (propName == "GoldValue" || propName == "GoldCost")
-        reader >> m_OzValue;
-    else if (propName == "Buyable")
-        reader >> m_Buyable;
-	else if (propName == "BuyableMode") {
-		m_BuyableMode = static_cast<BuyableMode>(std::stoi(reader.ReadPropValue()));
-	}
-    else if (propName == "Team")
+    StartPropertyList(return Entity::ReadProperty(propName, reader)); 
+    
+    MatchProperty("Position", { reader >> m_Pos; });
+    MatchForwards("GoldValue") MatchProperty("GoldCost", { reader >> m_OzValue; });
+    MatchProperty("Buyable", { reader >> m_Buyable; });
+	MatchProperty("BuyableMode", { m_BuyableMode = static_cast<BuyableMode>(std::stoi(reader.ReadPropValue())); });
+	
+    MatchProperty("Team",
     {
         reader >> m_Team;
         // Necessary to properly init (flag icons) some derived classes
         // (actually, this rarely matters since tehre won't be an activity going when this is read!)
         SetTeam(m_Team);
-    }
-    else if (propName == "PlacedByPlayer")
-        reader >> m_PlacedByPlayer;
-    else
-    {
-        return Entity::ReadProperty(propName, reader);
-    }
-
-    return 0;
+    });
+    MatchProperty("PlacedByPlayer", { reader >> m_PlacedByPlayer; });
+   
+    EndPropertyList;
 }
 
 

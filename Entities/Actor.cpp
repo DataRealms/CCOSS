@@ -103,6 +103,7 @@ void Actor::Clear() {
     m_LastAlarmPos.Reset();
     m_SightDistance = 450.0F;
     m_Perceptiveness = 0.5F;
+    m_PainThreshold = 15.0F;
 	m_CanRevealUnseen = true;
     m_CharHeight = 0;
     m_HolsterOffset.Reset();
@@ -126,6 +127,7 @@ void Actor::Clear() {
     m_UpdateMovePath = true;
     m_MoveProximityLimit = 100.0F;
     m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
+    m_BaseMass = std::numeric_limits<float>::infinity();
 
     m_DamageMultiplier = 1.0F;
 
@@ -145,13 +147,14 @@ void Actor::Clear() {
 
 int Actor::Create()
 {
-    if (MOSRotating::Create() < 0)
+    if (MOSRotating::Create() < 0) {
         return -1;
+    }
 
     // Set MO Type.
     m_MOType = MovableObject::TypeActor;
 
-    // Default to an interesitng AI controller mode
+    // Default to an interesting AI controller mode
     m_Controller.SetInputMode(Controller::CIM_AI);
     m_Controller.SetControlledActor(this);
     m_UpdateMovePath = true;
@@ -162,9 +165,14 @@ int Actor::Create()
     // Sets up the team icon
     SetTeam(m_Team);
 
-	// All brain actors by default avoid hitting each other ont he same team
-	if (IsInGroup("Brains"))
+    if (const Actor *presetActor = static_cast<const Actor *>(GetPreset())) {
+        m_BaseMass = presetActor->GetMass();
+    }
+
+	// All brain actors by default avoid hitting each other on the same team
+	if (IsInGroup("Brains")) {
 		m_IgnoresTeamHits = true;
+    }
 
 	if (!m_PieMenu) {
 		SetPieMenu(static_cast<PieMenu *>(g_PresetMan.GetEntityPreset("PieMenu", GetDefaultPieMenuName())->Clone()));
@@ -221,6 +229,7 @@ int Actor::Create(const Actor &reference)
     m_SeenTargetPos = reference.m_SeenTargetPos;
     m_SightDistance = reference.m_SightDistance;
     m_Perceptiveness = reference.m_Perceptiveness;
+    m_PainThreshold = reference.m_PainThreshold;
 	m_CanRevealUnseen = reference.m_CanRevealUnseen;
     m_CharHeight = reference.m_CharHeight;
     m_HolsterOffset = reference.m_HolsterOffset;
@@ -282,6 +291,8 @@ int Actor::Create(const Actor &reference)
 //    m_MovePath.clear(); will recalc on its own
     m_UpdateMovePath = reference.m_UpdateMovePath;
     m_MoveProximityLimit = reference.m_MoveProximityLimit;
+    m_AIBaseDigStrength = reference.m_AIBaseDigStrength;
+    m_BaseMass = reference.m_BaseMass;
 
 	m_Organic = reference.m_Organic;
 	m_Mechanical = reference.m_Mechanical;
@@ -306,37 +317,40 @@ int Actor::Create(const Actor &reference)
 
 int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-	if (propName == "PlayerControllable") {
-		reader >> m_PlayerControllable;
-	} else if (propName == "BodyHitSound") {
+    StartPropertyList(return MOSRotating::ReadProperty(propName, reader));
+
+	MatchProperty("PlayerControllable", { reader >> m_PlayerControllable; });
+	MatchProperty("BodyHitSound", {
 		m_BodyHitSound = new SoundContainer;
 		reader >> m_BodyHitSound;
-	} else if (propName == "AlarmSound") {
+	});
+	MatchProperty("AlarmSound", {
 		m_AlarmSound = new SoundContainer;
 		reader >> m_AlarmSound;
-	} else if (propName == "PainSound") {
+	});
+	MatchProperty("PainSound", {
 		m_PainSound = new SoundContainer;
 		reader >> m_PainSound;
-	} else if (propName == "DeathSound") {
+	});
+	MatchProperty("DeathSound", {
 		m_DeathSound = new SoundContainer;
 		reader >> m_DeathSound;
-	} else if (propName == "DeviceSwitchSound") {
+	});
+	MatchProperty("DeviceSwitchSound", {
 		m_DeviceSwitchSound = new SoundContainer;
 		reader >> m_DeviceSwitchSound;
-	} else if (propName == "Status")
-        reader >> m_Status;
-    else if (propName == "DeploymentID")
-        reader >> m_DeploymentID;
-    else if (propName == "PassengerSlots")
-        reader >> m_PassengerSlots;
-    else if (propName == "Health")
+	});
+	MatchProperty("Status", { reader >> m_Status; });
+    MatchProperty("DeploymentID", { reader >> m_DeploymentID; });
+    MatchProperty("PassengerSlots", { reader >> m_PassengerSlots; });
+    MatchProperty("Health",
     {
         reader >> m_Health;
         m_PrevHealth = m_Health;
 		if (m_Health > m_MaxHealth)
 			m_MaxHealth = m_Health;
-    }
-    else if (propName == "MaxHealth")
+    });
+    MatchProperty("MaxHealth",
 	{
 		reader >> m_MaxHealth;
 		if (m_MaxHealth < m_Health)
@@ -344,64 +358,49 @@ int Actor::ReadProperty(const std::string_view &propName, Reader &reader)
 			m_Health = m_MaxHealth;
 	        m_PrevHealth = m_Health;
 		}
-	}
-    else if (propName == "ImpulseDamageThreshold")
-        reader >> m_TravelImpulseDamage;
-    else if (propName == "StableVelocityThreshold")
-        reader >> m_StableVel;
-    else if (propName == "StableRecoveryDelay")
-        reader >> m_StableRecoverDelay;
-    else if (propName == "AimAngle")
-        reader >> m_AimAngle;
-    else if (propName == "AimRange")
-        reader >> m_AimRange;
-    else if (propName == "AimDistance")
-        reader >> m_AimDistance;
-    else if (propName == "SharpAimDelay")
-        reader >> m_SharpAimDelay;
-    else if (propName == "SightDistance")
-        reader >> m_SightDistance;
-    else if (propName == "Perceptiveness")
-        reader >> m_Perceptiveness;
-	else if (propName == "CanRevealUnseen")
-		reader >> m_CanRevealUnseen;
-    else if (propName == "CharHeight")
-        reader >> m_CharHeight;
-    else if (propName == "HolsterOffset")
-        reader >> m_HolsterOffset;
-	else if (propName == "ReloadOffset")
-        reader >> m_ReloadOffset;
-    else if (propName == "AddInventoryDevice" || propName == "AddInventory")
+	});
+    MatchProperty("ImpulseDamageThreshold", { reader >> m_TravelImpulseDamage; });
+    MatchProperty("StableVelocityThreshold", { reader >> m_StableVel; });
+    MatchProperty("StableRecoveryDelay", { reader >> m_StableRecoverDelay; });
+    MatchProperty("AimAngle", { reader >> m_AimAngle; });
+    MatchProperty("AimRange", { reader >> m_AimRange; });
+    MatchProperty("AimDistance", { reader >> m_AimDistance; });
+    MatchProperty("SharpAimDelay", { reader >> m_SharpAimDelay; });
+    MatchProperty("SightDistance", { reader >> m_SightDistance; });
+    MatchProperty("Perceptiveness", { reader >> m_Perceptiveness; });
+    MatchProperty("PainThreshold", { reader >> m_PainThreshold; });
+	MatchProperty("CanRevealUnseen", { reader >> m_CanRevealUnseen; });
+    MatchProperty("CharHeight", { reader >> m_CharHeight; });
+    MatchProperty("HolsterOffset", { reader >> m_HolsterOffset; });
+	MatchProperty("ReloadOffset", { reader >> m_ReloadOffset; });
+    MatchForwards("AddInventoryDevice") MatchProperty("AddInventory",
     {
         MovableObject *pInvMO = dynamic_cast<MovableObject *>(g_PresetMan.ReadReflectedPreset(reader));
 		if (!pInvMO) { reader.ReportError("Object added to inventory is broken."); }
         AddToInventoryBack(pInvMO);
-    }
-    else if (propName == "MaxInventoryMass")
-        reader >> m_MaxInventoryMass;
-	else if (propName == "AIMode") {
+    });
+    MatchProperty("MaxInventoryMass", { reader >> m_MaxInventoryMass; });
+	MatchProperty("AIMode", {
 		int mode;
 		reader >> mode;
 		m_AIMode = static_cast<AIMode>(mode);
-	} else if (propName == "SpecialBehaviour_AddAISceneWaypoint") {
+	});
+	MatchProperty("SpecialBehaviour_AddAISceneWaypoint", {
 		Vector waypointToAdd;
 		reader >> waypointToAdd;
 		AddAISceneWaypoint(waypointToAdd);
-	} else if (propName == "PieMenu") {
+	});
+	MatchProperty("PieMenu", {
 		m_PieMenu = std::unique_ptr<PieMenu>(dynamic_cast<PieMenu *>(g_PresetMan.ReadReflectedPreset(reader)));
 		if (!m_PieMenu) { reader.ReportError("Failed to set Actor's pie menu. Doublecheck your name and everything is correct."); }
 		m_PieMenu->Create(this);
-    } else if (propName == "Organic") {
-        reader >> m_Organic;
-    } else if (propName == "Mechanical") {
-        reader >> m_Mechanical;
-    } else if (propName == "AIBaseDigStrength") {
-        reader >> m_AIBaseDigStrength;
-    } else {
-        return MOSRotating::ReadProperty(propName, reader);
-    }
+    });
+    MatchProperty("Organic", { reader >> m_Organic; });
+    MatchProperty("Mechanical", { reader >> m_Mechanical; });
+    MatchProperty("AIBaseDigStrength", { reader >> m_AIBaseDigStrength; });
+    
 
-    return 0;
+    EndPropertyList;
 }
 
 
@@ -455,6 +454,8 @@ int Actor::Save(Writer &writer) const
     writer << m_SightDistance;
     writer.NewProperty("Perceptiveness");
     writer << m_Perceptiveness;
+    writer.NewProperty("PainThreshold");
+    writer << m_PainThreshold;
 	writer.NewProperty("CanRevealUnseen");
 	writer << m_CanRevealUnseen;
     writer.NewProperty("CharHeight");
@@ -481,6 +482,13 @@ int Actor::Save(Writer &writer) const
     return 0;
 }
 
+void Actor::DestroyScriptState() {
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr) {
+        (*itr)->DestroyScriptState();
+    }
+
+    MOSRotating::DestroyScriptState();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Destroy
@@ -495,11 +503,14 @@ void Actor::Destroy(bool notInherited)
 	delete m_DeathSound;
 	delete m_AlarmSound;
 
-    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr)
+    for (std::deque<MovableObject *>::const_iterator itr = m_Inventory.begin(); itr != m_Inventory.end(); ++itr) {
         delete (*itr);
+    }
 
-    if (!notInherited)
+    if (!notInherited) {
         MOSRotating::Destroy();
+    }
+    
     Clear();
 }
 
@@ -511,6 +522,20 @@ float Actor::GetInventoryMass() const {
         inventoryMass += inventoryItem->GetMass();
     }
     return inventoryMass;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float Actor::GetBaseMass() {
+    if (m_BaseMass == std::numeric_limits<float>::infinity()) {
+        if (const Actor* presetActor = static_cast<const Actor*>(GetPreset())) {
+            m_BaseMass = presetActor->GetMass();
+        } else {
+            m_BaseMass = GetMass();
+        }
+    }
+
+    return m_BaseMass;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -774,7 +799,8 @@ MovableObject * Actor::SwapNextInventory(MovableObject *pSwapIn, bool muteSound)
 void Actor::RemoveInventoryItem(const std::string &moduleName, const std::string &presetName) {
 	for (std::deque<MovableObject*>::iterator inventoryIterator = m_Inventory.begin(); inventoryIterator != m_Inventory.end(); ++inventoryIterator) {
 		if ((moduleName.empty() || (*inventoryIterator)->GetModuleName() == moduleName) && (*inventoryIterator)->GetPresetName() == presetName) {
-			delete (*inventoryIterator);
+            (*inventoryIterator)->DestroyScriptState();
+            delete (*inventoryIterator);
 			m_Inventory.erase(inventoryIterator);
 			break;
 		}
@@ -1369,7 +1395,6 @@ void Actor::Update()
 		const float impulse = std::sqrt(travelImpulseMagnitudeSqr) - m_TravelImpulseDamage;
 		const float damage = std::max(impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth, 0.0F);
 		m_Health -= damage;
-		if (damage > 0 && m_Health > 0 && m_PainSound) { m_PainSound->Play(m_Pos); }
 		if (m_Status == Actor::STABLE) { m_Status = UNSTABLE; }
 		m_ForceDeepCheck = true;
 	}
@@ -1400,7 +1425,6 @@ void Actor::Update()
 
 	if (m_Status != DYING && m_Status != DEAD && m_Health <= 0) {
 		if (m_DeathSound) { m_DeathSound->Play(m_Pos); }
-		m_Controller.SetDisabled(true);
         DropAllInventory();
         m_Status = DYING;
 		m_DeathTmr.Reset();
@@ -1445,6 +1469,9 @@ void Actor::Update()
     {
         g_MovableMan.SortTeamRoster(m_Team);
     }
+
+    // Play PainSound if damage this frame exceeded PainThreshold
+    if (m_PainThreshold > 0 && m_PrevHealth - m_Health > m_PainThreshold && m_Health > 1 && m_PainSound) { m_PainSound->Play(m_Pos); }
 
 	int brainOfPlayer = g_ActivityMan.GetActivity()->IsBrainOfWhichPlayer(this);
 	if (brainOfPlayer != Players::NoPlayer && g_ActivityMan.GetActivity()->PlayerHuman(brainOfPlayer)) {

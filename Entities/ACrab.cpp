@@ -20,12 +20,13 @@
 #include "Leg.h"
 #include "Controller.h"
 #include "Matrix.h"
-#include "AEmitter.h"
+#include "AEJetpack.h"
 #include "HDFirearm.h"
 #include "Scene.h"
 #include "SettingsMan.h"
 #include "PresetMan.h"
 #include "FrameMan.h"
+#include "UInputMan.h"
 
 #include "GUI.h"
 #include "AllegroBitmap.h"
@@ -57,12 +58,9 @@ void ACrab::Clear()
     m_pRBGFootGroup = 0;
     m_BackupRBGFootGroup = nullptr;
     m_StrideSound = nullptr;
-    m_pJetpack = 0;
-    m_JetTimeTotal = 0.0;
-    m_JetTimeLeft = 0.0;
-	m_JetReplenishRate = 1.0F;
-	m_JetAngleRange = 0.25F;
+    m_pJetpack = nullptr;
     m_MoveState = STAND;
+    m_StrideFrame = false;
     for (int side = 0; side < SIDECOUNT; ++side)
     {
         for (int layer = 0; layer < LAYERCOUNT; ++layer)
@@ -122,9 +120,6 @@ int ACrab::Create()
             m_Paths[side][BGROUND][i].Create(m_Paths[side][FGROUND][i]);
         }
     }
-
-    // Initalize the jump time left
-    m_JetTimeLeft = m_JetTimeTotal;
 
     // All ACrabs by default avoid hitting each other ont he same team
     m_IgnoresTeamHits = true;
@@ -187,15 +182,10 @@ int ACrab::Create(const ACrab &reference) {
     //Note - hardcoded attachable copying is organized based on desired draw order here.
     if (reference.m_pLBGLeg) { SetLeftBGLeg(dynamic_cast<Leg *>(reference.m_pLBGLeg->Clone())); }
     if (reference.m_pRBGLeg) { SetRightBGLeg(dynamic_cast<Leg *>(reference.m_pRBGLeg->Clone())); }
-    if (reference.m_pJetpack) { SetJetpack(dynamic_cast<AEmitter *>(reference.m_pJetpack->Clone())); }
+    if (reference.m_pJetpack) { SetJetpack(dynamic_cast<AEJetpack *>(reference.m_pJetpack->Clone())); }
     if (reference.m_pTurret) { SetTurret(dynamic_cast<Turret *>(reference.m_pTurret->Clone())); }
     if (reference.m_pLFGLeg) { SetLeftFGLeg(dynamic_cast<Leg *>(reference.m_pLFGLeg->Clone())); }
     if (reference.m_pRFGLeg) { SetRightFGLeg(dynamic_cast<Leg *>(reference.m_pRFGLeg->Clone())); }
-
-    m_JetTimeTotal = reference.m_JetTimeTotal;
-    m_JetTimeLeft = reference.m_JetTimeLeft;
-	m_JetReplenishRate = reference.m_JetReplenishRate;
-	m_JetAngleRange = reference.m_JetAngleRange;
 
 	AtomGroup *atomGroupToUseAsFootGroupLFG = reference.m_pLFGFootGroup ? dynamic_cast<AtomGroup *>(reference.m_pLFGFootGroup->Clone()) : m_pLFGLeg->GetFootGroupFromFootAtomGroup();
 	RTEAssert(atomGroupToUseAsFootGroupLFG, "Failed to fallback to using LFGFoot AtomGroup as LFGFootGroup in preset " + this->GetModuleAndPresetName() + "!\nPlease define a LFGFootGroup or LFGLeg Foot attachable!");
@@ -271,26 +261,15 @@ int ACrab::Create(const ACrab &reference) {
 
 int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "Turret") {
-        SetTurret(dynamic_cast<Turret *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "Jetpack") {
-        SetJetpack(dynamic_cast<AEmitter *>(g_PresetMan.ReadReflectedPreset(reader)));
-	} else if (propName == "JumpTime" || propName == "JetTime") {
-        reader >> m_JetTimeTotal;
-        m_JetTimeTotal *= 1000;
-	} else if (propName == "JumpReplenishRate" || propName == "JetReplenishRate") {
-		reader >> m_JetReplenishRate;
-	} else if (propName == "JumpAngleRange" || propName == "JetAngleRange") {
-		reader >> m_JetAngleRange;
-    } else if (propName == "LFGLeg" || propName == "LeftFGLeg") {
-        SetLeftFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "LBGLeg" || propName == "LeftBGLeg") {
-        SetLeftBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "RFGLeg" || propName == "RightFGLeg") {
-        SetRightFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "RBGLeg" || propName == "RightBGLeg") {
-        SetRightBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader)));
-    } else if (propName == "LFootGroup" || propName == "LeftFootGroup") {
+    StartPropertyList(return Actor::ReadProperty(propName, reader));
+
+    MatchProperty("Turret", { SetTurret(dynamic_cast<Turret *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchProperty("Jetpack", { SetJetpack(dynamic_cast<AEJetpack *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("LFGLeg") MatchProperty("LeftFGLeg", { SetLeftFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("LBGLeg") MatchProperty("LeftBGLeg", { SetLeftBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("RFGLeg") MatchProperty("RightFGLeg", { SetRightFGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("RBGLeg") MatchProperty("RightBGLeg", { SetRightBGLeg(dynamic_cast<Leg *>(g_PresetMan.ReadReflectedPreset(reader))); });
+    MatchForwards("LFootGroup") MatchProperty("LeftFootGroup", {
         delete m_pLFGFootGroup;
         delete m_pLBGFootGroup;
         delete m_BackupLFGFootGroup;
@@ -304,7 +283,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_BackupLFGFootGroup = new AtomGroup(*m_pLFGFootGroup);
         m_BackupLFGFootGroup->RemoveAllAtoms();
         m_BackupLBGFootGroup = new AtomGroup(*m_BackupLFGFootGroup);
-    } else if (propName == "RFootGroup" || propName == "RightFootGroup") {
+    }); 
+    MatchForwards("RFootGroup") MatchProperty("RightFootGroup", {
         delete m_pRFGFootGroup;
         delete m_pRBGFootGroup;
         delete m_BackupRFGFootGroup;
@@ -318,7 +298,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_BackupRFGFootGroup = new AtomGroup(*m_pRFGFootGroup);
         m_BackupRFGFootGroup->RemoveAllAtoms();
         m_BackupRBGFootGroup = new AtomGroup(*m_BackupRFGFootGroup);
-    } else if (propName == "LFGFootGroup" || propName == "LeftFGFootGroup") {
+    }); 
+    MatchForwards("LFGFootGroup") MatchProperty("LeftFGFootGroup", {
         delete m_pLFGFootGroup;
         delete m_BackupLFGFootGroup;
         m_pLFGFootGroup = new AtomGroup();
@@ -326,7 +307,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_pLFGFootGroup->SetOwner(this);
         m_BackupLFGFootGroup = new AtomGroup(*m_pLFGFootGroup);
         m_BackupLFGFootGroup->RemoveAllAtoms();
-    } else if (propName == "LBGFootGroup" || propName == "LeftBGFootGroup") {
+    }); 
+    MatchForwards("LBGFootGroup") MatchProperty("LeftBGFootGroup", {
         delete m_pLBGFootGroup;
         delete m_BackupLBGFootGroup;
         m_pLBGFootGroup = new AtomGroup();
@@ -334,7 +316,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_pLBGFootGroup->SetOwner(this);
         m_BackupLBGFootGroup = new AtomGroup(*m_pLBGFootGroup);
         m_BackupLBGFootGroup->RemoveAllAtoms();
-    } else if (propName == "RFGFootGroup" || propName == "RightFGFootGroup") {
+    }); 
+    MatchForwards("RFGFootGroup") MatchProperty("RightFGFootGroup", {
         delete m_pRFGFootGroup;
         delete m_BackupRFGFootGroup;
         m_pRFGFootGroup = new AtomGroup();
@@ -342,7 +325,8 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_pRFGFootGroup->SetOwner(this);
         m_BackupRFGFootGroup = new AtomGroup(*m_pRFGFootGroup);
         m_BackupRFGFootGroup->RemoveAllAtoms();
-    } else if (propName == "RBGFootGroup" || propName == "RightBGFootGroup") {
+    }); 
+    MatchForwards("RBGFootGroup") MatchProperty("RightBGFootGroup", {
         delete m_pRBGFootGroup;
         delete m_BackupRBGFootGroup;
         m_pRBGFootGroup = new AtomGroup();
@@ -350,30 +334,21 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
         m_pRBGFootGroup->SetOwner(this);
         m_BackupRBGFootGroup = new AtomGroup(*m_pRBGFootGroup);
         m_BackupRBGFootGroup->RemoveAllAtoms();
-    } else if (propName == "StrideSound") {
+    });
+    MatchProperty("StrideSound", {
 		m_StrideSound = new SoundContainer;
         reader >> m_StrideSound;
-    } else if (propName == "LStandLimbPath" || propName == "LeftStandLimbPath") {
-        reader >> m_Paths[LEFTSIDE][FGROUND][STAND];
-    } else if (propName == "LWalkLimbPath" || propName == "LeftWalkLimbPath") {
-        reader >> m_Paths[LEFTSIDE][FGROUND][WALK];
-    } else if (propName == "LDislodgeLimbPath" || propName == "LeftDislodgeLimbPath") {
-        reader >> m_Paths[LEFTSIDE][FGROUND][DISLODGE];
-    } else if (propName == "RStandLimbPath" || propName == "RightStandLimbPath") {
-        reader >> m_Paths[RIGHTSIDE][FGROUND][STAND];
-    } else if (propName == "RWalkLimbPath" || propName == "RightWalkLimbPath") {
-        reader >> m_Paths[RIGHTSIDE][FGROUND][WALK];
-    } else if (propName == "RDislodgeLimbPath" || propName == "RightDislodgeLimbPath") {
-        reader >> m_Paths[RIGHTSIDE][FGROUND][DISLODGE];
-    } else if (propName == "AimRangeUpperLimit") {
-        reader >> m_AimRangeUpperLimit;
-    } else if (propName == "AimRangeLowerLimit") {
-        reader >> m_AimRangeLowerLimit;
-    } else {
-        return Actor::ReadProperty(propName, reader);
-    }
-
-    return 0;
+    }); 
+    MatchForwards("LStandLimbPath") MatchProperty("LeftStandLimbPath", { reader >> m_Paths[LEFTSIDE][FGROUND][STAND]; });
+    MatchForwards("LWalkLimbPath") MatchProperty("LeftWalkLimbPath", { reader >> m_Paths[LEFTSIDE][FGROUND][WALK]; });
+    MatchForwards("LDislodgeLimbPath") MatchProperty("LeftDislodgeLimbPath", { reader >> m_Paths[LEFTSIDE][FGROUND][DISLODGE]; });
+    MatchForwards("RStandLimbPath") MatchProperty("RightStandLimbPath", { reader >> m_Paths[RIGHTSIDE][FGROUND][STAND]; });
+    MatchForwards("RWalkLimbPath") MatchProperty("RightWalkLimbPath", { reader >> m_Paths[RIGHTSIDE][FGROUND][WALK]; });
+    MatchForwards("RDislodgeLimbPath") MatchProperty("RightDislodgeLimbPath", { reader >> m_Paths[RIGHTSIDE][FGROUND][DISLODGE]; });
+    MatchProperty("AimRangeUpperLimit", { reader >> m_AimRangeUpperLimit; });
+    MatchProperty("AimRangeLowerLimit", { reader >> m_AimRangeLowerLimit; });
+    
+    EndPropertyList;
 }
 
 
@@ -391,13 +366,6 @@ int ACrab::Save(Writer &writer) const
     writer << m_pTurret;
     writer.NewProperty("Jetpack");
     writer << m_pJetpack;
-    writer.NewProperty("JumpTime");
-    // Convert to seconds
-    writer << m_JetTimeTotal / 1000;
-	writer.NewProperty("JumpReplenishRate");
-	writer << m_JetReplenishRate;
-	writer.NewProperty("JumpAngleRange");
-	writer << m_JetAngleRange;
     writer.NewProperty("LFGLeg");
     writer << m_pLFGLeg;
     writer.NewProperty("LBGLeg");
@@ -526,7 +494,7 @@ void ACrab::SetTurret(Turret *newTurret) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ACrab::SetJetpack(AEmitter *newJetpack) {
+void ACrab::SetJetpack(AEJetpack *newJetpack) {
     if (m_pJetpack && m_pJetpack->IsAttached()) { RemoveAndDeleteAttachable(m_pJetpack); }
     if (newJetpack == nullptr) {
         m_pJetpack = nullptr;
@@ -535,7 +503,7 @@ void ACrab::SetJetpack(AEmitter *newJetpack) {
         AddAttachable(newJetpack);
 
         m_HardcodedAttachableUniqueIDsAndSetters.insert({newJetpack->GetUniqueID(), [](MOSRotating *parent, Attachable *attachable) {
-            AEmitter *castedAttachable = dynamic_cast<AEmitter *>(attachable);
+            AEJetpack *castedAttachable = dynamic_cast<AEJetpack *>(attachable);
             RTEAssert(!attachable || castedAttachable, "Tried to pass incorrect Attachable subtype " + (attachable ? attachable->GetClassName() : "") + " to SetJetpack");
             dynamic_cast<ACrab *>(parent)->SetJetpack(castedAttachable);
         }});
@@ -1042,59 +1010,9 @@ void ACrab::PreControllerUpdate()
         }
     }
 
-    ////////////////////////////////////
-    // Jetpack activation and blast direction
-
-    if (m_pJetpack && m_pJetpack->IsAttached())
-    {
-		if (m_JetTimeTotal > 0) {
-			// Jetpack throttle depletes relative to jet time, but only if throttle range values have been defined
-			float jetTimeRatio = std::max(m_JetTimeLeft / m_JetTimeTotal, 0.0F);
-			m_pJetpack->SetThrottle(jetTimeRatio * 2.0F - 1.0F);
-		}
-		// Start Jetpack burn
-		if (m_Controller.IsState(BODY_JUMPSTART) && m_JetTimeLeft > 0 && m_Status != INACTIVE)
-		{
-			m_pJetpack->TriggerBurst();
-			// This is to make sure se get loose from being stuck
-			m_ForceDeepCheck = true;
-			m_pJetpack->EnableEmission(true);
-			// Quadruple this for the burst
-			m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS() * static_cast<float>(std::max(m_pJetpack->GetTotalBurstSize(), 2)) * (m_pJetpack->CanTriggerBurst() ? 1.0F : 0.5F), 0.0F);
-		} else if (m_Controller.IsState(BODY_JUMP) && m_JetTimeLeft > 0 && m_Status != INACTIVE) {
-            m_pJetpack->EnableEmission(true);
-            // Jetpacks are noisy!
-            m_pJetpack->AlarmOnEmit(m_Team);
-            // Deduct from the jetpack time
-            m_JetTimeLeft = std::max(m_JetTimeLeft - g_TimerMan.GetDeltaTimeMS(), 0.0F);
-            m_MoveState = JUMP;
-        }
-        // Jetpack is off/turning off
-        else {
-            m_pJetpack->EnableEmission(false);
-			if (m_MoveState == JUMP) { m_MoveState = STAND; }
-			m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * m_JetReplenishRate, m_JetTimeTotal);
-        }
-
-		float maxAngle = c_HalfPI * m_JetAngleRange;
-		// If pie menu is on, keep the angle to what it was before.
-		if (!m_Controller.IsState(PIE_MENU_ACTIVE)) {
-			// Direct the jetpack nozzle according to movement stick if analog input is present.
-			if (m_Controller.GetAnalogMove().MagnitudeIsGreaterThan(analogAimDeadzone)) {
-				float jetAngle = std::clamp(m_Controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
-				m_pJetpack->SetEmitAngle(FacingAngle(jetAngle - c_HalfPI));
-			// Use the aim angle if we're getting digital input.
-			} else {
-				// Thrust in the opposite direction when strafing.
-				float flip = ((m_HFlipped && m_Controller.IsState(MOVE_RIGHT)) || (!m_HFlipped && m_Controller.IsState(MOVE_LEFT))) ? -1.0F : 1.0F;
-				// Halve the jet angle when looking downwards so the actor isn't forced to go sideways
-                // TODO: don't hardcode this ratio?
-				float jetAngle = (m_AimAngle > 0 ? m_AimAngle * m_JetAngleRange : -m_AimAngle * m_JetAngleRange * 0.5F) - maxAngle;
-				// FacingAngle isn't needed because it's already been applied to AimAngle since last update.
-				m_pJetpack->SetEmitAngle(jetAngle * flip - c_HalfPI);
-			}
-		}
-    }
+    if (m_pJetpack && m_pJetpack->IsAttached()) {
+		m_pJetpack->UpdateBurstState(*this);
+	}
 
     ////////////////////////////////////
     // Movement direction
@@ -1213,6 +1131,13 @@ void ACrab::PreControllerUpdate()
         }
         // Correct angle based on flip
         m_AimAngle = FacingAngle(m_AimAngle);
+
+        // Clamp the analog aim too, so it doesn't feel "sticky" at the edges of the aim limit
+        if (m_Controller.IsPlayerControlled()) {
+            float mouseAngle = g_UInputMan.AnalogAimValues(m_Controller.GetPlayer()).GetAbsRadAngle();
+            Clamp(mouseAngle, FacingAngle(adjustedAimRangeUpperLimit), FacingAngle(adjustedAimRangeLowerLimit));
+            g_UInputMan.SetMouseValueAngle(mouseAngle, m_Controller.GetPlayer());
+        }
     }
     else
         m_AimState = AIMSTILL;
@@ -1225,7 +1150,7 @@ void ACrab::PreControllerUpdate()
 
 	if (m_Controller.IsState(AIM_SHARP) && m_Status == STABLE && m_Vel.MagnitudeIsLessThan(5.0F)) {
         float aimMag = analogAim.GetMagnitude();
-
+        
 		// If aim sharp is being done digitally, then translate to full magnitude.
 		if (aimMag < 0.1F) { aimMag = 1.0F; }
 		if (m_MoveState == WALK) { aimMag *= 0.3F; }
@@ -1240,7 +1165,7 @@ void ACrab::PreControllerUpdate()
 		} else {
 			m_SharpAimProgress *= 0.95F;
 		}
-	} else {
+	} else {    
 		m_SharpAimProgress = std::max(m_SharpAimProgress * 0.95F - 0.1F, 0.0F);
 	}
 
@@ -1273,6 +1198,8 @@ void ACrab::PreControllerUpdate()
 
     ///////////////////////////////////////////////////
     // Travel the limb AtomGroup:s
+
+    m_StrideFrame = false;
 
     if (m_Status == STABLE && !m_LimbPushForcesAndCollisionsDisabled)
     {
@@ -1362,6 +1289,11 @@ void ACrab::PreControllerUpdate()
 					m_StrideSound->Play();
 				}
 			}
+
+            if (restarted) {
+                m_StrideFrame = true;
+                RunScriptedFunctionInAppropriateScripts("OnStride");
+            }
 		} else if (m_pLFGLeg || m_pLBGLeg || m_pRFGLeg || m_pRBGLeg) {
 			if (m_MoveState == JUMP) {
 				// TODO: Utilize jump paths in an intuitive way?
@@ -1370,7 +1302,7 @@ void ACrab::PreControllerUpdate()
 				if (m_pRFGLeg) { m_pRFGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRFGLeg->GetParentOffset()), m_pRFGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pRFGLeg->GetMass(), deltaTime); }
 				if (m_pRBGLeg) { m_pRBGFootGroup->FlailAsLimb(m_Pos, RotateOffset(m_pRBGLeg->GetParentOffset()), m_pRBGLeg->GetMaxLength(), m_PrevVel, m_AngularVel, m_pRBGLeg->GetMass(), deltaTime); }
 
-				if (m_JetTimeLeft <= 0) {
+				if (m_pJetpack == nullptr || m_pJetpack->IsOutOfFuel()) {
 					m_MoveState = STAND;
 					m_Paths[LEFTSIDE][FGROUND][JUMP].Terminate();
 					m_Paths[LEFTSIDE][BGROUND][JUMP].Terminate();
@@ -1721,8 +1653,8 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
             m_HUDStack += -9;
         }
 
-		if (m_pJetpack && m_Status != INACTIVE && !m_Controller.IsState(PIE_MENU_ACTIVE) && (m_Controller.IsState(BODY_JUMP) || m_JetTimeLeft < m_JetTimeTotal)) {
-			if (m_JetTimeLeft < 100.0F) {
+		if (m_pJetpack && m_Status != INACTIVE && !m_Controller.IsState(PIE_MENU_ACTIVE) && (m_Controller.IsState(BODY_JUMP) || !m_pJetpack->IsFullyFueled())) {
+			if (m_pJetpack->GetJetTimeLeft() < 100.0F) {
 				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
 			} else if (m_pJetpack->IsEmitting()) {
 				float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
@@ -1739,8 +1671,8 @@ void ACrab::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 7, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
 
 			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 15, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
-			if (m_JetTimeTotal > 0) {
-				float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
+			if (m_pJetpack->GetJetTimeTotal() > 0.0F) {
+				float jetTimeRatio = m_pJetpack->GetJetTimeRatio();
 				int gaugeColor;
 				if (jetTimeRatio > 0.75F) {
 					gaugeColor = 149;

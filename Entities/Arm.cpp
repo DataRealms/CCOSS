@@ -89,26 +89,20 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Arm::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "MaxLength") {
-			reader >> m_MaxLength;
-		} else if (propName == "MoveSpeed") {
-			reader >> m_MoveSpeed;
-		} else if (propName == "HandIdleOffset" || propName == "IdleOffset") {
-			reader >> m_HandIdleOffset;
-		} else if (propName == "HandSprite" || propName == "Hand") {
+		StartPropertyList(return Attachable::ReadProperty(propName, reader));
+		
+		MatchProperty("MaxLength", { reader >> m_MaxLength; });
+		MatchProperty("MoveSpeed", { reader >> m_MoveSpeed; });
+		MatchForwards("HandIdleOffset") MatchProperty("IdleOffset", { reader >> m_HandIdleOffset; });
+		MatchForwards("HandSprite") MatchProperty("Hand", {
 			reader >> m_HandSpriteFile;
 			m_HandSpriteBitmap = m_HandSpriteFile.GetAsBitmap();
-		} else if (propName == "GripStrength") {
-			reader >> m_GripStrength;
-		} else if (propName == "ThrowStrength") {
-			reader >> m_ThrowStrength;
-		} else if (propName == "HeldDevice") {
-			SetHeldDevice(dynamic_cast<HeldDevice *>(g_PresetMan.ReadReflectedPreset(reader)));
-		} else {
-			return Attachable::ReadProperty(propName, reader);
-		}
+		});
+		MatchProperty("GripStrength", { reader >> m_GripStrength; });
+		MatchProperty("ThrowStrength", { reader >> m_ThrowStrength; });
+		MatchProperty("HeldDevice", { SetHeldDevice(dynamic_cast<HeldDevice *>(g_PresetMan.ReadReflectedPreset(reader))); });
 
-		return 0;
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,6 +160,11 @@ namespace RTE {
 					dynamic_cast<Arm *>(parent)->SetHeldDevice(castedAttachable);
 				}
 			);
+		}
+
+		// Reset our fire state, so that our activation of a prior device does not "leak"
+		if (Actor* parentActor = dynamic_cast<Actor*>(GetRootParent())) {
+			parentActor->GetController()->SetState(ControlState::WEAPON_FIRE, false);
 		}
 	}
 
@@ -308,7 +307,10 @@ namespace RTE {
 	void Arm::AccountForHeldDeviceRecoil(const HeldDevice *heldDevice, Vector &targetOffset) {
 		if (!heldDevice->GetRecoilForce().IsZero()) {
 			float totalGripStrength = m_GripStrength * heldDevice->GetGripStrengthMultiplier();
-			if (totalGripStrength == 0) { totalGripStrength = heldDevice->GetJointStrength(); }
+			if (totalGripStrength == 0.0F) { 
+				totalGripStrength = heldDevice->GetJointStrength(); 
+			}
+
 			if (heldDevice->GetSupported()) {
 				const AHuman *rootParentAsAHuman = dynamic_cast<const AHuman *>(GetRootParent());
 				const Arm *supportingArm = rootParentAsAHuman ? rootParentAsAHuman->GetBGArm() : nullptr;
@@ -322,14 +324,17 @@ namespace RTE {
 					}
 				}
 			}
-			if (totalGripStrength > 0) {
+
+			if (totalGripStrength > 0.0F) {
 				// Diminish recoil effect when body is horizontal so that the device doesn't get pushed into terrain when prone.
 				float rotAngleScalar = std::abs(std::cos(m_Parent->GetRotAngle()));
 				float recoilScalar = std::sqrt(std::min(heldDevice->GetRecoilForce().GetMagnitude() / totalGripStrength, 0.7F)) * rotAngleScalar;
+				recoilScalar *= heldDevice->GetVisualRecoilMultiplier();
+
 				targetOffset.SetX(targetOffset.GetX() * (1.0F - recoilScalar));
 
 				// Shift Y offset slightly so the device is more likely to go under the shoulder rather than over it, otherwise it looks goofy.
-				if (targetOffset.GetY() <= 0) {
+				if (targetOffset.GetY() <= 0.0F) {
 					targetOffset.SetY(targetOffset.GetY() * (1.0F - recoilScalar) + recoilScalar);
 				}
 			}
@@ -346,7 +351,7 @@ namespace RTE {
 		Vector terrainOrMuzzlePosition;
 		if (g_SceneMan.CastStrengthRay(midOfDevice, midToMuzzle, 5, terrainOrMuzzlePosition, 0, false)) {
 			Vector muzzleAdjustment = g_SceneMan.ShortestDistance(newMuzzlePos, terrainOrMuzzlePosition, g_SceneMan.SceneWrapsX());
-			if (muzzleAdjustment.GetMagnitude() > 2.0F) {
+			if (muzzleAdjustment.MagnitudeIsGreaterThan(2.0F)) {
 				targetOffset += muzzleAdjustment;
 			}
 		}
@@ -356,8 +361,8 @@ namespace RTE {
 
 	void Arm::UpdateArmFrame() {
 		float halfMaxLength = m_MaxLength / 2.0F;
-		float newFrame = std::floor(((m_HandCurrentOffset.GetMagnitude() - halfMaxLength) / halfMaxLength) * static_cast<float>(m_FrameCount));
-		m_Frame = static_cast<unsigned int>(std::clamp(newFrame, 0.0F, static_cast<float>(m_FrameCount - 1)));
+		int newFrame = static_cast<unsigned int>((m_HandCurrentOffset.GetMagnitude() - halfMaxLength) / halfMaxLength) * static_cast<float>(m_FrameCount);
+		m_Frame = std::clamp<int>(newFrame, 0, m_FrameCount - 1);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

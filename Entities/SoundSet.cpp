@@ -43,18 +43,17 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int SoundSet::ReadProperty(const std::string_view &propName, Reader &reader) {
-		if (propName == "SoundSelectionCycleMode") {
-			SetSoundSelectionCycleMode(ReadSoundSelectionCycleMode(reader));
-		} else if (propName == "AddSound") {
-			AddSoundData(ReadAndGetSoundData(reader));
-		} else if (propName == "AddSoundSet") {
+		StartPropertyList(return Serializable::ReadProperty(propName, reader));
+		
+		MatchProperty("SoundSelectionCycleMode", { SetSoundSelectionCycleMode(ReadSoundSelectionCycleMode(reader)); });
+		MatchProperty("AddSound", { AddSoundData(ReadAndGetSoundData(reader)); });
+		MatchProperty("AddSoundSet", {
 			SoundSet soundSetToAdd;
 			reader >> soundSetToAdd;
 			AddSoundSet(soundSetToAdd);
-		} else {
-			return Serializable::ReadProperty(propName, reader);
-		}
-		return 0;
+		});
+		
+		EndPropertyList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -305,9 +304,11 @@ namespace RTE {
 				}
 				RTEAssert(m_CurrentSelection.second >= 0 && m_CurrentSelection.second < selectedVectorSize, "Failed to select next sound, either none was selected or the selected sound was invalid.");
 		}
+
 		if (m_CurrentSelection.first == true) {
 			return m_SubSoundSets[m_CurrentSelection.second].SelectNextSounds();
 		}
+
 		return true;
 	}
 }

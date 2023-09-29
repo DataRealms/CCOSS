@@ -40,7 +40,6 @@ ConcreteClassInfo(HeldDevice, Attachable, 50);
 void HeldDevice::Clear()
 {
     m_HeldDeviceType = WEAPON;
-    m_IsExplosiveWeapon = false;
     m_Activated = false;
     m_ActivationTimer.Reset();
     m_OneHanded = false;
@@ -53,6 +52,7 @@ void HeldDevice::Clear()
     m_Supported = false;
 	m_SupportAvailable = false;
     m_SupportOffset.Reset();
+    m_UseSupportOffsetWhileReloading = true;
 	m_SeenByPlayer.fill(false);
     m_IsUnPickupable = false;
     m_PickupableByPresetNames.clear();
@@ -60,6 +60,9 @@ void HeldDevice::Clear()
     m_BlinkTimer.Reset();
 	m_BlinkTimer.SetSimTimeLimitMS(1000);
     m_Loudness = -1;
+    m_IsExplosiveWeapon = false;
+    m_GetsHitByMOsWhenHeld = false;
+    m_VisualRecoilMultiplier = 1.0F;
 
     // NOTE: This special override of a parent class member variable avoids needing an extra variable to avoid overwriting INI values.
     m_CollidesWithTerrainWhileAttached = false;
@@ -147,6 +150,7 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_StanceOffset = reference.m_StanceOffset;
     m_SharpStanceOffset = reference.m_SharpStanceOffset;
     m_SupportOffset = reference.m_SupportOffset;
+    m_UseSupportOffsetWhileReloading = reference.m_UseSupportOffsetWhileReloading;
 	m_Supportable = reference.m_Supportable;
     m_IsUnPickupable = reference.m_IsUnPickupable;
     for (std::string referenceActorWhoCanPickThisUp : reference.m_PickupableByPresetNames) {
@@ -160,6 +164,9 @@ int HeldDevice::Create(const HeldDevice &reference)
     m_Supported = reference.m_Supported;
 	m_SupportAvailable = reference.m_SupportAvailable;
     m_Loudness = reference.m_Loudness;
+    m_IsExplosiveWeapon = reference.m_IsExplosiveWeapon;
+    m_GetsHitByMOsWhenHeld = reference.m_GetsHitByMOsWhenHeld;
+    m_VisualRecoilMultiplier = reference.m_VisualRecoilMultiplier;
 
     return 0;
 }
@@ -175,21 +182,17 @@ int HeldDevice::Create(const HeldDevice &reference)
 
 int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
 {
-    if (propName == "HeldDeviceType")
-        reader >> m_HeldDeviceType;
-    else if (propName == "OneHanded")
-        reader >> m_OneHanded;
-	else if (propName == "DualWieldable")
-		reader >> m_DualWieldable;
-	else if (propName == "StanceOffset")
-        reader >> m_StanceOffset;
-    else if (propName == "SharpStanceOffset")
-        reader >> m_SharpStanceOffset;
-	else if (propName == "Supportable") {
-		reader >> m_Supportable;
-	} else if (propName == "SupportOffset")
-        reader >> m_SupportOffset;
-    else if (propName == "PickupableBy") {
+    StartPropertyList(return Attachable::ReadProperty(propName, reader));
+
+    MatchProperty("HeldDeviceType", { reader >> m_HeldDeviceType; });
+    MatchProperty("OneHanded", { reader >> m_OneHanded; });
+	MatchProperty("DualWieldable", { reader >> m_DualWieldable; });
+	MatchProperty("StanceOffset", { reader >> m_StanceOffset; });
+    MatchProperty("SharpStanceOffset", { reader >> m_SharpStanceOffset; });
+	MatchProperty("Supportable", { reader >> m_Supportable; });
+	MatchProperty("SupportOffset", { reader >> m_SupportOffset; });
+    MatchProperty("UseSupportOffsetWhileReloading", { reader >> m_UseSupportOffsetWhileReloading; });
+    MatchProperty("PickupableBy", {
         std::string pickupableByValue = reader.ReadPropValue();
         if (pickupableByValue == "PickupableByEntries") {
             while (reader.NextProperty()) {
@@ -209,22 +212,20 @@ int HeldDevice::ReadProperty(const std::string_view &propName, Reader &reader)
         } else if (pickupableByValue == "None") {
             SetUnPickupable(true);
         }
-    } else if (propName == "GripStrengthMultiplier") {
-        reader >> m_GripStrengthMultiplier;
-    } else if (propName == "SharpLength")
-        reader >> m_MaxSharpLength;
-    else if (propName == "Loudness") {
-        reader >> m_Loudness;
-	} else if (propName == "SpecialBehaviour_Activated") {
-		reader >> m_Activated;
-	} else if (propName == "SpecialBehaviour_ActivationTimerElapsedSimTimeMS") {
+    });
+    MatchProperty("GripStrengthMultiplier", { reader >> m_GripStrengthMultiplier; });
+    MatchProperty("SharpLength", { reader >> m_MaxSharpLength; });
+    MatchProperty("Loudness", { reader >> m_Loudness; });
+    MatchProperty("GetsHitByMOsWhenHeld", { reader >> m_GetsHitByMOsWhenHeld; });
+    MatchProperty("VisualRecoilMultiplier", { reader >> m_VisualRecoilMultiplier; });
+	MatchProperty("SpecialBehaviour_Activated", { reader >> m_Activated; });
+	MatchProperty("SpecialBehaviour_ActivationTimerElapsedSimTimeMS", {
 		double elapsedSimTimeMS;
 		reader >> elapsedSimTimeMS;
 		m_ActivationTimer.SetElapsedSimTimeMS(elapsedSimTimeMS);
-	} else
-        return Attachable::ReadProperty(propName, reader);
+	});
 
-    return 0;
+    EndPropertyList;
 }
 
 
@@ -252,12 +253,17 @@ int HeldDevice::Save(Writer &writer) const
 	writer.NewPropertyWithValue("Supportable", m_Supportable);
     writer.NewProperty("SupportOffset");
     writer << m_SupportOffset;
+    writer.NewPropertyWithValue("UseSupportOffsetWhileReloading", m_UseSupportOffsetWhileReloading);
     writer.NewProperty("GripStrengthMultiplier");
     writer << m_GripStrengthMultiplier;
     writer.NewProperty("SharpLength");
     writer << m_MaxSharpLength;
     writer.NewProperty("Loudness");
     writer << m_Loudness;
+    writer.NewProperty("GetsHitByMOsWhenHeld");
+    writer << m_GetsHitByMOsWhenHeld;
+    writer.NewProperty("VisualRecoilMultiplier");
+    writer << m_VisualRecoilMultiplier;
 
     return 0;
 }
@@ -327,6 +333,12 @@ Vector HeldDevice::GetMagazinePos() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+bool HeldDevice::IsBeingHeld() const {
+    return dynamic_cast<const Arm*>(m_Parent);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void HeldDevice::RemovePickupableByPresetName(const std::string &actorPresetName) {
     std::unordered_set<std::string>::iterator pickupableByPresetNameEntry = m_PickupableByPresetNames.find(actorPresetName);
     if (pickupableByPresetNameEntry != m_PickupableByPresetNames.end()) { m_PickupableByPresetNames.erase(pickupableByPresetNameEntry); }
@@ -344,6 +356,10 @@ void HeldDevice::RemovePickupableByPresetName(const std::string &actorPresetName
 
 bool HeldDevice::CollideAtPoint(HitData &hd)
 {
+    if (!m_GetsHitByMOsWhenHeld && IsBeingHeld()) {
+        return false;
+    }
+
     return Attachable::CollideAtPoint(hd);
 }
 

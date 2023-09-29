@@ -55,6 +55,7 @@ namespace RTE {
 		m_AvgImpulse = -1.0f;
 		m_FlashOnlyOnBurst = true;
 		m_SustainBurstSound = false;
+		m_BurstSoundFollowsEmitter = true;
 		m_LoudnessOnEmit = 1.0f;
 	}
 
@@ -103,6 +104,7 @@ namespace RTE {
 		m_FlashScale = reference.m_FlashScale;
 		m_FlashOnlyOnBurst = reference.m_FlashOnlyOnBurst;
 		m_SustainBurstSound = reference.m_SustainBurstSound;
+		m_BurstSoundFollowsEmitter = reference.m_BurstSoundFollowsEmitter;
 		m_LoudnessOnEmit = reference.m_LoudnessOnEmit;
 
 		return 0;
@@ -161,6 +163,7 @@ namespace RTE {
 		MatchProperty("FlashScale", { reader >> m_FlashScale; });
 		MatchProperty("FlashOnlyOnBurst", { reader >> m_FlashOnlyOnBurst; });
 		MatchProperty("SustainBurstSound", { reader >> m_SustainBurstSound; });
+		MatchProperty("BurstSoundFollowsEmitter", { reader >> m_BurstSoundFollowsEmitter; });
 		MatchProperty("LoudnessOnEmit", { reader >> m_LoudnessOnEmit; });
 		
 		EndPropertyList;
@@ -218,6 +221,8 @@ namespace RTE {
 		writer << m_FlashOnlyOnBurst;
 		writer.NewProperty("SustainBurstSound");
 		writer << m_SustainBurstSound;
+		writer.NewProperty("BurstSoundFollowsEmitter");
+		writer << m_BurstSoundFollowsEmitter;
 		writer.NewProperty("LoudnessOnEmit");
 		writer << m_LoudnessOnEmit;
 
@@ -357,6 +362,10 @@ namespace RTE {
 	void PEmitter::Update()
 	{
 		MOSParticle::Update();
+
+		if (m_BurstSoundFollowsEmitter) {
+			m_BurstSound.SetPosition(m_Pos);
+		}
 
 		if (m_EmitEnabled)
 		{

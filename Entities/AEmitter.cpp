@@ -60,6 +60,7 @@ void AEmitter::Clear()
     m_AvgImpulse = -1.0F;
     m_FlashOnlyOnBurst = true;
     m_SustainBurstSound = false;
+    m_BurstSoundFollowsEmitter = true;
     m_LoudnessOnEmit = 1.0F;
 }
 
@@ -101,6 +102,7 @@ int AEmitter::Create(const AEmitter &reference) {
     m_FlashScale = reference.m_FlashScale;
     m_FlashOnlyOnBurst = reference.m_FlashOnlyOnBurst;
     m_SustainBurstSound = reference.m_SustainBurstSound;
+    m_BurstSoundFollowsEmitter = reference.m_BurstSoundFollowsEmitter;
     m_LoudnessOnEmit = reference.m_LoudnessOnEmit;
 
     return 0;
@@ -166,6 +168,7 @@ int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
     MatchProperty("FlashScale", { reader >> m_FlashScale; });
     MatchProperty("FlashOnlyOnBurst", { reader >> m_FlashOnlyOnBurst; });
     MatchProperty("SustainBurstSound", { reader >> m_SustainBurstSound; });
+    MatchProperty("BurstSoundFollowsEmitter", { reader >> m_BurstSoundFollowsEmitter; });
     MatchProperty("LoudnessOnEmit", { reader >> m_LoudnessOnEmit; });
 
     EndPropertyList;
@@ -231,6 +234,8 @@ int AEmitter::Save(Writer &writer) const
     writer << m_FlashOnlyOnBurst;
     writer.NewProperty("SustainBurstSound");
 	writer << m_SustainBurstSound;
+    writer.NewProperty("BurstSoundFollowsEmitter");
+	writer << m_BurstSoundFollowsEmitter;
     writer.NewProperty("LoudnessOnEmit");
     writer << m_LoudnessOnEmit;
 
@@ -424,6 +429,10 @@ void AEmitter::Update()
     }
 
     Attachable::Update();
+
+    if (m_BurstSoundFollowsEmitter && m_BurstSound) {
+        m_BurstSound->SetPosition(m_Pos);
+    }
 
     if (m_EmitEnabled)
     {

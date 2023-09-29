@@ -724,6 +724,8 @@ protected:
     bool m_FlashOnlyOnBurst;
 	// Whether the burst sound should always play until completion, or whether it stops when this emitter stops emitting
 	bool m_SustainBurstSound;
+	// Whether the burst sound follows the emitter
+	bool m_BurstSoundFollowsEmitter;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

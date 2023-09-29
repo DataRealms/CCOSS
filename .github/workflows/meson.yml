@@ -117,13 +117,12 @@ jobs:
   build-macos:
     runs-on: macos-11
     name: MacOS Build
-
-    env: 
-      DEVELOPER_DIR: /Applications/Xcode_12.4.app/Contents/Developer
         
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
+
+      - run: sudo xcode-select -s /Applications/Xcode_12.4.app/Contents/Developer
 
       - name: Install Dependencies
         run: |

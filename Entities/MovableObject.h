@@ -1533,6 +1533,99 @@ enum MOType
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 	virtual int UpdateScripts(ThreadScriptsToRun scriptsToRun);
 
+    /// <summary>
+    /// Gets a const reference to this MOSRotating's map of string values.
+    /// </summary>
+    /// <returns>A const reference to this MOSRotating's map of string values.</returns>
+    const std::unordered_map<std::string, std::string> & GetStringValueMap() const { return m_StringValueMap; }
+
+    /// <summary>
+    /// Gets a const reference to this MOSRotating's map of number values.
+    /// </summary>
+    /// <returns>A const reference to this MOSRotating's map of number values.</returns>
+    const std::unordered_map<std::string, double> & GetNumberValueMap() const { return m_NumberValueMap; }
+
+    /// <summary>
+    /// Returns the string value associated with the specified key or "" if it does not exist.
+    /// </summary>
+    /// <param name="key">Key to retrieve value.</params>
+    /// <returns>The value associated with the key.</returns>
+    const std::string & GetStringValue(const std::string &key) const;
+
+    /// <summary>
+    /// Returns the number value associated with the specified key or 0 if it does not exist.
+    /// </summary>
+    /// <param name="key">Key to retrieve value.</params>
+    /// <returns>The value associated with the key.</returns>
+    double GetNumberValue(const std::string &key) const;
+
+    /// <summary>
+    /// Returns the entity value associated with the specified key or nullptr if it does not exist.
+    /// </summary>
+    /// <param name="key">Key to retrieve value.</params>
+    /// <returns>The value associated with the key.</returns>
+    Entity * GetObjectValue(const std::string &key) const;
+
+    /// <summary>
+    /// Sets the string value associated with the specified key.
+    /// </summary>
+    /// <param name="key">Key to retrieve value.</params>
+    /// <param name="value">The new value to be associated with the key.</returns>
+    void SetStringValue(const std::string &key, const std::string &value);
+
+    /// <summary>
+    /// Sets the number value associated with the specified key.
+    /// </summary>
+    /// <param name="key">Key to retrieve value.</params>
+    /// <param name="value">The new value to be associated with the key.</returns>
+    void SetNumberValue(const std::string &key, double value);
+
+    /// <summary>
+    /// Sets the entity value associated with the specified key.
+    /// </summary>
+    /// <param name="key">Key to retrieve value.</params>
+    /// <param name="value">The new value to be associated with the key.</returns>
+    void SetObjectValue(const std::string &key, Entity *value);
+
+    /// <summary>
+    /// Remove the string value associated with the specified key.
+    /// </summary>
+    /// <param name="key">The key to remove.</params>
+    void RemoveStringValue(const std::string &key);
+
+    /// <summary>
+    /// Remove the number value associated with the specified key.
+    /// </summary>
+    /// <param name="key">The key to remove.</params>
+    void RemoveNumberValue(const std::string &key);
+
+    /// <summary>
+    /// Remove the entity value associated with the specified key.
+    /// </summary>
+    /// <param name="key">The key to remove.</params>
+    void RemoveObjectValue(const std::string &key);
+
+    /// <summary>
+    /// Checks whether the string value associated with the specified key exists.
+    /// </summary>
+    /// <param name="key">The key to check.</params>
+    /// <returns>Whether or not there is an associated value for this key.</returns>
+    bool StringValueExists(const std::string &key) const;
+
+    /// <summary>
+    /// Checks whether the number value associated with the specified key exists.
+    /// </summary>
+    /// <param name="key">The key to check.</params>
+    /// <returns>Whether or not there is an associated value for this key.</returns>
+    bool NumberValueExists(const std::string &key) const;
+
+    /// <summary>
+    /// Checks whether the entity value associated with the specified key exists.
+    /// </summary>
+    /// <param name="key">The key to check.</params>
+    /// <returns>Whether or not there is an associated value for this key.</returns>
+    bool ObjectValueExists(const std::string &key) const;
+
 	/// <summary>
 	/// Event listener to be run while this MovableObject's PieMenu is opened.
 	/// </summary>
@@ -1966,6 +2059,11 @@ protected:
     std::string m_ScriptObjectName; //!< The name of this object for script usage.
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
     std::unordered_map<std::string, std::vector<std::unique_ptr<LuabindObjectWrapper>>> m_FunctionsAndScripts; //!< A map of function names to vectors of LuabindObjectWrappers that hold Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.
+
+    std::unordered_map<std::string, std::string> m_StringValueMap; //<! Map to store any generic strings available from script
+    std::unordered_map<std::string, double> m_NumberValueMap; //<! Map to store any generic numbers available from script
+    std::unordered_map<std::string, Entity*> m_ObjectValueMap; //<! Map to store any generic object pointers available from script
+    static std::string ms_EmptyString;
 
     // Special post processing flash effect file and Bitmap. Shuold be loaded from a 32bpp bitmap
     ContentFile m_ScreenEffectFile;

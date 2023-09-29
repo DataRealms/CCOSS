@@ -100,7 +100,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`JetTimeTotal`  
 	`JetTimeLeft`  
 
-- Improved loading times on large maps.
+- Improved loading times on large maps.  
+
+- Script values, i.e `GetStringValue`, `RemoveStringValue`, `StringValueExists` and the associated functions for `GetNumberValue`/`GetObjectValue`, have been moved from MOSRotating to MovableObject, so now any object with script support can use these values.  
 
 </details>
 

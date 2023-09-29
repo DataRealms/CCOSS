@@ -166,7 +166,7 @@ else
     dependencies        : [ threads_dep ],
     include_directories : tracy_public_include_dirs,
     override_options    : override_options,
-    install             : true)
+    install             : false)
 endif
 
 install_headers(includes)

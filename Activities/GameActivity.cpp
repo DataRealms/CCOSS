@@ -23,6 +23,7 @@
 #include "MetaMan.h"
 #include "ConsoleMan.h"
 #include "PresetMan.h"
+#include "SceneMan.h"
 #include "DataModule.h"
 #include "PostProcessMan.h"
 #include "Controller.h"
@@ -33,6 +34,7 @@
 #include "ACRocket.h"
 #include "HeldDevice.h"
 #include "Loadout.h"
+#include "SLTerrain.h"
 
 #include "GUI.h"
 #include "GUIFont.h"
@@ -775,8 +777,13 @@ bool GameActivity::CreateDelivery(int player, int mode, Vector &waypoint, Actor 
                 pDeliveryCraft->AddInventoryItem(*iItr);
         }
 
+        float spawnY = 0.0f;
+        if (g_SceneMan.GetTerrain() && g_SceneMan.GetTerrain()->GetOrbitDirection() == Directions::Down) {
+            spawnY = g_SceneMan.GetSceneHeight();
+        }
+
         // Delivery craft appear straight over the selected LZ
-        pDeliveryCraft->SetPos(Vector(m_LandingZone[player].m_X, 0));
+        pDeliveryCraft->SetPos(Vector(m_LandingZone[player].m_X, spawnY));
 //        pDeliveryCraft->SetPos(Vector(m_LandingZone[player].m_X, 300));
 
         pDeliveryCraft->SetTeam(team);
@@ -1804,6 +1811,10 @@ void GameActivity::Update()
 				} else {
 					// Place the new marker above the cursor so that they don't intersect with each other.
 					lzOffsetY += m_AIReturnCraft[player] ? -32.0F : 32.0F;
+                    if (g_SceneMan.GetTerrain()->GetOrbitDirection() == Directions::Down) {
+                        lzOffsetY *= -1.0f;
+                    }
+
 					m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) + lzOffsetY;
 
 					if (m_pBuyGUI[player]->GetTotalOrderCost() > GetTeamFunds(team)) {
@@ -1828,11 +1839,18 @@ void GameActivity::Update()
 
             // Interpolate the LZ altitude to the height of the highest terrain point at the player-chosen X
             float prevHeight = m_LandingZone[player].m_Y;
-            m_LandingZone[player].m_Y = 0;
+            
+            float viewOffset = g_FrameMan.GetPlayerScreenHeight() / 4;
+            m_LandingZone[player].m_Y = 0.0f;
+            if (g_SceneMan.GetTerrain() && g_SceneMan.GetTerrain()->GetOrbitDirection() == Directions::Down) {
+                m_LandingZone[player].m_Y = g_SceneMan.GetSceneHeight();
+                viewOffset *= -1;
+            }
+
             m_LandingZone[player].m_Y = prevHeight + ((g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) - prevHeight) * 0.2);
 
             // Set the view to a little above the LZ position
-            Vector viewTarget(m_LandingZone[player].m_X, m_LandingZone[player].m_Y - (g_FrameMan.GetPlayerScreenHeight() / 4));
+            Vector viewTarget(m_LandingZone[player].m_X, m_LandingZone[player].m_Y - viewOffset);
             g_CameraMan.SetScrollTarget(viewTarget, 0.1, ScreenOfPlayer(player));
         }
 
@@ -1959,8 +1977,14 @@ void GameActivity::Update()
 //            SwitchToPrevActor(player, team, m_Brain[player]);
             // Start selecting the landing zone
             m_ViewState[player] = ViewState::LandingZoneSelect;
+
             // Set this to zero so the cursor interpolates down from the sky
-            m_LandingZone[player].m_Y = 0;
+            float landingSpot = 0.0f;
+            if (g_SceneMan.GetTerrain() && g_SceneMan.GetTerrain()->GetOrbitDirection() == Directions::Down) {
+                landingSpot = g_SceneMan.GetSceneHeight();
+            }
+
+            m_LandingZone[player].m_Y = landingSpot;
         }
 
         // After a while of game over, change messages to the final one for everyone

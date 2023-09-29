@@ -2346,11 +2346,22 @@ float SceneMan::FindAltitude(const Vector &from, int max, int accuracy)
     Vector temp(from);
     ForceBounds(temp);
 
-    float result = g_SceneMan.CastNotMaterialRay(temp, Vector(0, (max > 0 ? max : g_SceneMan.GetSceneHeight())), g_MaterialAir, accuracy);
+    Directions orbitDirection = Directions::Up;
+    if (m_pCurrentScene) {
+        orbitDirection = m_pCurrentScene->GetTerrain()->GetOrbitDirection();
+    }
+
+    float yDir = max > 0 ? max : g_SceneMan.GetSceneHeight();
+    yDir *= orbitDirection == Directions::Up ? 1.0 : -1.0f;
+    Vector direction = Vector(0, yDir);
+
+    float result = g_SceneMan.CastNotMaterialRay(temp, direction, g_MaterialAir, accuracy);
     // If we didn't find anything but air, then report max height
-    if (result < 0)
+    if (result < 0) {
         result = max > 0 ? max : g_SceneMan.GetSceneHeight();
-    return result;
+    }
+
+    return orbitDirection == Directions::Up ? result : g_SceneMan.GetSceneHeight() - result;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -118,6 +118,9 @@ jobs:
     runs-on: macos-11
     name: MacOS Build
 
+    env: 
+      DEVELOPER_DIR: /Applications/Xcode_11.7.app/Contents/Developer
+        
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3

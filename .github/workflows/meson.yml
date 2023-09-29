@@ -122,8 +122,6 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
 
-      - run: sudo xcode-select -s /Applications/Xcode_12.4.app/Contents/Developer
-
       - name: Install Dependencies
         run: |
           brew install pkg-config tbb sdl2 minizip lz4 flac luajit lua@5.1 libpng gcc@12 ninja meson dylibbundler tree

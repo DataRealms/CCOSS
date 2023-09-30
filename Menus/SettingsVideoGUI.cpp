@@ -149,10 +149,6 @@ namespace RTE {
 
 	bool SettingsVideoGUI::IsSupportedResolution(int width, int height) const {
 		if ((width >= c_MinResX && height >= c_MinResY) && (width <= g_WindowMan.GetMaxResX() && height <= g_WindowMan.GetMaxResY())) {
-			// Filter wacky resolutions that are taller than wide and some other dumb ones.
-			if ((height > width)) {
-				return false;
-			}
 			return true;
 		}
 		return false;

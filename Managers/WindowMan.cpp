@@ -115,8 +115,9 @@ namespace RTE {
 
 		if (FullyCoversAllDisplays()) {
 			ChangeResolutionToMultiDisplayFullscreen(m_ResMultiplier);
+		} else {
+			SetViewportLetterboxed();
 		}
-		SetViewportLetterboxed();
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,9 +165,6 @@ namespace RTE {
 
 		if (!m_Fullscreen && IsResolutionMaximized(m_ResX, m_ResY, m_ResMultiplier)) {
 			SDL_MaximizeWindow(m_PrimaryWindow.get());
-		}
-		if (!FullyCoversAllDisplays()){
-			SetViewportLetterboxed();
 		}
 
 #ifdef __linux__
@@ -421,6 +419,8 @@ namespace RTE {
 			height = windowH;
 			width = (height * aspectRatio) + 0.5F;
 		}
+
+		m_ResMultiplier = width / static_cast<float>(m_ResX);
 
 		int offsetX = (windowW / 2) - (width / 2);
 		int offsetY = (windowH / 2) - (height / 2);

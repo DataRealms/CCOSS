@@ -300,19 +300,6 @@ namespace RTE {
 		uint64_t Hash(const std::string &text);
 	#pragma endregion
 
-	#pragma region True Alpha Blending
-
-		/// <summary>
-		/// Workaround for allegro's missing true alpha blender, use instead of set_alpha_blender when alpha values are desired or necessary after draw:
-		/// ``` set_blender_mode_ex(_blender_black, _blender_black, _blender_black, TrueAlphaBlender, _blender_black, _blender_black, _blender_black, 0, 0, 0, 0);```
-		/// </summary>
-		unsigned long TrueAlphaBlender(unsigned long x, unsigned long y, unsigned long n);
-		/// <summary>
-		/// Sets the 32bit allegro blender mode to TrueAlphaBlender
-		/// </summary>
-		void SetTrueAlphaBlender();
-	#pragma endregion
-
 	#pragma region Misc
 		/// <summary>
 		/// Convenience method that takes in a double pointer array and returns a std::vector with its contents, because pointers-to-pointers are the devil. The passed in array is deleted in the process so no need to delete it manually.

@@ -1010,7 +1010,7 @@
     <ClCompile Include="Menus\SettingsVideoGUI.cpp" />
     <ClCompile Include="Menus\TitleScreen.cpp" />
     <ClCompile Include="Menus\InventoryMenuGUI.cpp" />
-    <ClInclude Include="System\AlphaBlender.cpp" />
+    <ClCompile Include="System\AlphaBlender.cpp" />
     <ClCompile Include="System\Atom.cpp" />
     <ClCompile Include="System\Base64\base64.cpp" />
     <ClCompile Include="System\Controller.cpp" />

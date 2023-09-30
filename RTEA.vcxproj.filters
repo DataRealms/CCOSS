@@ -618,6 +618,9 @@
     <ClInclude Include="System\Base64\base64.h">
       <Filter>System\Base64</Filter>
     </ClInclude>
+    <ClInclude Include="System\AlphaBlender.h">
+      <Filter>System</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1187,6 +1190,9 @@
     </ClCompile>
     <ClCompile Include="System\Base64\base64.cpp">
       <Filter>System\Base64</Filter>
+    </ClCompile>
+    <ClCompile Include="System\AlphaBlender.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

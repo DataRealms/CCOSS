@@ -164,7 +164,9 @@ namespace RTE {
 		if (!m_Fullscreen && IsResolutionMaximized(m_ResX, m_ResY, m_ResMultiplier)) {
 			SDL_MaximizeWindow(m_PrimaryWindow.get());
 		}
-		SetViewportLetterboxed();
+		if (!FullyCoversAllDisplays()){
+			SetViewportLetterboxed();
+		}
 
 #ifdef __linux__
 		SDL_Surface *iconSurface = IMG_ReadXPMFromArray(ccicon);
@@ -340,9 +342,9 @@ namespace RTE {
 		}
 
 		std::stable_sort(m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.begin(), m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.end(),
-		    [](auto left, auto right) {
-			    return left.second.x < right.second.x;
-		    });
+			[](auto left, auto right) {
+				return left.second.x < right.second.x;
+			});
 
 		for (const auto &[displayIndex, displayBounds] : m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen) {
 			// Translate display offsets to backbuffer offsets, where the top left corner is (0,0) to figure out if the display arrangement is unreasonable garbage, i.e not top or bottom edge aligned.
@@ -577,14 +579,14 @@ namespace RTE {
 			int textureOffsetX = (displayOffsetX - m_DisplayArrangementLeftMostOffset);
 			int textureOffsetY = (displayOffsetY - m_DisplayArrangementTopMostOffset);
 
-			m_MultiDisplayTextureOffsets.emplace_back(glm::ortho<float>(
-			    textureOffsetX / resMultiplier,
-			    // Sometimes an odd Y offset implodes all the things, depending on the stupidity of the arrangement and what display is primary.
-			    // Sometimes it needs to be in multiples of 4 for reasons unknown to man, so we're just gonna go with this and hope for the best, for now at least.
-			    RoundToNearestMultiple(textureOffsetY, 2) / resMultiplier,
-			    displayWidth / resMultiplier,
-			    displayHeight / resMultiplier,
-			    -1.0f, 1.0f));
+			glm::mat4 textureOffset = glm::translate(glm::mat4(1), {m_DisplayArrangementLeftMostOffset, m_DisplayArrangementTopMostOffset, 0.0f});
+			textureOffset = glm::scale(textureOffset, {m_ResX * 0.5f, m_ResY * 0.5f, 1.0f});
+			textureOffset = glm::translate(textureOffset, {1.0f, 1.0f, 0.0f}); //Shift the quad so we're scaling from top left instead of center.
+
+			m_MultiDisplayTextureOffsets.emplace_back(textureOffset);
+			m_MultiDisplayProjections.emplace_back(
+				glm::ortho(static_cast<float>(textureOffsetX), static_cast<float>(textureOffsetX + displayWidth), static_cast<float>(textureOffsetY), static_cast<float>(textureOffsetY + displayHeight), -1.0f, 1.0f)
+			);
 		}
 
 		if (errorSettingFullscreen) {
@@ -739,6 +741,7 @@ namespace RTE {
 			m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), glm::mat4(1.0f));
 			m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), glm::mat4(1.0f));
 			GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+			SDL_GL_SwapWindow(m_PrimaryWindow.get());
 		} else {
 			for (size_t i = 0; i < m_MultiDisplayWindows.size(); ++i) {
 				SDL_GL_MakeCurrent(m_MultiDisplayWindows.at(i).get(), m_GLContext.get());
@@ -746,12 +749,12 @@ namespace RTE {
 				SDL_GL_GetDrawableSize(m_MultiDisplayWindows.at(i).get(), &windowW, &windowH);
 				GL_CHECK(glViewport(0, 0, windowW, windowH));
 				glm::mat4 viewportMatrix = glm::ortho<float>(0, windowW, windowH, 0, -1.0, 1.0);
-				m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), viewportMatrix);
+				m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), m_MultiDisplayProjections.at(i));
 				m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), m_MultiDisplayTextureOffsets.at(i));
+				GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+				SDL_GL_SwapWindow(m_MultiDisplayWindows.at(i).get());
 			}
 		}
-
-		SDL_GL_SwapWindow(m_PrimaryWindow.get());
 
 		FrameMark;
 	}

@@ -245,6 +245,7 @@ namespace RTE {
 		std::unique_ptr<SDL_Rect> m_PrimaryWindowViewport;
 
 		std::vector<std::shared_ptr<SDL_Window>> m_MultiDisplayWindows; //!< Additional windows for multi-display fullscreen.
+		std::vector<glm::mat4> m_MultiDisplayProjections; //!< Projection Matrices for MultiDisplay.
 		std::vector<glm::mat4> m_MultiDisplayTextureOffsets; //!< Texture offsets for multi-display fullscreen.
 
 		std::unique_ptr<void, SDLContextDeleter> m_GLContext; //!< OpenGL context.

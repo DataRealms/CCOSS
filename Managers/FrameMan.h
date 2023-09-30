@@ -595,6 +595,11 @@ namespace RTE {
 		int SaveBitmap(SaveBitmapMode modeToSave, const std::string &nameBase, BITMAP *bitmapToSave = nullptr);
 
 		/// <summary>
+		/// Saves the front buffer to the screen dump buffer.
+		/// </summary>
+		void SaveScreenToBitmap();
+
+		/// <summary>
 		/// Saves a BITMAP as an 8bpp bitmap file that is indexed with the specified palette.
 		/// </summary>
 		/// <param name="fileName">The full name of the file that is being saved. Path and everything included.</param>

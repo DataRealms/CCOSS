@@ -70,6 +70,7 @@ namespace RTE {
 
 	void WindowMan::ClearMultiDisplayData() {
 		m_MultiDisplayTextureOffsets.clear();
+		m_MultiDisplayProjections.clear();
 		m_MultiDisplayWindows.clear();
 	}
 
@@ -421,8 +422,6 @@ namespace RTE {
 			width = (height * aspectRatio) + 0.5F;
 		}
 
-		m_ResMultiplier = width / static_cast<float>(m_ResX);
-
 		int offsetX = (windowW / 2) - (width / 2);
 		int offsetY = (windowH / 2) - (height / 2);
 		m_PrimaryWindowViewport = std::make_unique<SDL_Rect>(offsetX, windowH - offsetY - height, width, height);
@@ -472,6 +471,7 @@ namespace RTE {
 
 		bool onlyResMultiplierChange = (m_ResX == newResX) && (m_ResY == newResY) && (glm::epsilonNotEqual(m_ResMultiplier, newResMultiplier, glm::epsilon<float>()));
 
+		SDL_GL_MakeCurrent(m_PrimaryWindow.get(), m_GLContext.get());
 		ClearMultiDisplayData();
 
 		if (!displaysAlreadyMapped) {
@@ -479,7 +479,7 @@ namespace RTE {
 		}
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
-		bool newResFullyCoversAllDisplays = fullscreen && m_CanMultiDisplayFullscreen && (m_NumDisplays > 1);
+		bool newResFullyCoversAllDisplays = fullscreen && !m_IgnoreMultiDisplays && m_CanMultiDisplayFullscreen && (m_NumDisplays > 1);
 
 		bool recoveredToPreviousSettings = false;
 

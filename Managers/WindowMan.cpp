@@ -580,13 +580,12 @@ namespace RTE {
 			int textureOffsetY = (displayOffsetY - m_DisplayArrangementTopMostOffset);
 
 			glm::mat4 textureOffset = glm::translate(glm::mat4(1), {m_DisplayArrangementLeftMostOffset, m_DisplayArrangementTopMostOffset, 0.0f});
-			textureOffset = glm::scale(textureOffset, {m_ResX * 0.5f, m_ResY * 0.5f, 1.0f});
+			textureOffset = glm::scale(textureOffset, {m_MaxResX * 0.5f, m_MaxResY * 0.5f, 1.0f});
 			textureOffset = glm::translate(textureOffset, {1.0f, 1.0f, 0.0f}); //Shift the quad so we're scaling from top left instead of center.
 
 			m_MultiDisplayTextureOffsets.emplace_back(textureOffset);
-			m_MultiDisplayProjections.emplace_back(
-				glm::ortho(static_cast<float>(textureOffsetX), static_cast<float>(textureOffsetX + displayWidth), static_cast<float>(textureOffsetY), static_cast<float>(textureOffsetY + displayHeight), -1.0f, 1.0f)
-			);
+			glm::mat4 projection = glm::ortho(static_cast<float>(textureOffsetX), static_cast<float>(textureOffsetX + displayWidth), static_cast<float>(textureOffsetY), static_cast<float>(textureOffsetY + displayHeight), -1.0f, 1.0f);
+			m_MultiDisplayProjections.emplace_back( projection);
 		}
 
 		if (errorSettingFullscreen) {
@@ -748,7 +747,6 @@ namespace RTE {
 				int windowW, windowH;
 				SDL_GL_GetDrawableSize(m_MultiDisplayWindows.at(i).get(), &windowW, &windowH);
 				GL_CHECK(glViewport(0, 0, windowW, windowH));
-				glm::mat4 viewportMatrix = glm::ortho<float>(0, windowW, windowH, 0, -1.0, 1.0);
 				m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), m_MultiDisplayProjections.at(i));
 				m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), m_MultiDisplayTextureOffsets.at(i));
 				GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));

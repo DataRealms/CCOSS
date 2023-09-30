@@ -394,6 +394,9 @@ namespace RTE {
 	}
 
 	void ContentFile::AddAlphaChannel(BITMAP* bitmap) {
+		if (!bitmap) {
+			return;
+		}
 		if (bitmap_color_depth(bitmap) != 32) {
 			return;
 		}

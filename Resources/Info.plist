@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>org.cortex-command-community.cccp</string>
+	<key>CFBundleIconFile</key>
+	<string>ccicon.icns</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleName</key>
+	<string>CortexCommand</string>
+	<key>CFBundleDisplayName</key>
+	<string>Cortex Command</string>
+	<key>CFBundleExecutable</key>
+	<string>@EXENAME@</string>
+	<key>CFBundleShortVersionString</key>
+	<string>@game_version@</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>NSHighResolutionCapable</key>
+	<string>True</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.15</string>
+</dict>
+</plist>

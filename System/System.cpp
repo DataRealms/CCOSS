@@ -3,6 +3,8 @@
 #include "RTETools.h"
 #include "unzip.h"
 
+#include "RTEError.h"
+
 #ifdef _WIN32
 #include "Windows.h"
 #elif defined _LINUX_OR_MACOSX_
@@ -10,6 +12,9 @@
 #include <sys/stat.h>
 #endif
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
 namespace RTE {
 
 	bool System::s_Quit = false;
@@ -34,6 +39,42 @@ namespace RTE {
 		s_ThisExePathAndName = std::filesystem::path(thisExePathAndName).generic_string();
 
 		s_WorkingDirectory = std::filesystem::current_path().generic_string();
+
+#ifdef __APPLE__
+		// Get a reference to the main bundle
+		CFBundleRef mainBundle = CFBundleGetMainBundle();
+
+		if (!mainBundle) {
+			RTEAbort("Could not get a reference to the main App Bundle! This may be due to a missing argv[0] path.")
+		}
+		// Get the URL of the application bundle
+		CFURLRef bundleURL = CFBundleCopyBundleURL(mainBundle);
+		
+		if (!bundleURL) {
+			RTEAbort("Could not copy App Bundle URL, the bundle does not exist!")
+		}
+
+		// Convert the URL to a C string
+		char pathBuffer[PATH_MAX];
+		if (CFURLGetFileSystemRepresentation(bundleURL, true, (UInt8 *)pathBuffer, sizeof(pathBuffer))) {
+			// bundlePath now contains the path to the application bundle as a C string
+			auto bundlePath = std::filesystem::path(pathBuffer);
+			
+			if (std::filesystem::exists(bundlePath) && bundlePath.extension() == ".app") {
+				auto workingDirPath = bundlePath.parent_path();
+				std::filesystem::current_path(workingDirPath);
+				s_WorkingDirectory = workingDirPath.generic_string();
+			}
+			
+		} else {
+			CFRelease(bundleURL);
+			RTEAbort("Could not write App Bundle URL to a readable representation! The bundle path may exceed the local PATH_MAX.")
+		}
+		// Release the CFURL object
+		CFRelease(bundleURL);
+		
+		
+#endif
 		if (s_WorkingDirectory.back() != '/') { s_WorkingDirectory.append("/"); }
 
 		if (!PathExistsCaseSensitive(s_WorkingDirectory + s_ScreenshotDirectory)) { MakeDirectory(s_WorkingDirectory + s_ScreenshotDirectory); }

@@ -526,17 +526,21 @@ namespace RTE {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void WindowMan::ToggleResolutionMultiplier() {
-		float newResMultiplier = (m_ResMultiplier == 1) ? 2 : 1;
-		bool fullscreen = (newResMultiplier * m_ResX == m_PrimaryWindowDisplayWidth) && (newResMultiplier * m_ResY == m_PrimaryWindowDisplayHeight);
+	void WindowMan::ToggleFullscreen() {
+		bool fullscreen = !m_Fullscreen;
 
 		MapDisplays();
 
-		if ((m_ResX * newResMultiplier > m_MaxResX) || (m_ResY * newResMultiplier > m_MaxResY)) {
-			RTEError::ShowMessageBox("Requested resolution multiplier will result in game window exceeding display bounds!\nNo change will be made!\n\nNOTE: To toggle fullscreen, use the button in the Options & Controls Menu!");
-			return;
+		if (fullscreen && !m_IgnoreMultiDisplays && m_CanMultiDisplayFullscreen && (m_NumDisplays > 1)) {
+			double aspectRatio = m_ResX / static_cast<double>(m_ResY);
+			double maxAspectRatio = m_MaxResX / static_cast<double>(m_MaxResY);
+			if (glm::epsilonNotEqual(aspectRatio, maxAspectRatio, glm::epsilon<double>())) {
+				RTEError::ShowMessageBox("Switching to multi display fullscreen would result in letterboxing, please enable ignore multiple displays or switch to fullscreen manually!");
+				return;
+			}
 		}
-		ChangeResolution(m_ResX, m_ResY, newResMultiplier, fullscreen, true);
+
+		ChangeResolution(m_ResX, m_ResY, m_ResMultiplier, fullscreen, true);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

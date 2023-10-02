@@ -194,9 +194,9 @@ namespace RTE {
 		void ChangeResolution(int newResX, int newResY, float newResMultiplier = 1.0f, bool fullscreen = false, bool displaysAlreadyMapped = false);
 
 		/// <summary>
-		/// Toggles between 1x and 2x resolution multiplier.
+		/// Toggles between windowed and fullscreen mode (single display).
 		/// </summary>
-		void ToggleResolutionMultiplier();
+		void ToggleFullscreen();
 
 		/// <summary>
 		/// Completes the resolution change by resetting the flag.

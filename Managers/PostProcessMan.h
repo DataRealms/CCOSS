@@ -53,6 +53,9 @@ namespace RTE {
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
 		int Initialize();
 
+		/// <summary>
+		/// (Re-)Initializes the GL backbuffers to the current render resolution for post-processing.
+		/// </summary>
 		void CreateGLBackBuffers();
 #pragma endregion
 
@@ -190,6 +193,10 @@ namespace RTE {
 		void SetNetworkPostEffectsList(int whichScreen, std::list<PostEffect> &inputList);
 #pragma endregion
 
+		/// <summary>
+		/// Gets the backbuffer texture for indexed drawings.
+		/// </summary>
+		/// <returns>The opengl backbuffer texture for indexed drawings.</returns>
 		GLuint GetPostProcessColorBuffer() { return m_BackBuffer32; }
 
 	protected:
@@ -214,19 +221,18 @@ namespace RTE {
 		std::unordered_map<int, BITMAP *> m_TempEffectBitmaps; //!< Stores temporary bitmaps to rotate post effects in for quick access.
 
 	private:
-		GLuint m_BackBuffer8;
-		GLuint m_BackBuffer32;
-		GLuint m_Palette8Texture;
-		std::vector<std::unique_ptr<GLBitmapInfo>> m_BitmapTextures;
-		size_t m_BitmapTexturesSize;
-		GLuint m_BlitFramebuffer;
-		GLuint m_PostProcessFramebuffer;
-		GLuint m_PostProcessDepthBuffer;
-		glm::mat4 m_ProjectionMatrix;
-		GLuint m_VertexBuffer;
-		GLuint m_VertexArray;
-		std::unique_ptr<Shader> m_Blit8;
-		std::unique_ptr<Shader> m_PostProcessShader;
+		GLuint m_BackBuffer8; //!< Backbuffer texture for incoming indexed drawings.
+		GLuint m_BackBuffer32; //!< Backbuffer texture for the final 32bpp frame.
+		GLuint m_Palette8Texture; //!< Palette texture for incoming indexed drawings.
+		std::vector<std::unique_ptr<GLBitmapInfo>> m_BitmapTextures; //!< Vector of all the GL textures for the bitmaps that have been uploaded so far.
+		GLuint m_BlitFramebuffer; //!< Framebuffer for blitting the 8bpp backbuffer to the 32bpp backbuffer.
+		GLuint m_PostProcessFramebuffer; //!< Framebuffer for post-processing effects.
+		GLuint m_PostProcessDepthBuffer; //!< Depth buffer for post-processing effects.
+		glm::mat4 m_ProjectionMatrix; //!< Projection matrix for post-processing effects.
+		GLuint m_VertexBuffer; //!< Vertex buffer for post-processing effects.
+		GLuint m_VertexArray; //!< Vertex array for post-processing effects.
+		std::unique_ptr<Shader> m_Blit8; //!< Shader for blitting the 8bpp backbuffer to the 32bpp backbuffer.
+		std::unique_ptr<Shader> m_PostProcessShader; //!< Shader for drawing bitmap post effects.
 
 #pragma region Post Effect Handling
 		/// <summary>
@@ -286,9 +292,19 @@ namespace RTE {
 		/// </summary>
 		void Clear();
 
+		/// <summary>
+		/// Initializes all the GL pointers used by this PostProcessMan.
+		/// </summary>
 		void InitializeGLPointers();
 		
+		/// <summary>
+		/// Destroys all the GL pointers used by this PostProcessMan.
+		/// </summary>
 		void DestroyGLPointers();
+
+		/// <summary>
+		/// Updates the palette texture with the current palette.
+		/// </summary>
 		void UpdatePalette();
 
 		/// <summary>

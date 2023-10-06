@@ -98,8 +98,17 @@ namespace RTE {
 		/// <returns>The vertical resolution the game is currently sized at, in pixels.</returns>
 		int GetResY() const { return m_ResY; }
 
+		/// <summary>
+		/// Gets the horizontal resolution the game window is currently sized at, in pixels.
+		/// </summary>
+		/// <returns>The horizontal resolution the game window is currently sized at, in pixels.</returns>
 		int GetWindowResX();
 
+		
+		/// <summary>
+		/// Gets the vertical resolution the game window is currently sized at, in pixels.
+		/// </summary>
+		/// <returns>The vertical resolution the game window is currently sized at, in pixels.</returns>
 		int GetWindowResY();
 
 		/// <summary>
@@ -120,6 +129,10 @@ namespace RTE {
 		/// <param name="enable">Whether to enable VSync.</param>
 		void SetVSyncEnabled(bool enable);
 
+		/// <summary>
+		/// Gets whether the game window is currently in fullscreen.
+		/// </summary>
+		/// <returns>Whether the game window is currently in fullscreen.</returns>
 		bool IsFullscreen() { return m_Fullscreen; }
 
 		/// <summary>
@@ -235,18 +248,18 @@ namespace RTE {
 
 		std::shared_ptr<SDL_Window> m_PrimaryWindow; //!< The main window.
 		GLuint m_BackBuffer32Texture; //!< The main window renderer's drawing surface.
-		glm::mat4 m_PrimaryWindowProjection;
-		std::unique_ptr<SDL_Rect> m_PrimaryWindowViewport;
+		glm::mat4 m_PrimaryWindowProjection; //!< Projection Matrix for the main window.
+		std::unique_ptr<SDL_Rect> m_PrimaryWindowViewport; //!< Viewport for the main window.
 
 		std::vector<std::shared_ptr<SDL_Window>> m_MultiDisplayWindows; //!< Additional windows for multi-display fullscreen.
 		std::vector<glm::mat4> m_MultiDisplayProjections; //!< Projection Matrices for MultiDisplay.
 		std::vector<glm::mat4> m_MultiDisplayTextureOffsets; //!< Texture offsets for multi-display fullscreen.
 
 		std::unique_ptr<void, SDLContextDeleter> m_GLContext; //!< OpenGL context.
-		GLuint m_ScreenVAO;
-		GLuint m_ScreenVBO;
+		GLuint m_ScreenVAO; //!< Vertex Array Object for the screen quad.
+		GLuint m_ScreenVBO; //!< Vertex Buffer Object for the screen quad.
 
-		std::unique_ptr<Shader> m_ScreenBlitShader;
+		std::unique_ptr<Shader> m_ScreenBlitShader; //!< Blit shader to combine the menu layer and post process layers and show them on screen.
 
 		bool m_AnyWindowHasFocus; //!< Whether any game window has focus.
 		bool m_ResolutionChanged; //!< Whether the resolution was changed through the settings.
@@ -302,8 +315,21 @@ namespace RTE {
 		/// </summary>
 		void UpdatePrimaryDisplayInfo();
 
+		/// <summary>
+		/// Gets the maximum available window bounds for a decorated window on the specified display.
+		/// May not provide accurate results if the window is in fullscreen or has just been created.
+		/// </summary>
+		/// <param name="display">The display to get the bounds for.</param>
+		/// <returns>The maximum available window bounds for a decorated window on the specified display.</returns>
 		SDL_Rect GetUsableBoundsWithDecorations(int display);
 
+		/// <summary>
+		/// Calculates whether the given resolution and multiplier would create a maximized window.
+		/// </summary>
+		/// <param name="resX">Game window width to check.</param>
+		/// <param name="resY">Game window height to check.</param>
+		/// <param name="resMultiplier">Game window resolution multiplier to check.</param>
+		/// <returns>Whether the given resolution and multiplier create a maximized window.</returns>
 		bool IsResolutionMaximized(int resX, int resY, float resMultiplier);
 
 		/// <summary>

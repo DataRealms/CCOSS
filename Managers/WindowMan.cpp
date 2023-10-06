@@ -217,23 +217,15 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int WindowMan::GetWindowResX() {
-		if (!m_Fullscreen) {
-			int w, h;
-			SDL_GL_GetDrawableSize(m_PrimaryWindow.get(), &w, &h);
-			return w;
-		} else {
-			return m_ResX * m_ResMultiplier;
-		}
+		int w, h;
+		SDL_GL_GetDrawableSize(m_PrimaryWindow.get(), &w, &h);
+		return w;
 	}
 
 	int WindowMan::GetWindowResY() {
-		if (!m_Fullscreen) {
-			int w, h;
-			SDL_GL_GetDrawableSize(m_PrimaryWindow.get(), &w, &h);
-			return h;
-		} else {
-			return m_ResY * m_ResMultiplier;
-		}
+		int w, h;
+		SDL_GL_GetDrawableSize(m_PrimaryWindow.get(), &w, &h);
+		return h;
 	}
 
 	void WindowMan::SetVSyncEnabled(bool enable) {

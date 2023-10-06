@@ -34,7 +34,6 @@ namespace RTE {
 		m_PostProcessFramebuffer = 0;
 		m_PostProcessDepthBuffer = 0;
 		m_BitmapTextures.clear();
-		m_BitmapTexturesSize = 0;
 		m_VertexBuffer = 0;
 		m_VertexArray = 0;
 		for (int i = 0; i < c_MaxScreenCount; ++i) {
@@ -73,6 +72,8 @@ namespace RTE {
 		return 0;
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PostProcessMan::InitializeGLPointers() {
 		glGenTextures(1, &m_BackBuffer8);
 		glGenTextures(1, &m_BackBuffer32);
@@ -93,6 +94,8 @@ namespace RTE {
 		glBindVertexArray(0);
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PostProcessMan::DestroyGLPointers() {
 		glDeleteTextures(1, &m_BackBuffer8);
 		glDeleteTextures(1, &m_BackBuffer32);
@@ -106,6 +109,9 @@ namespace RTE {
 		glDeleteVertexArrays(1, &m_VertexArray);
 		glDeleteBuffers(1, &m_VertexBuffer);
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PostProcessMan::CreateGLBackBuffers() {
 		glBindTexture(GL_TEXTURE_2D, m_BackBuffer8);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
@@ -125,6 +131,8 @@ namespace RTE {
 		m_ProjectionMatrix = glm::ortho(0.0F, static_cast<float>(g_FrameMan.GetBackBuffer8()->w), 0.0F, static_cast<float>(g_FrameMan.GetBackBuffer8()->h), -1.0F, 1.0F);
 	}
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void PostProcessMan::UpdatePalette() {
 		glBindTexture(GL_TEXTURE_1D, m_Palette8Texture);
 		std::array<unsigned int, c_PaletteEntriesNumber> palette;
@@ -139,6 +147,8 @@ namespace RTE {
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PostProcessMan::LazyInitBitmap(BITMAP *bitmap) {
 		m_BitmapTextures.emplace_back(new GLBitmapInfo);

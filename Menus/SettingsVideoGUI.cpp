@@ -169,6 +169,7 @@ namespace RTE {
 
 	void SettingsVideoGUI::PopulateResolutionsComboBox() {
 		m_PresetResolutions.clear();
+		m_PresetResolutionComboBox->ClearList();
 
 		std::set<PresetResolutionRecord> resRecords;
 		g_WindowMan.MapDisplays();
@@ -294,13 +295,17 @@ namespace RTE {
 	void SettingsVideoGUI::ApplyPresetResolution() {
 		int presetResListEntryID = m_PresetResolutionComboBox->GetSelectedIndex();
 		if (presetResListEntryID >= 0) {
-			m_NewResMultiplier = m_PresetResolutions.at(presetResListEntryID).Scale;
 
 			m_NewResX = m_PresetResolutions.at(presetResListEntryID).Width;
 			m_NewResY = m_PresetResolutions.at(presetResListEntryID).Height;
 
 			g_GUISound.ButtonPressSound()->Play();
 			m_NewFullscreen = m_FullscreenCheckbox->GetCheck();
+			if (m_NewFullscreen) {
+				m_NewResMultiplier = m_PresetResolutions.at(presetResListEntryID).Scale;
+			} else {
+				m_NewResMultiplier = 1.0f;
+			}
 			ApplyNewResolution();
 		}
 	}

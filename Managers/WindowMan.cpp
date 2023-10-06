@@ -539,9 +539,15 @@ namespace RTE {
 				RTEError::ShowMessageBox("Switching to multi display fullscreen would result in letterboxing, please disable multiple displays in settings or switch to fullscreen manually!");
 				return;
 			}
+			ChangeResolution(m_ResX, m_ResY, m_ResMultiplier, fullscreen, true);
 		}
-
-		ChangeResolution(m_ResX, m_ResY, m_ResMultiplier, fullscreen, true);
+		if(!fullscreen) {
+			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
+		} else {
+			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
+		}
+		m_Fullscreen = fullscreen;
+		SetViewportLetterboxed();
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

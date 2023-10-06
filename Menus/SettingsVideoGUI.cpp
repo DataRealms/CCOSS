@@ -178,10 +178,12 @@ namespace RTE {
 
 		m_PresetResolutions.assign(resRecords.begin(), resRecords.end());
 
+		float defaultScale = std::min<float>(std::round(g_WindowMan.GetMaxResX() / static_cast<float>(c_DefaultResX)), std::round(g_WindowMan.GetMaxResY() / static_cast<float>(c_DefaultResY)));
+
 		for (int i = 0; i < m_PresetResolutions.size(); ++i) {
 			const PresetResolutionRecord &resRecord = m_PresetResolutions[i];
 			m_PresetResolutionComboBox->AddItem(resRecord.GetDisplayString());
-			if (m_PresetResolutionComboBox->GetSelectedIndex() < 0 && (glm::epsilonEqual(resRecord.Scale, 2.0f, glm::epsilon<float>()))) {
+			if (m_PresetResolutionComboBox->GetSelectedIndex() < 0 && (glm::epsilonEqual(resRecord.Scale, defaultScale, 0.5f))) {
 				m_PresetResolutionComboBox->SetSelectedIndex(i);
 			}
 		}
@@ -252,7 +254,7 @@ namespace RTE {
 					m_NewResY = g_WindowMan.GetResY();
 					m_NewFullscreen = false;
 				} else {
-					m_NewResMultiplier = std::max<float>(std::round(g_WindowMan.GetWindowResX() / static_cast<float>(c_DefaultResX)), std::round(g_WindowMan.GetWindowResY() / static_cast<float>(c_DefaultResY)));
+					m_NewResMultiplier = std::min<float>(std::round(g_WindowMan.GetWindowResX() / static_cast<float>(c_DefaultResX)), std::round(g_WindowMan.GetWindowResY() / static_cast<float>(c_DefaultResY)));
 					m_NewResX = g_WindowMan.GetWindowResX() / m_NewResMultiplier;
 					m_NewResY = g_WindowMan.GetWindowResY() / m_NewResMultiplier;
 					m_NewFullscreen = false;
@@ -265,7 +267,7 @@ namespace RTE {
 					m_NewResY = g_WindowMan.GetResY();
 					m_NewFullscreen = true;
 				} else {
-					m_NewResMultiplier = std::max<float>(std::round(g_WindowMan.GetMaxResX() / static_cast<float>(c_DefaultResX)), std::round(g_WindowMan.GetMaxResY() / static_cast<float>(c_DefaultResY)));
+					m_NewResMultiplier = std::min<float>(std::round(g_WindowMan.GetMaxResX() / static_cast<float>(c_DefaultResX)), std::round(g_WindowMan.GetMaxResY() / static_cast<float>(c_DefaultResY)));
 					m_NewResX = g_WindowMan.GetMaxResX() / m_NewResMultiplier;
 					m_NewResY = g_WindowMan.GetMaxResY() / m_NewResMultiplier;
 					m_NewFullscreen = true;
@@ -408,6 +410,8 @@ namespace RTE {
 				} else if (guiEvent.GetControl() == m_UseMultiDisplaysCheckbox) {
 					g_WindowMan.SetIgnoreMultiDisplays(m_UseMultiDisplaysCheckbox->GetCheck());
 					UpdateCustomResolutionLimits();
+					PopulateResolutionsComboBox();
+					PopulateResMultplierComboBox();
 				}
 			} else if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {
 				if (guiEvent.GetControl() == m_TwoPlayerSplitscreenHSplitRadioButton) {

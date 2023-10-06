@@ -160,6 +160,7 @@ namespace RTE {
 			}
 		}
 
+		SDL_SetWindowMinimumSize(m_PrimaryWindow.get(), c_MinResX, c_MinResY);
 		SDL_GL_SwapWindow(m_PrimaryWindow.get());
 		SDL_SetCursor(NULL);
 
@@ -375,7 +376,7 @@ namespace RTE {
 		if (m_DisplayArrangmentLeftMostDisplayIndex >= 0) {
 			m_MaxResX = totalWidth;
 			m_MaxResY = maxHeight;
-			m_MaxResMultiplier = std::min<float>(m_MaxResX / static_cast<float>(c_DangerResX), m_MaxResY / static_cast<float>(c_DangerResY));
+			m_MaxResMultiplier = std::min<float>(m_MaxResX / static_cast<float>(c_MinResX), m_MaxResY / static_cast<float>(c_MinResY));
 			m_DisplayArrangementLeftMostOffset = leftMostOffset;
 			m_DisplayArrangementTopMostOffset = topMostOffset;
 			m_CanMultiDisplayFullscreen = true;
@@ -394,7 +395,7 @@ namespace RTE {
 			RTEError::ShowMessageBox("Resolution too high to fit display, overriding to fit!");
 			g_SettingsMan.SetSettingsNeedOverwrite();
 		}
-		else if (resX < c_DangerResX || resY < c_DangerResY) {
+		else if (resX < c_MinResX || resY < c_MinResY) {
 			resX = c_MinResX;
 			resY = c_MinResY;
 			resMultiplier = 1.0f;
@@ -469,7 +470,7 @@ namespace RTE {
 			return;
 		}
 
-		bool onlyResMultiplierChange = (m_ResX == newResX) && (m_ResY == newResY) && (glm::epsilonNotEqual(m_ResMultiplier, newResMultiplier, glm::epsilon<float>()));
+		bool onlyResMultiplierChange = (m_ResX == newResX) && (m_ResY == newResY);
 
 		SDL_GL_MakeCurrent(m_PrimaryWindow.get(), m_GLContext.get());
 		ClearMultiDisplayData();
@@ -512,7 +513,7 @@ namespace RTE {
 				SetViewportLetterboxed();
 				CreateBackBufferTexture();
 			}
-			g_ConsoleMan.PrintString("SYSTEM: Switched to different windowed mode multiplier.");
+			g_ConsoleMan.PrintString("SYSTEM: Switched to different resolution multiplier.");
 		} else {
 			m_ResolutionChanged = true;
 			g_FrameMan.CreateBackBuffers();

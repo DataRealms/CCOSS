@@ -63,7 +63,7 @@ namespace RTE {
 		m_ResMultiplier = 1;
 		m_Fullscreen = false;
 		m_EnableVSync = true;
-		m_IgnoreMultiDisplays = true;
+		m_UseMultiDisplays = false;
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -289,13 +289,13 @@ namespace RTE {
 		auto setSingleDisplayMode = [this](const std::string &errorMsg = "") {
 			m_MaxResX = m_PrimaryWindowDisplayWidth;
 			m_MaxResY = m_PrimaryWindowDisplayHeight;
-			m_MaxResMultiplier = std::min<float>(m_MaxResX / static_cast<float>(c_DangerResX), m_MaxResY / static_cast<float>(c_DangerResY));
+			m_MaxResMultiplier = std::min<float>(m_MaxResX / static_cast<float>(c_MinResX), m_MaxResY / static_cast<float>(c_MinResY));
 			m_NumDisplays = 1;
 			m_DisplayArrangementLeftMostOffset = -1;
 			m_DisplayArrangementTopMostOffset = -1;
 			m_ValidDisplayIndicesAndBoundsForMultiDisplayFullscreen.clear();
 			m_CanMultiDisplayFullscreen = false;
-			m_IgnoreMultiDisplays = true;
+			m_UseMultiDisplays = false;
 			if (!errorMsg.empty()) {
 				RTEError::ShowMessageBox("Failed to map displays for multi-display fullscreen because:\n\n" + errorMsg + "!\n\nFullscreen will be limited to the display the window is positioned at!");
 			}
@@ -307,7 +307,7 @@ namespace RTE {
 
 		m_NumDisplays = SDL_GetNumVideoDisplays();
 
-		if (m_IgnoreMultiDisplays || m_NumDisplays == 1) {
+		if (!m_UseMultiDisplays || m_NumDisplays == 1) {
 			setSingleDisplayMode();
 			return;
 		}
@@ -479,7 +479,7 @@ namespace RTE {
 		}
 		ValidateResolution(newResX, newResY, newResMultiplier);
 
-		bool newResFullyCoversAllDisplays = fullscreen && !m_IgnoreMultiDisplays && m_CanMultiDisplayFullscreen && (m_NumDisplays > 1);
+		bool newResFullyCoversAllDisplays = fullscreen && m_UseMultiDisplays && m_CanMultiDisplayFullscreen && (m_NumDisplays > 1);
 
 		bool recoveredToPreviousSettings = false;
 
@@ -531,11 +531,11 @@ namespace RTE {
 
 		MapDisplays();
 
-		if (fullscreen && !m_IgnoreMultiDisplays && m_CanMultiDisplayFullscreen && (m_NumDisplays > 1)) {
+		if (fullscreen && m_UseMultiDisplays && m_CanMultiDisplayFullscreen && (m_NumDisplays > 1)) {
 			double aspectRatio = m_ResX / static_cast<double>(m_ResY);
 			double maxAspectRatio = m_MaxResX / static_cast<double>(m_MaxResY);
 			if (glm::epsilonNotEqual(aspectRatio, maxAspectRatio, glm::epsilon<double>())) {
-				RTEError::ShowMessageBox("Switching to multi display fullscreen would result in letterboxing, please enable ignore multiple displays or switch to fullscreen manually!");
+				RTEError::ShowMessageBox("Switching to multi display fullscreen would result in letterboxing, please disable multiple displays in settings or switch to fullscreen manually!");
 				return;
 			}
 		}

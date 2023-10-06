@@ -126,13 +126,13 @@ namespace RTE {
 		/// Gets whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
 		/// </summary>
 		/// <returns>Whether the multi-display arrangement is ignored.</returns>
-		bool GetIgnoreMultiDisplays() const { return m_IgnoreMultiDisplays; }
+		bool GetUseMultiDisplays() const { return m_UseMultiDisplays; }
 
 		/// <summary>
 		/// Sets whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
 		/// </summary>
 		/// <param name="ignore">Whether the multi-display arrangement should be ignored</param>
-		void SetIgnoreMultiDisplays(bool ignore) { m_IgnoreMultiDisplays = ignore; }
+		void SetIgnoreMultiDisplays(bool ignore) { m_UseMultiDisplays = ignore; }
 
 		/// <summary>
 		/// Checks whether the current resolution settings fully cover the display the primary game window is positioned at.
@@ -279,7 +279,7 @@ namespace RTE {
 		bool m_Fullscreen; //!< Whether the game window is currently in fullscreen.
 
 		bool m_EnableVSync; //!< Whether vertical synchronization is enabled.
-		bool m_IgnoreMultiDisplays; //!< Whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
+		bool m_UseMultiDisplays; //!< Whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
 
 		bool m_DrawPostProcessBuffer; //!< Whether to draw the PostProcessBuffer while not in Activity. Resets on Frame Clear.
 

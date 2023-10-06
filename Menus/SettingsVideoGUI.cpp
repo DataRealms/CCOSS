@@ -44,9 +44,9 @@ namespace RTE {
 		m_FullscreenCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxFullscreen"));
 		m_FullscreenCheckbox->SetCheck(m_NewFullscreen);
 
-		m_IgnoreMultiDisplaysCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxIgnoreMultiDisplays"));
-		m_IgnoreMultiDisplaysCheckbox->SetCheck(g_WindowMan.GetIgnoreMultiDisplays());
-		m_IgnoreMultiDisplaysCheckbox->SetVisible(m_IgnoreMultiDisplaysCheckbox->GetVisible() && SDL_GetNumVideoDisplays() > 1);
+		m_UseMultiDisplaysCheckbox = dynamic_cast<GUICheckbox *>(m_GUIControlManager->GetControl("CheckboxIgnoreMultiDisplays"));
+		m_UseMultiDisplaysCheckbox->SetCheck(g_WindowMan.GetUseMultiDisplays());
+		m_UseMultiDisplaysCheckbox->SetVisible(m_UseMultiDisplaysCheckbox->GetVisible() && SDL_GetNumVideoDisplays() > 1);
 
 		m_PresetResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioPresetResolution"));
 		m_CustomResolutionRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioCustomResolution"));
@@ -185,8 +185,8 @@ namespace RTE {
 	}
 
 	void SettingsVideoGUI::PopulateResMultplierComboBox() {
-		float maxResX = g_WindowMan.GetIgnoreMultiDisplays() ? g_WindowMan.GetPrimaryWindowDisplayWidth() : g_WindowMan.GetMaxResX();
-		float maxResY = g_WindowMan.GetIgnoreMultiDisplays() ? g_WindowMan.GetPrimaryWindowDisplayHeight() : g_WindowMan.GetMaxResY();
+		float maxResX = g_WindowMan.GetUseMultiDisplays() ? g_WindowMan.GetPrimaryWindowDisplayWidth() : g_WindowMan.GetMaxResX();
+		float maxResY = g_WindowMan.GetUseMultiDisplays() ? g_WindowMan.GetPrimaryWindowDisplayHeight() : g_WindowMan.GetMaxResY();
 
 		float maximumResMultiplier = std::floor((std::min<float>(maxResX / c_MinResX, maxResY / c_MinResY) * 2.f) + 0.5f) / 2.0f;
 		m_CustomResolutionMultiplierComboBox->ClearList();
@@ -321,10 +321,7 @@ namespace RTE {
 			m_CustomResolutionMessageLabel->SetText("Resolution width or height lower than the minimum (" + std::to_string(c_MinResX) + "x" + std::to_string(c_MinResY) + ") is not supported.");
 			invalidResolution = true;
 		}
-		if (newResX < c_DangerResX || newResY < c_DangerResY) {
-			m_CustomResolutionMessageLabel->SetText("Resolution is dangerously low!");
-			invalidResolution = true;
-		} else if (m_NewResX < c_DangerResX || m_NewResY < c_DangerResY) {
+		else if (m_NewResX < c_MinResX || m_NewResY < c_MinResY) {
 			m_CustomResolutionMessageLabel->SetText("Resolution multiplier is too high for the specified resolution.");
 			invalidResolution = true;
 		}

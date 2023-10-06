@@ -14,6 +14,8 @@
 #include "GUITextBox.h"
 
 #include "SDL_video.h"
+#include "glm/ext.hpp"
+#include "glm/gtc/epsilon.hpp"
 #if __cpp_lib_format >= 201907L
 #include <format>
 #endif
@@ -92,13 +94,13 @@ namespace RTE {
 		m_CustomResolutionWidthTextBox->SetNumericOnly(true);
 		m_CustomResolutionWidthTextBox->SetMaxNumericValue(g_WindowMan.GetMaxResX());
 		m_CustomResolutionWidthTextBox->SetMaxTextLength(4);
-		m_CustomResolutionWidthTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetWindowResX())));
+		m_CustomResolutionWidthTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetResX())));
 
 		m_CustomResolutionHeightTextBox = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("TextboxCustomHeight"));
 		m_CustomResolutionHeightTextBox->SetNumericOnly(true);
 		m_CustomResolutionHeightTextBox->SetMaxNumericValue(g_WindowMan.GetMaxResY());
 		m_CustomResolutionHeightTextBox->SetMaxTextLength(4);
-		m_CustomResolutionHeightTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetWindowResY())));
+		m_CustomResolutionHeightTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetResY())));
 
 		m_CustomResolutionMultiplierComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboboxResolutionMultiplier"));
 		PopulateResMultplierComboBox();
@@ -120,13 +122,15 @@ namespace RTE {
 		m_VideoSettingsBox->SetEnabled(enable);
 
 		if (enable) {
-			m_CustomResolutionWidthTextBox->SetText(std::to_string(g_WindowMan.GetWindowResX()));
-			m_CustomResolutionHeightTextBox->SetText(std::to_string(g_WindowMan.GetWindowResY()));
+			m_CustomResolutionWidthTextBox->SetText(std::to_string(g_WindowMan.GetResX()));
+			m_CustomResolutionHeightTextBox->SetText(std::to_string(g_WindowMan.GetResY()));
 #if __cpp_lib_format >= 201907L
-		m_CustomResolutionMultiplierComboBox->SetText(std::format("{:.3g}x", m_NewResMultiplier));
+			m_CustomResolutionMultiplierComboBox->SetText(std::format("{:.3g}x", m_NewResMultiplier));
 #else
-		m_CustomResolutionMultiplierComboBox->SetText(std::to_string(m_NewResMultiplier));
+			m_CustomResolutionMultiplierComboBox->SetText(std::to_string(m_NewResMultiplier));
 #endif
+			std::string windowedText = g_WindowMan.IsFullscreen() ? "Windowed" : "Scale To Window";
+			m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Windowed]->SetText(windowedText);
 		}
 	}
 
@@ -167,7 +171,7 @@ namespace RTE {
 		while ((resX >= c_MinResX) && (resY >= c_MinResY)) {
 			if (IsSupportedResolution(resX, resY)) {
 				resRecords.emplace(resX, resY, scale);
-				}
+			}
 			scale += 0.5f;
 			resX = g_WindowMan.GetMaxResX() / scale;
 			resY = g_WindowMan.GetMaxResY() / scale;
@@ -198,6 +202,7 @@ namespace RTE {
 			m_CustomResolutionMultiplierComboBox->AddItem(std::to_string(resMultiplier));
 #endif
 		}
+		m_CustomResolutionMultiplierComboBox->SetSelectedIndex(0);
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,7 +226,8 @@ namespace RTE {
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SettingsVideoGUI::ApplyNewResolution(bool displaysWereMapped) {
-		if (g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
+		bool needWarning = (g_WindowMan.GetResX() != m_NewResX) && (g_WindowMan.GetResY() != m_NewResY);
+		if (needWarning && g_ActivityMan.GetActivity() && (g_ActivityMan.GetActivity()->GetActivityState() == Activity::Running || g_ActivityMan.GetActivity()->GetActivityState() == Activity::Editing)) {
 			m_ResolutionChangeDialogBox->SetVisible(true);
 			m_VideoSettingsBox->SetEnabled(false);
 		} else {
@@ -229,6 +235,8 @@ namespace RTE {
 			m_VideoSettingsBox->SetEnabled(true);
 			g_WindowMan.ChangeResolution(m_NewResX, m_NewResY, m_NewResMultiplier, m_NewFullscreen, displaysWereMapped);
 			m_FullscreenCheckbox->SetCheck(g_WindowMan.IsFullscreen());
+			std::string windowedText = g_WindowMan.IsFullscreen() ? "Windowed" : "Scale To Window";
+			m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Windowed]->SetText(windowedText);
 		}
 	}
 
@@ -239,22 +247,32 @@ namespace RTE {
 
 		switch (resolutionChangeType) {
 			case ResolutionQuickChangeType::Windowed:
-				m_NewResMultiplier = 1.0f;
-				m_NewResX = c_DefaultResX;
-				m_NewResY = c_DefaultResY;
-				m_NewFullscreen = false;
+				if (g_WindowMan.IsFullscreen()) {
+					m_NewResMultiplier = g_WindowMan.GetResMultiplier();
+					m_NewResX = g_WindowMan.GetResX();
+					m_NewResY = g_WindowMan.GetResY();
+					m_NewFullscreen = false;
+				} else {
+					m_NewResMultiplier = std::max<float>(std::round(g_WindowMan.GetWindowResX() / static_cast<float>(c_DefaultResX)), std::round(g_WindowMan.GetWindowResY() / static_cast<float>(c_DefaultResY)));
+					m_NewResX = g_WindowMan.GetWindowResX() / m_NewResMultiplier;
+					m_NewResY = g_WindowMan.GetWindowResY() / m_NewResMultiplier;
+					m_NewFullscreen = false;
+					std::cout << m_NewResMultiplier << " " << m_NewResX << " " << m_NewResY << std::endl;
+					std::cout << std::ceil(g_WindowMan.GetWindowResX() / static_cast<float>(c_DefaultResX)) << " " << std::ceil(g_WindowMan.GetWindowResY() / static_cast<float>(c_DefaultResY)) << std::endl;
+				}
 				break;
 			case ResolutionQuickChangeType::Fullscreen:
-				m_NewResMultiplier = 1.0f;
-				m_NewResX = g_WindowMan.GetMaxResX();
-				m_NewResY = g_WindowMan.GetMaxResY();
-				m_NewFullscreen = true;
-				break;
-			case ResolutionQuickChangeType::UpscaledFullscreen:
-				m_NewResMultiplier = 2.0f;
-				m_NewResX = g_WindowMan.GetMaxResX() / 2.0f;
-				m_NewResY = g_WindowMan.GetMaxResY() / 2.0f;
-				m_NewFullscreen = true;
+				if (!g_WindowMan.GetUseMultiDisplays()) {
+					m_NewResMultiplier = g_WindowMan.GetResMultiplier();
+					m_NewResX = g_WindowMan.GetResX();
+					m_NewResY = g_WindowMan.GetResY();
+					m_NewFullscreen = true;
+				} else {
+					m_NewResMultiplier = std::max<float>(std::round(g_WindowMan.GetMaxResX() / static_cast<float>(c_DefaultResX)), std::round(g_WindowMan.GetMaxResY() / static_cast<float>(c_DefaultResY)));
+					m_NewResX = g_WindowMan.GetMaxResX() / m_NewResMultiplier;
+					m_NewResY = g_WindowMan.GetMaxResY() / m_NewResMultiplier;
+					m_NewFullscreen = true;
+				}
 				break;
 			default:
 				RTEAbort("Invalid resolution quick change type passed to SettingsVideoGUI::ApplyQuickChangeResolution!");
@@ -269,10 +287,10 @@ namespace RTE {
 	void SettingsVideoGUI::ApplyPresetResolution() {
 		int presetResListEntryID = m_PresetResolutionComboBox->GetSelectedIndex();
 		if (presetResListEntryID >= 0) {
-			m_NewResMultiplier = m_PresetResolutions.at(presetResListEntryID).Upscaled ? 2.0f : 1.0f;
+			m_NewResMultiplier = m_PresetResolutions.at(presetResListEntryID).Scale;
 
-			m_NewResX = m_PresetResolutions.at(presetResListEntryID).Width / m_NewResMultiplier;
-			m_NewResY = m_PresetResolutions.at(presetResListEntryID).Height / m_NewResMultiplier;
+			m_NewResX = m_PresetResolutions.at(presetResListEntryID).Width;
+			m_NewResY = m_PresetResolutions.at(presetResListEntryID).Height;
 
 			g_GUISound.ButtonPressSound()->Play();
 			m_NewFullscreen = m_FullscreenCheckbox->GetCheck();
@@ -344,8 +362,6 @@ namespace RTE {
 					ApplyQuickChangeResolution(ResolutionQuickChangeType::Windowed);
 				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Fullscreen]) {
 					ApplyQuickChangeResolution(ResolutionQuickChangeType::Fullscreen);
-				} else if (guiEvent.GetControl() == m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledFullscreen]) {
-					ApplyQuickChangeResolution(ResolutionQuickChangeType::UpscaledFullscreen);
 				} else if (guiEvent.GetControl() == m_PresetResolutionApplyButton) {
 					ApplyPresetResolution();
 				} else if (guiEvent.GetControl() == m_CustomResolutionApplyButton) {
@@ -377,7 +393,7 @@ namespace RTE {
 				if (guiEvent.GetMsg() == GUIComboBox::Dropped) {
 					m_PresetResolutionBox->Resize(m_PresetResolutionBox->GetWidth(), 165);
 				} else if (guiEvent.GetMsg() == GUIComboBox::Closed) {
-					m_PresetResolutionBox->Resize(m_PresetResolutionBox->GetWidth(), 40);
+					m_PresetResolutionBox->Resize(m_PresetResolutionBox->GetWidth(), 80);
 				}
 			}
 
@@ -385,15 +401,15 @@ namespace RTE {
 				if (guiEvent.GetMsg() == GUIComboBox::Dropped) {
 					m_CustomResolutionBox->Resize(m_CustomResolutionBox->GetWidth(), 165);
 				} else if (guiEvent.GetMsg() == GUIComboBox::Closed) {
-					m_CustomResolutionBox->Resize(m_CustomResolutionBox->GetWidth(), 40);
+					m_CustomResolutionBox->Resize(m_CustomResolutionBox->GetWidth(), 80);
 				}
 			}
 
 			if (guiEvent.GetMsg() == GUICheckbox::Changed) {
 				if (guiEvent.GetControl() == m_EnableVSyncCheckbox) {
 					g_WindowMan.SetVSyncEnabled(m_EnableVSyncCheckbox->GetCheck());
-				} else if (guiEvent.GetControl() == m_IgnoreMultiDisplaysCheckbox) {
-					g_WindowMan.SetIgnoreMultiDisplays(m_IgnoreMultiDisplaysCheckbox->GetCheck());
+				} else if (guiEvent.GetControl() == m_UseMultiDisplaysCheckbox) {
+					g_WindowMan.SetIgnoreMultiDisplays(m_UseMultiDisplaysCheckbox->GetCheck());
 					UpdateCustomResolutionLimits();
 				}
 			} else if (guiEvent.GetMsg() == GUIRadioButton::Pushed) {

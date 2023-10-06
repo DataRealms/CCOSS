@@ -73,7 +73,7 @@ namespace RTE {
 		struct PresetResolutionRecord {
 			int Width; //!< Resolution width.
 			int Height; //!< Resolution height.
-			bool Upscaled; //!< Whether resolution is upscaled.
+			float Scale; //!< Whether resolution is upscaled.
 
 			/// <summary>
 			/// Constructor method to instantiate a PresetResolutionRecord object in system memory and make it ready for use.
@@ -121,7 +121,7 @@ namespace RTE {
 		GUIRadioButton *m_TwoPlayerSplitscreenVSplitRadioButton;
 		GUICheckbox *m_EnableVSyncCheckbox;
 		GUICheckbox *m_FullscreenCheckbox;
-		GUICheckbox *m_IgnoreMultiDisplaysCheckbox;
+		GUICheckbox *m_UseMultiDisplaysCheckbox;
 		GUIRadioButton *m_PresetResolutionRadioButton;
 		GUIRadioButton *m_CustomResolutionRadioButton;
 		GUICollectionBox *m_PresetResolutionBox;

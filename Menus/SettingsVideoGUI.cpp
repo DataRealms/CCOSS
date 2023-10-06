@@ -159,52 +159,26 @@ namespace RTE {
 	void SettingsVideoGUI::PopulateResolutionsComboBox() {
 		m_PresetResolutions.clear();
 
-		// Get a list of modes from the graphics deriver. This is so we don't need to populate the list manually, and have all the reasonable resolutions.
-		std::vector<SDL_DisplayMode> modeList;
 		std::set<PresetResolutionRecord> resRecords;
-
-		int displayIndex = SDL_GetWindowDisplayIndex(g_WindowMan.GetWindow());
-
-		for (int i = 0; i < SDL_GetNumDisplayModes(displayIndex); ++i) {
-			SDL_DisplayMode mode;
-			if (SDL_GetDisplayMode(displayIndex, i, &mode) == 0) {
-				modeList.push_back(mode);
-
-				if ((SDL_BITSPERPIXEL(mode.format) == 32 || SDL_BITSPERPIXEL(mode.format) == 24) && IsSupportedResolution(mode.w, mode.h)) {
-					resRecords.emplace(mode.w, mode.h, false);
+		g_WindowMan.MapDisplays();
+		int resX = g_WindowMan.GetMaxResX();
+		int resY = g_WindowMan.GetMaxResY();
+		float scale = 1.0f;
+		while ((resX >= c_MinResX) && (resY >= c_MinResY)) {
+			if (IsSupportedResolution(resX, resY)) {
+				resRecords.emplace(resX, resY, scale);
 				}
-			} else {
-				(void)SDL_GetError();
-			}
+			scale += 0.5f;
+			resX = g_WindowMan.GetMaxResX() / scale;
+			resY = g_WindowMan.GetMaxResY() / scale;
 		}
 
-		if (modeList.empty()) {
-			m_PresetResolutionComboBox->SetVisible(false);
-			m_PresetResolutionApplyButton->SetVisible(false);
-
-			m_PresetResolutionMessageLabel->SetText("Failed to get the preset resolution list from the graphics driver!\nPlease use the custom resolution controls instead.");
-			m_PresetResolutionMessageLabel->SetVisible(true);
-			m_PresetResolutionMessageLabel->CenterInParent(true, true);
-			return;
-		}
-
-		// Manually add qHD (960x540) to the list because it's rarely present in drivers.
-		resRecords.emplace(960, 540, false);
-
-		std::set<PresetResolutionRecord> upscaledResRecords;
-		for (const PresetResolutionRecord &resRecord: resRecords) {
-			PresetResolutionRecord upscaledResRecord(resRecord.Width * 2, resRecord.Height * 2, true);
-			if (IsSupportedResolution(upscaledResRecord.Width, upscaledResRecord.Height)) {
-				upscaledResRecords.emplace(upscaledResRecord);
-			}
-		}
-		resRecords.merge(upscaledResRecords);
 		m_PresetResolutions.assign(resRecords.begin(), resRecords.end());
 
 		for (int i = 0; i < m_PresetResolutions.size(); ++i) {
 			const PresetResolutionRecord &resRecord = m_PresetResolutions[i];
 			m_PresetResolutionComboBox->AddItem(resRecord.GetDisplayString());
-			if (m_PresetResolutionComboBox->GetSelectedIndex() < 0 && (resRecord.Width == g_WindowMan.GetResX() * g_WindowMan.GetResMultiplier()) && (resRecord.Height == g_WindowMan.GetResY() * g_WindowMan.GetResMultiplier()) && (resRecord.Upscaled == g_WindowMan.GetResMultiplier() > 1)) {
+			if (m_PresetResolutionComboBox->GetSelectedIndex() < 0 && (glm::epsilonEqual(resRecord.Scale, 2.0f, glm::epsilon<float>()))) {
 				m_PresetResolutionComboBox->SetSelectedIndex(i);
 			}
 		}

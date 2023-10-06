@@ -81,13 +81,13 @@ namespace RTE {
 			/// <param name="width">Resolution width.</param>
 			/// <param name="height">Resolution height.</param>
 			/// <param name="upscaled">Whether resolution is upscaled.</param>
-			PresetResolutionRecord(int width, int height, bool upscaled) : Width(width), Height(height), Upscaled(upscaled) {}
+			PresetResolutionRecord(int width, int height, float scale) : Width(width), Height(height), Scale(scale) {}
 
 			/// <summary>
 			/// Makes UI displayable string with resolution info.
 			/// </summary>
 			/// <returns>String with resolution info.</returns>
-			std::string GetDisplayString() const { return std::to_string(Width) + "x" + std::to_string(Height) + (Upscaled ? " Upscaled (" + std::to_string(Width / 2) + "x" + std::to_string(Height / 2) + ")" : ""); }
+			std::string GetDisplayString() const { return std::to_string(Width) + "x" + std::to_string(Height); }
 
 			/// <summary>
 			/// Comparison operator for eliminating duplicates and sorting in the temporary PresetResolutionRecord std::sets during PopulateResolutionsComboBox.
@@ -96,7 +96,7 @@ namespace RTE {
 			/// <returns>Bool with the result of the comparison.</returns>
 			bool operator<(const PresetResolutionRecord &rhs) const {
 				if (Width == rhs.Width && Height == rhs.Height) {
-					return Upscaled != rhs.Upscaled;
+					return Scale > rhs.Scale;
 				} else if (Width == rhs.Width) {
 					return Height < rhs.Height;
 				}

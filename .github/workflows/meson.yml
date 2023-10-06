@@ -43,9 +43,6 @@ on:
         required: false
         default: "release"
 
-env:
-  MESON_VERSION: "0.60.3"
-
 jobs:
   build-linux:
     runs-on: ubuntu-latest
@@ -60,7 +57,7 @@ jobs:
         run: |
           sudo apt-get update -yq
           sudo apt-get install --no-install-recommends wget liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libboost-dev libtbb-dev libsdl2-dev libsdl2-image-dev libopengl-dev libfuse2 ninja-build
-          sudo pip install meson==${{env.MESON_VERSION}}
+          sudo pip install meson
 
       - name: Setup Meson
         env:

@@ -135,12 +135,6 @@ namespace RTE {
 		void SetIgnoreMultiDisplays(bool ignore) { m_UseMultiDisplays = ignore; }
 
 		/// <summary>
-		/// Checks whether the current resolution settings fully cover the display the primary game window is positioned at.
-		/// </summary>
-		/// <returns>Whether the current resolution settings fully cover the display the primary game window is positioned at.</returns>
-		bool FullyCoversPrimaryWindowDisplayOnly() const { return (m_ResX * m_ResMultiplier == m_PrimaryWindowDisplayWidth) && (m_ResY * m_ResMultiplier == m_PrimaryWindowDisplayHeight); }
-
-		/// <summary>
 		/// Checks whether the current resolution settings fully cover all the available displays.
 		/// </summary>
 		/// <returns>Whether the current resolution settings fully cover all the available displays.</returns>

@@ -11,8 +11,6 @@
 #define g_PostProcessMan PostProcessMan::Instance()
 
 namespace RTE {
-	class ScreenShader;
-
 	/// <summary>
 	/// Struct for storing GL information in the BITMAP->extra field.
 	/// </summary>

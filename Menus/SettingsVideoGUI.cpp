@@ -34,7 +34,6 @@ namespace RTE {
 
 		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Windowed] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickWindowed"));
 		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Fullscreen] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickBorderless"));
-		m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::UpscaledFullscreen] = dynamic_cast<GUIButton *>(m_GUIControlManager->GetControl("ButtonQuickUpscaledBorderless"));
 
 		m_TwoPlayerSplitscreenHSplitRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioSplitscreenHoriz"));
 		m_TwoPlayerSplitscreenVSplitRadioButton = dynamic_cast<GUIRadioButton *>(m_GUIControlManager->GetControl("RadioSplitscreenVert"));
@@ -257,8 +256,6 @@ namespace RTE {
 					m_NewResX = g_WindowMan.GetWindowResX() / m_NewResMultiplier;
 					m_NewResY = g_WindowMan.GetWindowResY() / m_NewResMultiplier;
 					m_NewFullscreen = false;
-					std::cout << m_NewResMultiplier << " " << m_NewResX << " " << m_NewResY << std::endl;
-					std::cout << std::ceil(g_WindowMan.GetWindowResX() / static_cast<float>(c_DefaultResX)) << " " << std::ceil(g_WindowMan.GetWindowResY() / static_cast<float>(c_DefaultResY)) << std::endl;
 				}
 				break;
 			case ResolutionQuickChangeType::Fullscreen:

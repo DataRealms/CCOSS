@@ -40,7 +40,7 @@ namespace RTE {
 
 	void PathFinder::Clear() {
 		m_NodeGrid.clear();
-		m_NodeDimension = 20;
+		m_NodeDimension = SCENEGRIDSIZE;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,6 +197,9 @@ namespace RTE {
 	std::shared_ptr<volatile PathRequest> PathFinder::CalculatePathAsync(Vector start, Vector end, float digStrength, PathCompleteCallback callback) {
 		std::shared_ptr<volatile PathRequest> pathRequest = std::make_shared<PathRequest>();
 
+		const_cast<Vector &>(pathRequest->startPos) = start;
+		const_cast<Vector &>(pathRequest->targetPos) = end;
+
 		std::thread pathThread([this, start, end, digStrength, callback](std::shared_ptr<volatile PathRequest> volRequest) {
 			// Cast away the volatile-ness - only matters outside (and complicates the API otherwise)
 			PathRequest &request = const_cast<PathRequest &>(*volRequest);
@@ -205,11 +208,14 @@ namespace RTE {
 			
 			request.status = status;
 			request.pathLength = request.path.size();
-			request.complete = true;
 
 			if (callback) {
 				callback(volRequest);
 			}
+
+			// Have to set to complete after the callback, so anything that blocks on it knows that the callback will have been called by now
+			// This has the awkward side-effect that the complete flag is actually false during the callback - but that's fine, if it's called we know it's complete anyways
+			request.complete = true;
 		}, pathRequest);
 
 		pathThread.detach();
@@ -267,7 +273,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float PathFinder::LeastCostEstimate(void *startState, void *endState) {
-		return g_SceneMan.ShortestDistance((static_cast<PathNode *>(startState))->Pos, (static_cast<PathNode *>(endState))->Pos).GetMagnitude();
+		return g_SceneMan.ShortestDistance((static_cast<PathNode *>(startState))->Pos, (static_cast<PathNode *>(endState))->Pos).GetMagnitude() / m_NodeDimension;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -327,6 +333,16 @@ namespace RTE {
 			adjCost.state = static_cast<void *>(node->LeftUp);
 			adjacentList->push_back(adjCost);
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool PathFinder::PositionsAreTheSamePathNode(const Vector& pos1, const Vector& pos2) const {
+		int startNodeX = std::floor(pos1.m_X / static_cast<float>(m_NodeDimension));
+		int startNodeY = std::floor(pos1.m_Y / static_cast<float>(m_NodeDimension));
+		int endNodeX = std::floor(pos2.m_X / static_cast<float>(m_NodeDimension));
+		int endNodeY = std::floor(pos2.m_Y / static_cast<float>(m_NodeDimension));
+		return startNodeX == endNodeX && startNodeY == endNodeY;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

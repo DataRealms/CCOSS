@@ -71,6 +71,10 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     link_args += ['-Wl,--enable-new-dtags'] # Set RUNPATH instead of RPATH
   endif
 
+  if host_machine.system()=='darwin'
+    deps += dependency('appleframeworks', modules: ['foundation'])  
+  endif
+
   # Set preprocessor flags and cpp arguments according to build options
   buildtype_debug = get_option('debug')
   if buildtype_debug
@@ -134,6 +138,8 @@ conf_data = configuration_data()
 prefix = get_option('prefix')
 
 conf_data.set_quoted('BASEDATAPATH', prefix/get_option('data_install_dir'))
+conf_data.set('game_version', meson.project_version())
+
 if suffix==''
   suffix=[]
   conf_data.set('EXENAME', elfname)

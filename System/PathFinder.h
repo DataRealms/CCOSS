@@ -18,8 +18,10 @@ namespace RTE {
 		bool complete = false;
 		int status = MicroPather::NO_SOLUTION;
 		std::list<Vector> path;
-		float pathLength;
+		float pathLength = 0.0f;
 		float totalCost = 0.0f;
+		Vector startPos;
+		Vector targetPos;
 	};
 
 	using PathCompleteCallback = std::function<void (std::shared_ptr<volatile PathRequest>)>;
@@ -173,6 +175,14 @@ namespace RTE {
 		/// <param name="state">Pointer to PathNode to get to cost of all adjacents for. OWNERSHIP IS NOT TRANSFERRED!</param>
 		/// <param name="adjacentList">An empty vector which will be filled out with all the valid PathNodes adjacent to the one passed in. If at non-wrapping edge of seam, those non existent PathNodes won't be added.</param>
 		void AdjacentCost(void *state, std::vector<micropather::StateCost> *adjacentList) override;
+
+		/// <summary>
+		/// Returns whether two position represent the same path nodes.
+		/// </summary>
+		/// <param name="pos1">First coordinates to compare.</param>
+		/// <param name="pos2">Second coordinates to compare.</param>
+		/// <returns>Whether both coordinates represent the same path node.</returns>
+		bool PositionsAreTheSamePathNode(const Vector& pos1, const Vector& pos2) const;
 #pragma endregion
 
 #pragma region Misc

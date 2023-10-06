@@ -7,85 +7,70 @@ static std::string s_CreditsText =
 
 R"(- C O R T E X   C O M M A N D   C O M M U N I T Y   P R O J E C T -
 
-
-Project Coordination
-G A R E T H   " G A C Y R "   Y R
-M A X   " M A X I M D U D E "   K
-R I K U   " 4 Z K "   K
-
-Engine Programming
-G A R E T H   " G A C Y R "   Y R
-M A X   " M A X I M D U D E "   K
-R I K U   " 4 Z K "   K
-H E L I U M A N T
-C A U S E L E S S
-S T E W I E
-M Y N A M E I S T R E Z
-H A R D S P H E R E
+Programming
+3 4 3 N
+C O M R A D E S H O O K
+E V G E N I Y   " W E E G E E "   V I G O V S K I Y
 F R I S 0 U M A N
+G A R E T H   " G A C Y R "   Y R
+H A R D S P H E R E
+H E L I U M A N T
+J U S T   A L E X   :/
+K E N   " C A V E "   V U   D O
+M A X   " M A X I M D U D E "   K
+M A X S H A D O W
+M Y N A M E I S T R E Z
+O O A A A O A O A O
+P A W N I S H O O V Y
+P R I K E
+R I K U   " 4 Z K "   K
+S T E W I E
+T H O M A S   " C A U S E L E S S "   M A R C H
+T O P K E K
 Z A L O
 
-Platform Porting and Automation
-H E L I U M A N T
-S T E W I E
-
-Online Multiplayer Implementation
-E V G E N I Y   " W E E G E E "   V I G O V S K I Y
-
 Art and Content Production
-R I K U   " 4 Z K "   K
-G O T C H A
+B H I J N
+C O M R A D E S H O O K
 G A R E T H   " G A C Y R "   Y R
-M A X   " M A X I M D U D E "   K
+G O T C H A
 J E F F
 J U S T   A L E X   :/
-T A T U
 M A J O R
-C O M R A D E S H O O K
-Z E T A
-
-Audio Design
-M O S S
-R I K U   " 4 Z K "   K
-G O S T S
-
-Tools Programming
-M Y N A M E I S T R E Z
-S T E W I E
 M A X   " M A X I M D U D E "   K
-K E N   " C A V E "   V U   D O
-
-Additional Programming
-J U S T   A L E X   :/
-M A X S H A D O W
-T O P K E K
-O O A A A O A O A O
-P R I K E
-3 4 3 N
-
-Additional Content Production
+M I S S A K   G H O S T   C O M O D O
+M R M I K E X  /  C H E R K O V
+P A W N I S H O O V Y
 P R I M E T Y R A N T
+R I K U   " 4 Z K "   K
 S K A I A N D E S T I N Y
-B H I J N
-
-Community Management
-K E N   " C A V E "   V U   D O
-G O T C H A
+T A T U
+T H O M A S   " C A U S E L E S S "   M A R C H
+W A Z U B A B A
 Z E T A
-M A X
 
-Mod Portal Management
-M Y N A M E I S T R E Z
+Audio Design And Music
+G O S T S
+M O S S
+P A W N I S H O O V Y
+R I K U   " 4 Z K "   K
+
+Community and Mod Portal Management
 G O T C H A
+J E F F
+J U S T   A L E X   :/
+K E N   " C A V E "   V U   D O
+M A X
+M Y N A M E I S T R E Z
+Z E T A
 
 Website Design
-T O M
 P O C K E T S
+T O M
 
 Special Thanks
 D A N I E L   " D A T A "   T A B A R
 E V G E N I Y   " W E E G E E "   V I G O V S K I Y
-P A W N I S
 
 A huge thank you to every single person who has been a part of the Cortex Command Community Project!
 
@@ -122,7 +107,7 @@ Lua AI Implementation
 S T E F A N   " A B D U L   A L H A Z R E D "   W I N B E R G
 
 Intro and Main Menu Music Composition and Production
-R O B E R T   S T J Ä R N S T R Ö M   &   J O N A S   R Ö R L I N G,   H U B N E S T E R   I N D U S T R I E S
+R O B E R T   S T J Ã„ R N S T R Ã– M   &   J O N A S   R Ã– R L I N G,   H U B N E S T E R   I N D U S T R I E S
 
 Campaign Menu, Launch Trailer, and In-game Music Composition and Production
 D A N N Y   B A R A N O W S K Y ,   D B   S O U N D W O R K S
@@ -154,6 +139,6 @@ SDL2, FMOD, ALLEGRO, LUA, LUAJIT, LUABIND, MICROPATHER, RAKNET, LZ4, LIBPNG, ZLI
 FMOD Studio by Firelight Technologies Pty Ltd.
 
 
-Cortex Command is TM and © 2023 Data Realms, LLC)";
+Cortex Command is TM and Â© 2023 Data Realms, LLC)";
 
 #endif

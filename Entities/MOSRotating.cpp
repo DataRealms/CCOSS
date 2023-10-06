@@ -91,9 +91,6 @@ void MOSRotating::Clear()
     m_NoSetDamageMultiplier = true;
 	m_FlashWhiteTimer.Reset();
 	m_FlashWhiteTimer.SetRealTimeLimitMS(0);
-    m_StringValueMap.clear();
-    m_NumberValueMap.clear();
-    m_ObjectValueMap.clear();
 }
 
 
@@ -272,10 +269,6 @@ int MOSRotating::Create(const MOSRotating &reference) {
         m_Gibs.push_back(gib);
     }
 
-    m_StringValueMap = reference.m_StringValueMap;
-    m_NumberValueMap = reference.m_NumberValueMap;
-    m_ObjectValueMap = reference.m_ObjectValueMap;
-
     m_GibImpulseLimit = reference.m_GibImpulseLimit;
     m_GibWoundLimit = reference.m_GibWoundLimit;
     m_GibBlastStrength = reference.m_GibBlastStrength;
@@ -374,33 +367,10 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 	MatchProperty("DamageMultiplier", {
 		reader >> m_DamageMultiplier;
         m_NoSetDamageMultiplier = false;
-    });
-    MatchProperty("AddCustomValue", { ReadCustomValueProperty(reader); });
-    
+    }); 
     
     EndPropertyList;
 }
-
-void MOSRotating::ReadCustomValueProperty(Reader &reader) {
-    std::string customValueType;
-    reader >> customValueType;
-    std::string customKey = reader.ReadPropName();
-    std::string customValue = reader.ReadPropValue();
-    if (customValueType == "NumberValue") {
-        try {
-            SetNumberValue(customKey, std::stod(customValue));
-        } catch (const std::invalid_argument) {
-            reader.ReportError("Tried to read a non-number value for SetNumberValue.");
-        }
-    } else if (customValueType == "StringValue") {
-        SetStringValue(customKey, customValue);
-    } else {
-        reader.ReportError("Invalid CustomValue type " + customValueType);
-    }
-    // Artificially end reading this property since we got all we needed
-    reader.NextProperty();
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Save
@@ -611,6 +581,18 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includePositive
 	return damage;
 }
 
+void MOSRotating::DestroyScriptState() {
+    for (std::list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) {
+        (*itr)->DestroyScriptState();
+    }
+
+    for (std::list<Attachable *>::const_iterator itr = m_Attachables.begin(); itr != m_Attachables.end(); ++itr) {
+        (*itr)->DestroyScriptState();
+    }
+
+    MovableObject::DestroyScriptState();
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -623,7 +605,10 @@ void MOSRotating::Destroy(bool notInherited)
     delete m_pAtomGroup;
     delete m_pDeepGroup;
 
-    for (std::list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) { delete (*itr); }
+    for (std::list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) { 
+        delete (*itr); 
+    }
+
     for (std::list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr) {
         if (m_HardcodedAttachableUniqueIDsAndRemovers.find((*aItr)->GetUniqueID()) == m_HardcodedAttachableUniqueIDsAndRemovers.end()) {
             delete (*aItr);
@@ -1628,6 +1613,20 @@ void MOSRotating::Update() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void MOSRotating::PostUpdate() {
+    for (std::list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) {
+        (*itr)->PostUpdate();
+    }
+
+    for (std::list<Attachable *>::const_iterator itr = m_Attachables.begin(); itr != m_Attachables.end(); ++itr) {
+        (*itr)->PostUpdate();
+    }
+
+    MovableObject::PostUpdate();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool MOSRotating::DrawMOIDIfOverlapping(MovableObject *pOverlapMO) {
     if (pOverlapMO == this || !m_GetsHitByMOs || !pOverlapMO->GetsHitByMOs()) {
         return false;
@@ -2073,145 +2072,6 @@ bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
     if (!forces.IsZero()) { AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
     if (!impulses.IsZero()) { AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
     return intact;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetStringValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the string value associated with the specified key or "" if it does not exist.
-
-std::string MOSRotating::GetStringValue(std::string key) const
-{
-	if (StringValueExists(key))
-		return m_StringValueMap.at(key);
-	else
-		return "";
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetNumberValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the number value associated with the specified key or 0 if it does not exist.
-// Arguments:       Key to retrieve value.
-// Return value:    Number (double) value.
-
-double MOSRotating::GetNumberValue(std::string key) const
-{
-	if (NumberValueExists(key))
-		return m_NumberValueMap.at(key);
-	else
-		return 0;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetObjectValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the object value associated with the specified key or 0 if it does not exist.
-// Arguments:       None.
-// Return value:    Object (Entity *) value.
-
-Entity * MOSRotating::GetObjectValue(std::string key) const
-{
-	if (ObjectValueExists(key))
-		return m_ObjectValueMap.at(key);
-	else
-		return 0;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetStringValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the string value associated with the specified key.
-
-void MOSRotating::SetStringValue(std::string key, std::string value)
-{
-	m_StringValueMap[key] = value;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetNumberValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the string value associated with the specified key.
-
-void MOSRotating::SetNumberValue(std::string key, double value)
-{
-	m_NumberValueMap[key] = value;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetObjectValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the string value associated with the specified key.
-
-void MOSRotating::SetObjectValue(std::string key, Entity * value)
-{
-	m_ObjectValueMap[key] = value;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RemoveStringValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Remove the string value associated with the specified key.
-
-void MOSRotating::RemoveStringValue(std::string key)
-{
-	m_StringValueMap.erase(key);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RemoveNumberValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Remove the number value associated with the specified key.
-
-void MOSRotating::RemoveNumberValue(std::string key)
-{
-	m_NumberValueMap.erase(key);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RemoveObjectValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Remove the object value associated with the specified key.
-
-void MOSRotating::RemoveObjectValue(std::string key)
-{
-	m_ObjectValueMap.erase(key);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  StringValueExists
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether the value associated with the specified key exists.
-
-bool MOSRotating::StringValueExists(std::string key) const
-{
-	if (m_StringValueMap.find(key) != m_StringValueMap.end())
-		return true;
-	return false;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  NumberValueExists
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether the value associated with the specified key exists.
-
-bool MOSRotating::NumberValueExists(std::string key) const
-{
-	if (m_NumberValueMap.find(key) != m_NumberValueMap.end())
-		return true;
-	return false;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ObjectValueExists
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether the value associated with the specified key exists.
-
-bool MOSRotating::ObjectValueExists(std::string key) const
-{
-	if (m_ObjectValueMap.find(key) != m_ObjectValueMap.end())
-		return true;
-	return false;
 }
 
 } // namespace RTE

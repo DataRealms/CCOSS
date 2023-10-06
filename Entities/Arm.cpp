@@ -161,6 +161,11 @@ namespace RTE {
 				}
 			);
 		}
+
+		// Reset our fire state, so that our activation of a prior device does not "leak"
+		if (Actor* parentActor = dynamic_cast<Actor*>(GetRootParent())) {
+			parentActor->GetController()->SetState(ControlState::WEAPON_FIRE, false);
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

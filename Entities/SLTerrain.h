@@ -228,6 +228,12 @@ namespace RTE {
 		/// <param name="maxMOPs">The max number of MOPixels to make, if they are to be made.</param>
 		/// <returns>A deque filled with the MOPixels of the terrain that are now dislodged. This will be empty if makeMOPs is false. Note that ownership of all the MOPixels in the deque IS transferred!</returns>
 		std::deque<MOPixel *> EraseSilhouette(BITMAP *sprite, const Vector &pos, const Vector &pivot, const Matrix &rotation, float scale, bool makeMOPs = true, int skipMOP = 2, int maxMOPs = 150);
+
+		/// <summary>
+		/// Returns the direction of the out-of-bounds "orbit" for this scene, where the brain must path to and where dropships/rockets come from.
+		/// </summary>
+		/// <returns>The orbit direction, either Up, Down, Left or Right..</returns>
+		Directions GetOrbitDirection() { return m_OrbitDirection; }
 #pragma endregion
 
 #pragma region Virtual Override Methods
@@ -264,6 +270,8 @@ namespace RTE {
 		std::vector<TerrainObject *> m_TerrainObjects; //!< The TerrainObjects that need to be placed on this SLTerrain.
 
 		std::deque<Box> m_UpdatedMaterialAreas; //!< List of areas of the material layer (main bitmap) which have been affected by new objects copied to it. These boxes are NOT wrapped, and can be out of bounds!
+
+		Directions m_OrbitDirection; //!< The direction of the out-of-bounds "orbit" for this scene, where the brain must path to and where dropships/rockets come from.
 
 		/// <summary>
 		/// Applies Material textures to the foreground and background color layers, based on the loaded material layer (main bitmap).

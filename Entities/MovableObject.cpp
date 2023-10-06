@@ -28,6 +28,7 @@ namespace RTE {
 AbstractClassInfo(MovableObject, SceneObject);
 
 unsigned long int MovableObject::m_UniqueIDCounter = 1;
+std::string MovableObject::ms_EmptyString = "";
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
@@ -82,6 +83,9 @@ void MovableObject::Clear()
     m_IsTraveling = false;
     m_AllLoadedScripts.clear();
     m_FunctionsAndScripts.clear();
+    m_StringValueMap.clear();
+    m_NumberValueMap.clear();
+    m_ObjectValueMap.clear();
     m_ThreadedLuaState = nullptr;
     m_HasSinglethreadedScripts = false;
     m_ScriptObjectName.clear();
@@ -281,6 +285,10 @@ int MovableObject::Create(const MovableObject &reference)
 	m_SimUpdatesBetweenScriptedUpdates = reference.m_SimUpdatesBetweenScriptedUpdates;
 	m_SimUpdatesSinceLastScriptedUpdate = reference.m_SimUpdatesSinceLastScriptedUpdate;
 
+    m_StringValueMap = reference.m_StringValueMap;
+    m_NumberValueMap = reference.m_NumberValueMap;
+    m_ObjectValueMap = reference.m_ObjectValueMap;
+
 	m_UniqueID = MovableObject::GetNextUniqueID();
 	g_MovableMan.RegisterObject(this);
 
@@ -396,10 +404,30 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
     MatchProperty("ApplyWoundBurstDamageOnCollision", { reader >> m_ApplyWoundBurstDamageOnCollision; });
 	MatchProperty("IgnoreTerrain", { reader >> m_IgnoreTerrain; });
     MatchProperty("SimUpdatesBetweenScriptedUpdates", { reader >> m_SimUpdatesBetweenScriptedUpdates; });
+    MatchProperty("AddCustomValue", { ReadCustomValueProperty(reader); });
 
     EndPropertyList;
 }
 
+void MovableObject::ReadCustomValueProperty(Reader& reader) {
+    std::string customValueType;
+    reader >> customValueType;
+    std::string customKey = reader.ReadPropName();
+    std::string customValue = reader.ReadPropValue();
+    if (customValueType == "NumberValue") {
+        try {
+            SetNumberValue(customKey, std::stod(customValue));
+        } catch (const std::invalid_argument) {
+            reader.ReportError("Tried to read a non-number value for SetNumberValue.");
+        }
+    } else if (customValueType == "StringValue") {
+        SetStringValue(customKey, customValue);
+    } else {
+        reader.ReportError("Invalid CustomValue type " + customValueType);
+    }
+    // Artificially end reading this property since we got all we needed
+    reader.NextProperty();
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  Save
@@ -485,12 +513,22 @@ int MovableObject::Save(Writer &writer) const
     writer.NewProperty("SimUpdatesBetweenScriptedUpdates");
     writer << m_SimUpdatesBetweenScriptedUpdates;
 
+    for (const auto &[key, value] : m_NumberValueMap) {
+        writer.ObjectStart("AddCustomValue = NumberValue");
+        writer.NewPropertyWithValue(key, value);
+    }
+
+    for (const auto &[key, value] : m_StringValueMap) {
+        writer.ObjectStart("AddCustomValue = StringValue");
+        writer.NewPropertyWithValue(key, value);
+    }
+
     return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MovableObject::Destroy(bool notInherited) {
+void MovableObject::DestroyScriptState() {
     if (ObjectScriptsInitialized()) {
         RunScriptedFunctionInAppropriateScripts("Destroy");
 
@@ -503,14 +541,22 @@ void MovableObject::Destroy(bool notInherited) {
             // Shouldn't ever happen (destruction is delayed in movableman to happen in singlethreaded manner), but lets check just in case
             if (g_LuaMan.GetThreadLuaStateOverride() || !g_LuaMan.GetMasterScriptState().GetMutex().try_lock()) {
                 RTEAbort("Failed to destroy object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
-            } else {
+            }
+            else {
                 std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex(), std::adopt_lock);
                 g_LuaMan.GetMasterScriptState().RunScriptString(m_ScriptObjectName + " = nil;");
             }
         }
     }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::Destroy(bool notInherited) {
 	g_MovableMan.UnregisterObject(this);
-    if (!notInherited) { SceneObject::Destroy(); }
+    if (!notInherited) { 
+        SceneObject::Destroy(); 
+    }
     Clear();
 }
 
@@ -1032,6 +1078,105 @@ int MovableObject::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
 	}
 
 	return status;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const std::string & MovableObject::GetStringValue(const std::string &key) const
+{
+    auto itr = m_StringValueMap.find(key);
+    if (itr == m_StringValueMap.end()) {
+        return ms_EmptyString;
+    }
+    
+    return itr->second;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+double MovableObject::GetNumberValue(const std::string& key) const
+{
+    auto itr = m_NumberValueMap.find(key);
+    if (itr == m_NumberValueMap.end()) {
+        return 0.0;
+    }
+
+    return itr->second;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Entity* MovableObject::GetObjectValue(const std::string &key) const
+{
+    auto itr = m_ObjectValueMap.find(key);
+    if (itr == m_ObjectValueMap.end()) {
+        return nullptr;
+    }
+
+    return itr->second;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::SetStringValue(const std::string &key, const std::string &value)
+{
+    m_StringValueMap[key] = value;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::SetNumberValue(const std::string &key, double value)
+{
+    m_NumberValueMap[key] = value;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::SetObjectValue(const std::string &key, Entity* value)
+{
+    m_ObjectValueMap[key] = value;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::RemoveStringValue(const std::string &key)
+{
+    m_StringValueMap.erase(key);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::RemoveNumberValue(const std::string &key)
+{
+    m_NumberValueMap.erase(key);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::RemoveObjectValue(const std::string &key)
+{
+    m_ObjectValueMap.erase(key);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::StringValueExists(const std::string &key) const
+{
+    return m_StringValueMap.find(key) != m_StringValueMap.end();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::NumberValueExists(const std::string &key) const
+{
+    return m_NumberValueMap.find(key) != m_NumberValueMap.end();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool MovableObject::ObjectValueExists(const std::string &key) const
+{
+    return m_ObjectValueMap.find(key) != m_ObjectValueMap.end();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

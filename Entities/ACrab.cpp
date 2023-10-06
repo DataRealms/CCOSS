@@ -26,6 +26,7 @@
 #include "SettingsMan.h"
 #include "PresetMan.h"
 #include "FrameMan.h"
+#include "UInputMan.h"
 
 #include "GUI.h"
 #include "AllegroBitmap.h"
@@ -1130,6 +1131,13 @@ void ACrab::PreControllerUpdate()
         }
         // Correct angle based on flip
         m_AimAngle = FacingAngle(m_AimAngle);
+
+        // Clamp the analog aim too, so it doesn't feel "sticky" at the edges of the aim limit
+        if (m_Controller.IsPlayerControlled()) {
+            float mouseAngle = g_UInputMan.AnalogAimValues(m_Controller.GetPlayer()).GetAbsRadAngle();
+            Clamp(mouseAngle, FacingAngle(adjustedAimRangeUpperLimit), FacingAngle(adjustedAimRangeLowerLimit));
+            g_UInputMan.SetMouseValueAngle(mouseAngle, m_Controller.GetPlayer());
+        }
     }
     else
         m_AimState = AIMSTILL;
@@ -1142,7 +1150,7 @@ void ACrab::PreControllerUpdate()
 
 	if (m_Controller.IsState(AIM_SHARP) && m_Status == STABLE && m_Vel.MagnitudeIsLessThan(5.0F)) {
         float aimMag = analogAim.GetMagnitude();
-
+        
 		// If aim sharp is being done digitally, then translate to full magnitude.
 		if (aimMag < 0.1F) { aimMag = 1.0F; }
 		if (m_MoveState == WALK) { aimMag *= 0.3F; }
@@ -1157,7 +1165,7 @@ void ACrab::PreControllerUpdate()
 		} else {
 			m_SharpAimProgress *= 0.95F;
 		}
-	} else {
+	} else {    
 		m_SharpAimProgress = std::max(m_SharpAimProgress * 0.95F - 0.1F, 0.0F);
 	}
 

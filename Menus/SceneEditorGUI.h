@@ -19,6 +19,7 @@
 #include "Vector.h"
 #include "Controller.h"
 #include "PieSlice.h"
+#include "PathFinder.h"
 
 struct BITMAP;
 
@@ -388,6 +389,8 @@ protected:
     static BITMAP *s_pValidPathDot;
     // Invalid brain path line dots
     static BITMAP *s_pInvalidPathDot;
+    // The current pathfinding request
+    std::shared_ptr<volatile PathRequest> m_PathRequest;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

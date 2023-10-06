@@ -287,12 +287,18 @@ const std::vector<MovableObject *> * MovableMan::GetMOsInRadius(const Vector &ce
 
 void MovableMan::PurgeAllMOs()
 {
-    for (std::deque<Actor *>::iterator it1 = m_Actors.begin(); it1 != m_Actors.end(); ++it1)
-        delete (*it1);
-    for (std::deque<MovableObject *>::iterator it2 = m_Items.begin(); it2 != m_Items.end(); ++it2)
-        delete (*it2);
-    for (std::deque<MovableObject *>::iterator it3 = m_Particles.begin(); it3 != m_Particles.end(); ++it3)
-        delete (*it3);
+    for (std::deque<Actor*>::iterator itr = m_Actors.begin(); itr != m_Actors.end(); ++itr) {
+        (*itr)->DestroyScriptState();
+        delete (*itr);
+    }
+    for (std::deque<MovableObject*>::iterator itr = m_Items.begin(); itr != m_Items.end(); ++itr) {
+        (*itr)->DestroyScriptState();
+        delete (*itr);
+    }
+    for (std::deque<MovableObject*>::iterator itr = m_Particles.begin(); itr != m_Particles.end(); ++itr) {
+        (*itr)->DestroyScriptState();
+        delete (*itr);
+    }
 
     m_Actors.clear();
     m_Items.clear();
@@ -1689,7 +1695,7 @@ void MovableMan::Update()
         }
 
 		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
-        for (MovableObject* particle : m_Particles) {
+        for (MovableObject *particle : m_Particles) {
             particle->Update();
 
             g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
@@ -1704,6 +1710,16 @@ void MovableMan::Update()
             }
         }
 		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
+
+        for (Actor *actor : m_Actors) {
+            actor->PostUpdate();
+        }
+        for (MovableObject *item : m_Items) {
+            item->PostUpdate();
+        }
+        for (MovableObject *particle : m_Particles) {
+            particle->PostUpdate();
+        }
     }
 
 
@@ -1726,11 +1742,14 @@ void MovableMan::Update()
             else
 			{
                 m_ValidActors.erase(*aIt);
+
 				// Also remove actor from the roster
                 if ((*aIt)->GetTeam() >= 0) {
                     //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
                     RemoveActorFromTeamRoster(*aIt);
                 }
+
+                (*aIt)->DestroyScriptState();
                 delete (*aIt);
 			}
         }
@@ -1744,6 +1763,7 @@ void MovableMan::Update()
                 m_Items.push_back(*iIt);
             } else {
                 m_ValidItems.erase(*iIt);
+                (*iIt)->DestroyScriptState();
                 delete (*iIt);
             }
         }
@@ -1757,6 +1777,7 @@ void MovableMan::Update()
                 m_Particles.push_back(*parIt);
             } else {
                 m_ValidParticles.erase(*parIt);
+                (*parIt)->DestroyScriptState();
                 delete (*parIt);
             }
         }
@@ -1828,7 +1849,7 @@ void MovableMan::Update()
 
         while (aIt != m_Actors.end())
         {
-			// Set brain to 0 to avoid crasehs due to brain deletion
+			// Set brain to 0 to avoid crashes due to brain deletion
 			Activity * pActivity = g_ActivityMan.GetActivity();
 			if (pActivity)
 			{
@@ -1845,6 +1866,7 @@ void MovableMan::Update()
 
             // Delete
             m_ValidActors.erase(*aIt);
+            (*aIt)->DestroyScriptState();
             delete (*aIt);
             aIt++;
         }
@@ -1858,6 +1880,7 @@ void MovableMan::Update()
 
         while (iIt != m_Items.end()) {
             m_ValidItems.erase(*iIt);
+            (*iIt)->DestroyScriptState();
             delete (*iIt);
             iIt++;
         }
@@ -1869,6 +1892,7 @@ void MovableMan::Update()
 
         while (parIt != m_Particles.end()) {
             m_ValidParticles.erase(*parIt);
+            (*parIt)->DestroyScriptState();
             delete (*parIt);
             parIt++;
         }
@@ -1898,6 +1922,7 @@ void MovableMan::Update()
 			}
 			if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) { (*parIt)->DrawToTerrain(g_SceneMan.GetTerrain()); }
             m_ValidParticles.erase(*parIt);
+            (*parIt)->DestroyScriptState();
 			delete (*parIt);
             parIt++;
 		}
@@ -2048,6 +2073,16 @@ void MovableMan::PreControllerUpdate()
         actor->PreControllerUpdate();
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
+
+    for (MovableObject* item : m_Items) {
+        item->PreControllerUpdate();
+    }
+
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
+    for (MovableObject* particle : m_Particles) {
+        particle->PreControllerUpdate();
+    }
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

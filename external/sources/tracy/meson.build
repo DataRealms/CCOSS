@@ -161,17 +161,18 @@ if tracy_shared_libs
     include_directories : tracy_public_include_dirs,
     override_options    : override_options,
     install             : true)
+    install_headers(includes)
+    install_headers(common_includes, subdir : 'common')
+    install_headers(client_includes, subdir : 'client')
 else
   tracy = static_library('tracy', tracy_src, tracy_header_files,
     dependencies        : [ threads_dep ],
     include_directories : tracy_public_include_dirs,
     override_options    : override_options,
-    install             : true)
+    install             : false)
 endif
 
-install_headers(includes)
-install_headers(common_includes, subdir : 'common')
-install_headers(client_includes, subdir : 'client')
+
 
 tracy_dep_compile_args = []
 

@@ -210,6 +210,9 @@ bool AssemblyEditorGUI::SetCurrentObject(SceneObject *pNewObject)
         return true;
 
     // Replace the current object with the new one
+    if (MovableObject *asMo = dynamic_cast<MovableObject *>(m_pCurrentObject)) {
+        asMo->DestroyScriptState();
+    }
     delete m_pCurrentObject;
     m_pCurrentObject = pNewObject;
 

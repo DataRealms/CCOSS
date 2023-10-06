@@ -8,13 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 <details><summary><b>Added</b></summary>
 
-- Added in-game pause menu when pressing `Esc`. Pressing `Shift + Esc` will skip this menu and pause into scenario/conquest menu.
+- Added in-game pause menu when pressing `Esc`. Pressing `Shift + Esc` will skip this menu and pause into scenario/conquest menu.  
 
-- Added a save/load game menu which can be accessed from the main or pause menus, which allows the user to save their current progress in an activity to resume at a later date.
+- Added a save/load game menu which can be accessed from the main or pause menus, which allows the user to save their current progress in an activity to resume at a later date.  
 
-- New `Settings.ini` property `EnableMultithreadedLua`, which can be used to enable multithreaded Lua scripts and AI, for any lua script with the `--[[MULTITHREAD]]--` tag. Defaults to true.
+- New `Settings.ini` property `EnableMultithreadedLua`, which can be used to enable multithreaded Lua scripts and AI, for any lua script with the `--[[MULTITHREAD]]--` tag. Defaults to true.  
 
-- New Lua event function `SyncedUpdate()`, which will be called in a thread-safe synchronized manner and allows multithreaded scripts to modify game state in a safe and consistent way.
+- New Lua event function `SyncedUpdate()`, which will be called in a thread-safe synchronized manner and allows multithreaded scripts to modify game state in a safe and consistent way.  
 
 - Multithreaded asynchronous pathfinding, which dramatically improves performance on large maps and improves AI responsiveness.
 	New `Actor` Lua property (R) `IsWaitingOnNewMovePath`, which returns true while the actor is currently calculating a new path.  
@@ -39,26 +39,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - New `AEJetpack` type, which replaces the old technique of `ACrab`/`AHuman` using an `AEmitter` as a jetpack. This type inherits from `AEmitter`.  
 	New INI and Lua (R/W) property `JetpackType`, which can be either `AEJetpack.Standard` or `AEJetpack.JumpPack`. Standard acts the same as the typical jetpack, whereas JumpPacks can only be activated when fully recharged, and fires all of it's fuel in one burst. Defaults to Standard.  
 	New INI and Lua (R/W) property `CanAdjustAngleWhileFiring`, which defines whether the jet angle can change while the jetpack is active. Defaults to true.  
-	New INI and Lua (R/W) property `AdjustsThrottleForWeight`, which defines whether the jetpack will adjust it's throttle (between `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier`) to account for any extra inventory mass. Increased throttle will decrease jet time accordingly. Defaults to true.
+	New INI and Lua (R/W) property `AdjustsThrottleForWeight`, which defines whether the jetpack will adjust it's throttle (between `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier`) to account for any extra inventory mass. Increased throttle will decrease jet time accordingly. Defaults to true.  
 
 
-- New `HeldDevice` Lua (R) function `IsBeingHeld`, which returns whether or not the `HeldDevice` is currently being held.
+- New `HeldDevice` Lua (R) function `IsBeingHeld`, which returns whether or not the `HeldDevice` is currently being held.  
 
-- New `HeldDevice` INI and Lua (R/W) property `GetsHitByMOsWhenHeld`, which defines whether this `HeldDevice` can be hit by MOs while equipped and held by an actor. Defaults to true.
+- New `HeldDevice` INI and Lua (R/W) property `GetsHitByMOsWhenHeld`, which defines whether this `HeldDevice` can be hit by MOs while equipped and held by an actor. Defaults to true.  
 	
-- New `MovableObject` INI and Lua (R/W) property `IgnoresActorHits`, which defines whether this `MovableObject` should ignore collisions with actors. Defaults to false.
+- New `MovableObject` INI and Lua (R/W) property `IgnoresActorHits`, which defines whether this `MovableObject` should ignore collisions with actors. Defaults to false.  
 
-- New `HeldDevice` INI and Lua (R/W) property `VisualRecoilMultiplier`, which defines how much the recoil animation should be scaled for this weapon (without affecting SharpAim). Defaults to 1.0.
+- New `HeldDevice` INI and Lua (R/W) property `VisualRecoilMultiplier`, which defines how much the recoil animation should be scaled for this weapon (without affecting SharpAim). Defaults to 1.0.  
 
-- New `HeldDevice` INI and Lua (R/W) property `UseSupportOffsetWhileReloading`, which defines whether the off-hand should stay at the weapon's support offset when reloading. Defaults to false.
+- New `HeldDevice` INI and Lua (R/W) property `UseSupportOffsetWhileReloading`, which defines whether the off-hand should stay at the weapon's support offset when reloading. Defaults to false.  
 
-- New `HDFirearm` INI and Lua (R/W) property `ReloadEndOffset`, to define how many milliseconds prior to the reload being complete that the `ReloadEndSound` should play. Defaults to -1, which means the game will automatically calculate so that the middle of the sound is aligned with the reload completing.
+- New `HDFirearm` INI and Lua (R/W) property `ReloadEndOffset`, to define how many milliseconds prior to the reload being complete that the `ReloadEndSound` should play. Defaults to -1, which means the game will automatically calculate so that the middle of the sound is aligned with the reload completing.  
 
-- New `Actor` INI and Lua (R/W) property `PainThreshold`, which determines how much damage this actor must take in a frame to play their `PainSound`. This can be set to 0 to never manually play the sound. Defaults to 15.
+- New `Actor` INI and Lua (R/W) property `PainThreshold`, which determines how much damage this actor must take in a frame to play their `PainSound`. This can be set to 0 to never manually play the sound. Defaults to 15.  
 
-- New `MOPixel` INI and Lua (R/W) property `Staininess`, which defines how likely a pixel is to stain a surface when it collides with it. Staining a surface changes that surface's `Color` to that of this `MOPixel`, without changing the underlying material. Value can be between 0 and 1. Defaults to 0 (never stain).
+- New `MOPixel` INI and Lua (R/W) property `Staininess`, which defines how likely a pixel is to stain a surface when it collides with it. Staining a surface changes that surface's `Color` to that of this `MOPixel`, without changing the underlying material. Value can be between 0 and 1. Defaults to 0 (never stain).  
 
-- New `Activity` INI and Lua (R/W) property `AllowsUserSaving`, which can be used to enable/disable manual user saving/loading. This defaults to true for all `GAScripted` with an `OnSave()` function, but false otherwise. Lua `ActivityMan::SaveGame()` function now forces a save even if `AllowsUserSaving` is disabled. This allows mods and scripted gamemodes to handle saving in their own way (for example, only allowing saving at set points).
+- New `Activity` INI and Lua (R/W) property `AllowsUserSaving`, which can be used to enable/disable manual user saving/loading. This defaults to true for all `GAScripted` with an `OnSave()` function, but false otherwise. Lua `ActivityMan::SaveGame()` function now forces a save even if `AllowsUserSaving` is disabled. This allows mods and scripted gamemodes to handle saving in their own way (for example, only allowing saving at set points).  
+
+- New `AEmitter` and `PEmitter` Lua functions:  
+	`JustStartedEmitting()`, which returns whether the emitter just started emitting this frame.  
+	`WasEmitting()`, which returns whether the emitter was emitting last frame.  
+
+- New `AEmitter` and `PEmitter` INI properties:  
+	`SustainBurstSound`, which determines whether the burst sound should sustain and play until completion even when the emitter stops emitting, or if it cuts out with the emitter. Defaults to false.  
+	`BurstSoundFollowsEmitter`, which determines whether the burst sound follows the emitter or keeps playing where the burst occurred. Defaults to true.  
+
+- New `SLTerrain` INI property `OrbitDirection`, which defines which direction is considered to be orbit, for the sake of brain-path-to-orbit, dropship spawn/return location, etc. Can be any of `Up`, `Down`, `Left` or `Right`. Defaults to `Up`.
 
 </details>
 
@@ -92,6 +102,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`JetTimeTotal`  
 	`JetTimeLeft`  
 
+- Improved loading times on large maps.  
+
+- Script values, i.e `GetStringValue`, `RemoveStringValue`, `StringValueExists` and the associated functions for `GetNumberValue`/`GetObjectValue`, have been moved from MOSRotating to MovableObject, so now any object with script support can use these values.  
+
 </details>
 
 <details><summary><b>Fixed</b></summary>
@@ -107,6 +121,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Fixed a rare crash bug that could occur when under extreme CPU load.
 
 - Fixed a bug where dropships that were non-empty would slowly drop down over time.
+
+- Fixed a bug where AI pathfinding would choose unoptimal routes.
+
+- Fixed a crash that could occur when scripted objects were deleted, particularly when switching scene.
 
 </details>
 

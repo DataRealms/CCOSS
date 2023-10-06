@@ -26,6 +26,7 @@ namespace RTE {
 		m_TerrainDebris.clear();
 		m_TerrainObjects.clear();
 		m_UpdatedMaterialAreas.clear();
+		m_OrbitDirection = Directions::Up;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,6 +70,8 @@ namespace RTE {
 			m_TerrainObjects.emplace_back(terrainObject);
 		}
 
+		m_OrbitDirection = reference.m_OrbitDirection;
+
 		return 0;
 	}
 
@@ -100,6 +103,21 @@ namespace RTE {
 			std::unique_ptr<TerrainObject> terrainObject = std::make_unique<TerrainObject>();
 			reader >> terrainObject.get();
 			m_TerrainObjects.emplace_back(terrainObject.release());
+		});
+		MatchProperty("OrbitDirection", {
+			std::string orbitDirection;
+			reader >> orbitDirection;
+			if (orbitDirection == "Up") {
+				m_OrbitDirection = Directions::Up;
+			} else if (orbitDirection == "Down") {
+				m_OrbitDirection = Directions::Down;
+			} else if (orbitDirection == "Left") {
+				m_OrbitDirection = Directions::Left;
+			} else if (orbitDirection == "Right") {
+				m_OrbitDirection = Directions::Right;
+			} else {
+				reader.ReportError("Unknown OrbitDirection '" + orbitDirection + "'!");
+			}
 		});
 		
 		EndPropertyList;
@@ -136,6 +154,24 @@ namespace RTE {
 				writer.ObjectEnd();
 			}
 		}
+
+		writer.NewProperty("OrbitDirection");
+		switch (m_OrbitDirection) {
+		default:
+		case Directions::Up:
+			writer << "Up";
+			break;
+		case Directions::Down:
+			writer << "Down";
+			break;
+		case Directions::Left:
+			writer << "Left";
+			break;
+		case Directions::Right:
+			writer << "Right";
+			break;
+		}
+
 		return 0;
 	}
 
@@ -144,6 +180,9 @@ namespace RTE {
 	// TODO: Break this down and refactor.
 	void SLTerrain::TexturizeTerrain() {
 		BITMAP *defaultBGLayerTexture = m_DefaultBGTextureFile.GetAsBitmap();
+
+		BITMAP* fgLayerTexture = m_FGColorLayer->GetBitmap();
+		BITMAP* bgLayerTexture = m_BGColorLayer->GetBitmap();
 
 		const std::array<Material *, c_PaletteEntriesNumber> &materialPalette = g_SceneMan.GetMaterialPalette();
 		const std::array<unsigned char, c_PaletteEntriesNumber> &materialMappings = g_PresetMan.GetDataModule(m_BitmapFile.GetDataModuleID())->GetAllMaterialMappings();
@@ -155,74 +194,69 @@ namespace RTE {
 		std::array<int, c_PaletteEntriesNumber> materialColors;
 		materialColors.fill(0);
 
-		// Reference. Do not remove.
-		//acquire_bitmap(m_MainBitmap);
-		//acquire_bitmap(m_FGColorLayer->GetBitmap());
-		//acquire_bitmap(m_BGColorLayer->GetBitmap());
-		//acquire_bitmap(defaultBGLayerTexture);
+		// We want to multithread this, however parallel fors only work on container types
+		// This is sorta ugly, but a necessary evil for now :)
+		std::vector<int> rows(m_MainBitmap->h); // we loop through h first, because we want each thread to have sequential memory that they're touching
+		std::iota(std::begin(rows), std::end(rows), 0);
 
 		// Go through each pixel on the main bitmap, which contains all the material pixels loaded from the bitmap.
 		// Place texture pixels on the FG layer corresponding to the materials on the main material bitmap.
-		for (int xPos = 0; xPos < m_MainBitmap->w; ++xPos) {
-			for (int yPos = 0; yPos < m_MainBitmap->h; ++yPos) {
-				int matIndex = _getpixel(m_MainBitmap, xPos, yPos);
+		std::for_each(std::execution::par_unseq, std::begin(rows), std::end(rows),
+			[&](int yPos) {
+				for (int xPos = 0; xPos < m_MainBitmap->w; ++xPos) {
+					int matIndex = _getpixel(m_MainBitmap, xPos, yPos);
 
-				// Map any materials defined in this data module but initially collided with other material ID's and thus were displaced to other ID's.
-				if (materialMappings.at(matIndex) != 0) {
-					// Assign the mapping and put it onto the material bitmap too.
-					matIndex = materialMappings.at(matIndex);
-					_putpixel(m_MainBitmap, xPos, yPos, matIndex);
-				}
-
-				// Validate the material, or fallback to default material.
-				const Material *material = (matIndex >= 0 && matIndex < c_PaletteEntriesNumber && materialPalette.at(matIndex)) ? materialPalette.at(matIndex) : materialPalette.at(MaterialColorKeys::g_MaterialOutOfBounds);
-
-				// If haven't read a pixel of this material before, then get its texture so we can quickly access it.
-				if (!materialFGTextures.at(matIndex) && material->GetFGTexture()) {
-					materialFGTextures.at(matIndex) = material->GetFGTexture();
-					//acquire_bitmap(materialFGTextures.at(matIndex));
-				}
-				if (!materialBGTextures.at(matIndex) && material->GetBGTexture()) {
-					materialBGTextures.at(matIndex) = material->GetBGTexture();
-					//acquire_bitmap(materialBGTextures.at(matIndex));
-				}
-
-				int fgPixelColor = 0;
-				// If actually no texture for the material, then use the material's solid color instead.
-				if (!materialFGTextures.at(matIndex)) {
-					if (materialColors.at(matIndex) == 0) { materialColors.at(matIndex) = material->GetColor().GetIndex(); }
-					fgPixelColor = materialColors.at(matIndex);
-				} else {
-					fgPixelColor = _getpixel(materialFGTextures.at(matIndex), xPos % materialFGTextures.at(matIndex)->w, yPos % materialFGTextures.at(matIndex)->h);
-				}
-				_putpixel(m_FGColorLayer->GetBitmap(), xPos, yPos, fgPixelColor);
-
-				int bgPixelColor = 0;
-				if (matIndex == 0) {
-					bgPixelColor = ColorKeys::g_MaskColor;
-				} else {
-					if (!materialBGTextures.at(matIndex)) {
-						bgPixelColor = _getpixel(defaultBGLayerTexture, xPos % defaultBGLayerTexture->w, yPos % defaultBGLayerTexture->h);
-					} else {
-						bgPixelColor = _getpixel(materialBGTextures.at(matIndex), xPos % materialBGTextures.at(matIndex)->w, yPos % materialBGTextures.at(matIndex)->h);
+					// Map any materials defined in this data module but initially collided with other material ID's and thus were displaced to other ID's.
+					if (materialMappings[matIndex] != 0) {
+						// Assign the mapping and put it onto the material bitmap too.
+						matIndex = materialMappings[matIndex];
+						_putpixel(m_MainBitmap, xPos, yPos, matIndex);
 					}
+
+					RTEAssert(matIndex >= 0 && matIndex < c_PaletteEntriesNumber, "Invalid material index!");
+
+					// Validate the material, or fallback to default material.
+					const Material* material = materialPalette[matIndex] ? materialPalette[matIndex] : materialPalette[MaterialColorKeys::g_MaterialOutOfBounds];
+
+					BITMAP* fgTexture = materialFGTextures[matIndex];
+					BITMAP* bgTexture = materialBGTextures[matIndex];
+
+					// If haven't read a pixel of this material before, then get its texture so we can quickly access it.
+					if (!fgTexture && material->GetFGTexture()) {
+						fgTexture = materialFGTextures[matIndex] = material->GetFGTexture();
+					}
+
+					if (!bgTexture && material->GetBGTexture()) {
+						bgTexture = materialBGTextures[matIndex] = material->GetBGTexture();
+					}
+
+					int fgPixelColor = 0;
+
+					// If actually no texture for the material, then use the material's solid color instead.
+					if (!fgTexture) {
+						if (materialColors[matIndex] == 0) { 
+							materialColors[matIndex] = material->GetColor().GetIndex(); 
+						}
+						fgPixelColor = materialColors[matIndex];
+					} else {
+						fgPixelColor = _getpixel(fgTexture, xPos % fgTexture->w, yPos % fgTexture->h);
+					}
+					_putpixel(fgLayerTexture, xPos, yPos, fgPixelColor);
+
+					int bgPixelColor = 0;
+					if (matIndex == 0) {
+						bgPixelColor = ColorKeys::g_MaskColor;
+					} else {
+						if (!bgTexture) {
+							bgPixelColor = _getpixel(defaultBGLayerTexture, xPos % defaultBGLayerTexture->w, yPos % defaultBGLayerTexture->h);
+						} else {
+							bgPixelColor = _getpixel(bgTexture, xPos % bgTexture->w, yPos% bgTexture->h);
+						}
+					}
+
+					_putpixel(bgLayerTexture, xPos, yPos, bgPixelColor);
 				}
-				_putpixel(m_BGColorLayer->GetBitmap(), xPos, yPos, bgPixelColor);
-			}
-		}
-		// Reference. Do not remove.
-		//release_bitmap(m_MainBitmap);
-		//release_bitmap(m_FGColorLayer->GetBitmap());
-		//release_bitmap(m_BGColorLayer->GetBitmap());
-		//release_bitmap(defaultBGLayerTexture);
-		/*
-		for (BITMAP *fgTextureBitmap : materialFGTextures) {
-			release_bitmap(fgTextureBitmap);
-		}
-		for (BITMAP *bgTextureBitmap : materialBGTextures) {
-			release_bitmap(bgTextureBitmap);
-		}
-		*/
+			});
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

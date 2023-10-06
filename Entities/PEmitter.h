@@ -118,6 +118,12 @@ public:
 
 	bool IsEmitting() const { return m_EmitEnabled; }
 
+	/// <summary>
+	/// Returns whether this emitter was emitting last frame.
+	/// </summary>
+	/// <returns>Whether this emitter was emitting last frame.</returns>
+	bool WasEmitting() const { return m_WasEmitting; }
+
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          ResetEmissionTimers
@@ -278,7 +284,7 @@ public:
 	/// Gets the adjusted throttle multiplier that is factored into the emission rate of this PEmitter.
 	/// </summary>
 	/// <returns>The throttle strength as a multiplier.</returns>
-	float GetThrottleFactor() const { return 1.0F - std::abs(m_Throttle) + (m_Throttle < 0.0F ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier) * std::abs(m_Throttle); }
+	float GetThrottleFactor() const { return LERP(-1.0f, 1.0f, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, m_Throttle); }
 
 	/*
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -462,6 +468,7 @@ public:
 	// Return value:    None.
 
 	void Update() override;
+	void PostUpdate() override { m_WasEmitting = m_EmitEnabled; MOSParticle::PostUpdate(); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -489,6 +496,12 @@ public:
 	/// </summary>
 	/// <param name="newValue">New number of emissions left.</param>
 	void SetEmitCountLimit(long newValue) { m_EmitCountLimit = newValue; }
+
+	/// <summary>
+	/// Returns whether this emitter just started emitting this frame.
+	/// </summary>
+	/// <returns>Whether this emitter just started emitting this frame.</returns>
+	bool JustStartedEmitting() const { return !m_WasEmitting && m_EmitEnabled; }
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Protected member variable and method declarations
@@ -546,7 +559,10 @@ protected:
 	float m_LoudnessOnEmit;
 	// Whether to only display flash on bursts, and not on any emission frame.
 	bool m_FlashOnlyOnBurst;
-
+	// Whether the burst sound should always play until completion, or whether it stops when this emitter stops emitting
+	bool m_SustainBurstSound;
+	// Whether the burst sound follows the emitter
+	bool m_BurstSoundFollowsEmitter;
 
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Private member variable and method declarations

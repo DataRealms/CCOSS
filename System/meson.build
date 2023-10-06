@@ -27,7 +27,6 @@ sources += files(
 'Timer.cpp',
 'RTEError.cpp',
 'Matrix.cpp',
-#'ScreenShader.cpp',
 'Shader.cpp',
 'Serializable.cpp',
 'PieQuadrant.cpp',

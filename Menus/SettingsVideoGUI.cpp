@@ -22,6 +22,14 @@
 
 namespace RTE {
 
+	std::string SettingsVideoGUI::PresetResolutionRecord::GetDisplayString() const {
+#if __cpp_lib_format >= 201907L
+		return std::format("{}x{} ({:.1g}x Fullscreen scale)", Width, Height, Scale);
+#else
+		return std::to_string(Width) + "x" + std::to_string(Height); 
+#endif
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SettingsVideoGUI::SettingsVideoGUI(GUIControlManager *parentControlManager) : m_GUIControlManager(parentControlManager) {

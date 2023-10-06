@@ -87,7 +87,7 @@ namespace RTE {
 			/// Makes UI displayable string with resolution info.
 			/// </summary>
 			/// <returns>String with resolution info.</returns>
-			std::string GetDisplayString() const { return std::to_string(Width) + "x" + std::to_string(Height); }
+			std::string GetDisplayString() const;
 
 			/// <summary>
 			/// Comparison operator for eliminating duplicates and sorting in the temporary PresetResolutionRecord std::sets during PopulateResolutionsComboBox.

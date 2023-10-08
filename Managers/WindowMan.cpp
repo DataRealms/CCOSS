@@ -231,7 +231,7 @@ namespace RTE {
 	void WindowMan::SetVSyncEnabled(bool enable) {
 		m_EnableVSync = enable;
 
-		int sdlEnableVSync = m_EnableVSync ? SDL_TRUE : SDL_FALSE;
+		int sdlEnableVSync = m_EnableVSync ? 1 : 0;
 
 		SDL_GL_SetSwapInterval(sdlEnableVSync);
 	}
@@ -484,6 +484,7 @@ namespace RTE {
 			SDL_SetWindowSize(m_PrimaryWindow.get(), newResX * newResMultiplier, newResY * newResMultiplier);
 			SDL_SetWindowBordered(m_PrimaryWindow.get(), SDL_TRUE);
 			SDL_SetWindowPosition(m_PrimaryWindow.get(), SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex), SDL_WINDOWPOS_CENTERED_DISPLAY(m_PrimaryWindowDisplayIndex));
+			SDL_SetWindowMinimumSize(m_PrimaryWindow.get(), c_MinResX, c_MinResY);
 		}
 		if (!recoveredToPreviousSettings) {
 			m_ResX = newResX;
@@ -528,6 +529,7 @@ namespace RTE {
 		}
 		if(!fullscreen) {
 			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
+			SDL_SetWindowMinimumSize(m_PrimaryWindow.get(), c_MinResX, c_MinResY);
 		} else {
 			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
 		}

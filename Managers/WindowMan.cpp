@@ -20,6 +20,9 @@
 #include "Resources/cccp.xpm"
 #include "SDL2/SDL_image.h"
 #endif
+#ifdef _WIN32
+#include "dwmapi.h"
+#endif
 
 namespace RTE {
 
@@ -739,6 +742,9 @@ namespace RTE {
 			m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), glm::mat4(1.0f));
 			GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 			SDL_GL_SwapWindow(m_PrimaryWindow.get());
+#ifdef _WIN32
+			DwmFlush();
+#endif
 		} else {
 			for (size_t i = 0; i < m_MultiDisplayWindows.size(); ++i) {
 				SDL_GL_MakeCurrent(m_MultiDisplayWindows.at(i).get(), m_GLContext.get());
@@ -749,9 +755,11 @@ namespace RTE {
 				m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), m_MultiDisplayTextureOffsets.at(i));
 				GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 				SDL_GL_SwapWindow(m_MultiDisplayWindows.at(i).get());
+#ifdef _WIN32
+				DwmFlush();
+#endif
 			}
 		}
-
 		FrameMark;
 	}
 

@@ -334,34 +334,28 @@ namespace RTE {
 
 		m_NewResMultiplier = newResMultiplier;
 
-		int newResX = g_WindowMan.GetResX();
-		int newResY = g_WindowMan.GetResY();
+		m_NewResX = g_WindowMan.GetResX();
+		m_NewResY = g_WindowMan.GetResY();
 
 		if (std::string newResXString = m_CustomResolutionWidthTextBox->GetText(); !newResXString.empty()) {
-			newResX = std::stoi(newResXString);
+			m_NewResX = std::stoi(newResXString);
 		} else {
-			m_CustomResolutionWidthTextBox->SetText(std::to_string(newResX));
+			m_CustomResolutionWidthTextBox->SetText(std::to_string(m_NewResX));
 		}
 
 		if (std::string newResYString = m_CustomResolutionHeightTextBox->GetText(); !newResYString.empty()) {
-			newResY = std::stoi(newResYString);
+			m_NewResY = std::stoi(newResYString);
 		} else {
-			m_CustomResolutionHeightTextBox->SetText(std::to_string(newResY));
+			m_CustomResolutionHeightTextBox->SetText(std::to_string(m_NewResY));
 		}
 
-		m_NewResX = newResX / m_NewResMultiplier;
-		m_NewResY = newResY / m_NewResMultiplier;
 
 		bool invalidResolution = false;
-
-		if (m_NewResX * m_NewResMultiplier < c_MinResX || m_NewResY * m_NewResMultiplier < c_MinResY) {
+		if (m_NewResX < c_MinResX || m_NewResY < c_MinResY) {
 			m_CustomResolutionMessageLabel->SetText("Resolution width or height lower than the minimum (" + std::to_string(c_MinResX) + "x" + std::to_string(c_MinResY) + ") is not supported.");
 			invalidResolution = true;
 		}
-		else if (m_NewResX < c_MinResX || m_NewResY < c_MinResY) {
-			m_CustomResolutionMessageLabel->SetText("Resolution multiplier is too high for the specified resolution.");
-			invalidResolution = true;
-		}
+
 		g_GUISound.ButtonPressSound()->Play();
 
 		if (invalidResolution) {

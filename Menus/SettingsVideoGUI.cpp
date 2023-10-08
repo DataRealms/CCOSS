@@ -421,7 +421,7 @@ namespace RTE {
 				if (guiEvent.GetControl() == m_EnableVSyncCheckbox) {
 					g_WindowMan.SetVSyncEnabled(m_EnableVSyncCheckbox->GetCheck());
 				} else if (guiEvent.GetControl() == m_UseMultiDisplaysCheckbox) {
-					g_WindowMan.SetIgnoreMultiDisplays(m_UseMultiDisplaysCheckbox->GetCheck());
+					g_WindowMan.SetUseMultiDisplays(m_UseMultiDisplaysCheckbox->GetCheck());
 					UpdateCustomResolutionLimits();
 					PopulateResolutionsComboBox();
 					PopulateResMultplierComboBox();

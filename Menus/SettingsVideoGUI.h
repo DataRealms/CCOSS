@@ -110,8 +110,8 @@ namespace RTE {
 
 		int m_NewResX; //!< The new resolution width to use when changing resolution.
 		int m_NewResY; //!< The new resolution height to use when changing resolution.
-		float m_NewResMultiplier; //!< Whether the new resolution should be upscaled when changing resolution.
-		bool m_NewFullscreen;
+		float m_NewResMultiplier; //!< How much the new resolution should be upscaled when changing resolution.
+		bool m_NewFullscreen;  //!< Whether the game will be windowed or fullscreen.
 
 		/// <summary>
 		/// GUI elements that compose the video settings menu screen.

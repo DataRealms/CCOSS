@@ -136,16 +136,16 @@ namespace RTE {
 		bool IsFullscreen() { return m_Fullscreen; }
 
 		/// <summary>
-		/// Gets whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
+		/// Gets whether the multi-display arrangement should be used or whether only the display the main window is currently positioned at should be used for fullscreen.
 		/// </summary>
-		/// <returns>Whether the multi-display arrangement is ignored.</returns>
+		/// <returns>Whether the multi-display arrangement is used.</returns>
 		bool GetUseMultiDisplays() const { return m_UseMultiDisplays; }
 
 		/// <summary>
-		/// Sets whether the multi-display arrangement should be ignored and only the display the main window is currently positioned at should be used for fullscreen.
+		/// Sets whether the multi-display arrangement should be used or whether only the display the main window is currently positioned at should be used for fullscreen.
 		/// </summary>
-		/// <param name="ignore">Whether the multi-display arrangement should be ignored</param>
-		void SetIgnoreMultiDisplays(bool ignore) { m_UseMultiDisplays = ignore; }
+		/// <param name="use">Whether the multi-display arrangement should be used</param>
+		void SetUseMultiDisplays(bool use) { m_UseMultiDisplays = use; }
 
 		/// <summary>
 		/// Checks whether the current resolution settings fully cover all the available displays.

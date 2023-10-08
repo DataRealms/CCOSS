@@ -196,7 +196,7 @@ namespace RTE {
 			}
 		}
 		// Adjust glow areas for the player screen's position on the final buffer
-		for (const Box &glowBox :screenRelativeGlowBoxesList) {
+		for (const Box &glowBox : screenRelativeGlowBoxesList) {
 			g_PostProcessMan.GetPostScreenGlowBoxesList()->push_back(glowBox);
 			// Adjust each added glow area for the player screen's position on the final buffer
 			g_PostProcessMan.GetPostScreenGlowBoxesList()->back().m_Corner += targetBitmapOffset;

@@ -283,7 +283,7 @@ namespace RTE {
 					m_NewResY = g_WindowMan.GetResY();
 					m_NewFullscreen = true;
 				} else {
-					m_NewResMultiplier = std::min<float>(std::round(g_WindowMan.GetWindowResX() / static_cast<float>(c_DefaultResX)), std::round(g_WindowMan.GetWindowResY() / static_cast<float>(c_DefaultResY)));
+					m_NewResMultiplier = std::min<float>(std::round(g_WindowMan.GetMaxResX() / static_cast<float>(c_DefaultResX)), std::round(g_WindowMan.GetMaxResY() / static_cast<float>(c_DefaultResY)));
 					m_NewResX = g_WindowMan.GetMaxResX() / m_NewResMultiplier;
 					m_NewResY = g_WindowMan.GetMaxResY() / m_NewResMultiplier;
 					m_NewFullscreen = true;

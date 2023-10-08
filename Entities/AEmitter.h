@@ -275,6 +275,12 @@ ClassInfoGetters;
 	float GetThrottleFactor() const { return LERP(-1.0f, 1.0f, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, m_Throttle); }
 
 	/// <summary>
+	/// Gets the throttle value that will achieve a given throttle factor that is factored into the emission rate of this AEmitter.
+	/// </summary>
+	/// <returns>The throttle value that will achieve the given throttle factor.</returns>
+	float GetThrottleForThrottleFactor(float throttleFactor) const { return LERP(m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, -1.0f, 1.0f, throttleFactor); }
+
+	/// <summary>
 	/// Returns a scaled throttle value that represents a linear increase of force.
 	/// Because of (bad) reasons, throttle is in the range -1.0F to 1.0F, where -1.0F is "minimum force" and 1.0F is "maximum force".
 	/// 0.0F is "whoever the fuck knows?" force. As such, multiplying throttle by 2 does not mean twice the force emitted, instead it means "whoever the fuck knows?" additional force emitted.

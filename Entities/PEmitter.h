@@ -286,6 +286,12 @@ public:
 	/// <returns>The throttle strength as a multiplier.</returns>
 	float GetThrottleFactor() const { return LERP(-1.0f, 1.0f, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, m_Throttle); }
 
+	/// <summary>
+	/// Gets the throttle value that will achieve a given throttle factor that is factored into the emission rate of this AEmitter.
+	/// </summary>
+	/// <returns>The throttle value that will achieve the given throttle factor.</returns>
+	float GetThrottleForThrottleFactor(float throttleFactor) const { return LERP(m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, -1.0f, 1.0f, throttleFactor); }
+
 	/*
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Method:          SetEmitRate

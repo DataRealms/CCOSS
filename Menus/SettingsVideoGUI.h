@@ -161,7 +161,7 @@ namespace RTE {
 		bool IsSupportedResolution(int width, int height) const;
 
 		/// <summary>
-		/// Fills the PresetResolutions list with all valid PresetResolutionRecords, then fills the PresetResolutionComboBox using it and selects the currently selected preset resolution, if any.
+		/// Fills the preset resolutions set and combo box with scaled resolutions down to c_MinRes. Defaults the combobox to the closest resolution to c_DefaultRes.
 		/// </summary>
 		void PopulateResolutionsComboBox();
 

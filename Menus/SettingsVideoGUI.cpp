@@ -72,7 +72,10 @@ namespace RTE {
 		CreatePresetResolutionBox();
 		CreateCustomResolutionBox();
 
-		if (m_PresetResolutionComboBox->GetSelectedIndex() < 0 && m_CustomResolutionRadioButton->IsEnabled()) {
+		double aspectRatio = g_WindowMan.GetResX() / static_cast<double>(g_WindowMan.GetResY());
+		double presetRatio = g_WindowMan.GetMaxResX() / static_cast<double>(g_WindowMan.GetMaxResY());
+
+		if (!g_WindowMan.IsFullscreen() && glm::epsilonNotEqual(aspectRatio, presetRatio, glm::epsilon<double>()) && m_CustomResolutionRadioButton->IsEnabled()) {
 			m_CustomResolutionRadioButton->SetCheck(true);
 			m_PresetResolutionBox->SetVisible(false);
 			m_CustomResolutionBox->SetVisible(true);
@@ -101,13 +104,13 @@ namespace RTE {
 		m_CustomResolutionWidthTextBox->SetNumericOnly(true);
 		m_CustomResolutionWidthTextBox->SetMaxNumericValue(g_WindowMan.GetMaxResX());
 		m_CustomResolutionWidthTextBox->SetMaxTextLength(4);
-		m_CustomResolutionWidthTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetResX())));
+		m_CustomResolutionWidthTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetResX() * g_WindowMan.GetResMultiplier())));
 
 		m_CustomResolutionHeightTextBox = dynamic_cast<GUITextBox *>(m_GUIControlManager->GetControl("TextboxCustomHeight"));
 		m_CustomResolutionHeightTextBox->SetNumericOnly(true);
 		m_CustomResolutionHeightTextBox->SetMaxNumericValue(g_WindowMan.GetMaxResY());
 		m_CustomResolutionHeightTextBox->SetMaxTextLength(4);
-		m_CustomResolutionHeightTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetResY())));
+		m_CustomResolutionHeightTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetResY() * g_WindowMan.GetResMultiplier())));
 
 		m_CustomResolutionMultiplierComboBox = dynamic_cast<GUIComboBox *>(m_GUIControlManager->GetControl("ComboboxResolutionMultiplier"));
 		PopulateResMultplierComboBox();
@@ -129,8 +132,8 @@ namespace RTE {
 		m_VideoSettingsBox->SetEnabled(enable);
 
 		if (enable) {
-			m_CustomResolutionWidthTextBox->SetText(std::to_string(g_WindowMan.GetResX()));
-			m_CustomResolutionHeightTextBox->SetText(std::to_string(g_WindowMan.GetResY()));
+			m_CustomResolutionWidthTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetResX() * g_WindowMan.GetResMultiplier())));
+			m_CustomResolutionHeightTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetResY() * g_WindowMan.GetResMultiplier())));
 #if __cpp_lib_format >= 201907L
 			m_CustomResolutionMultiplierComboBox->SetText(std::format("{:.3g}x", m_NewResMultiplier));
 #else
@@ -138,6 +141,8 @@ namespace RTE {
 #endif
 			std::string windowedText = g_WindowMan.IsFullscreen() ? "Windowed" : "Scale To Window";
 			m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Windowed]->SetText(windowedText);
+			std::string fullscreenText = g_WindowMan.IsFullscreen() ? "Scale To Fullscreen" : "Fullscreen";
+			m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Fullscreen]->SetText(fullscreenText);
 		}
 	}
 
@@ -247,6 +252,8 @@ namespace RTE {
 			m_FullscreenCheckbox->SetCheck(g_WindowMan.IsFullscreen());
 			std::string windowedText = g_WindowMan.IsFullscreen() ? "Windowed" : "Scale To Window";
 			m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Windowed]->SetText(windowedText);
+			std::string fullscreenText = g_WindowMan.IsFullscreen() ? "Scale To Fullscreen" : "Fullscreen";
+			m_ResolutionQuickToggleButtons[ResolutionQuickChangeType::Fullscreen]->SetText(fullscreenText);
 		}
 	}
 
@@ -270,13 +277,13 @@ namespace RTE {
 				}
 				break;
 			case ResolutionQuickChangeType::Fullscreen:
-				if (!g_WindowMan.GetUseMultiDisplays()) {
+				if (!g_WindowMan.IsFullscreen() || g_WindowMan.GetUseMultiDisplays()) {
 					m_NewResMultiplier = g_WindowMan.GetResMultiplier();
 					m_NewResX = g_WindowMan.GetResX();
 					m_NewResY = g_WindowMan.GetResY();
 					m_NewFullscreen = true;
 				} else {
-					m_NewResMultiplier = std::min<float>(std::round(g_WindowMan.GetMaxResX() / static_cast<float>(c_DefaultResX)), std::round(g_WindowMan.GetMaxResY() / static_cast<float>(c_DefaultResY)));
+					m_NewResMultiplier = std::min<float>(std::round(g_WindowMan.GetWindowResX() / static_cast<float>(c_DefaultResX)), std::round(g_WindowMan.GetWindowResY() / static_cast<float>(c_DefaultResY)));
 					m_NewResX = g_WindowMan.GetMaxResX() / m_NewResMultiplier;
 					m_NewResY = g_WindowMan.GetMaxResY() / m_NewResMultiplier;
 					m_NewFullscreen = true;
@@ -393,10 +400,10 @@ namespace RTE {
 			// Clicking off focused textboxes does not remove their focus and they will still capture keyboard input, so remove focus when clicking CollectionBoxes.
 			if (guiEvent.GetMsg() == GUICollectionBox::Clicked && !m_VideoSettingsBox->HasFocus() && (guiEvent.GetControl() == m_VideoSettingsBox || guiEvent.GetControl() == m_CustomResolutionBox)) {
 				if (m_CustomResolutionWidthTextBox->GetText().empty()) {
-					m_CustomResolutionWidthTextBox->SetText(std::to_string(g_WindowMan.GetWindowResX()));
+					m_CustomResolutionWidthTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetResX() * g_WindowMan.GetResMultiplier())));
 				}
 				if (m_CustomResolutionHeightTextBox->GetText().empty()) {
-					m_CustomResolutionHeightTextBox->SetText(std::to_string(g_WindowMan.GetWindowResY()));
+					m_CustomResolutionHeightTextBox->SetText(std::to_string(static_cast<int>(g_WindowMan.GetResY() * g_WindowMan.GetResMultiplier())));
 				}
 				m_VideoSettingsBox->SetFocus();
 			}

@@ -618,7 +618,7 @@
     <ClInclude Include="System\Base64\base64.h">
       <Filter>System\Base64</Filter>
     </ClInclude>
-    <ClInclude Include="System\AlphaBlender.h">
+    <ClInclude Include="System\AllegroTools.h">
       <Filter>System</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1191,7 +1191,7 @@
     <ClCompile Include="System\Base64\base64.cpp">
       <Filter>System\Base64</Filter>
     </ClCompile>
-    <ClCompile Include="System\AlphaBlender.cpp">
+    <ClCompile Include="System\AllegroTools.cpp">
       <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>

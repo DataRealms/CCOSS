@@ -768,7 +768,7 @@
     <ClInclude Include="Menus\TitleScreen.h" />
     <ClInclude Include="Resources\Credits.h" />
     <ClInclude Include="Resources\resource.h" />
-    <ClInclude Include="System\AlphaBlender.h" />
+    <ClInclude Include="System\AllegroTools.h" />
     <ClInclude Include="System\Atom.h" />
     <ClInclude Include="System\Base64\base64.h" />
     <ClInclude Include="System\Constants.h" />
@@ -1010,7 +1010,7 @@
     <ClCompile Include="Menus\SettingsVideoGUI.cpp" />
     <ClCompile Include="Menus\TitleScreen.cpp" />
     <ClCompile Include="Menus\InventoryMenuGUI.cpp" />
-    <ClCompile Include="System\AlphaBlender.cpp" />
+    <ClCompile Include="System\AllegroTools.cpp" />
     <ClCompile Include="System\Atom.cpp" />
     <ClCompile Include="System\Base64\base64.cpp" />
     <ClCompile Include="System\Controller.cpp" />

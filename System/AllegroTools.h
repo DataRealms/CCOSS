@@ -1,5 +1,10 @@
-#ifndef _ALLEGROTOOLS_H_
-#define _ALLEGROTOOLS_H_
+#ifndef _RTEALLEGROTOOLS_H_
+#define _RTEALLEGROTOOLS_H_
+
+/// <summary>
+/// Contains hacks and workarounds for missing or wrong allegro functionality.
+/// Note: Prefer fixing in allegro itself over adding hacks here.
+/// </summary>
 namespace RTE {
 	#pragma region True Alpha Blending
 

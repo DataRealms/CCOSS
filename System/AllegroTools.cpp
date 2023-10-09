@@ -1,4 +1,4 @@
-#include "AlphaBlender.h"
+#include "AllegroTools.h"
 #include "allegro.h"
 #include "allegro/internal/aintern.h"
 namespace RTE {

@@ -17,7 +17,7 @@
 #include "GUICollectionBox.h"
 #include "GUIButton.h"
 
-#include "AlphaBlender.h"
+#include "AllegroTools.h"
 
 namespace RTE {
 

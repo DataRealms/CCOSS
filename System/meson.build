@@ -6,7 +6,7 @@ sources += files(
 'Semver200/Semver200_modifier.cpp',
 'Semver200/Semver200_parser.cpp',
 'StandardIncludes.cpp',
-'AlphaBlender.cpp',
+'AllegroTools.cpp',
 'Atom.cpp',
 'ContentFile.cpp',
 'Controller.cpp',

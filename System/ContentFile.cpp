@@ -298,6 +298,7 @@ namespace RTE {
 		set_color_conversion((conversionMode == COLORCONV_NONE) ? COLORCONV_MOST : conversionMode);
 		returnBitmap = load_bitmap(dataPathToLoad.c_str(), currentPalette);
 		RTEAssert(returnBitmap, "Failed to load image file with following path and name:\n\n" + m_DataPathAndReaderPosition + "\nThe file may be corrupt, incorrectly converted or saved with unsupported parameters.");
+		AddAlphaChannel(returnBitmap);
 
 		return returnBitmap;
 	}
@@ -382,6 +383,7 @@ namespace RTE {
 
 		BITMAP *loadedBitmap = (*bmpItr).second;
 		BITMAP *newBitmap = load_bitmap(filePath.c_str(), currentPalette);
+		AddAlphaChannel(newBitmap);
 		BITMAP swap;
 
 		std::memcpy(&swap, loadedBitmap, sizeof(BITMAP));
@@ -389,5 +391,24 @@ namespace RTE {
 		std::memcpy(newBitmap, &swap, sizeof(BITMAP));
 
 		destroy_bitmap(newBitmap);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void ContentFile::AddAlphaChannel(BITMAP* bitmap) {
+		if (!bitmap) {
+			return;
+		}
+		if (bitmap_color_depth(bitmap) != 32) {
+			return;
+		}
+		for (int y = 0; y < bitmap->h; ++y) {
+			for (int x = 0; x < bitmap->w; ++x) {
+				unsigned long color = _getpixel32(bitmap, x, y);
+				if (color != MASK_COLOR_32) {
+					_putpixel32(bitmap, x, y, color|(0xFF << 24));
+				}
+			}
+		}
 	}
 }

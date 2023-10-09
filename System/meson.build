@@ -1,11 +1,12 @@
 sources += files(
 'Base64/base64.cpp',
 'MicroPather/micropather.cpp',
-#'glad/gl.c',
+'glad/gl.c',
 'Semver200/Semver200_comparator.cpp',
 'Semver200/Semver200_modifier.cpp',
 'Semver200/Semver200_parser.cpp',
 'StandardIncludes.cpp',
+'AllegroTools.cpp',
 'Atom.cpp',
 'ContentFile.cpp',
 'Controller.cpp',
@@ -26,10 +27,10 @@ sources += files(
 'Timer.cpp',
 'RTEError.cpp',
 'Matrix.cpp',
-#'ScreenShader.cpp',
+'Shader.cpp',
 'Serializable.cpp',
 'PieQuadrant.cpp',
-#'GLCheck.cpp',
+'GLCheck.cpp',
 'SpatialPartitionGrid.cpp',
 )
 

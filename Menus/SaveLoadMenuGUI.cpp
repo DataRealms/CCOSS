@@ -276,9 +276,6 @@ namespace RTE {
 				} else if (guiEvent.GetControl() == m_LoadButton) {
 					bool gameLoaded = LoadSave();
 					if (gameLoaded) {
-						if (pauseMenu) {
-							pauseMenu->ClearBackdrop();
-						}
 						return true;
 					}
 				} else if (guiEvent.GetControl() == m_CreateButton) {

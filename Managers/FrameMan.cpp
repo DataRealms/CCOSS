@@ -19,6 +19,9 @@
 #include "AllegroBitmap.h"
 #include "AllegroScreen.h"
 
+#include "GLCheck.h"
+#include "glad/gl.h"
+
 namespace RTE {
 
 	void BitmapDeleter::operator()(BITMAP *bitmap) const { destroy_bitmap(bitmap); }
@@ -534,7 +537,7 @@ namespace RTE {
 				break;
 			case ScreenDump:
 				if (m_BackBuffer32 && m_ScreenDumpBuffer) {
-					blit(m_BackBuffer32.get(), m_ScreenDumpBuffer.get(), 0, 0, 0, 0, m_BackBuffer32->w, m_BackBuffer32->h);
+					SaveScreenToBitmap();
 
 					// Make a copy of the buffer because it may be overwritten mid thread and everything will be on fire.
 					BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_ScreenDumpBuffer.get()), m_ScreenDumpBuffer->w * g_WindowMan.GetResMultiplier(), m_ScreenDumpBuffer->h * g_WindowMan.GetResMultiplier());
@@ -595,6 +598,32 @@ namespace RTE {
 		} else {
 			return 0;
 		}
+	}
+
+	void FrameMan::SaveScreenToBitmap() {
+		if (!m_ScreenDumpBuffer) {
+			return;
+		}
+		int drawSizeX, drawSizeY;
+		SDL_GL_GetDrawableSize(g_WindowMan.GetWindow(), &drawSizeX, &drawSizeY);
+		BITMAP* screenBitmap = create_bitmap_ex(32, drawSizeX, drawSizeY);
+		GL_CHECK(glBindTexture(GL_TEXTURE_2D, 0));
+		GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+		GL_CHECK(glReadBuffer(GL_FRONT));
+		GL_CHECK(glPixelStorei(GL_PACK_ALIGNMENT, 1));
+		GL_CHECK(glReadPixels(0, 0, screenBitmap->w, screenBitmap->h, GL_RGBA, GL_UNSIGNED_BYTE, screenBitmap->line[0]));
+		GL_CHECK(glReadBuffer(GL_BACK));
+
+		BITMAP* depthBitmap = create_bitmap_ex(bitmap_color_depth(m_ScreenDumpBuffer.get()), screenBitmap->w, screenBitmap->h);
+		blit(screenBitmap, depthBitmap, 0, 0, 0, 0, screenBitmap->w, screenBitmap->h);
+
+		BITMAP* flipBitmap = create_bitmap_ex(bitmap_color_depth(depthBitmap), depthBitmap->w, depthBitmap->h);
+		draw_sprite_v_flip(flipBitmap, depthBitmap, 0, 0);
+
+		stretch_blit(flipBitmap, m_ScreenDumpBuffer.get(), 0, 0, screenBitmap->w, screenBitmap->h, 0, 0, m_ScreenDumpBuffer->w, m_ScreenDumpBuffer->h);
+		destroy_bitmap(screenBitmap);
+		destroy_bitmap(depthBitmap);
+		destroy_bitmap(flipBitmap);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1064,23 +1093,23 @@ namespace RTE {
 
 #ifndef RELEASE_BUILD
 			// Draw all player's screen into one
-			if (g_UInputMan.KeyHeld(KEY_5)) {
+			if (g_UInputMan.KeyHeld(SDLK_5)) {
 				stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameCurrent][i].get(), m_BackBuffer8.get(), 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][i]->h, dx, dy, dw, dh);
 			}
 #endif
 		}
 
 #ifndef RELEASE_BUILD
-		if (g_UInputMan.KeyHeld(KEY_1)) {
+		if (g_UInputMan.KeyHeld(SDLK_1)) {
 			stretch_blit(m_NetworkBackBufferFinal8[0][0].get(), m_BackBuffer8.get(), 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][0]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 		}
-		if (g_UInputMan.KeyHeld(KEY_2)) {
+		if (g_UInputMan.KeyHeld(SDLK_2)) {
 			stretch_blit(m_NetworkBackBufferFinal8[1][0].get(), m_BackBuffer8.get(), 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][1]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][1]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 		}
-		if (g_UInputMan.KeyHeld(KEY_3)) {
+		if (g_UInputMan.KeyHeld(SDLK_3)) {
 			stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][2].get(), m_BackBuffer8.get(), 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][2]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][2]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 		}
-		if (g_UInputMan.KeyHeld(KEY_4)) {
+		if (g_UInputMan.KeyHeld(SDLK_4)) {
 			stretch_blit(m_NetworkBackBufferFinal8[m_NetworkFrameReady][3].get(), m_BackBuffer8.get(), 0, 0, m_NetworkBackBufferFinal8[m_NetworkFrameReady][3]->w, m_NetworkBackBufferFinal8[m_NetworkFrameReady][3]->h, 0, 0, m_BackBuffer8->w, m_BackBuffer8->h);
 		}
 #endif

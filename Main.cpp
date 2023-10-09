@@ -57,12 +57,12 @@ namespace RTE {
 	/// </summary>
 	void InitializeManagers() {
 		g_SettingsMan.Initialize();
+		g_WindowMan.Initialize();
 
 		g_LuaMan.Initialize();
 		g_NetworkServer.Initialize();
 		g_NetworkClient.Initialize();
 		g_TimerMan.Initialize();
-		g_WindowMan.Initialize();
 		g_FrameMan.Initialize();
 		g_PostProcessMan.Initialize();
 		g_PerformanceMan.Initialize();
@@ -209,6 +209,7 @@ namespace RTE {
 		g_UInputMan.TrapMousePos(false);
 
 		while (!System::IsSetToQuit()) {
+			g_WindowMan.ClearRenderer();
 			PollSDLEvents();
 
 			g_WindowMan.Update();
@@ -268,8 +269,10 @@ namespace RTE {
 		while (!System::IsSetToQuit()) {
 			bool serverUpdated = false;
 			updateStartTime = g_TimerMan.GetAbsoluteTime();
+
 			PollSDLEvents();
 			g_WindowMan.Update();
+			g_WindowMan.ClearRenderer();
 
 			g_TimerMan.Update();
 
@@ -347,6 +350,7 @@ namespace RTE {
 			drawStartTime = updateEndAndDrawStartTime;
 
 			g_FrameMan.Draw();
+			g_WindowMan.DrawPostProcessBuffer();
 			g_WindowMan.UploadFrame();
 
 			drawTotalTime = g_TimerMan.GetAbsoluteTime() - drawStartTime;

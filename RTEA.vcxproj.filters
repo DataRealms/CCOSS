@@ -46,6 +46,9 @@
     <Filter Include="System\Base64">
       <UniqueIdentifier>{6f517ec6-8c53-4d34-b320-c408e1fd374d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="System\glad">
+      <UniqueIdentifier>{a92cf676-7096-4641-ae98-d02861c1acde}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System\Box.h">
@@ -603,11 +606,20 @@
     <ClInclude Include="Entities\AEJetpack.h">
       <Filter>Entities</Filter>
     </ClInclude>
+    <ClInclude Include="System\Shader.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\GLCheck.h">
+      <Filter>System</Filter>
+    </ClInclude>
     <ClInclude Include="Menus\SaveLoadMenuGUI.h">
       <Filter>GUI</Filter>
     </ClInclude>
     <ClInclude Include="System\Base64\base64.h">
       <Filter>System\Base64</Filter>
+    </ClInclude>
+    <ClInclude Include="System\AllegroTools.h">
+      <Filter>System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1158,6 +1170,15 @@
     <ClCompile Include="System\RTEStackTrace.cpp">
       <Filter>System</Filter>
     </ClCompile>
+    <ClCompile Include="System\Shader.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="System\glad\gl.c">
+      <Filter>System\glad</Filter>
+    </ClCompile>
+    <ClCompile Include="System\GLCheck.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
     <ClCompile Include="external\sources\tracy\public\TracyClient.cpp">
       <Filter>external\tracy</Filter>
     </ClCompile>
@@ -1169,6 +1190,9 @@
     </ClCompile>
     <ClCompile Include="System\Base64\base64.cpp">
       <Filter>System\Base64</Filter>
+    </ClCompile>
+    <ClCompile Include="System\AllegroTools.cpp">
+      <Filter>System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

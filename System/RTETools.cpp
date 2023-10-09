@@ -2,6 +2,7 @@
 
 #include "Vector.h"
 
+
 namespace RTE {
 
 	RandomGenerator g_RandomGenerator;

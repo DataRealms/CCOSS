@@ -258,6 +258,11 @@ namespace RTE {
 		/// <param name="filePath">The filepath to the bitmap we want to reload.</param>
 		/// <param name="conversionMode">The Allegro color conversion mode to use when reloading this bitmap.</param>
 		static void ReloadBitmap(const std::string &filePath, int conversionMode = 0);
+
+		/// <summary>
+		/// Set alpha value of non mask color pixels to 255 for 32-bit bitmaps. (WARN: would override existing alpha values!)
+		/// </summary>
+		static void AddAlphaChannel(BITMAP* bitmap);
 #pragma endregion
 
 		/// <summary>

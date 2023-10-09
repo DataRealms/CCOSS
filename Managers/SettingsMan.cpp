@@ -118,7 +118,8 @@ namespace RTE {
 		MatchProperty("ResolutionY", { reader >> g_WindowMan.m_ResY; });
 		MatchProperty("ResolutionMultiplier", { reader >> g_WindowMan.m_ResMultiplier; });
 		MatchProperty("EnableVSync", { reader >> g_WindowMan.m_EnableVSync; });
-		MatchProperty("IgnoreMultiDisplays", { reader >> g_WindowMan.m_IgnoreMultiDisplays; });
+		MatchProperty("Fullscreen", { reader >> g_WindowMan.m_Fullscreen; });
+		MatchProperty("UseMultiDisplays", { reader >> g_WindowMan.m_UseMultiDisplays; });
 		MatchProperty("TwoPlayerSplitscreenVertSplit", { reader >> g_FrameMan.m_TwoPlayerVSplit; });
 		MatchProperty("MasterVolume", { g_AudioMan.SetMasterVolume(std::stof(reader.ReadPropValue()) / 100.0F); });
 		MatchProperty("MuteMaster", { reader >> g_AudioMan.m_MuteMaster; });
@@ -243,8 +244,9 @@ namespace RTE {
 		writer.NewPropertyWithValue("ResolutionX", g_WindowMan.m_ResX);
 		writer.NewPropertyWithValue("ResolutionY", g_WindowMan.m_ResY);
 		writer.NewPropertyWithValue("ResolutionMultiplier", g_WindowMan.m_ResMultiplier);
+		writer.NewPropertyWithValue("Fullscreen", g_WindowMan.m_Fullscreen);
 		writer.NewPropertyWithValue("EnableVSync", g_WindowMan.m_EnableVSync);
-		writer.NewPropertyWithValue("IgnoreMultiDisplays", g_WindowMan.m_IgnoreMultiDisplays);
+		writer.NewPropertyWithValue("UseMultiDisplays", g_WindowMan.m_UseMultiDisplays);
 		writer.NewPropertyWithValue("TwoPlayerSplitscreenVertSplit", g_FrameMan.m_TwoPlayerVSplit);
 
 		writer.NewLine(false, 2);

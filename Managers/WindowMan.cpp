@@ -188,7 +188,11 @@ namespace RTE {
 			RTEAbort("Failed to load GL functions!");
 		}
 
+#ifndef _WIN32
 		SDL_GL_SetSwapInterval(m_EnableVSync ? 1 : 0);
+#else
+		SDL_GL_SetSwapInterval(m_Fullscreen && m_EnableVSync ? 1 : 0);
+#endif
 		glEnable(GL_BLEND);
 		glEnable(GL_DEPTH_TEST);
 		glGenBuffers(1, &m_ScreenVBO);
@@ -231,7 +235,11 @@ namespace RTE {
 	void WindowMan::SetVSyncEnabled(bool enable) {
 		m_EnableVSync = enable;
 
+#ifndef _WIN32
 		int sdlEnableVSync = m_EnableVSync ? 1 : 0;
+#else
+		int sdlEnableVSync = m_Fullscreen && m_EnableVSync ? 1 : 0;
+#endif
 
 		SDL_GL_SetSwapInterval(sdlEnableVSync);
 	}
@@ -507,7 +515,9 @@ namespace RTE {
 			SetViewportLetterboxed();
 			CreateBackBufferTexture();
 		}
-
+#ifdef _WIN32
+		SDL_GL_SetSwapInterval(m_Fullscreen && m_EnableVSync ? 1 : 0);
+#endif
 		g_ConsoleMan.PrintString("SYSTEM: " + std::string(!recoveredToPreviousSettings ? "Switched to different resolution." : "Failed to switch to different resolution. Reverted to previous settings."));
 	}
 
@@ -527,6 +537,7 @@ namespace RTE {
 			}
 			ChangeResolution(m_ResX, m_ResY, m_ResMultiplier, fullscreen, true);
 		}
+
 		if(!fullscreen) {
 			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), 0);
 			SDL_SetWindowMinimumSize(m_PrimaryWindow.get(), c_MinResX, c_MinResY);
@@ -534,6 +545,10 @@ namespace RTE {
 			SDL_SetWindowFullscreen(m_PrimaryWindow.get(), SDL_WINDOW_FULLSCREEN_DESKTOP);
 		}
 		m_Fullscreen = fullscreen;
+
+#ifdef _WIN32
+		SDL_GL_SetSwapInterval(m_Fullscreen && m_EnableVSync ? 1 : 0);
+#endif
 		SetViewportLetterboxed();
 	}
 

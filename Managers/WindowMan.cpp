@@ -235,6 +235,8 @@ namespace RTE {
 	void WindowMan::SetVSyncEnabled(bool enable) {
 		m_EnableVSync = enable;
 
+		// Workaround for DWM frame stutter
+		// See https://github.com/libsdl-org/SDL/issues/5797
 #ifndef _WIN32
 		int sdlEnableVSync = m_EnableVSync ? 1 : 0;
 #else

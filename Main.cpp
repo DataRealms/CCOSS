@@ -43,6 +43,9 @@
 #include "WindowMan.h"
 #include "NetworkServer.h"
 #include "NetworkClient.h"
+#include "CameraMan.h"
+#include "ActivityMan.h"
+#include "PrimitiveMan.h"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
@@ -56,6 +59,29 @@ namespace RTE {
 	/// Initializes all the essential managers.
 	/// </summary>
 	void InitializeManagers() {
+		TimerMan::Construct();
+		PresetMan::Construct();
+		SettingsMan::Construct();
+		WindowMan::Construct();
+		LuaMan::Construct();
+		NetworkServer::Construct();
+		NetworkClient::Construct();
+		FrameMan::Construct();
+		PerformanceMan::Construct();
+		PostProcessMan::Construct();
+		PrimitiveMan::Construct();
+		AudioMan::Construct();
+		GUISound::Construct();
+		UInputMan::Construct();
+		ConsoleMan::Construct();
+		SceneMan::Construct();
+		MovableMan::Construct();
+		MetaMan::Construct();
+		MenuMan::Construct();
+		CameraMan::Construct();
+		ActivityMan::Construct();
+		LoadingScreen::Construct();
+
 		g_SettingsMan.Initialize();
 		g_WindowMan.Initialize();
 

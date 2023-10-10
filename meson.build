@@ -157,8 +157,8 @@ endif
 if get_option('tracy_enable')
   add_global_arguments('-DTRACY_ENABLE', language:'cpp')
 endif
-if get_option('tracy_callstack')
-  add_global_arguments('-DTRACY_CALLSTACK=10', language:'cpp')
+if get_option('tracy_callstack') > 0
+  add_global_arguments('-DTRACY_CALLSTACK='+get_option('tracy_callstack').to_string(), language:'cpp')
 endif
 if get_option('tracy_on_demand')
   add_global_arguments('-DTRACY_ON_DEMAND', language:'cpp')

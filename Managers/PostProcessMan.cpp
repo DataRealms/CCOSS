@@ -534,7 +534,7 @@ namespace RTE {
 				effectStrength = postEffect.m_Strength / 255.f;
 				effectPosX = postEffect.m_Pos.m_X;
 				effectPosY = postEffect.m_Pos.m_Y;
-				m_PostProcessShader->SetVector4f(m_PostProcessShader->GetColorUniform(), glm::vec4(effectStrength));
+				m_PostProcessShader->SetVector4f(m_PostProcessShader->GetColorUniform(), glm::vec4(effectStrength, effectStrength, effectStrength, 1.0f));
 
 				glm::mat4 transformMatrix(1);
 				transformMatrix = glm::translate(transformMatrix, glm::vec3(effectPosX, effectPosY, 0));

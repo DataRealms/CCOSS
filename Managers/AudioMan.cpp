@@ -616,6 +616,12 @@ namespace RTE {
 				result = (result == FMOD_OK) ? channel->set3DLevel(0.0F) : result;
 				result = (result == FMOD_OK) ? channel->setVolume(soundContainer->GetVolume()) : result;
 			} else {
+
+				FMOD::DSP *dsp_multibandeq;
+				result = (result == FMOD_OK) ? m_AudioSystem->createDSPByType(FMOD_DSP_TYPE_MULTIBAND_EQ, &dsp_multibandeq) : result;
+				result = (result == FMOD_OK) ? dsp_multibandeq->setParameterFloat(1, 22000.0f) : result; // Functionally inactive lowpass filter
+				result = (result == FMOD_OK) ? channel->addDSP(0, dsp_multibandeq) : result;				
+				
 				m_SoundChannelMinimumAudibleDistances.insert({ channelIndex, soundData->MinimumAudibleDistance });
 				result = (result == FMOD_OK) ? channel->set3DLevel(m_SoundPanningEffectStrength) : result;
 
@@ -868,8 +874,17 @@ namespace RTE {
 		float attenuationStartDistance = c_DefaultAttenuationStartDistance;
 		float soundMaxDistance = 0.0F;
 		result = result == FMOD_OK ? soundChannel->get3DMinMaxDistance(&attenuationStartDistance, &soundMaxDistance) : result;
-
+		
 		float attenuatedVolume = (shortestDistance <= attenuationStartDistance) ? 1.0F : attenuationStartDistance / shortestDistance;
+
+		// Lowpass as distance increases
+		FMOD::DSP *dsp_multibandeq;
+		result = (result == FMOD_OK) ? soundChannel->getDSP(0, &dsp_multibandeq) : result;
+		float factor = 1 - pow(1 - attenuatedVolume, 3);
+		float lowpassFrequency = 22000.0f * factor;
+		lowpassFrequency = std::clamp(lowpassFrequency, 350.0f, 22000.0f);
+		result = (result == FMOD_OK) ? dsp_multibandeq->setParameterFloat(1, lowpassFrequency) : result;
+		
 		float minimumAudibleDistance = m_SoundChannelMinimumAudibleDistances.at(soundChannelIndex);
 		if (shortestDistance >= soundMaxDistance) {
 			attenuatedVolume = 0.0F;

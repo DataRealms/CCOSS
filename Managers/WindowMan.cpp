@@ -84,6 +84,14 @@ namespace RTE {
 
 	WindowMan::~WindowMan() = default;
 
+	void WindowMan::Destroy() {
+		glDeleteTextures(1, &m_BackBuffer32Texture);
+		glDeleteBuffers(1, &m_ScreenVBO);
+		glDeleteVertexArrays(1, &m_ScreenVAO);
+		glDeleteTextures(1, &m_ScreenBufferTexture);
+		glDeleteFramebuffers(1, &m_ScreenBufferFBO);
+	}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::Initialize() {
@@ -205,6 +213,9 @@ namespace RTE {
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 		glBindVertexArray(0);
+		glGenTextures(1, &m_BackBuffer32Texture);
+		glGenTextures(1, &m_ScreenBufferTexture);
+		glGenFramebuffers(1, &m_ScreenBufferFBO);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,6 +224,10 @@ namespace RTE {
 		glDeleteTextures(1, &m_BackBuffer32Texture);
 		glGenTextures(1, &m_BackBuffer32Texture);
 		glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_ResX, m_ResY, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, m_ScreenBufferTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_ResX, m_ResY, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

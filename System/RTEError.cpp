@@ -391,12 +391,28 @@ namespace RTE {
 
 	bool RTEError::DumpAbortScreen() {
 		int success = -1;
-		if (BITMAP *backbuffer = g_FrameMan.GetBackBuffer32(); backbuffer) {
-			// Have to convert the 32bpp backbuffer to 24bpp otherwise the saved file is blank for reasons that don't matter.
-			BITMAP *abortScreenBuffer = create_bitmap_ex(24, backbuffer->w, backbuffer->h);
-			blit(backbuffer, abortScreenBuffer, 0, 0, 0, 0, backbuffer->w, backbuffer->h);
-			success = save_png("AbortScreen.png", abortScreenBuffer, nullptr);
-			destroy_bitmap(abortScreenBuffer);
+		if (glReadPixels != nullptr) {
+			int w ,h;
+			SDL_GL_GetDrawableSize(g_WindowMan.GetWindow(), &w, &h);
+			if (!(w>0 && h>0)) {
+				return false;
+			}
+			BITMAP* readBuffer = create_bitmap_ex(24, w, h);
+			// Read screen from the front buffer since that is the only framebuffer guaranteed to exist at this point.
+			// Read twice because front buffer content is technically undefined, but most drivers still eventually give up the contents correctly.
+			glReadBuffer(GL_FRONT);
+			glPixelStorei(GL_PACK_ALIGNMENT, 1);
+			glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, readBuffer->line[0]);
+			glFinish();
+			glReadBuffer(GL_BACK);
+			glReadBuffer(GL_FRONT);
+			glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, readBuffer->line[0]);
+			glFinish();
+
+			BITMAP* flipBuffer = create_bitmap_ex(24, w, h);
+			draw_sprite_v_flip(flipBuffer, readBuffer, 0, 0);
+
+			success = save_png("AbortScreen.png", flipBuffer, nullptr);
 		}
 		return success == 0;
 	}

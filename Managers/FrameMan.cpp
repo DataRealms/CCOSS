@@ -510,7 +510,7 @@ namespace RTE {
 		}
 
 		// TODO: Remove this once GCC13 is released and switched to. std::format and std::chrono::time_zone are not part of latest libstdc++.
-#if _LINUX_OR_MACOSX_
+#if defined(__GNUC__) && __GNUC__ < 13
 		std::chrono::time_point now = std::chrono::system_clock::now();
 		time_t currentTime = std::chrono::system_clock::to_time_t(now);
 		tm *localCurrentTime = std::localtime(&currentTime);
@@ -540,7 +540,7 @@ namespace RTE {
 					SaveScreenToBitmap();
 
 					// Make a copy of the buffer because it may be overwritten mid thread and everything will be on fire.
-					BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_ScreenDumpBuffer.get()), m_ScreenDumpBuffer->w * g_WindowMan.GetResMultiplier(), m_ScreenDumpBuffer->h * g_WindowMan.GetResMultiplier());
+					BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_ScreenDumpBuffer.get()), m_ScreenDumpBuffer->w, m_ScreenDumpBuffer->h);
 					stretch_blit(m_ScreenDumpBuffer.get(), outputBitmap, 0, 0, m_ScreenDumpBuffer->w, m_ScreenDumpBuffer->h, 0, 0, outputBitmap->w, outputBitmap->h);
 
 					auto saveScreenDump = [fullFileName](BITMAP *bitmapToSaveCopy) {
@@ -604,26 +604,10 @@ namespace RTE {
 		if (!m_ScreenDumpBuffer) {
 			return;
 		}
-		int drawSizeX, drawSizeY;
-		SDL_GL_GetDrawableSize(g_WindowMan.GetWindow(), &drawSizeX, &drawSizeY);
-		BITMAP* screenBitmap = create_bitmap_ex(32, drawSizeX, drawSizeY);
-		GL_CHECK(glBindTexture(GL_TEXTURE_2D, 0));
-		GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-		GL_CHECK(glReadBuffer(GL_FRONT));
-		GL_CHECK(glPixelStorei(GL_PACK_ALIGNMENT, 1));
-		GL_CHECK(glReadPixels(0, 0, screenBitmap->w, screenBitmap->h, GL_RGBA, GL_UNSIGNED_BYTE, screenBitmap->line[0]));
-		GL_CHECK(glReadBuffer(GL_BACK));
 
-		BITMAP* depthBitmap = create_bitmap_ex(bitmap_color_depth(m_ScreenDumpBuffer.get()), screenBitmap->w, screenBitmap->h);
-		blit(screenBitmap, depthBitmap, 0, 0, 0, 0, screenBitmap->w, screenBitmap->h);
+		glBindTexture(GL_TEXTURE_2D, g_WindowMan.GetScreenBufferTexture());
+		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, m_ScreenDumpBuffer->line[0]);
 
-		BITMAP* flipBitmap = create_bitmap_ex(bitmap_color_depth(depthBitmap), depthBitmap->w, depthBitmap->h);
-		draw_sprite_v_flip(flipBitmap, depthBitmap, 0, 0);
-
-		stretch_blit(flipBitmap, m_ScreenDumpBuffer.get(), 0, 0, screenBitmap->w, screenBitmap->h, 0, 0, m_ScreenDumpBuffer->w, m_ScreenDumpBuffer->h);
-		destroy_bitmap(screenBitmap);
-		destroy_bitmap(depthBitmap);
-		destroy_bitmap(flipBitmap);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

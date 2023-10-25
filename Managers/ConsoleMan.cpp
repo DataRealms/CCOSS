@@ -255,7 +255,7 @@ namespace RTE {
 			SetReadOnly();
 		}
 
-		if (!g_UInputMan.FlagShiftState() && (!g_UInputMan.FlagCtrlState() && g_UInputMan.KeyPressed(SDL_SCANCODE_GRAVE))) {
+		if (!g_UInputMan.FlagShiftState() && (!g_UInputMan.FlagCtrlState() && (g_UInputMan.KeyPressed(SDL_SCANCODE_GRAVE) || (IsEnabled() && g_UInputMan.KeyPressed(SDL_SCANCODE_ESCAPE))))) {
 			if (IsEnabled()) {
 				if (!m_ReadOnly) {
 					m_InputTextBox->SetEnabled(false);

@@ -774,7 +774,7 @@ namespace RTE {
 		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_ScreenBufferTexture));
 		if (m_MultiDisplayWindows.empty()) {
 			glViewport(m_PrimaryWindowViewport->x, m_PrimaryWindowViewport->y, m_PrimaryWindowViewport->w, m_PrimaryWindowViewport->h);
-		m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), glm::mat4(1.0f));
+			m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), glm::mat4(1.0f));
 			GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 			SDL_GL_SwapWindow(m_PrimaryWindow.get());
 		} else {

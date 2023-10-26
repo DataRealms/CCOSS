@@ -424,6 +424,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	std::list<const SceneObject *> * LuaAdaptersBuyMenuGUI::GetOrderList(const BuyMenuGUI *luaSelfObject) {
+		auto* orderList = new std::list<const SceneObject *>();
+		luaSelfObject->GetOrderList(*orderList);
+		return orderList;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	Attachable * LuaAdaptersAttachable::RemoveFromParent1(Attachable *luaSelfObject) {
 		if (luaSelfObject->IsAttached()) {
 			return luaSelfObject->GetParent()->RemoveAttachable(luaSelfObject);

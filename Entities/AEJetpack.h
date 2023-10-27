@@ -171,6 +171,7 @@ namespace RTE
         float m_JetTimeLeft; //!< How much time left the jetpack can go, in ms
         float m_JetThrustBonusMultiplier; //!< A multiplier bonus to our produced thrust, which doesn't cost extra fuel. Used for AI buffs.
         float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
+        float m_MinimumFuel; // Minimum ratio of current fuel to max fuel to be able to initiate the JumpPack. Does nothing if standard jetpack.
         float m_JetAngleRange; //!< Ratio at which the jetpack angle follows aim angle
         bool m_CanAdjustAngleWhileFiring; //!< Whether or not the angle of the thrust can change while firing, or if it can only be adjusted while the jetpack is off
         bool m_AdjustsThrottleForWeight; //!< Whether or not the jetpack throttle auto-adjusts for weight, at the cost of fuel usage.

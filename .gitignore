@@ -15,6 +15,7 @@ compile_commands.json
 
 /enc_temp_folder
 
+/.idea
 /_Bin
 /NATPunchServer/Server/NATCompleteServer/Debug
 /NATPunchServer/Server/NATCompleteServer/Release

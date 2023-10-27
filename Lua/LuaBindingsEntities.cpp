@@ -431,6 +431,7 @@ namespace RTE {
 		.property("JetTimeTotal", &AEJetpack::GetJetTimeTotal, &AEJetpack::SetJetTimeTotal)
 		.property("JetTimeLeft", &AEJetpack::GetJetTimeLeft)
 		.property("JetReplenishRate", &AEJetpack::GetJetReplenishRate, &AEJetpack::SetJetReplenishRate)
+		.property("MinimumFuelRatio", &AEJetpack::GetMinimumFuelRatio, &AEJetpack::SetMinimumFuelRatio)
 		.property("JetAngleRange", &AEJetpack::GetJetAngleRange, &AEJetpack::SetJetAngleRange)
 		.property("CanAdjustAngleWhileFiring", &AEJetpack::GetCanAdjustAngleWhileFiring, &AEJetpack::SetCanAdjustAngleWhileFiring)
 		.property("AdjustsThrottleForWeight", &AEJetpack::GetAdjustsThrottleForWeight, &AEJetpack::SetAdjustsThrottleForWeight)

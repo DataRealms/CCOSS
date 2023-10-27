@@ -15,7 +15,7 @@ namespace RTE {
         m_JetTimeLeft = 0.0F;
 		m_JetThrustBonusMultiplier = 1.0F;
         m_JetReplenishRate = 1.0F;
-		m_MinimumFuel = 0.0F;
+		m_MinimumFuelRatio = 0.0F;
         m_JetAngleRange = 0.25F;
 		m_CanAdjustAngleWhileFiring = true;
 		m_AdjustsThrottleForWeight = true;
@@ -44,7 +44,7 @@ namespace RTE {
         m_JetTimeTotal = reference.m_JetTimeTotal;
         m_JetTimeLeft = reference.m_JetTimeLeft;
         m_JetReplenishRate = reference.m_JetReplenishRate;
-		m_MinimumFuel = reference.m_MinimumFuel;
+		m_MinimumFuelRatio = reference.m_MinimumFuelRatio;
         m_JetAngleRange = reference.m_JetAngleRange;
 		m_CanAdjustAngleWhileFiring = reference.m_CanAdjustAngleWhileFiring;
 		m_AdjustsThrottleForWeight = reference.m_AdjustsThrottleForWeight;
@@ -64,7 +64,7 @@ namespace RTE {
 				m_JetpackType = JetpackType::Standard;
 			} else if (jetpackType == "JumpPack") {
 				m_JetpackType = JetpackType::JumpPack;
-				m_MinimumFuel = 0.25F;
+				m_MinimumFuelRatio = 0.25F;
 			} else {
 				reader.ReportError("Unknown JetpackType '" + jetpackType + "'!");
 			}
@@ -74,9 +74,9 @@ namespace RTE {
             m_JetTimeTotal *= 1000.0f; // Convert to ms
 	    });
 		MatchForwards("JumpReplenishRate") MatchProperty("JetReplenishRate", { reader >> m_JetReplenishRate; });
-		MatchProperty("MinimumFuel", {
-			reader >> m_MinimumFuel;
-			m_MinimumFuel = std::clamp(m_MinimumFuel, 0.0F, 1.0F);
+		MatchProperty("MinimumFuelRatio", {
+			reader >> m_MinimumFuelRatio;
+			m_MinimumFuelRatio = std::clamp(m_MinimumFuelRatio, 0.0F, 1.0F);
 		});		
 		MatchForwards("JumpAngleRange") MatchProperty("JetAngleRange", { reader >> m_JetAngleRange; });
 		MatchProperty("CanAdjustAngleWhileFiring", { reader >> m_CanAdjustAngleWhileFiring; });
@@ -103,7 +103,7 @@ namespace RTE {
 
 		writer.NewPropertyWithValue("JumpTime", m_JetTimeTotal / 1000.0f); // Convert to seconds
 		writer.NewPropertyWithValue("JumpReplenishRate", m_JetReplenishRate);
-		writer.NewPropertyWithValue("MinimumFuel", m_MinimumFuel);
+		writer.NewPropertyWithValue("MinimumFuelRatio", m_MinimumFuelRatio);
 		writer.NewPropertyWithValue("JumpAngleRange", m_JetAngleRange);
 		writer.NewPropertyWithValue("CanAdjustAngleWhileFiring", m_CanAdjustAngleWhileFiring);
 		writer.NewPropertyWithValue("AdjustsThrottleForWeight", m_AdjustsThrottleForWeight);
@@ -145,7 +145,7 @@ namespace RTE {
 			case JetpackType::Standard:
 				if (controller.IsState(BODY_JUMPSTART) && !IsOutOfFuel() && IsFullyFueled()) {
 					Burst(parentActor, fuelUseMultiplier);
-				} else if (controller.IsState(BODY_JUMP) && !IsOutOfFuel() && GetJetTimeRatio() >= m_MinimumFuel) {
+				} else if (controller.IsState(BODY_JUMP) && !IsOutOfFuel() && GetJetTimeRatio() >= m_MinimumFuelRatio) {
 					Thrust(parentActor, fuelUseMultiplier);
 				} else {
 					Recharge(parentActor);
@@ -155,7 +155,7 @@ namespace RTE {
 			case JetpackType::JumpPack:
 				if (wasEmittingLastFrame && !IsOutOfFuel()) {
 					Thrust(parentActor, fuelUseMultiplier);
-				} else if (controller.IsState(BODY_JUMPSTART) && GetJetTimeRatio() >= m_MinimumFuel) {
+				} else if (controller.IsState(BODY_JUMPSTART) && GetJetTimeRatio() >= m_MinimumFuelRatio) {
 					Burst(parentActor, fuelUseMultiplier);
 				} else {
 					Recharge(parentActor);

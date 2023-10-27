@@ -38,6 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `AEJetpack` type, which replaces the old technique of `ACrab`/`AHuman` using an `AEmitter` as a jetpack. This type inherits from `AEmitter`.  
 	New INI and Lua (R/W) property `JetpackType`, which can be either `AEJetpack.Standard` or `AEJetpack.JumpPack`. Standard acts the same as the typical jetpack, whereas JumpPacks can only be activated when fully recharged, and fires all of it's fuel in one burst. Defaults to Standard.  
+	New INI and Lua (R/W) property `MinimumFuelRatio`, which defines the ratio of current fuel to max fuel that has to be met to fire the jetpack. Defaults to 0 for Standard and 0.25 for JumpPacks.
 	New INI and Lua (R/W) property `CanAdjustAngleWhileFiring`, which defines whether the jet angle can change while the jetpack is active. Defaults to true.  
 	New INI and Lua (R/W) property `AdjustsThrottleForWeight`, which defines whether the jetpack will adjust it's throttle (between `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier`) to account for any extra inventory mass. Increased throttle will decrease jet time accordingly. Defaults to true.  
 

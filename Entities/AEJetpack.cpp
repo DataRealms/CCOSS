@@ -145,7 +145,7 @@ namespace RTE {
 			case JetpackType::Standard:
 				if (controller.IsState(BODY_JUMPSTART) && !IsOutOfFuel() && IsFullyFueled()) {
 					Burst(parentActor, fuelUseMultiplier);
-				} else if (controller.IsState(BODY_JUMP) && !IsOutOfFuel() && GetJetTimeRatio() >= m_MinimumFuelRatio) {
+				} else if (controller.IsState(BODY_JUMP) && !IsOutOfFuel() && (GetJetTimeRatio() >= m_MinimumFuelRatio || wasEmittingLastFrame)) {
 					Thrust(parentActor, fuelUseMultiplier);
 				} else {
 					Recharge(parentActor);

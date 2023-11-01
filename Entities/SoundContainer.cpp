@@ -11,6 +11,12 @@ namespace RTE {
 		{"Ignore Play", SoundContainer::SoundOverlapMode::IGNORE_PLAY}
 	};
 
+	const std::unordered_map<std::string, SoundContainer::BusRouting> SoundContainer::c_BusRoutingMap = {
+		{"SFX", SoundContainer::BusRouting::SFX},
+		{"UI", SoundContainer::BusRouting::UI},
+		{"Music", SoundContainer::BusRouting::MUSIC}
+	};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SoundContainer::Clear() {
@@ -19,8 +25,10 @@ namespace RTE {
 		m_PlayingChannels.clear();
 		m_SoundOverlapMode = SoundOverlapMode::OVERLAP;
 
+		m_BusRouting = BusRouting::SFX;
 		m_Immobile = false;
 		m_AttenuationStartDistance = c_DefaultAttenuationStartDistance;
+		m_PanningStrengthMultiplier = 1.0F;
 		m_Loops = 0;
 		m_SoundPropertiesUpToDate = false;
 
@@ -43,8 +51,10 @@ namespace RTE {
 		m_PlayingChannels.clear();
 		m_SoundOverlapMode = reference.m_SoundOverlapMode;
 
+		m_BusRouting = reference.m_BusRouting;
 		m_Immobile = reference.m_Immobile;
 		m_AttenuationStartDistance = reference.m_AttenuationStartDistance;
+		m_PanningStrengthMultiplier = reference.m_PanningStrengthMultiplier;
 		m_Loops = reference.m_Loops;
 
 		m_Priority = reference.m_Priority;
@@ -83,8 +93,21 @@ namespace RTE {
 				}
 			}
 		});
+		MatchProperty("BusRouting", {
+			std::string busRoutingString = reader.ReadPropValue();
+			if (c_BusRoutingMap.find(busRoutingString) != c_BusRoutingMap.end()) {
+				m_BusRouting = c_BusRoutingMap.find(busRoutingString)->second;
+			} else {
+				try {
+					m_BusRouting = static_cast<BusRouting>(std::stoi(busRoutingString));
+				} catch (const std::exception &) {
+					reader.ReportError("Tried to route to non-existent sound bus " + busRoutingString);
+				}
+			}
+		});
 		MatchProperty("Immobile", { reader >> m_Immobile; });
 		MatchProperty("AttenuationStartDistance", { reader >> m_AttenuationStartDistance; });
+		MatchProperty("PanningStrengthMultiplier", { reader >> m_PanningStrengthMultiplier; });
 		MatchProperty("LoopSetting", { reader >> m_Loops; });
 		MatchProperty("Priority", {
 			reader >> m_Priority;
@@ -100,7 +123,7 @@ namespace RTE {
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+	
 	int SoundContainer::Save(Writer &writer) const {
 		Entity::Save(writer);
 
@@ -117,11 +140,14 @@ namespace RTE {
 		} else {
 			RTEAbort("Tried to write invalid SoundOverlapMode when saving SoundContainer.");
 		}
-
+		writer.NewProperty("BusRouting");
+		writer << m_BusRouting;
 		writer.NewProperty("Immobile");
 		writer << m_Immobile;
 		writer.NewProperty("AttenuationStartDistance");
 		writer << m_AttenuationStartDistance;
+		writer.NewProperty("PanningStrengthMultiplier");
+		writer << m_PanningStrengthMultiplier;
 		writer.NewProperty("LoopSetting");
 		writer << m_Loops;
 
@@ -216,7 +242,7 @@ namespace RTE {
 		for (SoundSet::SoundData *soundData : flattenedSoundData) {
 			FMOD_MODE soundMode = (m_Loops == 0) ? FMOD_LOOP_OFF : FMOD_LOOP_NORMAL;
 			if (m_Immobile) {
-				soundMode |= FMOD_3D_HEADRELATIVE;
+				soundMode |= FMOD_2D;
 				m_AttenuationStartDistance = c_SoundMaxAudibleDistance;
 			} else if (g_AudioMan.GetSoundPanningEffectStrength() == 1.0F) {
 				soundMode |= FMOD_3D_INVERSEROLLOFF;

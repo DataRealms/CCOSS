@@ -801,12 +801,15 @@ namespace RTE {
 				if (result == FMOD_OK && m_CurrentActivityHumanPlayerPositions.size() == 1) {
 					float sqrDistanceToPlayer = (*(m_CurrentActivityHumanPlayerPositions[0].get()) - GetAsVector(channelPosition)).GetSqrMagnitude();
 					float doubleMinimumDistanceForPanning = m_MinimumDistanceForPanning * 2.0F;
+					void *userData;
+					result = result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
+					const SoundContainer *soundContainer = static_cast<SoundContainer *>(userData);
 					if (sqrDistanceToPlayer < (m_MinimumDistanceForPanning * m_MinimumDistanceForPanning)) {
 						soundChannel->set3DLevel(0);
 					} else if (sqrDistanceToPlayer < (doubleMinimumDistanceForPanning * doubleMinimumDistanceForPanning)) {
-						soundChannel->set3DLevel(LERP(0, 1, 0, m_SoundPanningEffectStrength, channel3dLevel));
+						soundChannel->set3DLevel(LERP(0, 1, 0, m_SoundPanningEffectStrength * soundContainer->GetPanningStrengthMultiplier(), channel3dLevel));
 					} else {
-						soundChannel->set3DLevel(m_SoundPanningEffectStrength);
+						soundChannel->set3DLevel(m_SoundPanningEffectStrength * soundContainer->GetPanningStrengthMultiplier());
 					}
 				}
 			}

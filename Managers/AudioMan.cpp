@@ -596,7 +596,7 @@ namespace RTE {
 		for (const SoundSet::SoundData *soundData : selectedSoundData) {
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(soundData->SoundObject, channelGroupToPlayIn, true, &channel) : result;
 			result = (result == FMOD_OK) ? channel->getIndex(&channelIndex) : result;
-
+			
 			result = (result == FMOD_OK) ? channel->setUserData(soundContainer) : result;
 			result = (result == FMOD_OK) ? channel->setCallback(SoundChannelEndedCallback) : result;
 			result = (result == FMOD_OK) ? channel->setPriority(soundContainer->GetPriority()) : result;
@@ -790,8 +790,9 @@ namespace RTE {
 		for (int i = 0; i < numberOfPlayingChannels; i++) {
 			result = m_SFXChannelGroup->getChannel(i, &soundChannel);
 			FMOD_MODE mode;
-			result = result == FMOD_OK ? soundChannel->getMode(&mode) : result;
-			if (mode & FMOD_2D == 0){
+			result = (result == FMOD_OK) ? soundChannel->getMode(&mode) : result;
+			unsigned modeResult = mode & FMOD_2D;
+			if (modeResult == 0){
 				FMOD_VECTOR channelPosition;
 				result = result == FMOD_OK ? soundChannel->get3DAttributes(&channelPosition, nullptr) : result;
 				result = result == FMOD_OK ? UpdatePositionalEffectsForSoundChannel(soundChannel, &channelPosition) : result;

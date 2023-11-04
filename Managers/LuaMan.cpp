@@ -643,7 +643,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaStateWrapper::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects) {
+	int LuaStateWrapper::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects) {
 		if (int error = RunScriptFile(filePath); error < 0) {
 			return error;
 		}
@@ -651,8 +651,19 @@ namespace RTE {
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
 		s_currentLuaState = this;
 
+		luabind::object prefixObject;
+		if (prefix == "") {
+			prefixObject = luabind::globals(m_State);
+		} else {
+			prefixObject = luabind::globals(m_State)[prefix];
+		}
+
+		if (luabind::type(prefixObject) == LUA_TNIL) {
+			return -1;
+		}
+
 		for (const std::string &functionName : functionNamesToLookFor) {
-			luabind::object functionObject = luabind::globals(m_State)[functionName];
+			luabind::object functionObject = prefixObject[functionName];
 			if (luabind::type(functionObject) == LUA_TFUNCTION) {
 				luabind::object *functionObjectCopyForStoring = new luabind::object(functionObject);
 				outFunctionNamesAndObjects.try_emplace(functionName, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));

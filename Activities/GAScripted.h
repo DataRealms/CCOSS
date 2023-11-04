@@ -18,6 +18,8 @@
 #include "GlobalScript.h"
 #include "Box.h"
 
+#include "LuabindObjectWrapper.h"
+
 namespace RTE
 {
 
@@ -41,6 +43,7 @@ class GAScripted : public GameActivity {
 
 public:
 
+ScriptFunctionNames("StartActivity", "UpdateActivity", "PauseActivity", "EndActivity", "OnSave");
 
 // Concrete allocation and cloning definitions
 EntityAllocation(GAScripted);
@@ -282,6 +285,8 @@ protected:
 	std::vector<std::unique_ptr<PieSlice>> m_PieSlicesToAdd; //!< A vector of PieSlices that should be added to any PieMenus opened while this GAScripted is running.
     // The list of global scripts allowed to run during this activity
     std::vector<GlobalScript *> m_GlobalScriptsList;
+
+	std::unordered_map<std::string, std::unique_ptr<LuabindObjectWrapper>> m_ScriptFunctions; //!< A map of LuabindObjectWrappers that hold Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

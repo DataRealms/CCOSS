@@ -27,18 +27,6 @@ struct BITMAP;
 
 namespace RTE {
 
-#pragma region Global Macro Definitions
-    #define ScriptFunctionNames(...) \
-        virtual std::vector<std::string> GetSupportedScriptFunctionNames() const { return {__VA_ARGS__}; }
-
-    #define AddScriptFunctionNames(PARENT, ...) \
-        std::vector<std::string> GetSupportedScriptFunctionNames() const override { \
-            std::vector<std::string> functionNames = PARENT::GetSupportedScriptFunctionNames(); \
-            functionNames.insert(functionNames.end(), {__VA_ARGS__}); \
-            return functionNames; \
-        }
-#pragma endregion
-
 struct HitData;
 
 class MOSRotating;

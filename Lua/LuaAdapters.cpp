@@ -424,9 +424,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::list<const SceneObject *> * LuaAdaptersBuyMenuGUI::GetOrderList(const BuyMenuGUI *luaSelfObject) {
-		auto* orderList = new std::list<const SceneObject *>();
-		luaSelfObject->GetOrderList(*orderList);
+	std::list<std::unique_ptr<SceneObject>> * LuaAdaptersBuyMenuGUI::GetOrderList(const BuyMenuGUI *luaSelfObject) {
+		std::list<const SceneObject *> constOrderList;
+		luaSelfObject->GetOrderList(constOrderList);
+
+		auto* orderList = new std::list<std::unique_ptr<SceneObject>>();
+		for (const SceneObject *constObjectInOrderList : constOrderList) {
+			orderList->push_back( std::unique_ptr<SceneObject>(static_cast<SceneObject *>(constObjectInOrderList->Clone())) );
+		}
+
 		return orderList;
 	}
 

@@ -362,7 +362,7 @@ namespace RTE {
 
 #pragma region BuyMenuGUI Lua Adapters
 	struct LuaAdaptersBuyMenuGUI {
-		static std::list<const SceneObject *> * GetOrderList(const BuyMenuGUI *luaSelfObject);
+		static std::list<std::unique_ptr<SceneObject>> * GetOrderList(const BuyMenuGUI *luaSelfObject);
 	};
 #pragma endregion
 

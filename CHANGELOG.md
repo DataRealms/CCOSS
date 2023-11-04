@@ -70,6 +70,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `SLTerrain` INI property `OrbitDirection`, which defines which direction is considered to be orbit, for the sake of brain-path-to-orbit, dropship spawn/return location, etc. Can be any of `Up`, `Down`, `Left` or `Right`. Defaults to `Up`.
 
+- New FMOD and SoundContainer features:
+	The game is now divided into SFX, UI, and Music busses which all route into the Master bus.
+	The SFX bus has compression added for a better listening experience, and a safety volume limiter has been added to the Master bus.
+	Aside from volume being attenuated, sounds will now also be lowpass filtered as distance increases.
+	New `SoundContainer` INI and Lua (R/W) property `BusRouting`, which denotes which bus the SoundContainer routes to. Available busses: `SFX, UI, Music`. Defaults to `SFX`.
+	`Enum` binding for `SoundContainer.BusRouting`: `SFX = 0, UI = 1, MUSIC = 2`.
+	New `SoundContainer` INI and Lua (R/W) property `PanningStrengthMultiplier`, which will multiply the strength of 3D panning. This can be used to achieve for example a psuedo-Immobile effect where attenuation effects are still applied but the sound does not move from the center. Recommended to keep between 0.0 and 1.0.
+
 </details>
 
 <details><summary><b>Changed</b></summary>

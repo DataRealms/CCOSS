@@ -395,7 +395,7 @@ namespace RTE {
 		
 		bool m_Immobile; //!< Whether this SoundContainer's sounds should be treated as immobile, i.e. not affected by 3D sound effects.
 		float m_AttenuationStartDistance; //!< The distance away from the AudioSystem listener to start attenuating this sound. Attenuation follows FMOD 3D Inverse roll-off model.
-		float m_PanningStrengthMultiplier; //!< Multiplier for panning strength, 0.0 to 1.0.
+		float m_PanningStrengthMultiplier; //!< Multiplier for panning strength.
 		int m_Loops; //!< Number of loops (repeats) the SoundContainer's sounds should play when played. 0 means it plays once, -1 means it plays until stopped.
 		bool m_SoundPropertiesUpToDate = false; //!< Whether this SoundContainer's sounds' modes and properties are up to date. Used primarily to handle discrepancies that can occur when loading from ini if the line ordering isn't ideal.
 		

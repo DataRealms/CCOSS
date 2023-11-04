@@ -603,7 +603,6 @@ namespace RTE {
 			float pitchVariationMultiplier = pitchVariationFactor == 1.0F ? 1.0F : RandomNum(1.0F / pitchVariationFactor, 1.0F * pitchVariationFactor);
 			result = (result == FMOD_OK) ? channel->setPitch(soundContainer->GetPitch() * pitchVariationMultiplier) : result;
 			if (soundContainer->IsImmobile()) {
-				//result = (result == FMOD_OK) ? channel->set3DLevel(0.0F) : result;
 				result = (result == FMOD_OK) ? channel->setVolume(soundContainer->GetVolume()) : result;
 			} else {
 

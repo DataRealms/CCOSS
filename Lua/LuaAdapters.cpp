@@ -424,13 +424,16 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	std::list<std::unique_ptr<SceneObject>> * LuaAdaptersBuyMenuGUI::GetOrderList(const BuyMenuGUI *luaSelfObject) {
+	std::list<SceneObject*> * LuaAdaptersBuyMenuGUI::GetOrderList(const BuyMenuGUI *luaSelfObject) {
 		std::list<const SceneObject *> constOrderList;
 		luaSelfObject->GetOrderList(constOrderList);
 
-		auto* orderList = new std::list<std::unique_ptr<SceneObject>>();
+		// Previously I tried to push back a cloned object for const-correctness (and giving unique ptr so luabind would clean it up after)
+		// This is needed cause lua doesn't really enjoy being given a const SceneObject*
+		// But it didn't like that. So eh
+		auto* orderList = new std::list<SceneObject*>();
 		for (const SceneObject *constObjectInOrderList : constOrderList) {
-			orderList->push_back( std::unique_ptr<SceneObject>(static_cast<SceneObject *>(constObjectInOrderList->Clone())) );
+			orderList->push_back( const_cast<SceneObject *>(constObjectInOrderList) );
 		}
 
 		return orderList;

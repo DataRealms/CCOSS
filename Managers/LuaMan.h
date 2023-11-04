@@ -4,6 +4,7 @@
 #include "Singleton.h"
 #include "Entity.h"
 #include "RTETools.h"
+#include "LuabindObjectWrapper.h"
 
 #define g_LuaMan LuaMan::Instance()
 
@@ -111,7 +112,7 @@ namespace RTE {
 		/// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
 		/// <param name="functionLiteralArguments">Optional vector of strings that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int RunScriptFunctionObject(const LuabindObjectWrapper *functionObjectWrapper, const std::string &selfGlobalTableName, const std::string &selfGlobalTableKey, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>());
+		int RunScriptFunctionObject(const LuabindObjectWrapper *functionObjectWrapper, const std::string &selfGlobalTableName, const std::string &selfGlobalTableKey, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>(), const std::vector<LuabindObjectWrapper*> &functionObjectArguments = std::vector<LuabindObjectWrapper*>());
 
 		/// <summary>
 		/// Opens and loads a file containing a script and runs it on the state.

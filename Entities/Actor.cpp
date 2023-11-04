@@ -1251,10 +1251,10 @@ float Actor::EstimateDigStrength() const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Actor::UpdateAIScripted(ThreadScriptsToRun scriptsToRun) {
-    RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true, {}, {}, scriptsToRun);
+    RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true, {}, {}, {}, scriptsToRun);
     if (scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
         // If we're in a SingleThreaded context, we run the MultiThreaded scripts synced updates
-         RunScriptedFunctionInAppropriateScripts("SyncedUpdateAI", false, true, {}, {}, ThreadScriptsToRun::Both);
+         RunScriptedFunctionInAppropriateScripts("SyncedUpdateAI", false, true, {}, {}, {}, ThreadScriptsToRun::Both);
     }
 }
 

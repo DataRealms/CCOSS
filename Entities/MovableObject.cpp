@@ -697,7 +697,7 @@ void MovableObject::EnableOrDisableAllScripts(bool enableScripts) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, ThreadScriptsToRun scriptsToRun) {
+int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts, bool stopOnError, const std::vector<const Entity *> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, const std::vector<LuabindObjectWrapper*> &functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
     int status = 0;
 
     auto itr = m_FunctionsAndScripts.find(functionName);
@@ -722,7 +722,7 @@ int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &fu
             if (runOnDisabledScripts || m_AllLoadedScripts.at(functionObjectWrapper->GetFilePath())) {
                 LuaStateWrapper& usedState = GetAndLockStateForScript(functionObjectWrapper->GetFilePath());
                 std::lock_guard<std::recursive_mutex> lock(usedState.GetMutex(), std::adopt_lock);   
-				status = usedState.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments);
+				status = usedState.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments, functionObjectArguments);
                 if (status < 0 && stopOnError) {
                     return status;
                 }
@@ -1064,7 +1064,7 @@ int MovableObject::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
 	m_SimUpdatesSinceLastScriptedUpdate = 0;
 
 	if (status >= 0) {
-		status = RunScriptedFunctionInAppropriateScripts("Update", false, true, {}, {}, scriptsToRun);
+		status = RunScriptedFunctionInAppropriateScripts("Update", false, true, {}, {}, {}, scriptsToRun);
 
         // Perform our synced updates to let multithreaded scripts do anything that interacts with stuff in a non-const way
         // This is identical to non-multithreaded script's Update()
@@ -1073,7 +1073,7 @@ int MovableObject::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
         // I wonder if we can do some SFINAE magic to make the luabindings automagically do a no-op with const objects, to avoid writing the bindings twice
         if (status >= -1 && scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
             // If we're in a SingleThreaded context, we run the MultiThreaded scripts synced updates:
-            status = RunScriptedFunctionInAppropriateScripts("SyncedUpdate", false, true, {}, {}, ThreadScriptsToRun::Both);
+            status = RunScriptedFunctionInAppropriateScripts("SyncedUpdate", false, true, {}, {}, {}, ThreadScriptsToRun::Both);
         }
 	}
 

@@ -549,7 +549,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaStateWrapper::RunScriptFunctionObject(const LuabindObjectWrapper *functionObject, const std::string &selfGlobalTableName, const std::string &selfGlobalTableKey, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments) {
+	int LuaStateWrapper::RunScriptFunctionObject(const LuabindObjectWrapper *functionObject, const std::string &selfGlobalTableName, const std::string &selfGlobalTableKey, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, const std::vector<LuabindObjectWrapper*> &functionObjectArguments) {
 		int status = 0;
 
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
@@ -558,7 +558,7 @@ namespace RTE {
 		lua_pushcfunction(m_State, &AddFileAndLineToError);
 		functionObject->GetLuabindObject()->push(m_State);
 
-		int argumentCount = functionEntityArguments.size() + functionLiteralArguments.size();
+		int argumentCount = functionEntityArguments.size() + functionLiteralArguments.size() + functionObjectArguments.size();
 		if (!selfGlobalTableName.empty() && TableEntryIsDefined(selfGlobalTableName, selfGlobalTableKey)) {
 			lua_getglobal(m_State, selfGlobalTableName.c_str());
 			lua_getfield(m_State, -1, selfGlobalTableKey.c_str());
@@ -582,6 +582,10 @@ namespace RTE {
 			} else {
 				lua_pushlstring(m_State, functionLiteralArgument.data(), functionLiteralArgument.size());
 			}
+		}
+
+		for (const LuabindObjectWrapper *functionObjectArgument : functionObjectArguments) {
+			functionObjectArgument->GetLuabindObject()->push(m_State);
 		}
 
 		if (lua_pcall(m_State, argumentCount, LUA_MULTRET, -argumentCount - 2) > 0) {

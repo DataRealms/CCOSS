@@ -23,7 +23,7 @@ namespace RTE {
 		/// <summary>
 		/// Constructor method used to instantiate a LuabindObjectWrapper object in system memory.
 		/// </summary>
-		explicit LuabindObjectWrapper(luabind::adl::object *luabindObject, const std::string_view &filePath) : m_LuabindObject(luabindObject), m_FilePath(filePath) {}
+		explicit LuabindObjectWrapper(luabind::adl::object* luabindObject, const std::string_view& filePath, bool ownsObject = true) : m_LuabindObject(luabindObject), m_FilePath(filePath), m_OwnsObject(ownsObject) {}
 #pragma endregion
 
 #pragma region Destruction
@@ -51,6 +51,7 @@ namespace RTE {
 
 	private:
 
+		bool m_OwnsObject; //!< Whether or not we own the luabind object this is wrapping.
 		luabind::adl::object *m_LuabindObject; //!< The luabind object this is wrapping.
 		std::string m_FilePath; //!< The filepath the wrapped luabind object represents, if it's a function.
 

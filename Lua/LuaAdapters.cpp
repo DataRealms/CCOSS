@@ -386,6 +386,19 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaAdaptersMovableObject::SendMessage1(MovableObject *luaSelfObject, const std::string &message) {
+		luaSelfObject->RunScriptedFunctionInAppropriateScripts("OnMessage", false, false, {}, { message });
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMovableObject::SendMessage2(MovableObject *luaSelfObject, const std::string &message, luabind::object context) {
+		LuabindObjectWrapper wrapper(&context, "", false);
+		luaSelfObject->RunScriptedFunctionInAppropriateScripts("OnMessage", false, false, {}, { message }, { &wrapper });
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaAdaptersMOSRotating::GibThis(MOSRotating *luaSelfObject) {
 		luaSelfObject->GibThis();
 	}

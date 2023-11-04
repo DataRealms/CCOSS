@@ -27,10 +27,11 @@ void LuabindObjectWrapper::ApplyQueuedDeletions() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 LuabindObjectWrapper::~LuabindObjectWrapper() {
-	static std::mutex mut;
-    std::lock_guard<std::mutex> guard(mut);
-
-    s_QueuedDeletions.push_back(m_LuabindObject);
+	if (m_OwnsObject) {
+		static std::mutex mut;
+		std::lock_guard<std::mutex> guard(mut);
+		s_QueuedDeletions.push_back(m_LuabindObject);
+	}
 }
 
 }

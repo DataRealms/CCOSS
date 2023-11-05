@@ -2354,14 +2354,14 @@ const Vector& SceneMan::GetLastRayHitPos()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float SceneMan::FindAltitude(const Vector &from, int max, int accuracy)
+float SceneMan::FindAltitude(const Vector &from, int max, int accuracy, bool fromSceneOrbitDirection)
 {
 // TODO: Also make this avoid doors
     Vector temp(from);
     ForceBounds(temp);
 
     Directions orbitDirection = Directions::Up;
-    if (m_pCurrentScene) {
+    if (fromSceneOrbitDirection && m_pCurrentScene) {
         orbitDirection = m_pCurrentScene->GetTerrain()->GetOrbitDirection();
     }
 

@@ -1098,7 +1098,7 @@ public:
 //                  here means less calculation.
 // Return value:    The altitude over the terrain, in pixels.
 
-    float FindAltitude(const Vector &from, int max = 0, int accuracy = 0);
+    float FindAltitude(const Vector &from, int max = 0, int accuracy = 0, bool fromSceneOrbitDirection = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

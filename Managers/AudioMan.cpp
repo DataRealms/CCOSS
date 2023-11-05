@@ -64,17 +64,31 @@ namespace RTE {
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->setSoftwareChannels(c_MaxSoftwareChannels) : audioSystemSetupResult;
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->init(c_MaxVirtualChannels, FMOD_INIT_VOL0_BECOMES_VIRTUAL, 0) : audioSystemSetupResult;
 
+
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->getMasterChannelGroup(&m_MasterChannelGroup) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("SFX", &m_SFXChannelGroup) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("UI", &m_UIChannelGroup) : audioSystemSetupResult;
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("Music", &m_MusicChannelGroup) : audioSystemSetupResult;
-		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("Sounds", &m_SoundChannelGroup) : audioSystemSetupResult;
-		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("MobileSounds", &m_MobileSoundChannelGroup) : audioSystemSetupResult;
-		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("ImmobileSounds", &m_ImmobileSoundChannelGroup) : audioSystemSetupResult;
-		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createChannelGroup("MenuSounds", &m_MenuSoundChannelGroup) : audioSystemSetupResult;
+
+		// Add a safety limiter to the master channel group
+		FMOD::DSP *dsp_limiter;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createDSPByType(FMOD_DSP_TYPE_LIMITER, &dsp_limiter) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addDSP(0, dsp_limiter) : audioSystemSetupResult;
+		
+		// Add a compressor to the SFX channel group
+		// This is pretty heavy-handed, but it sounds great. Might need to be changed once we have sidechaining and fancier things going on.
+		FMOD::DSP* dsp_compressor;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_AudioSystem->createDSPByType(FMOD_DSP_TYPE_COMPRESSOR, &dsp_compressor) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? dsp_compressor->setParameterFloat(0, -10.0f) : audioSystemSetupResult; // Threshold
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? dsp_compressor->setParameterFloat(1, 4.0f) : audioSystemSetupResult; // Ratio
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? dsp_compressor->setParameterFloat(2, 80.0f) : audioSystemSetupResult; // Attack time
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? dsp_compressor->setParameterFloat(3, 180.0f) : audioSystemSetupResult; // Release time
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? dsp_compressor->setParameterFloat(4, 5.0f) : audioSystemSetupResult; // Make-up gain
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_SFXChannelGroup->addDSP(0, dsp_compressor) : audioSystemSetupResult;
+		
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addGroup(m_SFXChannelGroup) : audioSystemSetupResult;
+		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addGroup(m_UIChannelGroup) : audioSystemSetupResult;
 		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addGroup(m_MusicChannelGroup) : audioSystemSetupResult;
-		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_MasterChannelGroup->addGroup(m_SoundChannelGroup) : audioSystemSetupResult;
-		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_SoundChannelGroup->addGroup(m_MobileSoundChannelGroup) : audioSystemSetupResult;
-		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_SoundChannelGroup->addGroup(m_ImmobileSoundChannelGroup) : audioSystemSetupResult;
-		audioSystemSetupResult = (audioSystemSetupResult == FMOD_OK) ? m_SoundChannelGroup->addGroup(m_MenuSoundChannelGroup) : audioSystemSetupResult;
 
 		m_AudioEnabled = audioSystemSetupResult == FMOD_OK;
 
@@ -145,7 +159,7 @@ namespace RTE {
 					listenerNumber++;
 				}
 
-				Update3DEffectsForMobileSoundChannels();
+				Update3DEffectsForSFXChannels();
 			} else {
 				if (!m_CurrentActivityHumanPlayerPositions.empty()) {
 					m_CurrentActivityHumanPlayerPositions.clear();
@@ -174,9 +188,8 @@ namespace RTE {
 
 		m_GlobalPitch = std::clamp(pitch, 0.125F, 8.0F);
 		if (includeMusic) { m_MusicChannelGroup->setPitch(m_GlobalPitch); }
-
-		FMOD::ChannelGroup *channelGroupToUse = includeImmobileSounds ? m_SoundChannelGroup : m_MobileSoundChannelGroup;
-		channelGroupToUse->setPitch(m_GlobalPitch);
+		
+		m_SFXChannelGroup->setPitch(m_GlobalPitch);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -251,35 +264,21 @@ namespace RTE {
 			int numberOfPlayingChannels;
 			FMOD::Channel *soundChannel;
 
-			FMOD_RESULT result = m_MobileSoundChannelGroup->getNumChannels(&numberOfPlayingChannels);
+			FMOD_RESULT result = m_SFXChannelGroup->getNumChannels(&numberOfPlayingChannels);
 			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: Failed to get the number of playing mobile sound channels when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
+				g_ConsoleMan.PrintString("ERROR: Failed to get the number of playing SFX sound channels when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
 				return;
 			}
 
 			for (int i = 0; i < numberOfPlayingChannels; i++) {
-				result = m_MobileSoundChannelGroup->getChannel(i, &soundChannel);
+				result = m_SFXChannelGroup->getChannel(i, &soundChannel);
 				if (result != FMOD_OK) {
-					g_ConsoleMan.PrintString("ERROR: Failed to get mobile sound channel when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
+					g_ConsoleMan.PrintString("ERROR: Failed to get SFX sound channel when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
 					return;
 				}
 				soundChannel->setLoopCount(0);
 			}
-
-			result = m_ImmobileSoundChannelGroup->getNumChannels(&numberOfPlayingChannels);
-			if (result != FMOD_OK) {
-				g_ConsoleMan.PrintString("ERROR: Failed to get the number of playing immobile sound channels when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
-				return;
-			}
-
-			for (int i = 0; i < numberOfPlayingChannels; i++) {
-				result = m_ImmobileSoundChannelGroup->getChannel(i, &soundChannel);
-				if (result != FMOD_OK) {
-					g_ConsoleMan.PrintString("ERROR: Failed to get immobile sound channel when finishing all looping sounds: " + std::string(FMOD_ErrorString(result)));
-					return;
-				}
-				soundChannel->setLoopCount(0);
-			}
+			
 		}
     }
 
@@ -575,11 +574,18 @@ namespace RTE {
 			}
 		}
 
-		FMOD::ChannelGroup *channelGroupToPlayIn;
-		if (g_ActivityMan.ActivityRunning()) {
-			channelGroupToPlayIn = soundContainer->IsImmobile() ? m_ImmobileSoundChannelGroup : m_MobileSoundChannelGroup;
-		} else {
-			channelGroupToPlayIn = m_MenuSoundChannelGroup;
+		FMOD::ChannelGroup *channelGroupToPlayIn = m_SFXChannelGroup;
+
+		switch (soundContainer->GetBusRouting()){
+			case SoundContainer::UI:
+				channelGroupToPlayIn = m_UIChannelGroup;
+				break;
+			case SoundContainer::SFX:
+				channelGroupToPlayIn = m_SFXChannelGroup;
+				break;
+			case SoundContainer::MUSIC:
+				channelGroupToPlayIn = m_MusicChannelGroup;
+				break;
 		}
 
 		FMOD::Channel *channel;
@@ -590,18 +596,23 @@ namespace RTE {
 		for (const SoundSet::SoundData *soundData : selectedSoundData) {
 			result = (result == FMOD_OK) ? m_AudioSystem->playSound(soundData->SoundObject, channelGroupToPlayIn, true, &channel) : result;
 			result = (result == FMOD_OK) ? channel->getIndex(&channelIndex) : result;
-
+			
 			result = (result == FMOD_OK) ? channel->setUserData(soundContainer) : result;
 			result = (result == FMOD_OK) ? channel->setCallback(SoundChannelEndedCallback) : result;
 			result = (result == FMOD_OK) ? channel->setPriority(soundContainer->GetPriority()) : result;
 			float pitchVariationMultiplier = pitchVariationFactor == 1.0F ? 1.0F : RandomNum(1.0F / pitchVariationFactor, 1.0F * pitchVariationFactor);
 			result = (result == FMOD_OK) ? channel->setPitch(soundContainer->GetPitch() * pitchVariationMultiplier) : result;
 			if (soundContainer->IsImmobile()) {
-				result = (result == FMOD_OK) ? channel->set3DLevel(0.0F) : result;
 				result = (result == FMOD_OK) ? channel->setVolume(soundContainer->GetVolume()) : result;
 			} else {
+
+				FMOD::DSP *dsp_multibandeq;
+				result = (result == FMOD_OK) ? m_AudioSystem->createDSPByType(FMOD_DSP_TYPE_MULTIBAND_EQ, &dsp_multibandeq) : result;
+				result = (result == FMOD_OK) ? dsp_multibandeq->setParameterFloat(1, 22000.0f) : result; // Functionally inactive lowpass filter
+				result = (result == FMOD_OK) ? channel->addDSP(0, dsp_multibandeq) : result;				
+				
 				m_SoundChannelMinimumAudibleDistances.insert({ channelIndex, soundData->MinimumAudibleDistance });
-				result = (result == FMOD_OK) ? channel->set3DLevel(m_SoundPanningEffectStrength) : result;
+				result = (result == FMOD_OK) ? channel->set3DLevel(m_SoundPanningEffectStrength * soundContainer->GetPanningStrengthMultiplier()) : result;
 
 				FMOD_VECTOR soundContainerPosition = GetAsFMODVector(soundContainer->GetPosition() + soundData->Offset);
 				UpdatePositionalEffectsForSoundChannel(channel, &soundContainerPosition);
@@ -765,36 +776,43 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void AudioMan::Update3DEffectsForMobileSoundChannels() {
+	void AudioMan::Update3DEffectsForSFXChannels() {
 		int numberOfPlayingChannels;
 		FMOD::Channel *soundChannel;
 
-		FMOD_RESULT result = m_MobileSoundChannelGroup->getNumChannels(&numberOfPlayingChannels);
+		FMOD_RESULT result = m_SFXChannelGroup->getNumChannels(&numberOfPlayingChannels);
 		if (result != FMOD_OK) {
 			g_ConsoleMan.PrintString("ERROR: Failed to get the number of playing channels when updating calculated sound effects for all playing channels: " + std::string(FMOD_ErrorString(result)));
 			return;
 		}
 
 		for (int i = 0; i < numberOfPlayingChannels; i++) {
-			result = m_MobileSoundChannelGroup->getChannel(i, &soundChannel);
-			FMOD_VECTOR channelPosition;
-			result = result == FMOD_OK ? soundChannel->get3DAttributes(&channelPosition, nullptr) : result;
-			result = result == FMOD_OK ? UpdatePositionalEffectsForSoundChannel(soundChannel, &channelPosition) : result;
-
-			float channel3dLevel;
-			result = (result == FMOD_OK) ? soundChannel->get3DLevel(&channel3dLevel) : result;
-			if (result == FMOD_OK && m_CurrentActivityHumanPlayerPositions.size() == 1) {
-				float sqrDistanceToPlayer = (*(m_CurrentActivityHumanPlayerPositions[0].get()) - GetAsVector(channelPosition)).GetSqrMagnitude();
-				float doubleMinimumDistanceForPanning = m_MinimumDistanceForPanning * 2.0F;
-				if (sqrDistanceToPlayer < (m_MinimumDistanceForPanning * m_MinimumDistanceForPanning)) {
-					soundChannel->set3DLevel(0);
-				} else if (sqrDistanceToPlayer < (doubleMinimumDistanceForPanning * doubleMinimumDistanceForPanning)) {
-					soundChannel->set3DLevel(LERP(0, 1, 0, m_SoundPanningEffectStrength, channel3dLevel));
-				} else {
-					soundChannel->set3DLevel(m_SoundPanningEffectStrength);
+			result = m_SFXChannelGroup->getChannel(i, &soundChannel);
+			FMOD_MODE mode;
+			result = (result == FMOD_OK) ? soundChannel->getMode(&mode) : result;
+			unsigned modeResult = mode & FMOD_2D;
+			if (modeResult == 0){
+				FMOD_VECTOR channelPosition;
+				result = result == FMOD_OK ? soundChannel->get3DAttributes(&channelPosition, nullptr) : result;
+				result = result == FMOD_OK ? UpdatePositionalEffectsForSoundChannel(soundChannel, &channelPosition) : result;
+				float channel3dLevel;
+				result = (result == FMOD_OK) ? soundChannel->get3DLevel(&channel3dLevel) : result;
+				if (result == FMOD_OK && m_CurrentActivityHumanPlayerPositions.size() == 1) {
+					float sqrDistanceToPlayer = (*(m_CurrentActivityHumanPlayerPositions[0].get()) - GetAsVector(channelPosition)).GetSqrMagnitude();
+					float doubleMinimumDistanceForPanning = m_MinimumDistanceForPanning * 2.0F;
+					void *userData;
+					result = result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
+					const SoundContainer *soundContainer = static_cast<SoundContainer *>(userData);
+					if (sqrDistanceToPlayer < (m_MinimumDistanceForPanning * m_MinimumDistanceForPanning)) {
+						soundChannel->set3DLevel(0);
+					} else if (sqrDistanceToPlayer < (doubleMinimumDistanceForPanning * doubleMinimumDistanceForPanning)) {
+						soundChannel->set3DLevel(LERP(0, 1, 0, m_SoundPanningEffectStrength * soundContainer->GetPanningStrengthMultiplier(), channel3dLevel));
+					} else {
+						soundChannel->set3DLevel(m_SoundPanningEffectStrength * soundContainer->GetPanningStrengthMultiplier());
+					}
 				}
 			}
-
+			
 			if (result != FMOD_OK) {
 				g_ConsoleMan.PrintString("ERROR: An error occurred updating calculated sound effects for playing channel with index " + std::to_string(i) + ": " + std::string(FMOD_ErrorString(result)));
 				continue;
@@ -852,8 +870,17 @@ namespace RTE {
 		float attenuationStartDistance = c_DefaultAttenuationStartDistance;
 		float soundMaxDistance = 0.0F;
 		result = result == FMOD_OK ? soundChannel->get3DMinMaxDistance(&attenuationStartDistance, &soundMaxDistance) : result;
-
+		
 		float attenuatedVolume = (shortestDistance <= attenuationStartDistance) ? 1.0F : attenuationStartDistance / shortestDistance;
+
+		// Lowpass as distance increases
+		FMOD::DSP *dsp_multibandeq;
+		result = (result == FMOD_OK) ? soundChannel->getDSP(0, &dsp_multibandeq) : result;
+		float factor = 1 - pow(1 - attenuatedVolume, 3);
+		float lowpassFrequency = 22000.0f * factor;
+		lowpassFrequency = std::clamp(lowpassFrequency, 350.0f, 22000.0f);
+		result = (result == FMOD_OK) ? dsp_multibandeq->setParameterFloat(1, lowpassFrequency) : result;
+		
 		float minimumAudibleDistance = m_SoundChannelMinimumAudibleDistances.at(soundChannelIndex);
 		if (shortestDistance >= soundMaxDistance) {
 			attenuatedVolume = 0.0F;

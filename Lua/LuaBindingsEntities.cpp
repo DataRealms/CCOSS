@@ -431,6 +431,7 @@ namespace RTE {
 		.property("JetTimeTotal", &AEJetpack::GetJetTimeTotal, &AEJetpack::SetJetTimeTotal)
 		.property("JetTimeLeft", &AEJetpack::GetJetTimeLeft)
 		.property("JetReplenishRate", &AEJetpack::GetJetReplenishRate, &AEJetpack::SetJetReplenishRate)
+		.property("MinimumFuelRatio", &AEJetpack::GetMinimumFuelRatio, &AEJetpack::SetMinimumFuelRatio)
 		.property("JetAngleRange", &AEJetpack::GetJetAngleRange, &AEJetpack::SetJetAngleRange)
 		.property("CanAdjustAngleWhileFiring", &AEJetpack::GetCanAdjustAngleWhileFiring, &AEJetpack::SetCanAdjustAngleWhileFiring)
 		.property("AdjustsThrottleForWeight", &AEJetpack::GetAdjustsThrottleForWeight, &AEJetpack::SetAdjustsThrottleForWeight)
@@ -1368,8 +1369,10 @@ namespace RTE {
 		.def(luabind::constructor<>())
 
 		.property("SoundOverlapMode", &SoundContainer::GetSoundOverlapMode, &SoundContainer::SetSoundOverlapMode)
+		.property("BusRouting", &SoundContainer::GetBusRouting, &SoundContainer::SetBusRouting)
 		.property("Immobile", &SoundContainer::IsImmobile, &SoundContainer::SetImmobile)
 		.property("AttenuationStartDistance", &SoundContainer::GetAttenuationStartDistance, &SoundContainer::SetAttenuationStartDistance)
+		.property("PanningStrengthMultiplier", &SoundContainer::GetPanningStrengthMultiplier, &SoundContainer::SetPanningStrengthMultiplier)
 		.property("Loops", &SoundContainer::GetLoopSetting, &SoundContainer::SetLoopSetting)
 		.property("Priority", &SoundContainer::GetPriority, &SoundContainer::SetPriority)
 		.property("AffectedByGlobalPitch", &SoundContainer::IsAffectedByGlobalPitch, &SoundContainer::SetAffectedByGlobalPitch)
@@ -1391,7 +1394,13 @@ namespace RTE {
 		.def("Restart", (bool (SoundContainer:: *)()) &SoundContainer::Restart)
 		.def("Restart", (bool (SoundContainer:: *)(int player)) &SoundContainer::Restart)
 		.def("FadeOut", &SoundContainer::FadeOut)
-
+		
+		.enum_("BusRouting")[
+			luabind::value("SFX", SoundContainer::BusRouting::SFX),
+			luabind::value("UI", SoundContainer::BusRouting::UI),
+			luabind::value("MUSIC", SoundContainer::BusRouting::MUSIC)
+		]
+		
 		.enum_("SoundOverlapMode")[
 			luabind::value("OVERLAP", SoundContainer::SoundOverlapMode::OVERLAP),
 			luabind::value("RESTART", SoundContainer::SoundOverlapMode::RESTART),

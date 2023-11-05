@@ -277,6 +277,7 @@ namespace RTE {
 		.property("SceneHeight", &SceneMan::GetSceneHeight)
 		.property("SceneWrapsX", &SceneMan::SceneWrapsX)
 		.property("SceneWrapsY", &SceneMan::SceneWrapsY)
+		.property("SceneOrbitDirection", &SceneMan::GetSceneOrbitDirection)
 		.property("LayerDrawMode", &SceneMan::GetLayerDrawMode, &SceneMan::SetLayerDrawMode)
 		.property("GlobalAcc", &SceneMan::GetGlobalAcc)
 		.property("OzPerKg", &SceneMan::GetOzPerKg)

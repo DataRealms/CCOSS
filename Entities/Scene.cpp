@@ -1550,6 +1550,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 
             writer.NewPropertyWithValue("JumpTime", jetpackToSave->GetJetTimeTotal() / 1000.0f); // Convert to seconds
             writer.NewPropertyWithValue("JumpReplenishRate", jetpackToSave->GetJetReplenishRate());
+        	writer.NewPropertyWithValue("MinimumFuelRatio", jetpackToSave->GetMinimumFuelRatio());
             writer.NewPropertyWithValue("JumpAngleRange", jetpackToSave->GetJetAngleRange());
             writer.NewPropertyWithValue("CanAdjustAngleWhileFiring", jetpackToSave->GetCanAdjustAngleWhileFiring());
         }

@@ -344,6 +344,12 @@ public:
 
     bool SceneWrapsY() const;
 
+    /// <summary>
+    /// Gets the orbit direction for the current scene.
+    /// </summary>
+    /// <returns>The orbit direction for the current scene.</returns>
+    Directions GetSceneOrbitDirection() const;
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTerrain
 //////////////////////////////////////////////////////////////////////////////////////////

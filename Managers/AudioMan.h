@@ -271,7 +271,12 @@ namespace RTE {
 		/// Mutes or unmutes all the sound effects channels.
 		/// </summary>
 		/// <param name="muteOrUnmute">Whether to mute or unmute all the sound effects channels.</param>
-		void SetSoundsMuted(bool muteOrUnmute = true) { m_MuteSounds = muteOrUnmute; if (m_AudioEnabled) { m_SoundChannelGroup->setMute(m_MuteSounds); } }
+		void SetSoundsMuted(bool muteOrUnmute = true) { m_MuteSounds = muteOrUnmute; if (m_AudioEnabled)
+		{
+			// TODO: We may or may not wanna separate this out and add a UI sound slider
+			m_SFXChannelGroup->setMute(m_MuteSounds);
+			m_UIChannelGroup->setMute(m_MuteSounds);
+		} }
 
 		/// <summary>
 		/// Gets the volume of all sounds. Does not get volume of music.
@@ -283,7 +288,11 @@ namespace RTE {
 		/// Sets the volume of all sounds to a specific volume. Does not affect music.
 		/// </summary>
 		/// <param name="volume">The desired volume scalar. 0.0-1.0.</param>
-		void SetSoundsVolume(float volume = 1.0F) { m_SoundsVolume = volume; if (m_AudioEnabled) { m_SoundChannelGroup->setVolume(m_SoundsVolume); } }
+		void SetSoundsVolume(float volume = 1.0F) { m_SoundsVolume = volume; if (m_AudioEnabled)
+		{
+			m_SFXChannelGroup->setVolume(m_SoundsVolume);
+			m_UIChannelGroup->setVolume(m_SoundsVolume);
+		} }
 #pragma endregion
 
 #pragma region Global Playback and Handling
@@ -301,7 +310,7 @@ namespace RTE {
 		/// Pauses all ingame sounds.
 		/// <param name="pause">Whether to pause sounds or resume them.</param>
 		/// </summary>
-		void PauseIngameSounds(bool pause = true) { if (m_AudioEnabled) { m_MobileSoundChannelGroup->setPaused(pause); m_ImmobileSoundChannelGroup->setPaused(pause); } }
+		void PauseIngameSounds(bool pause = true) { if (m_AudioEnabled) { m_SFXChannelGroup->setPaused(pause); } }
 #pragma endregion
 
 #pragma region Music Playback and Handling
@@ -434,11 +443,9 @@ namespace RTE {
 
 		FMOD::System *m_AudioSystem; //!< The FMOD Sound management object.
 		FMOD::ChannelGroup *m_MasterChannelGroup; //!< The top-level FMOD ChannelGroup that holds everything.
+		FMOD::ChannelGroup *m_SFXChannelGroup; //!< The FMOD ChannelGroup for diegetic gameplay sounds.
+		FMOD::ChannelGroup *m_UIChannelGroup; //!< The FMOD ChannelGroup for UI sounds.
 		FMOD::ChannelGroup *m_MusicChannelGroup; //!< The FMOD ChannelGroup for music.
-		FMOD::ChannelGroup *m_SoundChannelGroup; //!< The FMOD ChannelGroup for sounds.
-		FMOD::ChannelGroup *m_MobileSoundChannelGroup; //!< The FMOD ChannelGroup for mobile sounds.
-		FMOD::ChannelGroup *m_ImmobileSoundChannelGroup; //!< The FMOD ChannelGroup for immobile sounds.
-		FMOD::ChannelGroup *m_MenuSoundChannelGroup; //!< The FMOD ChannelGroup for immobile sounds.
 
 		bool m_AudioEnabled; //!< Bool to tell whether audio is enabled or not.
 		std::vector<std::unique_ptr<const Vector>> m_CurrentActivityHumanPlayerPositions; //!< The stored positions of each human player in the current activity. Only filled when there's an activity running.
@@ -523,7 +530,7 @@ namespace RTE {
 		/// <summary>
 		/// Updates 3D effects calculations for all sound channels whose SoundContainers isn't immobile.
 		/// </summary>
-		void Update3DEffectsForMobileSoundChannels();
+		void Update3DEffectsForSFXChannels();
 
 		/// <summary>
 		/// Sets or updates the position of the given sound channel so it handles scene wrapping correctly. Also handles volume attenuation and minimum audible distance.

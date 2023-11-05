@@ -258,7 +258,7 @@ private:
 	int m_CursorY;
 	int m_CursorIndex;
 	unsigned long m_CursorColor;
-	int m_CursorBlinkCount; // Hacky way to make cursor blink without a timer
+    Timer m_BlinkTimer;
 
 	int m_StartIndex;
 

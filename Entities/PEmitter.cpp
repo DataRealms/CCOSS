@@ -494,6 +494,8 @@ namespace RTE {
 
 			if (m_BurstTriggered)
 				m_BurstTriggered = false;
+
+			m_WasEmitting = true;
 		}
 		// Do stuff to stop emission
 		else if (m_WasEmitting)
@@ -501,6 +503,7 @@ namespace RTE {
 			m_EmissionSound.Stop();
 			if (!m_SustainBurstSound) { m_BurstSound.Stop(); }
 			m_EndSound.Play(m_Pos);
+			m_WasEmitting = false;
 		}
 	}
 

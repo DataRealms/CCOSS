@@ -43,7 +43,7 @@ class GAScripted : public GameActivity {
 
 public:
 
-ScriptFunctionNames("StartActivity", "UpdateActivity", "PauseActivity", "EndActivity", "OnSave");
+ScriptFunctionNames("StartActivity", "UpdateActivity", "PauseActivity", "EndActivity", "OnSave", "CraftEnteredOrbit");
 
 // Concrete allocation and cloning definitions
 EntityAllocation(GAScripted);

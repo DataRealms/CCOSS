@@ -139,7 +139,10 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader) {
 
 int GAScripted::Save(Writer &writer) const {
     // Call the script OnSave() function, if it exists
-    g_LuaMan.GetMasterScriptState().RunScriptString("if " + m_LuaClassName + " and " + m_LuaClassName + ".OnSave then " + m_LuaClassName + ":OnSave(); end");
+    auto saveItr = m_ScriptFunctions.find("OnSave");
+    if (saveItr != m_ScriptFunctions.end()) {
+        g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(saveItr->second.get(), "_G", m_LuaClassName, {}, {}, {});
+    }
 
     GameActivity::Save(writer);
 
@@ -311,7 +314,7 @@ int GAScripted::Start() {
     // Call the create function, but only after first checking if it exists
     auto createItr = m_ScriptFunctions.find("StartActivity");
     if (createItr != m_ScriptFunctions.end()) {
-        if ((error = g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(createItr->second.get(), m_LuaClassName, "", {}, { initialActivityState == ActivityState::NotStarted ? "true" : "false" }, {})) < 0) {
+        if ((error = g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(createItr->second.get(), "_G", m_LuaClassName, {}, { initialActivityState == ActivityState::NotStarted ? "true" : "false" }, {})) < 0) {
             return error;
         }
     }
@@ -358,7 +361,7 @@ void GAScripted::SetPaused(bool pause) {
     // Call the defined function, but only after first checking if it exists
     auto pauseItr = m_ScriptFunctions.find("PauseActivity");
     if (pauseItr != m_ScriptFunctions.end()) {
-        g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(pauseItr->second.get(), m_LuaClassName, "", {}, { pause ? "true" : "false" }, {});
+        g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(pauseItr->second.get(), "_G", m_LuaClassName, {}, { pause ? "true" : "false" }, {});
     }
 
 	// Pause all global scripts
@@ -381,7 +384,7 @@ void GAScripted::End() {
     // Call the defined function, but only after first checking if it exists
     auto endItr = m_ScriptFunctions.find("EndActivity");
     if (endItr != m_ScriptFunctions.end()) {
-        g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(endItr->second.get(), m_LuaClassName, "", {}, {}, {});
+        g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(endItr->second.get(), "_G", m_LuaClassName, {}, {}, {});
     }
 
 	// End all global scripts
@@ -442,7 +445,7 @@ void GAScripted::Update() {
         // Call the defined function, but only after first checking if it exists
         auto updateItr = m_ScriptFunctions.find("UpdateActivity");
         if (updateItr != m_ScriptFunctions.end()) {
-            g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(updateItr->second.get(), m_LuaClassName, "", {}, {}, {});
+            g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(updateItr->second.get(), "_G", m_LuaClassName, {}, {}, {});
         }
 
         UpdateGlobalScripts(false);

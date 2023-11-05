@@ -4,7 +4,6 @@
 #include "Singleton.h"
 #include "Entity.h"
 #include "RTETools.h"
-#include "LuabindObjectWrapper.h"
 
 #define g_LuaMan LuaMan::Instance()
 

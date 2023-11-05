@@ -424,6 +424,9 @@ namespace RTE {
 		/// <param name="movableMan">A reference to MovableMan, provided by Lua.</param>
 		/// <param name="particle">A pointer to the particle to be added.</param>
 		static void AddParticle(MovableMan &movableMan, MovableObject *particle);
+
+		static void SendGlobalMessage1(MovableMan &movableMan, const std::string& message);
+		static void SendGlobalMessage2(MovableMan &movableMan, const std::string& message, luabind::object context);
 	};
 #pragma endregion
 

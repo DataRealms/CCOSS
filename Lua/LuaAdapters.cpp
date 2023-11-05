@@ -562,6 +562,26 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaAdaptersMovableMan::SendGlobalMessage1(MovableMan &movableMan, const std::string &message) {
+		luabind::object context;
+		SendGlobalMessage2(movableMan, message, context);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMovableMan::SendGlobalMessage2(MovableMan &movableMan, const std::string &message, luabind::object context) {
+		LuabindObjectWrapper wrapper(&context, "", false);
+
+		GAScripted* scriptedActivity = dynamic_cast<GAScripted*>(g_ActivityMan.GetActivity());
+		if (scriptedActivity) {
+			scriptedActivity->RunLuaFunction("OnGlobalMessage", {}, { message }, { &wrapper });
+		}
+
+		movableMan.RunLuaFunctionOnAllMOs("OnGlobalMessage", {}, { message }, { &wrapper });
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	double LuaAdaptersTimerMan::GetDeltaTimeTicks(const TimerMan &timerMan) {
 		return static_cast<double>(timerMan.GetDeltaTimeTicks());
 	}

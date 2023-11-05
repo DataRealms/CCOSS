@@ -340,6 +340,23 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaAdaptersActivity::SendMessage1(Activity *luaSelfObject, const std::string &message) {
+		luabind::object context;
+		SendMessage2(luaSelfObject, message, context);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersActivity::SendMessage2(Activity *luaSelfObject, const std::string &message, luabind::object context) {
+		GAScripted* scriptedActivity = dynamic_cast<GAScripted*>(luaSelfObject);
+		if (scriptedActivity) {
+			LuabindObjectWrapper wrapper(&context, "", false);
+			scriptedActivity->RunLuaFunction("OnMessage", {}, { message }, { &wrapper });
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool LuaAdaptersMovableObject::HasScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
 		return luaSelfObject->HasScript(g_PresetMan.GetFullModulePath(scriptPath));
 	}
@@ -382,6 +399,20 @@ namespace RTE {
 
 	bool LuaAdaptersMovableObject::DisableScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
 		return luaSelfObject->EnableOrDisableScript(g_PresetMan.GetFullModulePath(scriptPath), false);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMovableObject::SendMessage1(MovableObject *luaSelfObject, const std::string &message) {
+		luaSelfObject->RunScriptedFunctionInAppropriateScripts("OnMessage", false, false, {}, { message });
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMovableObject::SendMessage2(MovableObject *luaSelfObject, const std::string &message, luabind::object context) {
+		// We're not transferring context between lua states, so only run singlethreaded scripts when we have context
+		LuabindObjectWrapper wrapper(&context, "", false);
+		luaSelfObject->RunScriptedFunctionInAppropriateScripts("OnMessage", false, false, {}, { message }, { &wrapper }, ThreadScriptsToRun::SingleThreaded);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -525,6 +556,26 @@ namespace RTE {
 		} else {
 			movableMan.AddParticle(particle);
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMovableMan::SendGlobalMessage1(MovableMan &movableMan, const std::string &message) {
+		luabind::object context;
+		SendGlobalMessage2(movableMan, message, context);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMovableMan::SendGlobalMessage2(MovableMan &movableMan, const std::string &message, luabind::object context) {
+		LuabindObjectWrapper wrapper(&context, "", false);
+
+		GAScripted* scriptedActivity = dynamic_cast<GAScripted*>(g_ActivityMan.GetActivity());
+		if (scriptedActivity) {
+			scriptedActivity->RunLuaFunction("OnGlobalMessage", {}, { message }, { &wrapper });
+		}
+
+		movableMan.RunLuaFunctionOnAllMOs("OnGlobalMessage", {}, { message }, { &wrapper });
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

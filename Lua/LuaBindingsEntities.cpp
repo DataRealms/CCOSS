@@ -1081,7 +1081,9 @@ namespace RTE {
 		.def("NotResting", &MovableObject::NotResting)
 		.def("IsAtRest", &MovableObject::IsAtRest)
 		.def("MoveOutOfTerrain", &MovableObject::MoveOutOfTerrain)
-		.def("RotateOffset", &MovableObject::RotateOffset);
+		.def("RotateOffset", &MovableObject::RotateOffset)
+		.def("SendMessage", &LuaAdaptersMovableObject::SendMessage1)
+		.def("SendMessage", &LuaAdaptersMovableObject::SendMessage2);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

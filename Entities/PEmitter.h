@@ -474,7 +474,7 @@ public:
 	// Return value:    None.
 
 	void Update() override;
-	void PostUpdate() override { m_WasEmitting = m_EmitEnabled; MOSParticle::PostUpdate(); }
+	void PostUpdate() override { MOSParticle::PostUpdate(); }
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////

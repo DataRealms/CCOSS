@@ -10,7 +10,7 @@ GUITextPanel::GUITextPanel(GUIManager *Manager) : GUIPanel(Manager) {
 	m_CursorX = m_CursorY = 0;
 	m_CursorIndex = 0;
 	m_CursorColor = 0;
-	m_CursorBlinkCount = 0;
+	m_BlinkTimer.Reset();
 
 	m_FontColor = 0;
 	m_FontSelectColor = 0;
@@ -36,7 +36,8 @@ GUITextPanel::GUITextPanel() : GUIPanel() {
 	m_CursorX = m_CursorY = 0;
 	m_CursorIndex = 0;
 	m_CursorColor = 0;
-	m_CursorBlinkCount = 0;
+	m_BlinkTimer.Reset();
+
 	m_FontColor = 0;
 	m_FontSelectColor = 0;
 	m_StartIndex = 0;
@@ -134,8 +135,10 @@ void GUITextPanel::Draw(GUIScreen *Screen) {
 	}
 
 
-	// If we have focus, draw the cursor with hacky blink
-	if (m_GotFocus && (m_CursorBlinkCount++ % 30 > 15)) { Screen->GetBitmap()->DrawRectangle(m_X + m_CursorX + 2, m_Y + hSpacer + m_CursorY + 2, 1, FontHeight - 3, m_CursorColor, true); }
+	// If we have focus, draw the blinking cursor
+	const int blinkInterval = 250;
+	bool shouldBlink = static_cast<int>(m_BlinkTimer.GetElapsedRealTimeMS()) % (blinkInterval * 2) > blinkInterval;
+	if (m_GotFocus && shouldBlink) { Screen->GetBitmap()->DrawRectangle(m_X + m_CursorX + 2, m_Y + hSpacer + m_CursorY + 2, 1, FontHeight - 3, m_CursorColor, true); }
 
 	// Restore normal clipping
 	Screen->GetBitmap()->SetClipRect(nullptr);

@@ -341,15 +341,13 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaAdaptersActivity::SendMessage1(Activity *luaSelfObject, const std::string &message) {
-		GAScripted* scriptedActivity = dynamic_cast<GAScripted*>(luaSelfObject);
-		if (scriptedActivity) {
-			scriptedActivity->RunLuaFunction("OnMessage", {}, { message });
-		}
+		luabind::object context;
+		SendMessage2(luaSelfObject, message, context);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void LuaAdaptersActivity::SendMessage2(Activity*luaSelfObject, const std::string &message, luabind::object context) {
+	void LuaAdaptersActivity::SendMessage2(Activity *luaSelfObject, const std::string &message, luabind::object context) {
 		GAScripted* scriptedActivity = dynamic_cast<GAScripted*>(luaSelfObject);
 		if (scriptedActivity) {
 			LuabindObjectWrapper wrapper(&context, "", false);

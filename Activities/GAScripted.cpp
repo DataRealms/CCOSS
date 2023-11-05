@@ -190,10 +190,11 @@ int GAScripted::ReloadScripts() {
 
     CollectRequiredAreas();
 
-    std::string luaClearSupportedFunctionsString;
+    std::string luaClearSupportedFunctionsString = "if " + m_LuaClassName + " then ";
     for (const std::string& functionName : GetSupportedScriptFunctionNames()) {
-        luaClearSupportedFunctionsString += m_LuaClassName + "." + functionName + " = nil;";
+        luaClearSupportedFunctionsString += m_LuaClassName + "." + functionName + " = nil; ";
     }
+    luaClearSupportedFunctionsString += " end";
 
     if (g_LuaMan.GetMasterScriptState().RunScriptString(luaClearSupportedFunctionsString) < 0) {
         return -1;

@@ -421,13 +421,27 @@ bool SceneMan::SceneWrapsY() const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+Directions SceneMan::GetSceneOrbitDirection() const {
+    if (m_pCurrentScene) {
+        SLTerrain *terrain = m_pCurrentScene->GetTerrain();
+        if (terrain) {
+            return terrain->GetOrbitDirection();
+        }
+    }
+
+    return Directions::Up;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 SLTerrain * SceneMan::GetTerrain()
 {
 //    RTEAssert(m_pCurrentScene, "Trying to get terrain matter before there is a scene or terrain!");
-    if (m_pCurrentScene)
+    if (m_pCurrentScene) {
         return m_pCurrentScene->GetTerrain();
+    }
 
-    return 0;
+    return nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

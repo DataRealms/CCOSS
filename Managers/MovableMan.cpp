@@ -1608,6 +1608,18 @@ void callLuaFunctionOnMORecursive(MovableObject* mo, const std::string& function
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, const std::vector<LuabindObjectWrapper*> &functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
+    for (Actor* actor : m_AddedActors) {
+        callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    }
+
+    for (MovableObject *item : m_AddedItems) {
+        callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    }
+
+    for (MovableObject* particle : m_AddedParticles) {
+        callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    }
+    
     for (Actor *actor : m_Actors) {
         callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
     }

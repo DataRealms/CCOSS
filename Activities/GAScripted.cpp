@@ -138,11 +138,8 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader) {
 //                  later recreation with Create(Reader &reader);
 
 int GAScripted::Save(Writer &writer) const {
-    // Call the script OnSave() function, if it exists
-    auto saveItr = m_ScriptFunctions.find("OnSave");
-    if (saveItr != m_ScriptFunctions.end()) {
-        g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(saveItr->second.get(), "_G", m_LuaClassName, {}, {}, {});
-    }
+    // Hmm. We should probably be calling this prior to the writer Save, instead of const-casting.
+    const_cast<GAScripted*>(this)->RunLuaFunction("OnSave");
 
     GameActivity::Save(writer);
 
@@ -307,16 +304,13 @@ int GAScripted::Start() {
     }
 
     // Run the file that specifies the Lua functions for this' operating logic
-    if (ReloadScripts() < 0) {
+    if ((error = ReloadScripts()) < 0) {
         return error;
     }
 
-    // Call the create function, but only after first checking if it exists
-    auto createItr = m_ScriptFunctions.find("StartActivity");
-    if (createItr != m_ScriptFunctions.end()) {
-        if ((error = g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(createItr->second.get(), "_G", m_LuaClassName, {}, { initialActivityState == ActivityState::NotStarted ? "true" : "false" }, {})) < 0) {
-            return error;
-        }
+    // Call the create function
+    if ((error = RunLuaFunction("StartActivity", {}, { initialActivityState == ActivityState::NotStarted ? "true" : "false" }, {})) < 0) {
+        return error;
     }
 
 	// Clear active global scripts
@@ -358,11 +352,7 @@ int GAScripted::Start() {
 void GAScripted::SetPaused(bool pause) {
     GameActivity::SetPaused(pause);
 
-    // Call the defined function, but only after first checking if it exists
-    auto pauseItr = m_ScriptFunctions.find("PauseActivity");
-    if (pauseItr != m_ScriptFunctions.end()) {
-        g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(pauseItr->second.get(), "_G", m_LuaClassName, {}, { pause ? "true" : "false" }, {});
-    }
+    RunLuaFunction("PauseActivity", {}, { pause ? "true" : "false" }, {});
 
 	// Pause all global scripts
 	for (std::vector<GlobalScript *>::iterator sItr = m_GlobalScriptsList.begin(); sItr < m_GlobalScriptsList.end(); ++sItr) {
@@ -381,11 +371,7 @@ void GAScripted::SetPaused(bool pause) {
 void GAScripted::End() {
     GameActivity::End();
 
-    // Call the defined function, but only after first checking if it exists
-    auto endItr = m_ScriptFunctions.find("EndActivity");
-    if (endItr != m_ScriptFunctions.end()) {
-        g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(endItr->second.get(), "_G", m_LuaClassName, {}, {}, {});
-    }
+    RunLuaFunction("EndActivity");
 
 	// End all global scripts
 	for (std::vector<GlobalScript *>::iterator sItr = m_GlobalScriptsList.begin(); sItr < m_GlobalScriptsList.end(); ++sItr) {
@@ -442,11 +428,7 @@ void GAScripted::Update() {
     if (m_ActivityState != ActivityState::Over) {
 		AddPieSlicesToActiveActorPieMenus();
 
-        // Call the defined function, but only after first checking if it exists
-        auto updateItr = m_ScriptFunctions.find("UpdateActivity");
-        if (updateItr != m_ScriptFunctions.end()) {
-            g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(updateItr->second.get(), "_G", m_LuaClassName, {}, {}, {});
-        }
+        RunLuaFunction("UpdateActivity");
 
         UpdateGlobalScripts(false);
     }
@@ -486,6 +468,16 @@ void GAScripted::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 
 void GAScripted::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) {
     GameActivity::Draw(pTargetBitmap, targetPos);
+}
+
+int GAScripted::RunLuaFunction(const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments, const std::vector<std::string_view>& functionLiteralArguments, const std::vector<LuabindObjectWrapper*>& functionObjectArguments) {
+    // Call the defined function, but only after first checking if it exists
+    auto funcItr = m_ScriptFunctions.find(functionName);
+    if (funcItr == m_ScriptFunctions.end()) {
+        return 0;
+    }
+
+    return g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(funcItr->second.get(), "_G", m_LuaClassName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
 }
 
 

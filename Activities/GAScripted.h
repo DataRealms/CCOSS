@@ -43,7 +43,7 @@ class GAScripted : public GameActivity {
 
 public:
 
-ScriptFunctionNames("StartActivity", "UpdateActivity", "PauseActivity", "EndActivity", "OnSave", "CraftEnteredOrbit");
+ScriptFunctionNames("StartActivity", "UpdateActivity", "PauseActivity", "EndActivity", "OnSave", "CraftEnteredOrbit", "OnMessage");
 
 // Concrete allocation and cloning definitions
 EntityAllocation(GAScripted);
@@ -245,6 +245,7 @@ ClassInfoGetters;
 
 	void Draw(BITMAP *pTargetBitmap, const Vector& targetPos = Vector()) override;
 
+	int RunLuaFunction(const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments = std::vector<const Entity*>(), const std::vector<std::string_view>& functionLiteralArguments = std::vector<std::string_view>(), const std::vector<LuabindObjectWrapper*>& functionObjectArguments = std::vector<LuabindObjectWrapper*>());
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

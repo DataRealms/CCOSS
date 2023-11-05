@@ -340,6 +340,25 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaAdaptersActivity::SendMessage1(Activity *luaSelfObject, const std::string &message) {
+		GAScripted* scriptedActivity = dynamic_cast<GAScripted*>(luaSelfObject);
+		if (scriptedActivity) {
+			scriptedActivity->RunLuaFunction("OnMessage", {}, { message });
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersActivity::SendMessage2(Activity*luaSelfObject, const std::string &message, luabind::object context) {
+		GAScripted* scriptedActivity = dynamic_cast<GAScripted*>(luaSelfObject);
+		if (scriptedActivity) {
+			LuabindObjectWrapper wrapper(&context, "", false);
+			scriptedActivity->RunLuaFunction("OnMessage", {}, { message }, { &wrapper });
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool LuaAdaptersMovableObject::HasScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
 		return luaSelfObject->HasScript(g_PresetMan.GetFullModulePath(scriptPath));
 	}

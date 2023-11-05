@@ -341,6 +341,13 @@ namespace RTE {
 	};
 #pragma endregion
 
+#pragma region Activity Lua Adapters
+	struct LuaAdaptersActivity {
+		static void SendMessage1(Activity *luaSelfObject, const std::string &message);
+		static void SendMessage2(Activity *luaSelfObject, const std::string &message, luabind::object context);
+	};
+#pragma endregion
+
 #pragma region MovableObject Lua Adapters
 	struct LuaAdaptersMovableObject {
 		static bool HasScript(MovableObject *luaSelfObject, const std::string &scriptPath);

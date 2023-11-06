@@ -1382,6 +1382,20 @@ void Actor::Update()
     }
     m_Health = std::min(m_Health, m_MaxHealth);
 
+    /////////////////////////////
+    // Stability logic
+
+    if (m_Status == STABLE) {
+        // If moving really fast, we're not able to be stable
+        if (std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y)) { m_Status = UNSTABLE; }
+
+        m_StableRecoverTimer.Reset();
+    }
+    else if (m_Status == UNSTABLE) {
+        // Only regain stability if we're not moving too fast and it's been a while since we lost it
+        if (m_StableRecoverTimer.IsPastSimMS(m_StableRecoverDelay) && !(std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y))) { m_Status = STABLE; }
+    }
+
     /////////////////////////////////////////////
     // Take damage from large hits during travel
 
@@ -1391,27 +1405,13 @@ void Actor::Update()
     float halfTravelImpulseDamage = m_TravelImpulseDamage * 0.5F;
 	if (m_BodyHitSound && travelImpulseMagnitudeSqr > (halfTravelImpulseDamage * halfTravelImpulseDamage)) { m_BodyHitSound->Play(m_Pos); }
 
-	if (travelImpulseMagnitudeSqr > (m_TravelImpulseDamage * m_TravelImpulseDamage)) {
+    // But only actually damage ourselves if we're unstable
+	if (m_Status == Actor::UNSTABLE && travelImpulseMagnitudeSqr > (m_TravelImpulseDamage * m_TravelImpulseDamage)) {
 		const float impulse = std::sqrt(travelImpulseMagnitudeSqr) - m_TravelImpulseDamage;
 		const float damage = std::max(impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth, 0.0F);
 		m_Health -= damage;
-		if (m_Status == Actor::STABLE) { m_Status = UNSTABLE; }
 		m_ForceDeepCheck = true;
 	}
-
-    /////////////////////////////
-    // Stability logic
-
-    if (m_Status == STABLE) {
-        // If moving really fast, we're not able to be stable
-		if (std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y)) { m_Status = UNSTABLE; }
-
-        m_StableRecoverTimer.Reset();
-    }
-    else if (m_Status == UNSTABLE) {
-        // Only regain stability if we're not moving too fast and it's been a while since we lost it
-		if (m_StableRecoverTimer.IsPastSimMS(m_StableRecoverDelay) && !(std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y))) { m_Status = STABLE; }
-    }
 
     // Spread the carried items and gold around before death.
     if (m_Status == DYING || m_Status == DEAD) {

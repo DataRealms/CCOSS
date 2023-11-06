@@ -2391,6 +2391,13 @@ bool SceneMan::OverAltitude(const Vector &point, int threshold, int accuracy)
 
 Vector SceneMan::MovePointToGround(const Vector &from, int maxAltitude, int accuracy)
 {
+    if (m_pCurrentScene) {
+        Scene::Area* noGravArea = m_pCurrentScene->GetArea("NoGravityArea");
+        if (noGravArea && noGravArea->IsInside(from)) {
+            return from;
+        }
+    }
+
     Vector temp(from);
     ForceBounds(temp);
 

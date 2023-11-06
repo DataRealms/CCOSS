@@ -1574,6 +1574,7 @@ void SceneEditorGUI::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) const
 
 void SceneEditorGUI::UpdateBrainSkyPathAndCost(Vector brainPos) {
     if (!m_RequireClearPathToOrbit) {
+        m_PathRequest.reset();
         return;
     }
 

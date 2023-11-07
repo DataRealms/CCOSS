@@ -2391,6 +2391,7 @@ bool SceneMan::OverAltitude(const Vector &point, int threshold, int accuracy)
 
 Vector SceneMan::MovePointToGround(const Vector &from, int maxAltitude, int accuracy)
 {
+    // Todo, instead of a nograv area maybe best to tag certain areas as NoGrav. As otherwise it's tricky to keep track of when things are removed
     if (m_pCurrentScene) {
         Scene::Area* noGravArea = m_pCurrentScene->GetArea("NoGravityArea");
         if (noGravArea && noGravArea->IsInside(from)) {
@@ -2856,6 +2857,27 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			g_MovableMan.DrawHUD(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
 			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
+
+#ifdef DRAW_NOGRAV_BOXES
+            if (Scene::Area* noGravArea = m_pCurrentScene->GetArea("NoGravityArea")) {
+                const std::vector<Box>& boxList = noGravArea->GetBoxes();
+                g_FrameMan.SetTransTableFromPreset(TransparencyPreset::MoreTrans);
+                drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
+
+                std::list<Box> wrappedBoxes;
+                for (std::vector<Box>::const_iterator bItr = boxList.begin(); bItr != boxList.end(); ++bItr)
+                {
+                    wrappedBoxes.clear();
+                    g_SceneMan.WrapBox(*bItr, wrappedBoxes);
+
+                    for (std::list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
+                    {
+                        Vector adjCorner = (*wItr).GetCorner() - targetPos;
+                        rectfill(targetBitmap, adjCorner.m_X, adjCorner.m_Y, adjCorner.m_X + (*wItr).GetWidth(), adjCorner.m_Y + (*wItr).GetHeight(), g_RedColor);
+                    }
+                }
+            }
+#endif
 
 			if (m_pDebugLayer) {
                 m_pDebugLayer->Draw(targetBitmap, targetBox);

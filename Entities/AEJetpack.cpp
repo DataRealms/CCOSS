@@ -15,6 +15,7 @@ namespace RTE {
         m_JetTimeLeft = 0.0F;
 		m_JetThrustBonusMultiplier = 1.0F;
         m_JetReplenishRate = 1.0F;
+		m_MinimumFuelRatio = 0.0F;
         m_JetAngleRange = 0.25F;
 		m_CanAdjustAngleWhileFiring = true;
 		m_AdjustsThrottleForWeight = true;
@@ -43,6 +44,7 @@ namespace RTE {
         m_JetTimeTotal = reference.m_JetTimeTotal;
         m_JetTimeLeft = reference.m_JetTimeLeft;
         m_JetReplenishRate = reference.m_JetReplenishRate;
+		m_MinimumFuelRatio = reference.m_MinimumFuelRatio;
         m_JetAngleRange = reference.m_JetAngleRange;
 		m_CanAdjustAngleWhileFiring = reference.m_CanAdjustAngleWhileFiring;
 		m_AdjustsThrottleForWeight = reference.m_AdjustsThrottleForWeight;
@@ -62,6 +64,7 @@ namespace RTE {
 				m_JetpackType = JetpackType::Standard;
 			} else if (jetpackType == "JumpPack") {
 				m_JetpackType = JetpackType::JumpPack;
+				m_MinimumFuelRatio = 0.25F;
 			} else {
 				reader.ReportError("Unknown JetpackType '" + jetpackType + "'!");
 			}
@@ -71,10 +74,13 @@ namespace RTE {
             m_JetTimeTotal *= 1000.0f; // Convert to ms
 	    });
 		MatchForwards("JumpReplenishRate") MatchProperty("JetReplenishRate", { reader >> m_JetReplenishRate; });
+		MatchProperty("MinimumFuelRatio", {
+			reader >> m_MinimumFuelRatio;
+			m_MinimumFuelRatio = std::clamp(m_MinimumFuelRatio, 0.0F, 1.0F);
+		});		
 		MatchForwards("JumpAngleRange") MatchProperty("JetAngleRange", { reader >> m_JetAngleRange; });
 		MatchProperty("CanAdjustAngleWhileFiring", { reader >> m_CanAdjustAngleWhileFiring; });
 		MatchProperty("AdjustsThrottleForWeight", { reader >> m_AdjustsThrottleForWeight; });
-        
 
 		EndPropertyList;
 	}
@@ -97,6 +103,7 @@ namespace RTE {
 
 		writer.NewPropertyWithValue("JumpTime", m_JetTimeTotal / 1000.0f); // Convert to seconds
 		writer.NewPropertyWithValue("JumpReplenishRate", m_JetReplenishRate);
+		writer.NewPropertyWithValue("MinimumFuelRatio", m_MinimumFuelRatio);
 		writer.NewPropertyWithValue("JumpAngleRange", m_JetAngleRange);
 		writer.NewPropertyWithValue("CanAdjustAngleWhileFiring", m_CanAdjustAngleWhileFiring);
 		writer.NewPropertyWithValue("AdjustsThrottleForWeight", m_AdjustsThrottleForWeight);
@@ -138,7 +145,7 @@ namespace RTE {
 			case JetpackType::Standard:
 				if (controller.IsState(BODY_JUMPSTART) && !IsOutOfFuel() && IsFullyFueled()) {
 					Burst(parentActor, fuelUseMultiplier);
-				} else if (controller.IsState(BODY_JUMP) && !IsOutOfFuel()) {
+				} else if (controller.IsState(BODY_JUMP) && !IsOutOfFuel() && (GetJetTimeRatio() >= m_MinimumFuelRatio || wasEmittingLastFrame)) {
 					Thrust(parentActor, fuelUseMultiplier);
 				} else {
 					Recharge(parentActor);
@@ -148,7 +155,7 @@ namespace RTE {
 			case JetpackType::JumpPack:
 				if (wasEmittingLastFrame && !IsOutOfFuel()) {
 					Thrust(parentActor, fuelUseMultiplier);
-				} else if (controller.IsState(BODY_JUMPSTART) && IsFullyFueled()) {
+				} else if (controller.IsState(BODY_JUMPSTART) && GetJetTimeRatio() >= m_MinimumFuelRatio) {
 					Burst(parentActor, fuelUseMultiplier);
 				} else {
 					Recharge(parentActor);
@@ -159,12 +166,13 @@ namespace RTE {
 			Recharge(parentActor);
 		}
 
-		float maxAngle = c_HalfPI * m_JetAngleRange;
+		m_JetTimeLeft = std::clamp(m_JetTimeLeft, 0.0f, m_JetTimeTotal);
 
 		// If pie menu is on, keep the angle to what it was before.
 		bool canAdjustAngle = !controller.IsState(PIE_MENU_ACTIVE) && (m_CanAdjustAngleWhileFiring || !IsEmitting());
 		if (canAdjustAngle) {
 			// Direct the jetpack nozzle according to either analog stick input or aim angle.
+			float maxAngle = c_HalfPI * m_JetAngleRange;
             const float analogDeadzone = 0.1F;
 			if (controller.GetAnalogMove().MagnitudeIsGreaterThan(analogDeadzone)) {
 				float jetAngle = std::clamp(controller.GetAnalogMove().GetAbsRadAngle() - c_HalfPI, -maxAngle, maxAngle);
@@ -187,6 +195,9 @@ namespace RTE {
 	void AEJetpack::Burst(Actor& parentActor, float fuelUseMultiplier) {
 		parentActor.SetMovementState(Actor::JUMP);
 		
+		// TODO - find a better solution! This stops the actor getting stuck, but it's awful...
+		parentActor.ForceDeepCheck();
+
 		TriggerBurst();
 		EnableEmission(true);
 		AlarmOnEmit(m_Team); // Jetpacks are noisy!
@@ -215,7 +226,7 @@ namespace RTE {
 		if (parentActor.GetMovementState() == Actor::JUMP) {
 			parentActor.SetMovementState(Actor::STAND);
 		}
-		m_JetTimeLeft = std::min(m_JetTimeLeft + g_TimerMan.GetDeltaTimeMS() * m_JetReplenishRate, m_JetTimeTotal);
+		m_JetTimeLeft += g_TimerMan.GetDeltaTimeMS() * m_JetReplenishRate;
 	}
 
 }

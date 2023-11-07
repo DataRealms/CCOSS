@@ -18,6 +18,8 @@
 #include "GlobalScript.h"
 #include "Box.h"
 
+#include "LuabindObjectWrapper.h"
+
 namespace RTE
 {
 
@@ -41,6 +43,7 @@ class GAScripted : public GameActivity {
 
 public:
 
+ScriptFunctionNames("StartActivity", "UpdateActivity", "PauseActivity", "EndActivity", "OnSave", "CraftEnteredOrbit", "OnMessage", "OnGlobalMessage");
 
 // Concrete allocation and cloning definitions
 EntityAllocation(GAScripted);
@@ -242,6 +245,7 @@ ClassInfoGetters;
 
 	void Draw(BITMAP *pTargetBitmap, const Vector& targetPos = Vector()) override;
 
+	int RunLuaFunction(const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments = std::vector<const Entity*>(), const std::vector<std::string_view>& functionLiteralArguments = std::vector<std::string_view>(), const std::vector<LuabindObjectWrapper*>& functionObjectArguments = std::vector<LuabindObjectWrapper*>());
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -282,6 +286,8 @@ protected:
 	std::vector<std::unique_ptr<PieSlice>> m_PieSlicesToAdd; //!< A vector of PieSlices that should be added to any PieMenus opened while this GAScripted is running.
     // The list of global scripts allowed to run during this activity
     std::vector<GlobalScript *> m_GlobalScriptsList;
+
+	std::unordered_map<std::string, std::unique_ptr<LuabindObjectWrapper>> m_ScriptFunctions; //!< A map of LuabindObjectWrappers that hold Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

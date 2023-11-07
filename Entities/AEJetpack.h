@@ -116,6 +116,18 @@ namespace RTE
         void SetJetReplenishRate(float newValue) { m_JetReplenishRate = newValue; }
 
         /// <summary>
+        /// Gets the rate at which this AHuman's jetpack is replenished during downtime.
+        /// </summary>
+        /// <returns>The rate at which the jetpack is replenished.</returns>
+        float GetMinimumFuelRatio() const { return m_MinimumFuelRatio; }
+
+        /// <summary>
+        /// Sets the rate at which this AHuman's jetpack is replenished during downtime.
+        /// </summary>
+        /// <param name="newValue">The rate at which the jetpack is replenished.</param>
+        void SetMinimumFuelRatio(float newValue) { m_MinimumFuelRatio = newValue; }
+
+        /// <summary>
         /// Gets the scalar ratio at which this jetpack's thrust angle follows the aim angle of the user.
         /// </summary>
         /// <returns>The ratio at which this jetpack follows the aim angle of the user.</returns>
@@ -171,6 +183,7 @@ namespace RTE
         float m_JetTimeLeft; //!< How much time left the jetpack can go, in ms
         float m_JetThrustBonusMultiplier; //!< A multiplier bonus to our produced thrust, which doesn't cost extra fuel. Used for AI buffs.
         float m_JetReplenishRate; //!< A multiplier affecting how fast the jetpack fuel will replenish when not in use. 1 means that jet time replenishes at 2x speed in relation to depletion.
+        float m_MinimumFuelRatio; // Minimum ratio of current fuel to max fuel to be able to initiate the jetpack.
         float m_JetAngleRange; //!< Ratio at which the jetpack angle follows aim angle
         bool m_CanAdjustAngleWhileFiring; //!< Whether or not the angle of the thrust can change while firing, or if it can only be adjusted while the jetpack is off
         bool m_AdjustsThrottleForWeight; //!< Whether or not the jetpack throttle auto-adjusts for weight, at the cost of fuel usage.

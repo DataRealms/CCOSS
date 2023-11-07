@@ -897,7 +897,7 @@ namespace RTE {
 						g_SceneMan.WrapPosition(intPos[X], intPos[Y]);
 
 						// Check if particle is sticky and should adhere to where it collided
-						if (velocity.MagnitudeIsGreaterThan(1.0F)) {
+						if (!m_OwnerMO->IsMissionCritical() && velocity.MagnitudeIsGreaterThan(1.0F)) {
 							MOPixel *ownerMOAsPixel = dynamic_cast<MOPixel *>(m_OwnerMO);
 							if (RandomNum() < std::max(m_Material->GetStickiness(), ownerMOAsPixel ? ownerMOAsPixel->GetStaininess() : 0.0f)) {
 								// Weighted random select between stickiness or staininess

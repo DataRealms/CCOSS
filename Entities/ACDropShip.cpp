@@ -209,9 +209,9 @@ float ACDropShip::GetAltitude(int max, int accuracy)
     g_SceneMan.WrapPosition(rPos);
 
     // Check center too
-    float cAlt = g_SceneMan.FindAltitude(m_Pos, max, accuracy);
-    float rAlt = g_SceneMan.FindAltitude(rPos, max, accuracy);
-    float lAlt = g_SceneMan.FindAltitude(lPos, max, accuracy);
+    float cAlt = g_SceneMan.FindAltitude(m_Pos, max, accuracy, true);
+    float rAlt = g_SceneMan.FindAltitude(rPos, max, accuracy, true);
+    float lAlt = g_SceneMan.FindAltitude(lPos, max, accuracy, true);
 
     // Return the lowest of the three
     return MIN(cAlt, MIN(rAlt, lAlt));
@@ -300,8 +300,10 @@ void ACDropShip::PreControllerUpdate()
 		//////////////////////////////////////////////////////
 		// Main thruster throttling to stay hovering
 
+        // ugly hacks. the entire trimming to hover system is shit and should be replaced
+
 		// This is to trim the hover so it's perfectly still altitude-wise
-		float trimming = -1.75f;
+		float trimming = -2.6f;
 
 		float throttle = (targetYVel + m_Vel.m_Y + trimming) / throttleRange;
 
@@ -311,7 +313,8 @@ void ACDropShip::PreControllerUpdate()
 		// Right main thruster
 		if (m_pRThruster && m_pRThruster->IsAttached())
 		{
-			float rightThrottle = m_pRThruster->GetScaledThrottle(throttle, massAdjustment);
+            float baseThrottleForThruster = m_pRThruster->GetThrottleForThrottleFactor(1.0f);
+			float rightThrottle = m_pRThruster->GetScaledThrottle(throttle + baseThrottleForThruster, massAdjustment);
 
 			// Throttle override control for correcting heavy tilt, only applies if both engines are present
 			if (m_pLThruster && m_pLThruster->IsAttached()) {
@@ -335,10 +338,11 @@ void ACDropShip::PreControllerUpdate()
 		// Left main thruster
 		if (m_pLThruster && m_pLThruster->IsAttached())
 		{
-			float leftThrottle = m_pLThruster->GetScaledThrottle(throttle, massAdjustment);
+            float baseThrottleForThruster = m_pLThruster->GetThrottleForThrottleFactor(1.0f);
+			float leftThrottle = m_pLThruster->GetScaledThrottle(throttle + baseThrottleForThruster, massAdjustment);
+
 			// Throttle override control for correcting heavy tilt, only applies if both engines are present
-			if (m_pRThruster && m_pRThruster->IsAttached())
-			{
+			if (m_pRThruster && m_pRThruster->IsAttached()) {
                 if (m_Rotation.GetRadAngle() > c_SixteenthPI) {
                     leftThrottle = 0.8f;
                 } else if (m_Rotation.GetRadAngle() < -c_SixteenthPI) {

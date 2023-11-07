@@ -64,6 +64,8 @@ namespace RTE {
 		.def("LoadString", &Activity::LoadString)
 		.def("SaveNumber", &Activity::SaveNumber)
 		.def("LoadNumber", &Activity::LoadNumber)
+		.def("SendMessage", &LuaAdaptersActivity::SendMessage1)
+		.def("SendMessage", &LuaAdaptersActivity::SendMessage2)
 
 		.enum_("Players")[
 			luabind::value("PLAYER_NONE", Players::NoPlayer),

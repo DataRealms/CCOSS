@@ -37,8 +37,8 @@ namespace RTE {
 	static constexpr int c_DefaultResX = 960; //!< Default game window width.
 	static constexpr int c_DefaultResY = 540; //!< Default game window height.
 
-	static constexpr int c_MinResX = 640; //!< Minimum game window width.
-	static constexpr int c_MinResY = 384; //!< Minimum game window height.
+	static constexpr int c_MinResX = 640; //!< Minimum reasonable game window width.
+	static constexpr int c_MinResY = 360; //!< Minimum reasonable game window height.
 
 	static constexpr int c_ScenePreviewWidth = 170; //< Width of the scene preview bitmap.
 	static constexpr int c_ScenePreviewHeight = 80; //< Height of the scene preview bitmap.
@@ -124,6 +124,11 @@ namespace RTE {
 	#define c_PlayerSlotColorDefault makecol(161, 109, 20)
 	#define c_PlayerSlotColorHovered makecol(203, 130, 56)
 	#define c_PlayerSlotColorDisabled makecol(104, 67, 15)
+	static constexpr std::array<float, 16> c_Quad {
+			1.0f, 1.0f, 1.0f, 0.0f,
+			1.0f, -1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f, 0.0f, 0.0f,
+			-1.0f, -1.0f, 0.0f, 1.0f};
 #pragma endregion
 
 #pragma region Math Constants

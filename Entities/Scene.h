@@ -153,6 +153,12 @@ public:
 		/// <returns>The first Box in this Area.</returns>
 		const Box * GetFirstBox() const { return m_BoxList.empty() ? nullptr : &m_BoxList[0]; }
 
+        /// <summary>
+        /// Gets the boxes for this area.
+        /// </summary>
+        /// <returns>The boxes in this Area.</returns>
+        const std::vector<Box> & GetBoxes() const { return m_BoxList; }
+
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Virtual method:  HasNoArea
@@ -1230,6 +1236,14 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
     int GetScenePathSize() const;
 
     std::list<Vector>& GetScenePath();
+
+    /// <summary>
+    /// Returns whether two position represent the same path nodes.
+    /// </summary>
+    /// <param name="pos1">First coordinates to compare.</param>
+    /// <param name="pos2">Second coordinates to compare.</param>
+    /// <returns>Whether both coordinates represent the same path node.</returns>
+    bool PositionsAreTheSamePathNode(const Vector &pos1, const Vector &pos2) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

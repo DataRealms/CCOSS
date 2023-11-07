@@ -24,19 +24,15 @@ namespace RTE {
 		~Singleton() = default;
 
 		/// <summary>
-		/// Returns the sole instance of this Singleton. If there isn't one yet, constructs it.
+		/// Returns the sole instance of this Singleton.
 		/// </summary>
 		/// <returns>A reference to the sole instance of this Singleton.</returns>
-		static Type & Instance() {
-			if (!s_Instance) {
-				static std::mutex mut;
-				std::lock_guard<std::mutex> guard(mut);
-				if (!s_Instance) { // double-check locking
-					s_Instance = new Type();
-				}
-			}
-			return *s_Instance;
-		}
+		inline static Type & Instance() { return *s_Instance; }
+
+		/// <summary>
+		/// Constructs this Singleton.
+		/// </summary>
+		inline static void Construct() { s_Instance = new Type(); }
 
 	protected:
 

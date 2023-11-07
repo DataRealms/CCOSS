@@ -341,12 +341,21 @@ namespace RTE {
 	};
 #pragma endregion
 
+#pragma region Activity Lua Adapters
+	struct LuaAdaptersActivity {
+		static void SendMessage1(Activity *luaSelfObject, const std::string &message);
+		static void SendMessage2(Activity *luaSelfObject, const std::string &message, luabind::object context);
+	};
+#pragma endregion
+
 #pragma region MovableObject Lua Adapters
 	struct LuaAdaptersMovableObject {
 		static bool HasScript(MovableObject *luaSelfObject, const std::string &scriptPath);
 		static bool AddScript(MovableObject *luaSelfObject, const std::string &scriptPath);
 		static bool EnableScript(MovableObject *luaSelfObject, const std::string &scriptPath);
 		static bool DisableScript(MovableObject *luaSelfObject, const std::string &scriptPath);
+		static void SendMessage1(MovableObject *luaSelfObject, const std::string &message);
+		static void SendMessage2(MovableObject *luaSelfObject, const std::string &message, luabind::object context);
 	};
 #pragma endregion
 
@@ -357,6 +366,12 @@ namespace RTE {
 		static std::vector<AEmitter *> * GetWounds2(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables);
 		// Need a seperate implementation function without the return so we can safely recurse.
 		static void GetWoundsImpl(const MOSRotating *luaSelfObject, bool includePositiveDamageAttachables, bool includeNegativeDamageAttachables, bool includeNoDamageAttachables, std::vector<AEmitter *> &wounds);
+	};
+#pragma endregion
+
+#pragma region BuyMenuGUI Lua Adapters
+	struct LuaAdaptersBuyMenuGUI {
+		static std::list<SceneObject*> * GetOrderList(const BuyMenuGUI *luaSelfObject);
 	};
 #pragma endregion
 
@@ -409,6 +424,9 @@ namespace RTE {
 		/// <param name="movableMan">A reference to MovableMan, provided by Lua.</param>
 		/// <param name="particle">A pointer to the particle to be added.</param>
 		static void AddParticle(MovableMan &movableMan, MovableObject *particle);
+
+		static void SendGlobalMessage1(MovableMan &movableMan, const std::string& message);
+		static void SendGlobalMessage2(MovableMan &movableMan, const std::string& message, luabind::object context);
 	};
 #pragma endregion
 

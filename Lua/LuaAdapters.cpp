@@ -340,6 +340,23 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaAdaptersActivity::SendMessage1(Activity *luaSelfObject, const std::string &message) {
+		luabind::object context;
+		SendMessage2(luaSelfObject, message, context);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersActivity::SendMessage2(Activity *luaSelfObject, const std::string &message, luabind::object context) {
+		GAScripted* scriptedActivity = dynamic_cast<GAScripted*>(luaSelfObject);
+		if (scriptedActivity) {
+			LuabindObjectWrapper wrapper(&context, "", false);
+			scriptedActivity->RunLuaFunction("OnMessage", {}, { message }, { &wrapper });
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	bool LuaAdaptersMovableObject::HasScript(MovableObject *luaSelfObject, const std::string &scriptPath) {
 		return luaSelfObject->HasScript(g_PresetMan.GetFullModulePath(scriptPath));
 	}
@@ -386,6 +403,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaAdaptersMovableObject::SendMessage1(MovableObject *luaSelfObject, const std::string &message) {
+		luaSelfObject->RunScriptedFunctionInAppropriateScripts("OnMessage", false, false, {}, { message });
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMovableObject::SendMessage2(MovableObject *luaSelfObject, const std::string &message, luabind::object context) {
+		// We're not transferring context between lua states, so only run singlethreaded scripts when we have context
+		LuabindObjectWrapper wrapper(&context, "", false);
+		luaSelfObject->RunScriptedFunctionInAppropriateScripts("OnMessage", false, false, {}, { message }, { &wrapper }, ThreadScriptsToRun::SingleThreaded);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaAdaptersMOSRotating::GibThis(MOSRotating *luaSelfObject) {
 		luaSelfObject->GibThis();
 	}
@@ -420,6 +451,23 @@ namespace RTE {
 				}
 			}
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	std::list<SceneObject*> * LuaAdaptersBuyMenuGUI::GetOrderList(const BuyMenuGUI *luaSelfObject) {
+		std::list<const SceneObject *> constOrderList;
+		luaSelfObject->GetOrderList(constOrderList);
+
+		// Previously I tried to push back a cloned object for const-correctness (and giving unique ptr so luabind would clean it up after)
+		// This is needed cause lua doesn't really enjoy being given a const SceneObject*
+		// But it didn't like that. So eh
+		auto* orderList = new std::list<SceneObject*>();
+		for (const SceneObject *constObjectInOrderList : constOrderList) {
+			orderList->push_back( const_cast<SceneObject *>(constObjectInOrderList) );
+		}
+
+		return orderList;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -508,6 +556,26 @@ namespace RTE {
 		} else {
 			movableMan.AddParticle(particle);
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMovableMan::SendGlobalMessage1(MovableMan &movableMan, const std::string &message) {
+		luabind::object context;
+		SendGlobalMessage2(movableMan, message, context);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaAdaptersMovableMan::SendGlobalMessage2(MovableMan &movableMan, const std::string &message, luabind::object context) {
+		LuabindObjectWrapper wrapper(&context, "", false);
+
+		GAScripted* scriptedActivity = dynamic_cast<GAScripted*>(g_ActivityMan.GetActivity());
+		if (scriptedActivity) {
+			scriptedActivity->RunLuaFunction("OnGlobalMessage", {}, { message }, { &wrapper });
+		}
+
+		movableMan.RunLuaFunctionOnAllMOs("OnGlobalMessage", {}, { message }, { &wrapper });
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

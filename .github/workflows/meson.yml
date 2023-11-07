@@ -38,17 +38,13 @@ on:
         type: string
         required: false
         default: "release"
-      debug_level:  # "full" | "minimal" | "release" 
+      debug_level: # "full" | "minimal" | "release"
         type: string
         required: false
         default: "release"
 
-env: 
-  MESON_VERSION: "0.60.3"
-
 jobs:
   build-linux:
-
     runs-on: ubuntu-latest
     name: Linux Build
 
@@ -61,7 +57,7 @@ jobs:
         run: |
           sudo apt-get update -yq
           sudo apt-get install --no-install-recommends wget liballegro4-dev libloadpng4-dev libflac++-dev luajit-5.1-dev liblua5.2-dev libminizip-dev liblz4-dev libpng++-dev libx11-dev libboost-dev libtbb-dev libsdl2-dev libsdl2-image-dev libopengl-dev libfuse2 ninja-build
-          sudo pip install meson==${{env.MESON_VERSION}}
+          sudo pip install meson
 
       - name: Setup Meson
         env:
@@ -76,14 +72,14 @@ jobs:
           CC: "gcc"
           CXX: "g++"
         run: meson configure -Dinstall_data=false -Dinstall_runner=false -Dfmod_dir=/usr/lib/ --prefix=/usr/ build
-          
+
       - name: Build
         env:
           CC: "gcc"
           CXX: "g++"
         run: |
           meson compile -C build
-        
+
       - name: Create AppDir
         if: ${{inputs.upload_artefacts}}
         run: |
@@ -116,25 +112,64 @@ jobs:
           if-no-files-found: error
 
   build-macos:
-    runs-on: macos-latest
+    runs-on: macos-11
     name: MacOS Build
-
+        
+    env:
+      GCC_VERSION: "13"
+      MACOSX_DEPLOYMENT_TARGET: 10.15
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
 
       - name: Install Dependencies
         run: |
-          brew install pkg-config tbb sdl2 minizip lz4 flac luajit lua@5.1 libpng gcc@12 ninja meson
+          brew install pkg-config tbb sdl2 minizip lz4 flac luajit lua@5.1 libpng gcc@${{env.GCC_VERSION}} ninja meson dylibbundler tree
 
-      - name: Build
+      - name: Setup Meson
         env:
-          CC: "gcc-12"
-          CXX: "g++-12"
+          CC: "gcc-${{env.GCC_VERSION}}"
+          CXX: "g++-${{env.GCC_VERSION}}"
           LDFLAGS: "-static-libgcc -static-libstdc++"
         run: |
           meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} -Db_lto=false build
+
+      - name: Configure for App Bundle
+        if: ${{inputs.upload_artefacts}}
+        env:
+          CC: "gcc-${{env.GCC_VERSION}}"
+          CXX: "g++-${{env.GCC_VERSION}}"
+          LDFLAGS: "-static-libgcc -static-libstdc++"
+        run: |
+          meson configure \
+          -Dinstall_data=false -Dinstall_runner=false -Dfmod_dir=Contents/Frameworks \
+          --bindir=Contents/MacOS \
+          --prefix="/" \
+          build
+
+      - name: Build
+        env:
+          CC: "gcc-${{env.GCC_VERSION}}"
+          CXX: "g++-${{env.GCC_VERSION}}"
+          LDFLAGS: "-static-libgcc -static-libstdc++"
+        run: |
           meson compile -C build
+
+      - name: Create App Bundle
+        if: ${{inputs.upload_artefacts}}
+        run: |
+          DESTDIR="/tmp/Cortex Command.app" meson install -C build
+
+      - name: Tar files
+        if: ${{inputs.upload_artefacts}}
+        run: |
+          tree /tmp/
+          cd /tmp/
+          tar -cvf CortexCommand.tar "Cortex Command.app"
+
+      - name: Move artefact
+        if: ${{inputs.upload_artefacts}}
+        run: cp /tmp/CortexCommand.tar .
 
       - name: Artifact Deploy
         if: ${{inputs.upload_artefacts}}
@@ -142,26 +177,25 @@ jobs:
         with:
           name: CortexCommand (macOS)
           path: |
-            build/CortexCommand
-            build/CortexCommand_debug
+            CortexCommand.tar
           if-no-files-found: error
 
   build-windows:
     runs-on: windows-latest
     name: Windows Build
-    
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
-      
+
       - name: Install Dependencies
         run: |
           pip install meson
-      
+
       - name: Setup
         run: |
           meson setup --buildtype=${{inputs.build_type}} -Ddebug_type=${{inputs.debug_level}} --vsenv build
-      
+
       - name: Build
         run: |
           meson compile -Cbuild

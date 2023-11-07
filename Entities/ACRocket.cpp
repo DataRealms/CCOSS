@@ -268,7 +268,7 @@ float ACRocket::GetAltitude(int max, int accuracy)
     else
         pos = m_Pos;
 
-    return g_SceneMan.FindAltitude(pos, max, accuracy);
+    return g_SceneMan.FindAltitude(pos, max, accuracy, true);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -193,7 +193,7 @@ Actor * Loadout::CreateFirstActor(int nativeModule, float foreignMult, float nat
         // Go through the list of things ordered, and give any actors all the items that is present after them,
         // until the next actor. Also, the first actor gets all stuff in the list above him.
         MovableObject *pInventoryObject = 0;
-        Actor *pActor = 0;
+        Actor *pActor = nullptr;
         std::list<MovableObject *> tempCargo;
         for (std::list<const SceneObject *>::const_iterator itr = m_CargoItems.begin(); itr != m_CargoItems.end(); ++itr)
         {
@@ -225,7 +225,7 @@ Actor * Loadout::CreateFirstActor(int nativeModule, float foreignMult, float nat
                     costTally -= pActor->GetGoldValue(nativeModule, foreignMult, nativeMult);
                     // Also stop going through the list; we only need ONE Actor.. so destroy the instance we jsut created of a second one.
                     delete pActor;
-                    pActor = 0;
+                    pActor = nullptr;
                     // STOP!
                     break;
                 }

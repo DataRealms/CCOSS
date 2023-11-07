@@ -648,15 +648,17 @@ void GUIListPanel::ScrollToItem(Item *pItem) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void GUIListPanel::ScrollUp() {
-	if (m_VertScroll->_GetVisible()) { m_VertScroll->SetValue(m_VertScroll->GetValue() - 20); }
+	const int sensitivity = 80;
+	if (m_VertScroll->_GetVisible()) { m_VertScroll->SetValue(m_VertScroll->GetValue() - sensitivity); }
 	BuildBitmap(false, true);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void GUIListPanel::ScrollDown() {
+	const int sensitivity = 80;
 	if (m_VertScroll->_GetVisible()) {
-		int scrollValueToAdd = 20;
+		int scrollValueToAdd = sensitivity;
 		if (!m_Items.empty()) {
 			RTE::GUIListPanel::Item *item = m_Items.back();
 			int maximumScrollDistance = GetStackHeight(item) + GetItemHeight(item) - (m_VertScroll->GetPageSize() + m_VertScroll->GetValue());

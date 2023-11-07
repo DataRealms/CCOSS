@@ -1550,6 +1550,7 @@ void Scene::SaveSceneObject(Writer &writer, const SceneObject *sceneObjectToSave
 
             writer.NewPropertyWithValue("JumpTime", jetpackToSave->GetJetTimeTotal() / 1000.0f); // Convert to seconds
             writer.NewPropertyWithValue("JumpReplenishRate", jetpackToSave->GetJetReplenishRate());
+        	writer.NewPropertyWithValue("MinimumFuelRatio", jetpackToSave->GetMinimumFuelRatio());
             writer.NewPropertyWithValue("JumpAngleRange", jetpackToSave->GetJetAngleRange());
             writer.NewPropertyWithValue("CanAdjustAngleWhileFiring", jetpackToSave->GetCanAdjustAngleWhileFiring());
         }
@@ -2261,6 +2262,9 @@ SceneObject * Scene::GetResidentBrain(int player) const
 
 void Scene::SetResidentBrain(int player, SceneObject *pNewBrain)
 {
+    if (MovableObject* asMo = dynamic_cast<MovableObject*>(m_ResidentBrains[player])) {
+        asMo->DestroyScriptState();
+    }
     delete m_ResidentBrains[player];
     m_ResidentBrains[player] = pNewBrain;
 }
@@ -3035,6 +3039,14 @@ int Scene::GetScenePathSize() const {
 
 std::list<Vector>& Scene::GetScenePath() {
     return s_ScenePath;
+}
+
+bool Scene::PositionsAreTheSamePathNode(const Vector &pos1, const Vector &pos2) const {
+    if (const std::unique_ptr<PathFinder> &pathFinder = const_cast<Scene*>(this)->GetPathFinder(Activity::Teams::NoTeam)) {
+        return pathFinder->PositionsAreTheSamePathNode(pos1, pos2);
+    }
+    
+    return false;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

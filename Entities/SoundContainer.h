@@ -20,6 +20,15 @@ namespace RTE {
 		ClassInfoGetters;
 
 		/// <summary>
+		/// The FMOD channelgroup/bus this sound routes through.
+		/// </summary>
+		enum BusRouting {
+			SFX = 0, // Default diegetic bus for general game SFX.
+			UI = 1, // Menu sounds and other things that shouldn't be affected by diegetic sound processing.
+			MUSIC = 2 // Self-explanatory music bus.
+		};
+
+		/// <summary>
 		/// How the SoundContainer should behave when it tries to play again while already playing.
 		/// </summary>
 		enum SoundOverlapMode {
@@ -48,13 +57,14 @@ namespace RTE {
 		int Create(const SoundContainer &reference);
 
 		/// <summary>
-		/// Creates a SoundContainer and adds a sound, optionally setting whether it's immobile or affected by global pitch.
+		/// Creates a SoundContainer and adds a sound, optionally setting immobility, being affected by global pitch, and bus routing.
 		/// </summary>
 		/// <param name="soundFilePath">The path to a sound to add to the first SoundSet of this SoundContainer.</param>
 		/// <param name="immobile">Whether this SoundContainer's sounds will be treated as immobile, i.e. they won't be affected by 3D sound manipulation.</param>
 		/// <param name="affectedByGlobalPitch">Whether this SoundContainer's sounds' frequency will be affected by the global pitch.</param>
+		/// <param name="busRouting">Bus to route this sound to.</param>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int Create(const std::string &soundFilePath, bool immobile = false, bool affectedByGlobalPitch = true) { m_TopLevelSoundSet.AddSound(soundFilePath, true); SetImmobile(immobile); SetAffectedByGlobalPitch(affectedByGlobalPitch); return 0; }
+		int Create(const std::string &soundFilePath, bool immobile = false, bool affectedByGlobalPitch = true, BusRouting busRouting = BusRouting::SFX) { m_TopLevelSoundSet.AddSound(soundFilePath, true); SetImmobile(immobile); SetAffectedByGlobalPitch(affectedByGlobalPitch); SetBusRouting(busRouting); return 0; }
 #pragma endregion
 
 #pragma region Destruction
@@ -157,6 +167,19 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Sound Property Getters and Setters
+
+		/// <summary>
+		/// Gets the bus this sound routes to.
+		/// </summary>
+		/// <returns>The bus this sound routes to.</returns>
+		BusRouting GetBusRouting() const { return m_BusRouting; }
+
+		/// <summary>
+		/// Sets the bus this sound routes to.
+		/// </summary>
+		/// <param name="newBusRoute">The new bus for this sound to route to.</param>
+		void SetBusRouting(BusRouting newBusRoute) { m_BusRouting = newBusRoute; }
+		
 		/// <summary>
 		/// Gets whether the sounds in this SoundContainer should be considered immobile, i.e. always play at the listener's position.
 		/// </summary>
@@ -181,6 +204,18 @@ namespace RTE {
 		/// <param name="attenuationStartDistance">The new attenuation start distance.</param>
 		void SetAttenuationStartDistance(float attenuationStartDistance) { m_AttenuationStartDistance = (attenuationStartDistance < 0) ? c_DefaultAttenuationStartDistance : attenuationStartDistance; m_SoundPropertiesUpToDate = false; }
 
+		/// <summary>
+		/// Gets the panning strength multiplier of this SoundContainer.
+		/// </summary>
+		/// <returns>A float with the panning strength multiplier.</returns>
+		float GetPanningStrengthMultiplier() const { return m_PanningStrengthMultiplier; }
+
+		/// <summary>
+		/// Sets the panning strength multiplier of this SoundContainer.
+		/// </summary>
+		/// <param name="panningStrengthMultiplier">The new panning strength multiplier.</param>
+		void SetPanningStrengthMultiplier(float panningStrengthMultiplier) { m_PanningStrengthMultiplier = panningStrengthMultiplier; m_SoundPropertiesUpToDate = false; }
+		
 		/// <summary>
 		/// Gets the looping setting of this SoundContainer.
 		/// </summary>
@@ -349,14 +384,18 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 		static const std::unordered_map<std::string, SoundOverlapMode> c_SoundOverlapModeMap; //!< A map of strings to SoundOverlapModes to support string parsing for the SoundOverlapMode enum. Populated in the implementing cpp file.
-
+		static const std::unordered_map<std::string, BusRouting> c_BusRoutingMap; //!< A map of strings to BusRoutings to support string parsing for the BusRouting enum. Populated in the implementing cpp file.
+		
 		SoundSet m_TopLevelSoundSet; //The top level SoundSet that handles all SoundData and sub SoundSets in this SoundContainer.
 
 		std::unordered_set<int> m_PlayingChannels; //!< The channels this SoundContainer is currently using.
 		SoundOverlapMode m_SoundOverlapMode; //!< The SoundOverlapMode for this SoundContainer, used to determine how it should handle overlapping play calls.
-
-		bool m_Immobile; //!< Whether this SoundContainer's sounds should be treated as immobile, i.e. not affected by 3D sound effects. Mostly used for GUI sounds and the like.
+		
+		BusRouting m_BusRouting; //!< What bus this sound routes to.
+		
+		bool m_Immobile; //!< Whether this SoundContainer's sounds should be treated as immobile, i.e. not affected by 3D sound effects.
 		float m_AttenuationStartDistance; //!< The distance away from the AudioSystem listener to start attenuating this sound. Attenuation follows FMOD 3D Inverse roll-off model.
+		float m_PanningStrengthMultiplier; //!< Multiplier for panning strength.
 		int m_Loops; //!< Number of loops (repeats) the SoundContainer's sounds should play when played. 0 means it plays once, -1 means it plays until stopped.
 		bool m_SoundPropertiesUpToDate = false; //!< Whether this SoundContainer's sounds' modes and properties are up to date. Used primarily to handle discrepancies that can occur when loading from ini if the line ordering isn't ideal.
 		

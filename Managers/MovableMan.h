@@ -32,6 +32,7 @@ class AHuman;
 class SceneLayer;
 class SceneObject;
 class Box;
+class LuabindObjectWrapper;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -940,6 +941,10 @@ public:
 	/// <returns>Pointers to the MOs that are within the specified radius of the given centre position.</returns>
     const std::vector<MovableObject *> * GetMOsInRadius(const Vector &centre, float radius) const { return GetMOsInRadius(centre, radius, Activity::NoTeam); }
 
+    /// <summary>
+    /// Runs a lua function on all MOs in the simulation, including owned child MOs.
+    /// </summary>
+    void RunLuaFunctionOnAllMOs(const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments = std::vector<const Entity*>(), const std::vector<std::string_view>& functionLiteralArguments = std::vector<std::string_view>(), const std::vector<LuabindObjectWrapper*>& functionObjectArguments = std::vector<LuabindObjectWrapper*>(), ThreadScriptsToRun scriptsToRun = ThreadScriptsToRun::Both);
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

@@ -43,6 +43,9 @@
 #include "WindowMan.h"
 #include "NetworkServer.h"
 #include "NetworkClient.h"
+#include "CameraMan.h"
+#include "ActivityMan.h"
+#include "PrimitiveMan.h"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
@@ -56,13 +59,36 @@ namespace RTE {
 	/// Initializes all the essential managers.
 	/// </summary>
 	void InitializeManagers() {
+		TimerMan::Construct();
+		PresetMan::Construct();
+		SettingsMan::Construct();
+		WindowMan::Construct();
+		LuaMan::Construct();
+		NetworkServer::Construct();
+		NetworkClient::Construct();
+		FrameMan::Construct();
+		PerformanceMan::Construct();
+		PostProcessMan::Construct();
+		PrimitiveMan::Construct();
+		AudioMan::Construct();
+		GUISound::Construct();
+		UInputMan::Construct();
+		ConsoleMan::Construct();
+		SceneMan::Construct();
+		MovableMan::Construct();
+		MetaMan::Construct();
+		MenuMan::Construct();
+		CameraMan::Construct();
+		ActivityMan::Construct();
+		LoadingScreen::Construct();
+
 		g_SettingsMan.Initialize();
+		g_WindowMan.Initialize();
 
 		g_LuaMan.Initialize();
 		g_NetworkServer.Initialize();
 		g_NetworkClient.Initialize();
 		g_TimerMan.Initialize();
-		g_WindowMan.Initialize();
 		g_FrameMan.Initialize();
 		g_PostProcessMan.Initialize();
 		g_PerformanceMan.Initialize();
@@ -104,6 +130,7 @@ namespace RTE {
 		g_LuaMan.Destroy();
 		ContentFile::FreeAllLoaded();
 		g_ConsoleMan.Destroy();
+		g_WindowMan.Destroy();
 
 #ifdef DEBUG_BUILD
 		Entity::ClassInfo::DumpPoolMemoryInfo(Writer("MemCleanupInfo.txt"));
@@ -209,6 +236,7 @@ namespace RTE {
 		g_UInputMan.TrapMousePos(false);
 
 		while (!System::IsSetToQuit()) {
+			g_WindowMan.ClearRenderer();
 			PollSDLEvents();
 
 			g_WindowMan.Update();
@@ -268,8 +296,10 @@ namespace RTE {
 		while (!System::IsSetToQuit()) {
 			bool serverUpdated = false;
 			updateStartTime = g_TimerMan.GetAbsoluteTime();
+
 			PollSDLEvents();
 			g_WindowMan.Update();
+			g_WindowMan.ClearRenderer();
 
 			g_TimerMan.Update();
 
@@ -351,6 +381,7 @@ namespace RTE {
 			drawStartTime = updateEndAndDrawStartTime;
 
 			g_FrameMan.Draw();
+			g_WindowMan.DrawPostProcessBuffer();
 			g_WindowMan.UploadFrame();
 
 			drawTotalTime = g_TimerMan.GetAbsoluteTime() - drawStartTime;

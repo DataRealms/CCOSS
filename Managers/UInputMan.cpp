@@ -125,8 +125,8 @@ namespace RTE {
 		m_PlayerScreenMouseBounds = {
 			0,
 			0,
-			g_FrameMan.GetPlayerFrameBufferWidth(Players::NoPlayer) * g_WindowMan.GetResMultiplier(),
-			g_FrameMan.GetPlayerFrameBufferHeight(Players::NoPlayer) * g_WindowMan.GetResMultiplier()
+			static_cast<int>(g_FrameMan.GetPlayerFrameBufferWidth(Players::NoPlayer) * g_WindowMan.GetResMultiplier()),
+			static_cast<int>(g_FrameMan.GetPlayerFrameBufferHeight(Players::NoPlayer) * g_WindowMan.GetResMultiplier())
 		};
 
 		return 0;
@@ -418,7 +418,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void UInputMan::ForceMouseWithinPlayerScreen(bool force, int whichPlayer) {
-		int resMultiplier = g_WindowMan.GetResMultiplier();
+		float resMultiplier = g_WindowMan.GetResMultiplier();
 
 		if (force && (whichPlayer >= Players::PlayerOne && whichPlayer < Players::MaxPlayerCount)) {
 			int screenWidth = g_FrameMan.GetPlayerFrameBufferWidth(whichPlayer) * resMultiplier;
@@ -456,7 +456,7 @@ namespace RTE {
 			}
 		} else {
 			// Set the mouse bounds to the whole window so ForceMouseWithinBox is not stuck being relative to some player screen, because it can still bind the mouse even if this doesn't.
-			m_PlayerScreenMouseBounds = { 0, 0, g_WindowMan.GetResX() * resMultiplier, g_WindowMan.GetResY() * resMultiplier };
+			m_PlayerScreenMouseBounds = { 0, 0, static_cast<int>(g_WindowMan.GetResX() * resMultiplier), static_cast<int>(g_WindowMan.GetResY() * resMultiplier) };
 			SDL_SetWindowMouseRect(g_WindowMan.GetWindow(), nullptr);
 		}
 	}
@@ -791,7 +791,7 @@ namespace RTE {
 						break;
 					}
 					m_RawMouseMovement += Vector(static_cast<float>(inputEvent.motion.xrel), static_cast<float>(inputEvent.motion.yrel));
-					m_AbsoluteMousePos.SetXY(static_cast<float>(inputEvent.motion.x * g_WindowMan.GetResMultiplier()), static_cast<float>(inputEvent.motion.y * g_WindowMan.GetResMultiplier()));
+					m_AbsoluteMousePos.SetXY(static_cast<float>(inputEvent.motion.x), static_cast<float>(inputEvent.motion.y));
 					if (g_WindowMan.FullyCoversAllDisplays()) {
 						int windowPosX = 0;
 						int windowPosY = 0;
@@ -903,7 +903,6 @@ namespace RTE {
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
 			if (!g_MetaMan.GameInProgress() && !g_ActivityMan.ActivitySetToRestart()) {
-				g_ActivityMan.SetRestartActivity(FlagCtrlState() && KeyPressed(SDLK_r) || AnyBackPress());
 				g_ActivityMan.SetRestartActivity((FlagCtrlState() && KeyPressed(SDLK_r)) || AnyBackPress());
 			}
 			if (g_ActivityMan.ActivitySetToRestart()) {
@@ -949,7 +948,7 @@ namespace RTE {
 				ContentFile::ReloadAllBitmaps();
 			// Alt+Enter to switch resolution multiplier
 			} else if (KeyPressed(SDLK_RETURN)) {
-				g_WindowMan.ChangeResolutionMultiplier();
+				g_WindowMan.ToggleFullscreen();
 			// Alt+W to save ScenePreviewDump (miniature WorldDump)
 			} else if (KeyPressed(SDLK_w)) {
 				g_FrameMan.SaveWorldPreviewToPNG("ScenePreviewDump");
@@ -1017,7 +1016,6 @@ namespace RTE {
 		int mousePlayer = MouseUsedByPlayer();
 		// TODO: Figure out a less shit solution to updating the mouse in GUIs when there are no mouse players configured, i.e. no player input scheme is using mouse+keyboard. For not just check if we're out of Activity.
 		if (!g_ActivityMan.IsInActivity() || mousePlayer != Players::NoPlayer) {
-			// Multiplying by 30 for sensitivity. TODO: Make sensitivity slider 1-50;
 			m_AnalogMouseData.m_X += m_RawMouseMovement.m_X * 3;
 			m_AnalogMouseData.m_Y += m_RawMouseMovement.m_Y * 3;
 			m_AnalogMouseData.CapMagnitude(m_MouseTrapRadius);

@@ -344,6 +344,12 @@ public:
 
     bool SceneWrapsY() const;
 
+    /// <summary>
+    /// Gets the orbit direction for the current scene.
+    /// </summary>
+    /// <returns>The orbit direction for the current scene.</returns>
+    Directions GetSceneOrbitDirection() const;
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTerrain
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1092,7 +1098,7 @@ public:
 //                  here means less calculation.
 // Return value:    The altitude over the terrain, in pixels.
 
-    float FindAltitude(const Vector &from, int max = 0, int accuracy = 0);
+    float FindAltitude(const Vector &from, int max = 0, int accuracy = 0, bool fromSceneOrbitDirection = false);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

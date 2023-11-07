@@ -59,6 +59,8 @@ void AEmitter::Clear()
     m_AvgBurstImpulse = -1.0F;
     m_AvgImpulse = -1.0F;
     m_FlashOnlyOnBurst = true;
+    m_SustainBurstSound = false;
+    m_BurstSoundFollowsEmitter = true;
     m_LoudnessOnEmit = 1.0F;
 }
 
@@ -99,6 +101,8 @@ int AEmitter::Create(const AEmitter &reference) {
     m_EmitDamage = reference.m_EmitDamage;
     m_FlashScale = reference.m_FlashScale;
     m_FlashOnlyOnBurst = reference.m_FlashOnlyOnBurst;
+    m_SustainBurstSound = reference.m_SustainBurstSound;
+    m_BurstSoundFollowsEmitter = reference.m_BurstSoundFollowsEmitter;
     m_LoudnessOnEmit = reference.m_LoudnessOnEmit;
 
     return 0;
@@ -163,8 +167,9 @@ int AEmitter::ReadProperty(const std::string_view &propName, Reader &reader) {
     MatchProperty("Flash", { SetFlash(dynamic_cast<Attachable *>(g_PresetMan.ReadReflectedPreset(reader))); });
     MatchProperty("FlashScale", { reader >> m_FlashScale; });
     MatchProperty("FlashOnlyOnBurst", { reader >> m_FlashOnlyOnBurst; });
+    MatchProperty("SustainBurstSound", { reader >> m_SustainBurstSound; });
+    MatchProperty("BurstSoundFollowsEmitter", { reader >> m_BurstSoundFollowsEmitter; });
     MatchProperty("LoudnessOnEmit", { reader >> m_LoudnessOnEmit; });
-    
 
     EndPropertyList;
 }
@@ -227,6 +232,10 @@ int AEmitter::Save(Writer &writer) const
     writer << m_FlashScale;
     writer.NewProperty("FlashOnlyOnBurst");
     writer << m_FlashOnlyOnBurst;
+    writer.NewProperty("SustainBurstSound");
+	writer << m_SustainBurstSound;
+    writer.NewProperty("BurstSoundFollowsEmitter");
+	writer << m_BurstSoundFollowsEmitter;
     writer.NewProperty("LoudnessOnEmit");
     writer << m_LoudnessOnEmit;
 
@@ -363,16 +372,8 @@ int AEmitter::GetTotalBurstSize() const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float AEmitter::GetScaledThrottle(float throttle, float multiplier) const {
-    float throttleFactor = 1.0F - std::abs(throttle) + (throttle < 0.0F ? m_NegativeThrottleMultiplier : m_PositiveThrottleMultiplier) * std::abs(throttle);
-    throttleFactor *= multiplier;
-    throttleFactor -= 1.0F;
-    if (throttleFactor >= 0.0F) {
-        return (throttleFactor / (m_PositiveThrottleMultiplier - 1.0F));
-    } else {
-        return (throttleFactor / (m_NegativeThrottleMultiplier - 1.0F)) * -1.0F;
-    }
-
-    //std::unreachable();
+    float throttleFactor = LERP(-1.0f, 1.0f, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, throttle);
+    return LERP(m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, -1.0f, 1.0f, throttleFactor * multiplier);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -428,6 +429,10 @@ void AEmitter::Update()
     }
 
     Attachable::Update();
+
+    if (m_BurstSoundFollowsEmitter && m_BurstSound) {
+        m_BurstSound->SetPosition(m_Pos);
+    }
 
     if (m_EmitEnabled)
     {
@@ -581,7 +586,7 @@ void AEmitter::Update()
 		if (m_WasEmitting)
 		{
 			if (m_EmissionSound) { m_EmissionSound->Stop(); }
-			if (m_BurstSound) { m_BurstSound->Stop(); }
+			if (m_BurstSound && !m_SustainBurstSound) { m_BurstSound->Stop(); }
 			if (m_EndSound) { m_EndSound->Play(m_Pos); }
 			m_WasEmitting = false;
 		}

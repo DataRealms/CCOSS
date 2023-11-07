@@ -410,6 +410,7 @@ namespace RTE {
 		.def_readwrite("Emissions", &AEmitter::m_EmissionList, luabind::return_stl_iterator)
 
 		.def("IsEmitting", &AEmitter::IsEmitting)
+		.def("WasEmitting", &AEmitter::WasEmitting)
 		.def("EnableEmission", &AEmitter::EnableEmission)
 		.def("GetEmitVector", &AEmitter::GetEmitVector)
 		.def("GetRecoilVector", &AEmitter::GetRecoilVector)
@@ -417,7 +418,8 @@ namespace RTE {
 		.def("TriggerBurst", &AEmitter::TriggerBurst)
 		.def("IsSetToBurst", &AEmitter::IsSetToBurst)
 		.def("CanTriggerBurst", &AEmitter::CanTriggerBurst)
-		.def("GetScaledThrottle", &AEmitter::GetScaledThrottle);
+		.def("GetScaledThrottle", &AEmitter::GetScaledThrottle)
+		.def("JustStartedEmitting", &AEmitter::JustStartedEmitting);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -425,10 +427,11 @@ namespace RTE {
 	LuaBindingRegisterFunctionDefinitionForType(EntityLuaBindings, AEJetpack) {
 		return ConcreteTypeLuaClassDefinition(AEJetpack, AEmitter)
 
-		.property("JetPackType", &AEJetpack::GetJetpackType, &AEJetpack::SetJetpackType)
+		.property("JetpackType", &AEJetpack::GetJetpackType, &AEJetpack::SetJetpackType)
 		.property("JetTimeTotal", &AEJetpack::GetJetTimeTotal, &AEJetpack::SetJetTimeTotal)
 		.property("JetTimeLeft", &AEJetpack::GetJetTimeLeft)
 		.property("JetReplenishRate", &AEJetpack::GetJetReplenishRate, &AEJetpack::SetJetReplenishRate)
+		.property("MinimumFuelRatio", &AEJetpack::GetMinimumFuelRatio, &AEJetpack::SetMinimumFuelRatio)
 		.property("JetAngleRange", &AEJetpack::GetJetAngleRange, &AEJetpack::SetJetAngleRange)
 		.property("CanAdjustAngleWhileFiring", &AEJetpack::GetCanAdjustAngleWhileFiring, &AEJetpack::SetCanAdjustAngleWhileFiring)
 		.property("AdjustsThrottleForWeight", &AEJetpack::GetAdjustsThrottleForWeight, &AEJetpack::SetAdjustsThrottleForWeight)
@@ -954,18 +957,6 @@ namespace RTE {
 		.def("RemoveWounds", (float (MOSRotating:: *)(int numberOfWoundsToRemove, bool positiveDamage, bool negativeDamage, bool noDamage)) &MOSRotating::RemoveWounds)
 		.def("IsOnScenePoint", &MOSRotating::IsOnScenePoint)
 		.def("EraseFromTerrain", &MOSRotating::EraseFromTerrain)
-		.def("GetStringValue", &MOSRotating::GetStringValue)
-		.def("GetNumberValue", &MOSRotating::GetNumberValue)
-		.def("GetObjectValue", &MOSRotating::GetObjectValue)
-		.def("SetStringValue", &MOSRotating::SetStringValue)
-		.def("SetNumberValue", &MOSRotating::SetNumberValue)
-		.def("SetObjectValue", &MOSRotating::SetObjectValue)
-		.def("RemoveStringValue", &MOSRotating::RemoveStringValue)
-		.def("RemoveNumberValue", &MOSRotating::RemoveNumberValue)
-		.def("RemoveObjectValue", &MOSRotating::RemoveObjectValue)
-		.def("StringValueExists", &MOSRotating::StringValueExists)
-		.def("NumberValueExists", &MOSRotating::NumberValueExists)
-		.def("ObjectValueExists", &MOSRotating::ObjectValueExists)
 		.def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd))&MOSRotating::AddAttachable, luabind::adopt(_2))
 		.def("AddAttachable", (void (MOSRotating::*)(Attachable *attachableToAdd, const Vector &parentOffset))&MOSRotating::AddAttachable, luabind::adopt(_2))
 		.def("RemoveAttachable", (Attachable *(MOSRotating:: *)(long uniqueIDOfAttachableToRemove)) &MOSRotating::RemoveAttachable, luabind::adopt(luabind::return_value))
@@ -1044,6 +1035,18 @@ namespace RTE {
 		.def("EnableScript", &LuaAdaptersMovableObject::EnableScript)
 		.def("DisableScript", &LuaAdaptersMovableObject::DisableScript)
 		.def("EnableOrDisableAllScripts", &MovableObject::EnableOrDisableAllScripts)
+		.def("GetStringValue", &MovableObject::GetStringValue)
+		.def("GetNumberValue", &MovableObject::GetNumberValue)
+		.def("GetObjectValue", &MovableObject::GetObjectValue)
+		.def("SetStringValue", &MovableObject::SetStringValue)
+		.def("SetNumberValue", &MovableObject::SetNumberValue)
+		.def("SetObjectValue", &MovableObject::SetObjectValue)
+		.def("RemoveStringValue", &MovableObject::RemoveStringValue)
+		.def("RemoveNumberValue", &MovableObject::RemoveNumberValue)
+		.def("RemoveObjectValue", &MovableObject::RemoveObjectValue)
+		.def("StringValueExists", &MovableObject::StringValueExists)
+		.def("NumberValueExists", &MovableObject::NumberValueExists)
+		.def("ObjectValueExists", &MovableObject::ObjectValueExists)
 		.def("GetAltitude", &MovableObject::GetAltitude)
 		.def("GetWhichMOToNotHit", &MovableObject::GetWhichMOToNotHit)
 		.def("SetWhichMOToNotHit", &MovableObject::SetWhichMOToNotHit)
@@ -1078,7 +1081,9 @@ namespace RTE {
 		.def("NotResting", &MovableObject::NotResting)
 		.def("IsAtRest", &MovableObject::IsAtRest)
 		.def("MoveOutOfTerrain", &MovableObject::MoveOutOfTerrain)
-		.def("RotateOffset", &MovableObject::RotateOffset);
+		.def("RotateOffset", &MovableObject::RotateOffset)
+		.def("SendMessage", &LuaAdaptersMovableObject::SendMessage1)
+		.def("SendMessage", &LuaAdaptersMovableObject::SendMessage2);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1098,13 +1103,15 @@ namespace RTE {
 		.def_readwrite("Emissions", &PEmitter::m_EmissionList, luabind::return_stl_iterator)
 
 		.def("IsEmitting", &PEmitter::IsEmitting)
+		.def("WasEmitting", &PEmitter::WasEmitting)
 		.def("EnableEmission", &PEmitter::EnableEmission)
 		.def("GetEmitVector", &PEmitter::GetEmitVector)
 		.def("GetRecoilVector", &PEmitter::GetRecoilVector)
 		.def("EstimateImpulse", &PEmitter::EstimateImpulse)
 		.def("TriggerBurst", &PEmitter::TriggerBurst)
 		.def("IsSetToBurst", &PEmitter::IsSetToBurst)
-		.def("CanTriggerBurst", &PEmitter::CanTriggerBurst);
+		.def("CanTriggerBurst", &PEmitter::CanTriggerBurst)
+		.def("JustStartedEmitting", &PEmitter::JustStartedEmitting);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1362,8 +1369,10 @@ namespace RTE {
 		.def(luabind::constructor<>())
 
 		.property("SoundOverlapMode", &SoundContainer::GetSoundOverlapMode, &SoundContainer::SetSoundOverlapMode)
+		.property("BusRouting", &SoundContainer::GetBusRouting, &SoundContainer::SetBusRouting)
 		.property("Immobile", &SoundContainer::IsImmobile, &SoundContainer::SetImmobile)
 		.property("AttenuationStartDistance", &SoundContainer::GetAttenuationStartDistance, &SoundContainer::SetAttenuationStartDistance)
+		.property("PanningStrengthMultiplier", &SoundContainer::GetPanningStrengthMultiplier, &SoundContainer::SetPanningStrengthMultiplier)
 		.property("Loops", &SoundContainer::GetLoopSetting, &SoundContainer::SetLoopSetting)
 		.property("Priority", &SoundContainer::GetPriority, &SoundContainer::SetPriority)
 		.property("AffectedByGlobalPitch", &SoundContainer::IsAffectedByGlobalPitch, &SoundContainer::SetAffectedByGlobalPitch)
@@ -1385,7 +1394,13 @@ namespace RTE {
 		.def("Restart", (bool (SoundContainer:: *)()) &SoundContainer::Restart)
 		.def("Restart", (bool (SoundContainer:: *)(int player)) &SoundContainer::Restart)
 		.def("FadeOut", &SoundContainer::FadeOut)
-
+		
+		.enum_("BusRouting")[
+			luabind::value("SFX", SoundContainer::BusRouting::SFX),
+			luabind::value("UI", SoundContainer::BusRouting::UI),
+			luabind::value("MUSIC", SoundContainer::BusRouting::MUSIC)
+		]
+		
 		.enum_("SoundOverlapMode")[
 			luabind::value("OVERLAP", SoundContainer::SoundOverlapMode::OVERLAP),
 			luabind::value("RESTART", SoundContainer::SoundOverlapMode::RESTART),

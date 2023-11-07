@@ -73,7 +73,7 @@ namespace RTE {
 		struct PresetResolutionRecord {
 			int Width; //!< Resolution width.
 			int Height; //!< Resolution height.
-			bool Upscaled; //!< Whether resolution is upscaled.
+			float Scale; //!< Whether resolution is upscaled.
 
 			/// <summary>
 			/// Constructor method to instantiate a PresetResolutionRecord object in system memory and make it ready for use.
@@ -81,13 +81,13 @@ namespace RTE {
 			/// <param name="width">Resolution width.</param>
 			/// <param name="height">Resolution height.</param>
 			/// <param name="upscaled">Whether resolution is upscaled.</param>
-			PresetResolutionRecord(int width, int height, bool upscaled) : Width(width), Height(height), Upscaled(upscaled) {}
+			PresetResolutionRecord(int width, int height, float scale) : Width(width), Height(height), Scale(scale) {}
 
 			/// <summary>
 			/// Makes UI displayable string with resolution info.
 			/// </summary>
 			/// <returns>String with resolution info.</returns>
-			std::string GetDisplayString() const { return std::to_string(Width) + "x" + std::to_string(Height) + (Upscaled ? " Upscaled (" + std::to_string(Width / 2) + "x" + std::to_string(Height / 2) + ")" : ""); }
+			std::string GetDisplayString() const;
 
 			/// <summary>
 			/// Comparison operator for eliminating duplicates and sorting in the temporary PresetResolutionRecord std::sets during PopulateResolutionsComboBox.
@@ -96,7 +96,7 @@ namespace RTE {
 			/// <returns>Bool with the result of the comparison.</returns>
 			bool operator<(const PresetResolutionRecord &rhs) const {
 				if (Width == rhs.Width && Height == rhs.Height) {
-					return Upscaled != rhs.Upscaled;
+					return Scale > rhs.Scale;
 				} else if (Width == rhs.Width) {
 					return Height < rhs.Height;
 				}
@@ -110,7 +110,8 @@ namespace RTE {
 
 		int m_NewResX; //!< The new resolution width to use when changing resolution.
 		int m_NewResY; //!< The new resolution height to use when changing resolution.
-		bool m_NewResUpscaled; //!< Whether the new resolution should be upscaled when changing resolution.
+		float m_NewResMultiplier; //!< How much the new resolution should be upscaled when changing resolution.
+		bool m_NewFullscreen;  //!< Whether the game will be windowed or fullscreen.
 
 		/// <summary>
 		/// GUI elements that compose the video settings menu screen.
@@ -119,7 +120,8 @@ namespace RTE {
 		GUIRadioButton *m_TwoPlayerSplitscreenHSplitRadioButton;
 		GUIRadioButton *m_TwoPlayerSplitscreenVSplitRadioButton;
 		GUICheckbox *m_EnableVSyncCheckbox;
-		GUICheckbox *m_IgnoreMultiDisplaysCheckbox;
+		GUICheckbox *m_FullscreenCheckbox;
+		GUICheckbox *m_UseMultiDisplaysCheckbox;
 		GUIRadioButton *m_PresetResolutionRadioButton;
 		GUIRadioButton *m_CustomResolutionRadioButton;
 		GUICollectionBox *m_PresetResolutionBox;
@@ -129,7 +131,7 @@ namespace RTE {
 		GUICollectionBox *m_CustomResolutionBox;
 		GUITextBox *m_CustomResolutionWidthTextBox;
 		GUITextBox *m_CustomResolutionHeightTextBox;
-		GUICheckbox *m_CustomResolutionUpscaledCheckbox;
+		GUIComboBox *m_CustomResolutionMultiplierComboBox;
 		GUILabel *m_CustomResolutionMessageLabel;
 		GUIButton *m_CustomResolutionApplyButton;
 		GUICollectionBox *m_ResolutionChangeDialogBox;
@@ -159,9 +161,14 @@ namespace RTE {
 		bool IsSupportedResolution(int width, int height) const;
 
 		/// <summary>
-		/// Fills the PresetResolutions list with all valid PresetResolutionRecords, then fills the PresetResolutionComboBox using it and selects the currently selected preset resolution, if any.
+		/// Fills the preset resolutions set and combo box with scaled resolutions down to c_MinRes. Defaults the combobox to the closest resolution to c_DefaultRes.
 		/// </summary>
 		void PopulateResolutionsComboBox();
+
+		/// <summary>
+		/// Creates Resolution multipliers down to c_DefaultRes.
+		/// </summary>
+		void PopulateResMultplierComboBox();
 
 		/// <summary>
 		/// Remaps the displays to get the new maximum resolution values to update the numeric limits on the custom resolution textboxes.

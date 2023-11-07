@@ -163,7 +163,14 @@ namespace RTE {
 			return;
 		}
 
-		if (m_ControlledActor) { m_Team = m_ControlledActor->GetTeam(); }
+		if (m_ControlledActor) { 
+			m_Team = m_ControlledActor->GetTeam();
+
+			if (m_ControlledActor->GetHealth() == 0.0f || m_ControlledActor->GetStatus() == Actor::DYING || m_ControlledActor->GetStatus() == Actor::DEAD) {
+				// Keep old states so jetpacks stay on etc
+				return;
+			}
+		}
 
 		switch (m_InputMode) {
 			case InputMode::CIM_PLAYER:
@@ -207,6 +214,10 @@ namespace RTE {
 
 	bool Controller::ShouldUpdateAIThisFrame() const
 	{
+		if (IsDisabled()) {
+			return false;
+		}
+
 		// Throttle the AI to only update every X sim updates.
 		// We want to spread the updates around (so, half the actors on odd frames, the other half on even frames, etc), so we check their contiguous ID against the frame number.
 		const int simTicksPerUpdate = g_SettingsMan.GetAIUpdateInterval();

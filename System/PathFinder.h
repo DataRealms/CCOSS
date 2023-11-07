@@ -35,6 +35,8 @@ namespace RTE {
 
 		Vector Pos; //!< Absolute position of the center of this PathNode in the scene.
 
+		bool m_Navigatable; //!< Whether this node can be navigated through.
+
 		/// <summary>
 		/// Pointers to all adjacent PathNodes, in clockwise order with top first. These are not owned, and may be 0 if adjacent to non-wrapping scene border.
 		/// </summary>
@@ -183,6 +185,20 @@ namespace RTE {
 		/// <param name="pos2">Second coordinates to compare.</param>
 		/// <returns>Whether both coordinates represent the same path node.</returns>
 		bool PositionsAreTheSamePathNode(const Vector& pos1, const Vector& pos2) const;
+
+		/// <summary>
+		/// Marks a box as being navigatable or not.
+		/// </summary>
+		/// <param name="box">The Box of which all PathNodes that should have their navigatable status changed.</param>
+		/// <param name="navigatable">Whether or not the nodes in this box should be navigatable.</param>
+		void MarkBoxNavigatable(Box box, bool navigatable);
+
+		/// <summary>
+		/// Marks a box as being navigatable or not.
+		/// </summary>
+		/// <param name="box">The Box of which all PathNodes that should have their navigatable status changed.</param>
+		/// <param name="navigatable">Whether or not the nodes in this box should be navigatable.</param>
+		void MarkAllNodesNavigatable(bool navigatable);
 #pragma endregion
 
 #pragma region Misc

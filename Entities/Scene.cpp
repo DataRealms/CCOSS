@@ -474,6 +474,8 @@ void Scene::Clear()
         m_ScanScheduled[team] = false;
     }
 	m_AreaList.clear();
+    m_NavigatableAreas.clear();
+    m_NavigatableAreasUpToDate = false;
     m_Locked = false;
     m_GlobalAcc.Reset();
 	m_SelectedAssemblies.clear();
@@ -3112,6 +3114,23 @@ void Scene::Update()
 			}
 		}
 	}
+
+    if (m_NavigatableAreasUpToDate == false) {
+        m_NavigatableAreasUpToDate = true;
+        for (int team = Activity::Teams::NoTeam; team < Activity::Teams::MaxTeamCount; ++team) {
+            PathFinder& pathFinder = *GetPathFinder(static_cast<Activity::Teams>(team));
+
+            pathFinder.MarkAllNodesNavigatable(m_NavigatableAreas.empty());
+
+            for (const std::string &navigatableArea : m_NavigatableAreas) {
+                if (HasArea(navigatableArea)) {
+                    for (const Box &navigatableBox : GetArea(navigatableArea)->GetBoxes()) {
+                        pathFinder.MarkBoxNavigatable(navigatableBox, true);
+                    }
+                }
+            }
+        }
+    }
 
     // Occasionally update pathfinding. There's a tradeoff between how often updates occur vs how big the multithreaded batched node lists to update are.
     if (m_PartialPathUpdateTimer.IsPastRealMS(100)) {

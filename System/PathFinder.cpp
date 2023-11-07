@@ -157,8 +157,15 @@ namespace RTE {
 		s_DigStrength = digStrength;
 
 		// Do the actual pathfinding, fetch out the list of states that comprise the best path.
+		int result = MicroPather::NO_SOLUTION;
 		std::vector<void *> statePath;
-		int result = GetPather()->Solve(static_cast<void *>(GetPathNodeAtGridCoords(startNodeX, startNodeY)), static_cast<void *>(GetPathNodeAtGridCoords(endNodeX, endNodeY)), &statePath, &totalCostResult);
+
+		// If end node is invalid, there's no path
+		PathNode* endNode = GetPathNodeAtGridCoords(endNodeX, endNodeY);
+		if (endNode && endNode->m_Navigatable) {
+			result = GetPather()->Solve(static_cast<void*>(GetPathNodeAtGridCoords(startNodeX, startNodeY)), static_cast<void*>(endNode), &statePath, &totalCostResult);
+		}
+
 		if (result == MicroPather::NO_SOLUTION) {
 			// Otherwise micropather inits it to zero :)
 			totalCostResult = std::numeric_limits<float>::max();
@@ -291,44 +298,44 @@ namespace RTE {
 		const float extraUpCost = 3.0F;
 
 		// Add cost for digging upwards.
-		if (node->Up) {
+		if (node->Up && node->Up->m_Navigatable) {
 			adjCost.cost = 1.0F + extraUpCost + (GetMaterialTransitionCost(*node->UpMaterial) * 4.0F) + radiatedCost; // Four times more expensive when digging.
 			adjCost.state = static_cast<void *>(node->Up);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->Right) {
+		if (node->Right && node->Right->m_Navigatable) {
 			adjCost.cost = 1.0F + GetMaterialTransitionCost(*node->RightMaterial) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Right);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->Down) {
+		if (node->Down && node->Down->m_Navigatable) {
 			adjCost.cost = 1.0F + GetMaterialTransitionCost(*node->DownMaterial) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Down);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->Left) {
+		if (node->Left && node->Left->m_Navigatable) {
 			adjCost.cost = 1.0F + GetMaterialTransitionCost(*node->LeftMaterial) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->Left);
 			adjacentList->push_back(adjCost);
 		}
 
 		// Add cost for digging at 45 degrees and for digging upwards.
-		if (node->UpRight) {
+		if (node->UpRight && node->UpRight->m_Navigatable) {
 			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(*node->UpRightMaterial) * 1.4F * 3.0F) + radiatedCost;  // Three times more expensive when digging.
 			adjCost.state = static_cast<void *>(node->UpRight);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->RightDown) {
+		if (node->RightDown && node->RightDown->m_Navigatable) {
 			adjCost.cost = 1.4F + (GetMaterialTransitionCost(*node->RightDownMaterial) * 1.4F) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->RightDown);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->DownLeft) {
+		if (node->DownLeft && node->DownLeft->m_Navigatable) {
 			adjCost.cost = 1.4F + (GetMaterialTransitionCost(*node->DownLeftMaterial) * 1.4F) + radiatedCost;
 			adjCost.state = static_cast<void *>(node->DownLeft);
 			adjacentList->push_back(adjCost);
 		}
-		if (node->LeftUp) {
+		if (node->LeftUp && node->LeftUp->m_Navigatable) {
 			adjCost.cost = 1.4F + extraUpCost + (GetMaterialTransitionCost(*node->LeftUpMaterial) * 1.4F * 3.0F) + radiatedCost;  // Three times more expensive when digging.
 			adjCost.state = static_cast<void *>(node->LeftUp);
 			adjacentList->push_back(adjCost);
@@ -488,6 +495,41 @@ namespace RTE {
 		}
 
 		return anyChange;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PathFinder::MarkBoxNavigatable(Box box, bool navigatable) {
+		std::vector<int> pathNodesInBox = GetNodeIdsInBox(box);
+		std::for_each(
+			std::execution::par_unseq,
+			pathNodesInBox.begin(),
+			pathNodesInBox.end(),
+			[this, navigatable](int nodeId) {
+				PathNode* node = &m_NodeGrid[nodeId];
+				node->m_Navigatable = navigatable;
+			}
+		);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void PathFinder::MarkAllNodesNavigatable(bool navigatable) {
+		std::vector<int> pathNodesIdsVec;
+		pathNodesIdsVec.reserve(m_NodeGrid.size());
+		for (int i = 0; i < m_NodeGrid.size(); ++i) {
+			pathNodesIdsVec.push_back(i);
+		}
+
+		std::for_each(
+			std::execution::par_unseq,
+			pathNodesIdsVec.begin(),
+			pathNodesIdsVec.end(),
+			[this, navigatable](int nodeId) {
+				PathNode* node = &m_NodeGrid[nodeId];
+				node->m_Navigatable = navigatable;
+			}
+		);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

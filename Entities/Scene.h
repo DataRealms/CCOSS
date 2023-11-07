@@ -952,6 +952,9 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
 	Area * GetOptionalArea(const std::string &areaName) { return GetArea(areaName, true); };
 
+    void AddNavigatableArea(const std::string &areaName) { m_NavigatableAreas.push_back(areaName); m_NavigatableAreasUpToDate = false; }
+    void ClearNavigatableAreas(const std::string &areaName) { m_NavigatableAreas.clear(); m_NavigatableAreasUpToDate = false; }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          RemoveArea
@@ -1396,8 +1399,13 @@ protected:
     // Whether this Scene is scheduled to be orbitally scanned by any team
     bool m_ScanScheduled[Activity::MaxTeamCount];
 
-    // List of all the specified Area:s of the scene
+    // List of all the specified Area's of the scene
     std::list<Area> m_AreaList;
+
+    // List of navigatable areas in the scene. If this list is empty, the entire scene is assumed to be navigatable
+    std::vector<std::string> m_NavigatableAreas;
+    bool m_NavigatableAreasUpToDate;
+
     // Whether the scene's bitmaps are locked or not.
     bool m_Locked;
     // The global acceleration vector in m/s^2. (think gravity/wind)

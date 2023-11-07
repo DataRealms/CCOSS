@@ -946,6 +946,11 @@ public:
     /// </summary>
     void RunLuaFunctionOnAllMOs(const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments = std::vector<const Entity*>(), const std::vector<std::string_view>& functionLiteralArguments = std::vector<std::string_view>(), const std::vector<LuabindObjectWrapper*>& functionObjectArguments = std::vector<LuabindObjectWrapper*>(), ThreadScriptsToRun scriptsToRun = ThreadScriptsToRun::Both);
 
+    /// <summary>
+    /// Clears all cached lua functions on all MOs, including owned child MOs.
+    /// </summary>
+    void ReloadLuaScripts();
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 

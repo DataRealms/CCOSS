@@ -574,15 +574,6 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
     LuaStateWrapper& usedState = GetAndLockStateForScript(scriptPath);
     std::lock_guard<std::recursive_mutex> lock(usedState.GetMutex(), std::adopt_lock);
 
-	std::string luaClearSupportedFunctionsString;
-	luaClearSupportedFunctionsString.reserve(160);
-	for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
-		luaClearSupportedFunctionsString += functionName + " = nil;";
-	}
-	if (usedState.RunScriptString(luaClearSupportedFunctionsString) < 0) {
-		return -4;
-	}
-
 	for (const std::string &functionName : GetSupportedScriptFunctionNames()) {
 		if (m_FunctionsAndScripts.find(functionName) == m_FunctionsAndScripts.end()) {
 			m_FunctionsAndScripts.try_emplace(functionName);
@@ -593,13 +584,12 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 
 	std::unordered_map<std::string, LuabindObjectWrapper *> scriptFileFunctions;
 	if (usedState.RunScriptFileAndRetrieveFunctions(scriptPath, "", GetSupportedScriptFunctionNames(), scriptFileFunctions) < 0) {
-		return -5;
+		return -4;
 	}
+
 	for (const auto &[functionName, functionObject] : scriptFileFunctions) {
 		m_FunctionsAndScripts.at(functionName).emplace_back(std::unique_ptr<LuabindObjectWrapper>(functionObject));
 	}
-
-	usedState.RunScriptString(luaClearSupportedFunctionsString);
 
 	if (ObjectScriptsInitialized()) {
 		RunFunctionOfScript(scriptPath, "Create");

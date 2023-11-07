@@ -135,6 +135,7 @@ namespace RTE {
 		/// <param name="prefix">The prefix before each function we're looking for. With normal objects this is usually nothing (free floating), but activities expect the activity name beforehand.</param>
 		/// <param name="functionNamesToLookFor">The vector of strings defining the function names to be retrieved.</param>
 		/// <param name="outFunctionNamesAndObjects">The map of function names to LuabindObjectWrappers to be retrieved from the script that was run.</param>
+		/// <param name="noCaching">Whether caching shouldn't be used.</param>
 		/// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
 		int RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects);
 #pragma endregion
@@ -193,6 +194,11 @@ namespace RTE {
 		/// Clears internal Lua package tables from all user-defined modules. Those must be reloaded with ReloadAllScripts().
 		/// </summary>
 		void ClearUserModuleCache();
+
+		/// <summary>
+		/// Clears the Lua script cache.
+		/// </summary>
+		void ClearLuaScriptCache();
 #pragma endregion
 
 #pragma region Error Handling
@@ -269,6 +275,11 @@ namespace RTE {
 
 		// This mutex is more for safety, and with new script/AI architecture we shouldn't ever be locking on a mutex. As such we use this primarily to fire asserts.
 		std::recursive_mutex m_Mutex; //!< Mutex to ensure multiple threads aren't running something in this lua state simultaneously.
+
+		struct LuaScriptFunctionObjects {
+			std::unordered_map<std::string, LuabindObjectWrapper*> functionNamesAndObjects;
+		};
+		std::unordered_map<std::string, LuaScriptFunctionObjects> m_ScriptCache;
 
 		std::unordered_map<std::string, PerformanceMan::ScriptTiming> m_ScriptTimings; //!< Internal map of script timings.
 
@@ -378,6 +389,11 @@ namespace RTE {
 		/// </summary>
 		/// <returns>m_ScriptTimings.</returns>
 		const std::unordered_map<std::string, PerformanceMan::ScriptTiming> GetScriptTimings() const;
+
+		/// <summary>
+		/// Clears the Lua script cache.
+		/// </summary>
+		void ClearLuaScriptCache();
 #pragma endregion
 
 #pragma region File I/O Handling

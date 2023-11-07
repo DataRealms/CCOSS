@@ -1633,6 +1633,58 @@ void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, const s
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void reloadLuaFunctionsOnMORecursive(MovableObject* mo) {
+    if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
+        for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
+            Attachable* attachable = *attachablrItr;
+            ++attachablrItr;
+
+            attachable->ReloadScripts();
+            reloadLuaFunctionsOnMORecursive(attachable);
+        }
+
+        for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
+            AEmitter* wound = *woundItr;
+            ++woundItr;
+
+            wound->ReloadScripts();
+            reloadLuaFunctionsOnMORecursive(wound);
+        }
+    }
+
+    mo->ReloadScripts();
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableMan::ReloadLuaScripts() {
+    for (Actor* actor : m_AddedActors) {
+        reloadLuaFunctionsOnMORecursive(actor);
+    }
+
+    for (MovableObject* item : m_AddedItems) {
+        reloadLuaFunctionsOnMORecursive(item);
+    }
+
+    for (MovableObject* particle : m_AddedParticles) {
+        reloadLuaFunctionsOnMORecursive(particle);
+    }
+
+    for (Actor* actor : m_Actors) {
+        reloadLuaFunctionsOnMORecursive(actor);
+    }
+
+    for (MovableObject* item : m_Items) {
+        reloadLuaFunctionsOnMORecursive(item);
+    }
+
+    for (MovableObject* particle : m_Particles) {
+        reloadLuaFunctionsOnMORecursive(particle);
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////

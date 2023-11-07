@@ -425,6 +425,15 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	void LuaMan::ClearLuaScriptCache() {
+		m_MasterScriptState.ClearLuaScriptCache();
+		for (LuaStateWrapper &luaState : m_ScriptStates) {
+			luaState.ClearLuaScriptCache();
+		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaMan::Destroy() {
 		for (int i = 0; i < c_MaxOpenFiles; ++i) {
 			FileClose(i);
@@ -436,6 +445,12 @@ namespace RTE {
 
 	void LuaStateWrapper::ClearUserModuleCache() {
 		luaL_dostring(m_State, "for m, n in pairs(package.loaded) do if type(n) == \"boolean\" then package.loaded[m] = nil; end; end;");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaStateWrapper::ClearLuaScriptCache() {
+		m_ScriptCache.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -674,12 +689,33 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int LuaStateWrapper::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects) {
-		if (int error = RunScriptFile(filePath); error < 0) {
-			return error;
+		// If it's already cached, we don't need to run it again
+		auto cachedScript = m_ScriptCache.find(filePath);
+		if (cachedScript != m_ScriptCache.end()) {
+			for (auto& pair : cachedScript->second.functionNamesAndObjects) {
+				luabind::object* functionObjectCopyForStoring = new luabind::object(*pair.second->GetLuabindObject());
+				outFunctionNamesAndObjects.try_emplace(pair.first, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
+			}
+
+			return 0;
 		}
 
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
 		s_currentLuaState = this;
+
+		std::string luaClearSupportedFunctionsString;
+		luaClearSupportedFunctionsString.reserve(160);
+		for (const std::string& functionName : functionNamesToLookFor) {
+			luaClearSupportedFunctionsString += functionName + " = nil;";
+		}
+
+		if (int error = RunScriptString(luaClearSupportedFunctionsString) < 0) {
+			return error;
+		}
+
+		if (int error = RunScriptFile(filePath); error < 0) {
+			return error;
+		}
 
 		luabind::object prefixObject;
 		if (prefix == "") {
@@ -692,15 +728,16 @@ namespace RTE {
 			return -1;
 		}
 
-		for (const std::string &functionName : functionNamesToLookFor) {
+		auto &newScript = m_ScriptCache[filePath];
+		for (const std::string& functionName : functionNamesToLookFor) {
 			luabind::object functionObject = prefixObject[functionName];
 			if (luabind::type(functionObject) == LUA_TFUNCTION) {
-				luabind::object *functionObjectCopyForStoring = new luabind::object(functionObject);
-				outFunctionNamesAndObjects.try_emplace(functionName, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
+				luabind::object* functionObjectCopyForStoring = new luabind::object(functionObject);
+				newScript.functionNamesAndObjects.try_emplace(functionName, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
 			}
 		}
 
-		return 0;
+		return RunScriptFileAndRetrieveFunctions(filePath, prefix, functionNamesToLookFor, outFunctionNamesAndObjects);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

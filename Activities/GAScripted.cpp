@@ -202,15 +202,6 @@ int GAScripted::ReloadScripts() {
         }
     }
 
-    std::string luaClearSupportedFunctionsString;
-    for (const std::string& functionName : GetSupportedScriptFunctionNames()) {
-        luaClearSupportedFunctionsString += m_LuaClassName + "." + functionName + " = nil; ";
-    }
-
-    if ((error = g_LuaMan.GetMasterScriptState().RunScriptString(luaClearSupportedFunctionsString)) < 0) {
-        return error;
-    }
-
     std::unordered_map<std::string, LuabindObjectWrapper*> scriptFileFunctions;
     if ((error = g_LuaMan.GetMasterScriptState().RunScriptFileAndRetrieveFunctions(m_ScriptPath, m_LuaClassName, GetSupportedScriptFunctionNames(), scriptFileFunctions)) < 0) {
         return error;

@@ -908,9 +908,11 @@ std::string PresetMan::GetEntityDataLocation(std::string type, std::string prese
 
 void PresetMan::ReloadAllScripts() const {
 	g_LuaMan.ClearUserModuleCache();
+	g_LuaMan.ClearLuaScriptCache();
 	for (const DataModule *dataModule : m_pDataModules) {
 		dataModule->ReloadAllScripts();
 	}
+	g_MovableMan.ReloadLuaScripts();
 	g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded!");
 }
 

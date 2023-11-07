@@ -411,6 +411,20 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	const std::unordered_map<std::string, PerformanceMan::ScriptTiming> LuaMan::GetScriptTimings() const {
+		std::unordered_map<std::string, PerformanceMan::ScriptTiming> timings = m_MasterScriptState.GetScriptTimings();
+		for (const LuaStateWrapper &luaState : m_ScriptStates) {
+			for (auto&& [functionName, timing] : luaState.GetScriptTimings()) {
+				auto& existing = timings[functionName];
+				existing.m_CallCount += timing.m_CallCount;
+				existing.m_Time = std::max(existing.m_Time, timing.m_Time);
+			}
+		}
+		return timings;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaMan::Destroy() {
 		for (int i = 0; i < c_MaxOpenFiles; ++i) {
 			FileClose(i);
@@ -471,6 +485,12 @@ namespace RTE {
 		lua_pushstring(m_State, currentPath.c_str()); // push the new one.
 		lua_setfield(m_State, -2, "path"); // set the field "path" in table at -2 with value at top of stack.
 		lua_pop(m_State, 1); // get rid of package table from top of stack.
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	const std::unordered_map<std::string, PerformanceMan::ScriptTiming> & LuaStateWrapper::GetScriptTimings() const {
+		return m_ScriptTimings;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -588,6 +608,7 @@ namespace RTE {
 			functionObjectArgument->GetLuabindObject()->push(m_State);
 		}
 
+		std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 		if (lua_pcall(m_State, argumentCount, LUA_MULTRET, -argumentCount - 2) > 0) {
 			m_LastError = lua_tostring(m_State, -1);
 			lua_pop(m_State, 1);
@@ -595,6 +616,15 @@ namespace RTE {
 			ClearErrors();
 			status = -1;
 		}
+		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+		// only track time in non-MT scripts, for now
+		if (&g_LuaMan.GetMasterScriptState() == this) {
+			const std::string& path = functionObject->GetFilePath();
+			m_ScriptTimings[path].m_Time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+			m_ScriptTimings[path].m_CallCount++;
+		}
+
 		lua_pop(m_State, 1);
 
 		return status;
@@ -681,8 +711,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool LuaStateWrapper::ExpressionIsTrue(const std::string &expression, bool consoleErrors)
-    {
+	void LuaStateWrapper::ClearScriptTimings() {
+		m_ScriptTimings.clear();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    bool LuaStateWrapper::ExpressionIsTrue(const std::string &expression, bool consoleErrors) {
         if (expression.empty()) {
 			return false;
 		}
@@ -968,6 +1003,15 @@ namespace RTE {
 
 		// Apply all deletions queued from lua
     	LuabindObjectWrapper::ApplyQueuedDeletions();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaMan::ClearScriptTimings() {
+		m_MasterScriptState.ClearScriptTimings();
+		for (LuaStateWrapper& luaState : m_ScriptStates) {
+			luaState.ClearScriptTimings();
+		}
 	}
 
 }

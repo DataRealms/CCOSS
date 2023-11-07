@@ -4,6 +4,7 @@
 #include "Singleton.h"
 #include "Entity.h"
 #include "RTETools.h"
+#include "PerformanceMan.h"
 
 #define g_LuaMan LuaMan::Instance()
 
@@ -78,6 +79,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>This LuaStateWrapper's internal lua state.</returns>
 		lua_State* GetLuaState() { return m_State; };
+		
+		/// <summary>
+		/// Gets m_ScriptTimings.
+		/// </summary>
+		/// <returns>m_ScriptTimings.</returns>
+		const std::unordered_map<std::string, PerformanceMan::ScriptTiming> & GetScriptTimings() const;
 #pragma endregion
 
 #pragma region Script Execution Handling
@@ -137,6 +144,11 @@ namespace RTE {
 		/// Updates this Lua state.
 		/// </summary>
 		void Update();
+
+		/// <summary>
+		/// Clears m_ScriptTimings.
+		/// </summary>
+		void ClearScriptTimings();
 #pragma endregion
 
 #pragma region MultiThreading
@@ -258,6 +270,8 @@ namespace RTE {
 		// This mutex is more for safety, and with new script/AI architecture we shouldn't ever be locking on a mutex. As such we use this primarily to fire asserts.
 		std::recursive_mutex m_Mutex; //!< Mutex to ensure multiple threads aren't running something in this lua state simultaneously.
 
+		std::unordered_map<std::string, PerformanceMan::ScriptTiming> m_ScriptTimings; //!< Internal map of script timings.
+
 		// For determinism, every Lua state has it's own random number generator.
 		RandomGenerator m_RandomGenerator; //!< The random number generator used for this lua state.
 	};
@@ -358,6 +372,12 @@ namespace RTE {
 		/// Executes and clears all pending script callbacks.
 		/// </summary>
 		void ExecuteLuaScriptCallbacks();
+
+		/// <summary>
+		/// Gets m_ScriptTimings.
+		/// </summary>
+		/// <returns>m_ScriptTimings.</returns>
+		const std::unordered_map<std::string, PerformanceMan::ScriptTiming> GetScriptTimings() const;
 #pragma endregion
 
 #pragma region File I/O Handling
@@ -432,6 +452,11 @@ namespace RTE {
 		/// </summary>
 		void Update();
 #pragma endregion
+
+		/// <summary>
+		/// Clears Script Timings.
+		/// </summary>
+		void ClearScriptTimings();
 
 	private:
 

@@ -87,7 +87,7 @@ void GameActivity::Clear()
 
 	m_StartingGold = 0;
 	m_FogOfWarEnabled = false;
-	m_RequireClearPathToOrbit = true;
+	m_RequireClearPathToOrbit = false;
 
 	m_DefaultFogOfWar = -1;
 	m_DefaultRequireClearPathToOrbit = -1;

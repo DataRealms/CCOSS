@@ -82,7 +82,7 @@ void SceneEditorGUI::Clear()
     m_pObjectToBlink = 0;
     m_BrainSkyPath.clear();
     m_BrainSkyPathCost = 0;
-	m_RequireClearPathToOrbit = true;
+	m_RequireClearPathToOrbit = false;
     m_PathRequest.reset();
 }
 
@@ -130,7 +130,7 @@ int SceneEditorGUI::Create(Controller *pController, FeatureSets featureSet, int 
     m_RevealTimer.SetRealTimeLimitMS(100);
 
 	//Check if we need to check for a clear path to orbit
-	m_RequireClearPathToOrbit = true;
+	m_RequireClearPathToOrbit = false;
 	GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
     if (gameActivity) {
         m_RequireClearPathToOrbit = gameActivity->GetRequireClearPathToOrbit();

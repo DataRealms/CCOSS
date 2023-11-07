@@ -125,7 +125,7 @@ void Actor::Clear() {
     m_MoveVector.Reset();
     m_MovePath.clear();
     m_UpdateMovePath = true;
-    m_MoveProximityLimit = 100.0F;
+    m_MoveProximityLimit = 75.0F;
     m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
     m_BaseMass = std::numeric_limits<float>::infinity();
 
@@ -1251,10 +1251,10 @@ float Actor::EstimateDigStrength() const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Actor::UpdateAIScripted(ThreadScriptsToRun scriptsToRun) {
-    RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true, {}, {}, scriptsToRun);
+    RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true, {}, {}, {}, scriptsToRun);
     if (scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
         // If we're in a SingleThreaded context, we run the MultiThreaded scripts synced updates
-         RunScriptedFunctionInAppropriateScripts("SyncedUpdateAI", false, true, {}, {}, ThreadScriptsToRun::Both);
+         RunScriptedFunctionInAppropriateScripts("SyncedUpdateAI", false, true, {}, {}, {}, ThreadScriptsToRun::Both);
     }
 }
 
@@ -1338,15 +1338,15 @@ void Actor::Update()
         {
             pathPointVec = g_SceneMan.ShortestDistance(m_Pos, *lItr);
             // Make sure we are within range AND have a clear sight to the path point we're about to eliminate, or it might be around a corner
-            if (pathPointVec.GetLargest() <= m_MoveProximityLimit && !g_SceneMan.CastStrengthRay(m_Pos, pathPointVec, 5, notUsed, 0))
+            if (pathPointVec.MagnitudeIsLessThan(m_MoveProximityLimit) && !g_SceneMan.CastStrengthRay(m_Pos, pathPointVec, 5, notUsed, 0))
             {
                 lItr++;
                 // Save the last one before being popped off so we can use it to check if we need to dig (if there's any material between last and current)
                 m_PrevPathTarget = m_MovePath.front();
                 m_MovePath.pop_front();
-            }
-            else
+            } else {
                 break;
+            }
         }
 
         if (!m_MovePath.empty())
@@ -1356,8 +1356,9 @@ void Actor::Update()
             // See if we are close enough to the last point in the current path, in which case we can toss teh whole current path and start ont he next
             pathPointVec = g_SceneMan.ShortestDistance(m_Pos, m_MovePath.back());
             // Clear out the current path, the player apparently took a shortcut
-            if (pathPointVec.GetLargest() <= m_MoveProximityLimit && !g_SceneMan.CastStrengthRay(m_Pos, pathPointVec, 5, notUsed, 0, g_MaterialDoor))
+            if (pathPointVec.MagnitudeIsLessThan(m_MoveProximityLimit) && !g_SceneMan.CastStrengthRay(m_Pos, pathPointVec, 5, notUsed, 0, g_MaterialDoor)) {
                 m_MovePath.clear();
+            }
         }
 
         // If still stuff in the path, get the next point on it
@@ -1382,6 +1383,20 @@ void Actor::Update()
     }
     m_Health = std::min(m_Health, m_MaxHealth);
 
+    /////////////////////////////
+    // Stability logic
+
+    if (m_Status == STABLE) {
+        // If moving really fast, we're not able to be stable
+        if (std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y)) { m_Status = UNSTABLE; }
+
+        m_StableRecoverTimer.Reset();
+    }
+    else if (m_Status == UNSTABLE) {
+        // Only regain stability if we're not moving too fast and it's been a while since we lost it
+        if (m_StableRecoverTimer.IsPastSimMS(m_StableRecoverDelay) && !(std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y))) { m_Status = STABLE; }
+    }
+
     /////////////////////////////////////////////
     // Take damage from large hits during travel
 
@@ -1391,27 +1406,13 @@ void Actor::Update()
     float halfTravelImpulseDamage = m_TravelImpulseDamage * 0.5F;
 	if (m_BodyHitSound && travelImpulseMagnitudeSqr > (halfTravelImpulseDamage * halfTravelImpulseDamage)) { m_BodyHitSound->Play(m_Pos); }
 
-	if (travelImpulseMagnitudeSqr > (m_TravelImpulseDamage * m_TravelImpulseDamage)) {
+    // But only actually damage ourselves if we're unstable
+	if (m_Status == Actor::UNSTABLE && travelImpulseMagnitudeSqr > (m_TravelImpulseDamage * m_TravelImpulseDamage)) {
 		const float impulse = std::sqrt(travelImpulseMagnitudeSqr) - m_TravelImpulseDamage;
 		const float damage = std::max(impulse / (m_GibImpulseLimit - m_TravelImpulseDamage) * m_MaxHealth, 0.0F);
 		m_Health -= damage;
-		if (m_Status == Actor::STABLE) { m_Status = UNSTABLE; }
 		m_ForceDeepCheck = true;
 	}
-
-    /////////////////////////////
-    // Stability logic
-
-    if (m_Status == STABLE) {
-        // If moving really fast, we're not able to be stable
-		if (std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y)) { m_Status = UNSTABLE; }
-
-        m_StableRecoverTimer.Reset();
-    }
-    else if (m_Status == UNSTABLE) {
-        // Only regain stability if we're not moving too fast and it's been a while since we lost it
-		if (m_StableRecoverTimer.IsPastSimMS(m_StableRecoverDelay) && !(std::abs(m_Vel.m_X) > std::abs(m_StableVel.m_X) || std::abs(m_Vel.m_Y) > std::abs(m_StableVel.m_Y))) { m_Status = STABLE; }
-    }
 
     // Spread the carried items and gold around before death.
     if (m_Status == DYING || m_Status == DEAD) {

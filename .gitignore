@@ -8,6 +8,8 @@
 *.APS
 *.user
 
+/.idea
+
 compile_commands.json
 /.ccls-cache
 
@@ -15,6 +17,7 @@ compile_commands.json
 
 /enc_temp_folder
 
+/.idea
 /_Bin
 /NATPunchServer/Server/NATCompleteServer/Debug
 /NATPunchServer/Server/NATCompleteServer/Release

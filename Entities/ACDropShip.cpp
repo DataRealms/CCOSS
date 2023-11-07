@@ -209,9 +209,9 @@ float ACDropShip::GetAltitude(int max, int accuracy)
     g_SceneMan.WrapPosition(rPos);
 
     // Check center too
-    float cAlt = g_SceneMan.FindAltitude(m_Pos, max, accuracy);
-    float rAlt = g_SceneMan.FindAltitude(rPos, max, accuracy);
-    float lAlt = g_SceneMan.FindAltitude(lPos, max, accuracy);
+    float cAlt = g_SceneMan.FindAltitude(m_Pos, max, accuracy, true);
+    float rAlt = g_SceneMan.FindAltitude(rPos, max, accuracy, true);
+    float lAlt = g_SceneMan.FindAltitude(lPos, max, accuracy, true);
 
     // Return the lowest of the three
     return MIN(cAlt, MIN(rAlt, lAlt));

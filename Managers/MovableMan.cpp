@@ -1551,11 +1551,9 @@ void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
     }
 }
 
-void updateMultiThreadedScripts(MovableObject* mo, LuaStateWrapper* luaState) {
-    if (!luaState || mo->GetLuaState() == luaState) {
-        mo->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
-    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void updateMultiThreadedScripts(MovableObject* mo, LuaStateWrapper* luaState) {
     if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
         for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
             Attachable* attachable = *attachablrItr;
@@ -1577,7 +1575,63 @@ void updateMultiThreadedScripts(MovableObject* mo, LuaStateWrapper* luaState) {
             updateMultiThreadedScripts(wound, luaState);
         }
     }
+
+    if (!luaState || mo->GetLuaState() == luaState) {
+        mo->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
+    }
 };
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void callLuaFunctionOnMORecursive(MovableObject* mo, const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments, const std::vector<std::string_view>& functionLiteralArguments, const std::vector<LuabindObjectWrapper*>& functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
+    if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
+        for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
+            Attachable* attachable = *attachablrItr;
+            ++attachablrItr;
+
+            attachable->RunScriptedFunctionInAppropriateScripts("OnGlobalMessage", false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+            callLuaFunctionOnMORecursive(attachable, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        }
+
+        for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
+            AEmitter* wound = *woundItr;
+            ++woundItr;
+
+            wound->RunScriptedFunctionInAppropriateScripts("OnGlobalMessage", false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+            callLuaFunctionOnMORecursive(wound, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        }
+    }
+
+    mo->RunScriptedFunctionInAppropriateScripts("OnGlobalMessage", false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, const std::vector<LuabindObjectWrapper*> &functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
+    for (Actor* actor : m_AddedActors) {
+        callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    }
+
+    for (MovableObject *item : m_AddedItems) {
+        callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    }
+
+    for (MovableObject* particle : m_AddedParticles) {
+        callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    }
+    
+    for (Actor *actor : m_Actors) {
+        callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    }
+
+    for (MovableObject *item : m_Items) {
+        callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    }
+
+    for (MovableObject* particle : m_Particles) {
+        callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    }
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update

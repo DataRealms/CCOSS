@@ -138,8 +138,8 @@ int GAScripted::ReadProperty(const std::string_view &propName, Reader &reader) {
 //                  later recreation with Create(Reader &reader);
 
 int GAScripted::Save(Writer &writer) const {
-    // Call the script OnSave() function, if it exists
-    g_LuaMan.GetMasterScriptState().RunScriptString("if " + m_LuaClassName + " and " + m_LuaClassName + ".OnSave then " + m_LuaClassName + ":OnSave(); end");
+    // Hmm. We should probably be calling this prior to the writer Save, instead of const-casting.
+    const_cast<GAScripted*>(this)->RunLuaFunction("OnSave");
 
     GameActivity::Save(writer);
 
@@ -184,63 +184,50 @@ void GAScripted::Destroy(bool notInherited) {
 //                  spawned will use the new scripts.
 
 int GAScripted::ReloadScripts() {
+    if (m_ScriptPath.empty()) {
+        return 0;
+    }
+
     int error = 0;
+    CollectRequiredAreas();
 
-    // Read in the Lua script function definitions for this preset
-    if (!m_ScriptPath.empty()) {
-        // Get the required Area:s from the new script
-        CollectRequiredAreas();
-
-        // If it hasn't been yet, run the file that specifies the Lua functions for this' operating logic (including the scene test function)
-        if (!g_LuaMan.GetMasterScriptState().GlobalIsDefined(m_LuaClassName)) {
-            // Temporarily store this Activity so the Lua state can access it
-            g_LuaMan.GetMasterScriptState().SetTempEntity(this);
-            // Define the var that will hold the script file definitions
-            if ((error = g_LuaMan.GetMasterScriptState().RunScriptString(m_LuaClassName + " = ToGameActivity(LuaMan.TempEntity);")) < 0) {
-                return error;
-            }
-        }
-
-        // Load and run the file, defining all the scripted functions of this Activity
-        if ((error = g_LuaMan.GetMasterScriptState().RunScriptFile(m_ScriptPath)) < 0) {
+    // If it hasn't been yet, run the file that specifies the Lua functions for this' operating logic (including the scene test function)
+    if (!g_LuaMan.GetMasterScriptState().GlobalIsDefined(m_LuaClassName)) {
+        // Temporarily store this Activity so the Lua state can access it
+        g_LuaMan.GetMasterScriptState().SetTempEntity(this);
+        
+        // Define the var that will hold the script file definitions
+        if ((error = g_LuaMan.GetMasterScriptState().RunScriptString(m_LuaClassName + " = ToGameActivity(LuaMan.TempEntity);")) < 0) {
             return error;
         }
     }
 
-    return error;
+    std::string luaClearSupportedFunctionsString;
+    for (const std::string& functionName : GetSupportedScriptFunctionNames()) {
+        luaClearSupportedFunctionsString += m_LuaClassName + "." + functionName + " = nil; ";
+    }
+
+    if ((error = g_LuaMan.GetMasterScriptState().RunScriptString(luaClearSupportedFunctionsString)) < 0) {
+        return error;
+    }
+
+    std::unordered_map<std::string, LuabindObjectWrapper*> scriptFileFunctions;
+    if ((error = g_LuaMan.GetMasterScriptState().RunScriptFileAndRetrieveFunctions(m_ScriptPath, m_LuaClassName, GetSupportedScriptFunctionNames(), scriptFileFunctions)) < 0) {
+        return error;
+    }
+
+    m_ScriptFunctions.clear();
+    for (const auto& [functionName, functionObject] : scriptFileFunctions) {
+        m_ScriptFunctions[functionName] = std::unique_ptr<LuabindObjectWrapper>(functionObject);
+    }
+
+    return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool GAScripted::HasSaveFunction() const {
-	//TODO this method is complicated and manually parsing lua like this sucks. It should be replaceable with a simple check if the function exists in Lua, but it wasn't working when I tried so I just copied this from SceneIsCompatible.
-	std::ifstream scriptInputFileStream(m_ScriptPath);
-	if (scriptInputFileStream.good()) {
-		std::string::size_type commentPos;
-		bool inBlockComment = false;
-		while (!scriptInputFileStream.eof()) {
-			char rawLine[512];
-			scriptInputFileStream.getline(rawLine, 512);
-			std::string currentLine(rawLine);
-
-			if (!inBlockComment) {
-				commentPos = currentLine.find("--[[", 0);
-				inBlockComment = commentPos != std::string::npos;
-			}
-			if (inBlockComment) {
-				commentPos = currentLine.find("]]", commentPos == std::string::npos ? 0 : commentPos);
-				inBlockComment = commentPos != std::string::npos;
-			}
-			if (!inBlockComment) {
-				commentPos = currentLine.find("--", 0);
-				std::string::size_type foundTextPos = currentLine.find("OnSave");
-				if (foundTextPos != std::string::npos && foundTextPos < commentPos) {
-					return true;
-				}
-			}
-		}
-	}
-	return false;
+    return m_ScriptFunctions.find("OnSave") != m_ScriptFunctions.end();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -329,12 +316,12 @@ int GAScripted::Start() {
     }
 
     // Run the file that specifies the Lua functions for this' operating logic
-    if ((error = g_LuaMan.GetMasterScriptState().RunScriptFile(m_ScriptPath)) < 0) {
+    if ((error = ReloadScripts()) < 0) {
         return error;
     }
 
-    // Call the defined function, but only after first checking if it exists
-    if ((error = g_LuaMan.GetMasterScriptState().RunScriptString("if " + m_LuaClassName + ".StartActivity then " + m_LuaClassName + ":StartActivity( " + (initialActivityState == ActivityState::NotStarted ? "true" : "false") + "); end")) < 0) {
+    // Call the create function
+    if ((error = RunLuaFunction("StartActivity", {}, { initialActivityState == ActivityState::NotStarted ? "true" : "false" }, {})) < 0) {
         return error;
     }
 
@@ -377,8 +364,7 @@ int GAScripted::Start() {
 void GAScripted::SetPaused(bool pause) {
     GameActivity::SetPaused(pause);
 
-    // Call the defined function, but only after first checking if it exists
-    g_LuaMan.GetMasterScriptState().RunScriptString("if " + m_LuaClassName + ".PauseActivity then " + m_LuaClassName + ":PauseActivity(" + (pause ? "true" : "false") + "); end");
+    RunLuaFunction("PauseActivity", {}, { pause ? "true" : "false" }, {});
 
 	// Pause all global scripts
 	for (std::vector<GlobalScript *>::iterator sItr = m_GlobalScriptsList.begin(); sItr < m_GlobalScriptsList.end(); ++sItr) {
@@ -397,9 +383,7 @@ void GAScripted::SetPaused(bool pause) {
 void GAScripted::End() {
     GameActivity::End();
 
-    // Call the defined function, but only after first checking if it exists
-    g_LuaMan.GetMasterScriptState().RunScriptString("if " + m_LuaClassName + ".EndActivity then " + m_LuaClassName + ":EndActivity(); end");
-
+    RunLuaFunction("EndActivity");
 
 	// End all global scripts
 	for (std::vector<GlobalScript *>::iterator sItr = m_GlobalScriptsList.begin(); sItr < m_GlobalScriptsList.end(); ++sItr) {
@@ -456,8 +440,7 @@ void GAScripted::Update() {
     if (m_ActivityState != ActivityState::Over) {
 		AddPieSlicesToActiveActorPieMenus();
 
-        // Call the defined function, but only after first checking if it exists
-        g_LuaMan.GetMasterScriptState().RunScriptString("if " + m_LuaClassName + ".UpdateActivity then " + m_LuaClassName + ":UpdateActivity(); end");
+        RunLuaFunction("UpdateActivity");
 
         UpdateGlobalScripts(false);
     }
@@ -497,6 +480,16 @@ void GAScripted::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
 
 void GAScripted::Draw(BITMAP *pTargetBitmap, const Vector &targetPos) {
     GameActivity::Draw(pTargetBitmap, targetPos);
+}
+
+int GAScripted::RunLuaFunction(const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments, const std::vector<std::string_view>& functionLiteralArguments, const std::vector<LuabindObjectWrapper*>& functionObjectArguments) {
+    // Call the defined function, but only after first checking if it exists
+    auto funcItr = m_ScriptFunctions.find(functionName);
+    if (funcItr == m_ScriptFunctions.end()) {
+        return 0;
+    }
+
+    return g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(funcItr->second.get(), "_G", m_LuaClassName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
 }
 
 

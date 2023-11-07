@@ -335,35 +335,25 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::CleanAir() {
-		// Reference. Do not remove.
-		//acquire_bitmap(m_MainBitmap);
-		//acquire_bitmap(m_FGColorLayer->GetBitmap());
+		std::vector<int> rows(m_MainBitmap->h); // we loop through h first, because we want each thread to have sequential memory that they're touching
+		std::iota(std::begin(rows), std::end(rows), 0);
 
-		int width = m_MainBitmap->w;
-		int height = m_MainBitmap->h;
-
-		for (int y = 0; y < height; ++y) {
-			for (int x = 0; x < width; ++x) {
-				int matPixel = _getpixel(m_MainBitmap, x, y);
-				if (matPixel == MaterialColorKeys::g_MaterialCavity) {
-					_putpixel(m_MainBitmap, x, y, MaterialColorKeys::g_MaterialAir);
-					matPixel = MaterialColorKeys::g_MaterialAir;
+		std::for_each(std::execution::par_unseq, std::begin(rows), std::end(rows),
+			[&](int yPos) {
+				for (int xPos = 0; xPos < m_MainBitmap->w; ++xPos) {
+					int matPixel = _getpixel(m_MainBitmap, xPos, yPos);
+					if (matPixel == MaterialColorKeys::g_MaterialCavity) {
+						_putpixel(m_MainBitmap, xPos, yPos, MaterialColorKeys::g_MaterialAir);
+						matPixel = MaterialColorKeys::g_MaterialAir;
+					}
+					if (matPixel == MaterialColorKeys::g_MaterialAir) { _putpixel(m_FGColorLayer->GetBitmap(), xPos, yPos, ColorKeys::g_MaskColor); }
 				}
-				if (matPixel == MaterialColorKeys::g_MaterialAir) { _putpixel(m_FGColorLayer->GetBitmap(), x, y, ColorKeys::g_MaskColor); }
-			}
-		}
-		// Reference. Do not remove.
-		//release_bitmap(m_MainBitmap);
-		//release_bitmap(m_FGColorLayer->GetBitmap());
+			});
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void SLTerrain::CleanAirBox(const Box &box, bool wrapsX, bool wrapsY) {
-		// Reference. Do not remove.
-		//acquire_bitmap(m_MainBitmap);
-		//acquire_bitmap(m_FGColorLayer->GetBitmap());
-
 		int width = m_MainBitmap->w;
 		int height = m_MainBitmap->h;
 
@@ -390,9 +380,6 @@ namespace RTE {
 				}
 			}
 		}
-		// Reference. Do not remove.
-		//release_bitmap(m_MainBitmap);
-		//release_bitmap(m_FGColorLayer->GetBitmap());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -550,6 +550,17 @@ bool ACraft::HandlePieCommand(PieSlice::SliceType pieSliceIndex) {
         } else if (pieSliceIndex == PieSlice::SliceType::Stay) {
             m_AIMode = AIMODE_STAY;
             m_DeliveryState = FALL;
+        } else if (pieSliceIndex == PieSlice::SliceType::Sentry) {
+            m_AIMode = AIMODE_SENTRY;
+            m_DeliveryState = FALL;
+        } else if (pieSliceIndex == PieSlice::SliceType::Return) {
+            m_AIMode = AIMODE_RETURN;
+            m_DeliveryState = LAUNCH;
+        } else if (pieSliceIndex == PieSlice::SliceType::GoTo) {
+            m_AIMode = AIMODE_GOTO;
+            m_DeliveryState = FALL;
+            ClearAIWaypoints();
+            m_UpdateMovePath = true;
         } else if (pieSliceIndex == PieSlice::SliceType::Scuttle) {
             m_AIMode = AIMODE_SCUTTLE;
         } else {

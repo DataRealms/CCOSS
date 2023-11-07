@@ -40,7 +40,7 @@ namespace RTE {
 
 	private:
 
-		const float m_KeyRepeatDelay = 0.300F; //!< The delay a key needs to be held to be considered a repeating input.
+		const float m_KeyRepeatDelay = 0.10F; //!< The delay a key needs to be held to be considered a repeating input. TODO: Make this use proper OS repeating instead of this shit...
 		std::array<float, GUIInput::Constants::KEYBOARD_BUFFER_SIZE> m_KeyHoldDuration; //!< How long each key has been held in order to set repeating inputs.
 
 		std::unique_ptr<Timer> m_KeyTimer; //!< Timer for checking key hold duration.

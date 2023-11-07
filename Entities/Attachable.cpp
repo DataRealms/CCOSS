@@ -337,7 +337,7 @@ namespace RTE {
 
 	int Attachable::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
 		if (m_Parent && !m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
-			RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, { }, scriptsToRun);
+			RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, {}, {}, scriptsToRun);
 		}
 
 		return MOSRotating::UpdateScripts(scriptsToRun);
@@ -393,7 +393,7 @@ namespace RTE {
 		if (m_Parent && GetRootParent()->HasEverBeenAddedToMovableMan()) {
 			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 			if (!m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
-				RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, { }, ThreadScriptsToRun::SingleThreaded);
+				RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, {}, {}, ThreadScriptsToRun::SingleThreaded);
 			}
 			UpdateScripts(ThreadScriptsToRun::SingleThreaded);
 			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);

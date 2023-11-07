@@ -214,6 +214,10 @@ namespace RTE {
 
 	bool Controller::ShouldUpdateAIThisFrame() const
 	{
+		if (IsDisabled()) {
+			return false;
+		}
+
 		// Throttle the AI to only update every X sim updates.
 		// We want to spread the updates around (so, half the actors on odd frames, the other half on even frames, etc), so we check their contiguous ID against the frame number.
 		const int simTicksPerUpdate = g_SettingsMan.GetAIUpdateInterval();

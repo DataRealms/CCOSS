@@ -514,7 +514,7 @@ ClassInfoGetters;
 // Return value:    None.
 
 	void Update() override;
-	void PostUpdate() override { m_WasEmitting = m_EmitEnabled; Attachable::PostUpdate(); }
+	void PostUpdate() override { Attachable::PostUpdate(); }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

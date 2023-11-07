@@ -87,7 +87,7 @@ void GameActivity::Clear()
 
 	m_StartingGold = 0;
 	m_FogOfWarEnabled = false;
-	m_RequireClearPathToOrbit = true;
+	m_RequireClearPathToOrbit = false;
 
 	m_DefaultFogOfWar = -1;
 	m_DefaultRequireClearPathToOrbit = -1;
@@ -1795,7 +1795,7 @@ void GameActivity::Update()
 				float lzOffsetY = 0;
 				// Holding up or down will allow the player to make multiple orders without exiting the delivery phase. TODO: this should probably have a cooldown?
 				if (!m_PlayerController[player].IsState(MOVE_UP) && !m_PlayerController[player].IsState(MOVE_DOWN)) {
-					m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10);
+					m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10, true);
 					if (!g_MovableMan.GetNextTeamActor(team)) {
 						m_ObservationTarget[player] = m_LandingZone[player];
 						m_ViewState[player] = ViewState::Observe;
@@ -1815,7 +1815,7 @@ void GameActivity::Update()
                         lzOffsetY *= -1.0f;
                     }
 
-					m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) + lzOffsetY;
+					m_LandingZone[player].m_Y = g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10, true) + lzOffsetY;
 
 					if (m_pBuyGUI[player]->GetTotalOrderCost() > GetTeamFunds(team)) {
 						g_GUISound.UserErrorSound()->Play(player);
@@ -1847,7 +1847,7 @@ void GameActivity::Update()
                 viewOffset *= -1;
             }
 
-            m_LandingZone[player].m_Y = prevHeight + ((g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) - prevHeight) * 0.2);
+            m_LandingZone[player].m_Y = prevHeight + ((g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) - prevHeight, true) * 0.2);
 
             // Set the view to a little above the LZ position
             Vector viewTarget(m_LandingZone[player].m_X, m_LandingZone[player].m_Y - viewOffset);
@@ -2135,7 +2135,7 @@ void GameActivity::Update()
             // Make view follow the terrain
             float prevHeight = m_ObservationTarget[Players::PlayerFour].m_Y;
             m_ObservationTarget[Players::PlayerFour].m_Y = 0;
-            m_ObservationTarget[Players::PlayerFour].m_Y = prevHeight + ((g_SceneMan.FindAltitude(m_ObservationTarget[Players::PlayerFour], g_SceneMan.GetSceneHeight(), 20) - prevHeight) * 0.02);
+            m_ObservationTarget[Players::PlayerFour].m_Y = prevHeight + ((g_SceneMan.FindAltitude(m_ObservationTarget[Players::PlayerFour], g_SceneMan.GetSceneHeight(), 20, true) - prevHeight) * 0.02);
         }
 
         // Set the view to the observation position

@@ -153,6 +153,12 @@ public:
 		/// <returns>The first Box in this Area.</returns>
 		const Box * GetFirstBox() const { return m_BoxList.empty() ? nullptr : &m_BoxList[0]; }
 
+        /// <summary>
+        /// Gets the boxes for this area.
+        /// </summary>
+        /// <returns>The boxes in this Area.</returns>
+        const std::vector<Box> & GetBoxes() const { return m_BoxList; }
+
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // Virtual method:  HasNoArea

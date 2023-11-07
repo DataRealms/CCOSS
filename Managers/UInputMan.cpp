@@ -903,7 +903,6 @@ namespace RTE {
 			}
 			// Ctrl+R or Back button for controllers to reset activity.
 			if (!g_MetaMan.GameInProgress() && !g_ActivityMan.ActivitySetToRestart()) {
-				g_ActivityMan.SetRestartActivity(FlagCtrlState() && KeyPressed(SDLK_r) || AnyBackPress());
 				g_ActivityMan.SetRestartActivity((FlagCtrlState() && KeyPressed(SDLK_r)) || AnyBackPress());
 			}
 			if (g_ActivityMan.ActivitySetToRestart()) {

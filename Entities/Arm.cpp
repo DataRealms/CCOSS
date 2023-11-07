@@ -361,8 +361,8 @@ namespace RTE {
 
 	void Arm::UpdateArmFrame() {
 		float halfMaxLength = m_MaxLength / 2.0F;
-		int newFrame = static_cast<unsigned int>((m_HandCurrentOffset.GetMagnitude() - halfMaxLength) / halfMaxLength) * static_cast<float>(m_FrameCount);
-		m_Frame = std::clamp<int>(newFrame, 0, m_FrameCount - 1);
+		float newFrame = std::floor(((m_HandCurrentOffset.GetMagnitude() - halfMaxLength) / halfMaxLength) * static_cast<float>(m_FrameCount));
+		m_Frame = static_cast<unsigned int>(std::clamp(newFrame, 0.0F, static_cast<float>(m_FrameCount - 1)));
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

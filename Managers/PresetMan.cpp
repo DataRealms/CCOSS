@@ -334,8 +334,12 @@ bool PresetMan::IsModuleUserdata(const std::string &moduleName) const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::string PresetMan::GetFullModulePath(const std::string &modulePath) const {
-	const std::string modulePathGeneric = std::filesystem::path(modulePath).generic_string();
-	const std::string pathTopDir = modulePathGeneric.substr(0, modulePathGeneric.find_first_of("/\\") + 1);
+	// Note: Mods may use mixed path separators, which aren't supported on non Windows systems.
+	// Since Windows supports both forward and backslash separators it's safe to replace all backslashes with forward slashes.
+	std::string modulePathGeneric = std::filesystem::path(modulePath).generic_string();
+	std::replace(modulePathGeneric.begin(), modulePathGeneric.end(), '\\', '/');
+
+	const std::string pathTopDir = modulePathGeneric.substr(0, modulePathGeneric.find_first_of("/") + 1);
 	const std::string moduleName = GetModuleNameFromPath(modulePathGeneric);
 
 	std::string moduleTopDir = System::GetModDirectory();

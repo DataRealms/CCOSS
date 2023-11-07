@@ -261,7 +261,7 @@ public:
 // Return value:    Whetehr any items were put in the list at all. false if there are no
 //                  items in the order listbox.
 
-    bool GetOrderList(std::list<const SceneObject *> &listToFill);
+    bool GetOrderList(std::list<const SceneObject *> &listToFill) const;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -296,13 +296,31 @@ public:
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetTotalCost
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Return the total cost of everything listed in the order box.
+// Arguments:       Whether or not to include delivery cost.
+// Return value:    The total cost in ounces of gold.
+
+    float GetTotalCost(bool includeDelivery = true) const;
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetTotalOrderCost
 //////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Return teh total cost of everything listed in the order box.
+// Description:     Return the total cost of everything listed in the order box, including delivery costs.
 // Arguments:       None.
 // Return value:    The total cost in ounces of gold.
 
-    float GetTotalOrderCost();
+    float GetTotalOrderCost() const { return GetTotalCost(true); };
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          GetTotalCartCost
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Return the total cost of everything listed in the order box, excluding delivery costs.
+// Arguments:       None.
+// Return value:    The total cost in ounces of gold.
+
+    float GetTotalCartCost() const { return GetTotalCost(false); }
 
 
 	/// <summary>

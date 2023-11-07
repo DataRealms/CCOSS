@@ -67,7 +67,12 @@ namespace RTE {
 		.def("SetBannerImage", &BuyMenuGUI::SetBannerImage)
 		.def("SetLogoImage", &BuyMenuGUI::SetLogoImage)
 		.def("ClearCartList", &BuyMenuGUI::ClearCartList)
-		.def("LoadDefaultLoadoutToCart", &BuyMenuGUI::LoadDefaultLoadoutToCart);
+		.def("LoadDefaultLoadoutToCart", &BuyMenuGUI::LoadDefaultLoadoutToCart)
+		.def("GetOrderList", &LuaAdaptersBuyMenuGUI::GetOrderList, luabind::adopt(luabind::return_value) + luabind::return_stl_iterator)
+		.def("GetTotalCartCost", &BuyMenuGUI::GetTotalCartCost)
+		.def("GetTotalOrderCost", &BuyMenuGUI::GetTotalOrderCost)
+		.def("GetTotalOrderMass", &BuyMenuGUI::GetTotalOrderMass)
+		.def("GetTotalOrderPassengers", &BuyMenuGUI::GetTotalOrderPassengers);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

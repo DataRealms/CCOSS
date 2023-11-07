@@ -59,6 +59,11 @@ namespace RTE {
 		/// Destructor method used to clean up a WindowMan object before deletion from system memory.
 		/// </summary>
 		~WindowMan();
+
+		/// <summary>
+		/// Clean up GL pointers.
+		/// </summary>
+		void Destroy();
 #pragma endregion
 
 #pragma region Getters and Setters
@@ -164,6 +169,12 @@ namespace RTE {
 		/// </summary>
 		/// <returns>The absolute top-most position in the OS display arrangement.</returns>
 		int GetDisplayArrangementAbsOffsetY() const { return std::abs(m_DisplayArrangementTopMostOffset); }
+
+		/// <summary>
+		/// Get the screen buffer texture.
+		/// </summary>
+		/// <returns>The screen buffer texture.</returns>
+		GLuint GetScreenBufferTexture() const { return m_ScreenBufferTexture; }
 #pragma endregion
 
 #pragma region Resolution Change Handling
@@ -247,7 +258,9 @@ namespace RTE {
 		bool m_FocusEventsDispatchedByDisplaySwitchIn; //!< Whether queued events were dispatched due to raising windows when taking focus of any game window in the previous update.
 
 		std::shared_ptr<SDL_Window> m_PrimaryWindow; //!< The main window.
-		GLuint m_BackBuffer32Texture; //!< The main window renderer's drawing surface.
+		GLuint m_BackBuffer32Texture; //!< Streaming texture for the software rendered stuff.
+		GLuint m_ScreenBufferTexture; //!< Internal backbuffer for the final blit and sceenshots, only clear immediately before drawing.
+		GLuint m_ScreenBufferFBO; //!< Framebuffer object for the screen buffer texture.
 		glm::mat4 m_PrimaryWindowProjection; //!< Projection Matrix for the main window.
 		std::unique_ptr<SDL_Rect> m_PrimaryWindowViewport; //!< Viewport for the main window.
 

@@ -360,6 +360,12 @@ namespace RTE {
 	};
 #pragma endregion
 
+#pragma region BuyMenuGUI Lua Adapters
+	struct LuaAdaptersBuyMenuGUI {
+		static std::list<const SceneObject *> * GetOrderList(const BuyMenuGUI *luaSelfObject);
+	};
+#pragma endregion
+
 #pragma region PieMenu Lua Adapters
 	struct LuaAdaptersPieMenu {
 		static bool AddPieSlice(PieMenu *luaSelfObject, PieSlice *pieSliceToAdd, const Entity *pieSliceOriginalSource);

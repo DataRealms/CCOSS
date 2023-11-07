@@ -618,9 +618,12 @@ namespace RTE {
 		}
 		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
-		const std::string &path = functionObject->GetFilePath();
-		m_ScriptTimings[path].m_Time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-		m_ScriptTimings[path].m_CallCount++;
+		// only track time in non-MT scripts, for now
+		if (&g_LuaMan.GetMasterScriptState() == this) {
+			const std::string& path = functionObject->GetFilePath();
+			m_ScriptTimings[path].m_Time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+			m_ScriptTimings[path].m_CallCount++;
+		}
 
 		lua_pop(m_State, 1);
 

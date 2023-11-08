@@ -289,14 +289,21 @@ void MovableMan::PurgeAllMOs()
 {
     for (std::deque<Actor*>::iterator itr = m_Actors.begin(); itr != m_Actors.end(); ++itr) {
         (*itr)->DestroyScriptState();
-        delete (*itr);
     }
     for (std::deque<MovableObject*>::iterator itr = m_Items.begin(); itr != m_Items.end(); ++itr) {
         (*itr)->DestroyScriptState();
-        delete (*itr);
     }
     for (std::deque<MovableObject*>::iterator itr = m_Particles.begin(); itr != m_Particles.end(); ++itr) {
         (*itr)->DestroyScriptState();
+    }
+
+    for (std::deque<Actor*>::iterator itr = m_Actors.begin(); itr != m_Actors.end(); ++itr) {
+        delete (*itr);
+    }
+    for (std::deque<MovableObject*>::iterator itr = m_Items.begin(); itr != m_Items.end(); ++itr) {
+        delete (*itr);
+    }
+    for (std::deque<MovableObject*>::iterator itr = m_Particles.begin(); itr != m_Particles.end(); ++itr) {
         delete (*itr);
     }
 

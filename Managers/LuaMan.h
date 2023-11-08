@@ -13,6 +13,7 @@ struct lua_State;
 namespace RTE {
 
 	class LuabindObjectWrapper;
+	class MovableObject;
 
 	/// <summary>
 	/// A single lua state. Multiple of these can exist at once for multithreaded scripting.
@@ -85,6 +86,26 @@ namespace RTE {
 		/// </summary>
 		/// <returns>m_ScriptTimings.</returns>
 		const std::unordered_map<std::string, PerformanceMan::ScriptTiming> & GetScriptTimings() const;
+#pragma endregion
+
+#pragma region Script Responsibility Handling
+		/// <summary>
+		/// Registers an MO as using us.
+		/// </summary>
+		/// <param name="moToRegister">The MO to register with us. Ownership is NOT transferred!</param>
+		void RegisterMO(MovableObject* moToRegister) { m_RegisteredMOs.insert(moToRegister); }
+
+		/// <summary>
+		/// Unregisters an MO as using us.
+		/// </summary>
+		/// <param name="moToUnregister">The MO to unregister as using us. Ownership is NOT transferred!</param>
+		void UnregisterMO(MovableObject *moToUnregister) { m_RegisteredMOs.erase(moToUnregister); }
+
+		/// <summary>
+		/// Gets a list of the MOs registed as using us.
+		/// </summary>
+		/// <returns>The MOs registed as using us.</returns>
+		const std::unordered_set<MovableObject *> & GetRegisteredMOs() const { return m_RegisteredMOs; }
 #pragma endregion
 
 #pragma region Script Execution Handling
@@ -267,6 +288,8 @@ namespace RTE {
 		/// Clears all the member variables of this LuaStateWrapper, effectively resetting the members of this abstraction level only.
 		/// </summary>
 		void Clear();
+
+		std::unordered_set<MovableObject *> m_RegisteredMOs; //!< The objects using our lua state.
 
 		lua_State *m_State;
 		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
@@ -488,8 +511,6 @@ namespace RTE {
 
 		std::vector<std::function<void()>> m_ScriptCallbacks; //!< A list of callback functions we'll trigger before processing lua scripts. This allows other threads (i.e pathing requests) to safely trigger callbacks in lua
 		std::mutex m_ScriptCallbacksMutex; //!< Mutex to ensure multiple threads aren't modifying the script callback vector at the same time.
-
-		int m_LastAssignedLuaState = 0;
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

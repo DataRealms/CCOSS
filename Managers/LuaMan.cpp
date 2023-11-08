@@ -331,13 +331,14 @@ namespace RTE {
 			return s_luaStateOverride;
 		}
 
-		int ourState = m_LastAssignedLuaState;
-		m_LastAssignedLuaState = (m_LastAssignedLuaState + 1) % c_NumThreadedLuaStates;
+		auto itr = std::min_element(m_ScriptStates.begin(), m_ScriptStates.end(), 
+			[](const LuaStateWrapper& lhs, const LuaStateWrapper& rhs) { return lhs.GetRegisteredMOs().size() < rhs.GetRegisteredMOs().size(); }
+		);
 
-		bool success = m_ScriptStates[ourState].GetMutex().try_lock();
+		bool success = itr->GetMutex().try_lock();
 		RTEAssert(success, "Script mutex was already locked while in a non-multithreaded environment!");
 
-		return &m_ScriptStates[ourState];	
+		return &(*itr);	
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1553,36 +1553,6 @@ void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void updateMultiThreadedScripts(MovableObject* mo, LuaStateWrapper* luaState) {
-    if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
-        for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
-            Attachable* attachable = *attachablrItr;
-            ++attachablrItr;
-
-            if (!luaState || attachable->GetLuaState() == luaState) {
-                attachable->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
-            }
-            updateMultiThreadedScripts(attachable, luaState);
-        }
-
-        for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
-            AEmitter* wound = *woundItr;
-            ++woundItr;
-
-            if (!luaState || wound->GetLuaState() == luaState) {
-                wound->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
-            }
-            updateMultiThreadedScripts(wound, luaState);
-        }
-    }
-
-    if (!luaState || mo->GetLuaState() == luaState) {
-        mo->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
-    }
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void callLuaFunctionOnMORecursive(MovableObject* mo, const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments, const std::vector<std::string_view>& functionLiteralArguments, const std::vector<LuabindObjectWrapper*>& functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
     if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
         for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
@@ -1755,16 +1725,8 @@ void MovableMan::Update()
             [&](LuaStateWrapper& luaState) {
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
 
-                for (Actor* actor : m_Actors) {
-                    updateMultiThreadedScripts(actor, &luaState);
-                }
-
-                for (MovableObject* item : m_Items) {
-                    updateMultiThreadedScripts(item, &luaState);
-                }
-
-                for (MovableObject* particle : m_Particles) {
-                    updateMultiThreadedScripts(particle, &luaState);
+                for (MovableObject *mo : luaState.GetRegisteredMOs()) {
+                    mo->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
                 }
 
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);

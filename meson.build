@@ -4,6 +4,37 @@ project('Cortex-Command-Community-Project', ['cpp','c'], subproject_dir: 'extern
 
 compiler = meson.get_compiler('cpp')
 deps=[]
+if host_machine.system() in ['linux','darwin']
+  deps = [
+    dependency(['sdl2']),
+    dependency('flac'),
+    dependency('minizip'),
+    dependency('luajit'),
+    dependency('threads'),
+    dependency('liblz4'),
+    dependency('libpng'),
+    dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2', 'lua51', 'lua5.1', 'lua-5.1']),
+    dependency('tbb'),
+    dependency('gl')
+  ]
+  if host_machine.system() == 'linux'
+    deps += dependency('SDL2_image')
+  endif
+elif host_machine.system() == 'windows'
+  sdl2 = subproject('SDL2-2.26.3')
+  sdl2_dep = dependency('sdl2')
+  luajit = subproject('LuaJIT-2.1')
+  luajit_dep = dependency('luajit')
+  zlib = subproject('zlib-ng-2.1.3')
+  zlib_dep = dependency('zlib')
+  minizip = subproject('minizip-ng-4.0.0')
+  minizip_dep = dependency('minizip')
+  libpng = subproject('libpng-1.6.40')
+  libpng_dep = dependency('libpng')
+  # Windows Libraries
+  opengl = compiler.find_library('opengl32')
+  deps += [sdl2_dep, luajit_dep, zlib_dep, minizip_dep, libpng_dep, opengl]
+endif
 
 elfname = 'CortexCommand'
 build_rpath = ''
@@ -138,38 +169,6 @@ if get_option('tracy_debuginfod')
 endif
 
 #### Platform Common External Libraries ####
-if host_machine.system() in ['linux','darwin']
-  deps = [
-    dependency(['sdl2']),
-    dependency('flac'),
-    dependency('minizip'),
-    dependency('luajit'),
-    dependency('threads'),
-    dependency('liblz4'),
-    dependency('libpng'),
-    dependency(['lua', 'lua54', 'lua5.4','lua-5.4', 'lua53', 'lua-5.3', 'lua5.3','lua52', 'lua5.2', 'lua-5.2', 'lua51', 'lua5.1', 'lua-5.1']),
-    dependency('tbb'),
-    dependency('gl')
-  ]
-  if host_machine.system() == 'linux'
-    deps += dependency('SDL2_image')
-  endif
-elif host_machine.system() == 'windows'
-  sdl2 = subproject('SDL2-2.26.3')
-  sdl2_dep = dependency('sdl2')
-  luajit = subproject('LuaJIT-2.1')
-  luajit_dep = dependency('luajit')
-  zlib = subproject('zlib-ng-2.1.3')
-  zlib_dep = dependency('zlib')
-  minizip = subproject('minizip-ng-4.0.0')
-  minizip_dep = dependency('minizip')
-  libpng = subproject('libpng-1.6.40')
-  libpng_dep = dependency('libpng')
-  # Windows Libraries
-  opengl = compiler.find_library('opengl32')
-  deps += [sdl2_dep, luajit_dep, zlib_dep, minizip_dep, libpng_dep, opengl]
-endif
-
 external_objects = []
 external_libs = []
 subdir('external')

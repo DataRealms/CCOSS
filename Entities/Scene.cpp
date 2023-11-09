@@ -2342,7 +2342,7 @@ Scene::Area * Scene::GetArea(const std::string_view &areaName, bool required) {
 	}
 
     if (required) {
-        g_ConsoleMan.PrintString("WARNING: Could not find the requested Scene Area named : " + areaName.data());
+        g_ConsoleMan.PrintString("WARNING: Could not find the requested Scene Area named : " + std::string(areaName));
     }
 
     return nullptr;

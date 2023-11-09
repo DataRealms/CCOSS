@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34018.315
 MinimumVisualStudioVersion = 16.0
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RTEA", "RTEA.vcxproj", "{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}"
 EndProject
@@ -14,8 +14,8 @@ Global
 		Debug Release|x86 = Debug Release|x86
 		Final|x64 = Final|x64
 		Final|x86 = Final|x86
-		Tracy|x64 = Tracy|x64
-		Tracy|x86 = Tracy|x86
+		Profiling|x64 = Profiling|x64
+		Profiling|x86 = Profiling|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Debug Full|x64.ActiveCfg = Debug Full|x64
@@ -34,10 +34,10 @@ Global
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final|x64.Build.0 = Final|x64
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final|x86.ActiveCfg = Final|Win32
 		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Final|x86.Build.0 = Final|Win32
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Tracy|x64.ActiveCfg = Tracy|x64
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Tracy|x64.Build.0 = Tracy|x64
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Tracy|x86.ActiveCfg = Tracy|Win32
-		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Tracy|x86.Build.0 = Tracy|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Profiling|x64.ActiveCfg = Profiling|x64
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Profiling|x64.Build.0 = Profiling|x64
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Profiling|x86.ActiveCfg = Profiling|Win32
+		{A58C9DD7-8BC7-48DA-9E04-04D04F582BE3}.Profiling|x86.Build.0 = Profiling|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

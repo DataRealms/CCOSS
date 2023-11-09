@@ -1847,7 +1847,7 @@ void GameActivity::Update()
                 viewOffset *= -1;
             }
 
-            m_LandingZone[player].m_Y = prevHeight + ((g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10) - prevHeight, true) * 0.2);
+            m_LandingZone[player].m_Y = prevHeight + ((g_SceneMan.FindAltitude(m_LandingZone[player], g_SceneMan.GetSceneHeight(), 10, true) - prevHeight) * 0.2);
 
             // Set the view to a little above the LZ position
             Vector viewTarget(m_LandingZone[player].m_X, m_LandingZone[player].m_Y - viewOffset);

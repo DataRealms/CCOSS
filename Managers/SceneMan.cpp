@@ -2393,7 +2393,7 @@ Vector SceneMan::MovePointToGround(const Vector &from, int maxAltitude, int accu
 {
     // Todo, instead of a nograv area maybe best to tag certain areas as NoGrav. As otherwise it's tricky to keep track of when things are removed
     if (m_pCurrentScene) {
-        Scene::Area* noGravArea = m_pCurrentScene->GetArea("NoGravityArea");
+        Scene::Area* noGravArea = m_pCurrentScene->GetOptionalArea("NoGravityArea");
         if (noGravArea && noGravArea->IsInside(from)) {
             return from;
         }

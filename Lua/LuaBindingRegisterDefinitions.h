@@ -46,6 +46,7 @@ namespace RTE {
 	#define RegisterLuaBindingsOfAbstractType(OWNINGSCOPE, TYPE) \
 		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (TYPE *(*)(Entity *))&LuaAdaptersEntityCast::To##TYPE),						\
 		luabind::def((std::string("To") + std::string(#TYPE)).c_str(), (const TYPE *(*)(const Entity *))&LuaAdaptersEntityCast::ToConst##TYPE),		\
+		luabind::def((std::string("Is") + std::string(#TYPE)).c_str(), (bool(*)(const Entity *))&LuaAdaptersEntityCast::Is##TYPE),																\
 		OWNINGSCOPE::Register##TYPE##LuaBindings()
 
 	/// <summary>

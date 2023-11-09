@@ -935,7 +935,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 	/// <param name="areaName">The name of the Area to try to get.</param>
 	/// <param name="required">Whether the area is required, and should throw an error if not found.</param>
 	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
-	Area * GetArea(const std::string_view &areaName, bool required = false);
+	Area * GetArea(const std::string_view &areaName, bool required = true);
 
 	/// <summary>
 	/// Gets a specified Area identified by name, showing a Lua warning if it's not found. Ownership is NOT transferred!
@@ -943,7 +943,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 	/// </summary>
 	/// <param name="areaName">The name of the Area to try to get.</param>
 	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
-	Area * GetOptionalArea(const std::string &areaName) { return GetArea(areaName, true); };
+	Area * GetOptionalArea(const std::string &areaName) { return GetArea(areaName, false); };
 
     void AddNavigatableArea(const std::string &areaName) { m_NavigatableAreas.push_back(areaName); m_NavigatableAreasUpToDate = false; }
     void ClearNavigatableAreas(const std::string &areaName) { m_NavigatableAreas.clear(); m_NavigatableAreasUpToDate = false; }

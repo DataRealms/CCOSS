@@ -301,9 +301,15 @@ int GAScripted::Start() {
         return error;
     }
 
-    // Create the Lua variable which will hold the class representation that we'll add some definitions to
-    if ((error = g_LuaMan.GetMasterScriptState().RunScriptString(m_LuaClassName + " = ToGameActivity(ActivityMan:GetActivity());")) < 0) {
-        return error;
+    // If it hasn't been yet, run the file that specifies the Lua functions for this' operating logic (including the scene test function)
+    if (!g_LuaMan.GetMasterScriptState().GlobalIsDefined(m_LuaClassName)) {
+        // Temporarily store this Activity so the Lua state can access it
+        g_LuaMan.GetMasterScriptState().SetTempEntity(this);
+
+        // Define the var that will hold the script file definitions
+        if ((error = g_LuaMan.GetMasterScriptState().RunScriptString(m_LuaClassName + " = ToGameActivity(LuaMan.TempEntity);")) < 0) {
+            return error;
+        }
     }
 
     // Run the file that specifies the Lua functions for this' operating logic

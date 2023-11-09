@@ -943,7 +943,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 	/// </summary>
 	/// <param name="areaName">The name of the Area to try to get.</param>
 	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
-	Area * GetOptionalArea(const std::string &areaName) { return GetArea(areaName, true); };
+	Area * GetOptionalArea(const std::string &areaName) { return GetArea(areaName, false); };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

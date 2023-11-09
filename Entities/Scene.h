@@ -935,7 +935,7 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 	/// <param name="areaName">The name of the Area to try to get.</param>
 	/// <param name="required">Whether the area is required, and should throw an error if not found.</param>
 	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
-	Area * GetArea(const std::string_view &areaName, bool required = false);
+	Area * GetArea(const std::string_view &areaName, bool required = true);
 
 	/// <summary>
 	/// Gets a specified Area identified by name, showing a Lua warning if it's not found. Ownership is NOT transferred!

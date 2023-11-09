@@ -698,6 +698,11 @@ namespace RTE {
 				outFunctionNamesAndObjects.try_emplace(pair.first, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
 			}
 
+			static bool disableCaching = true;
+			if (disableCaching) {
+				m_ScriptCache.erase(cachedScript);
+			}
+
 			return 0;
 		}
 

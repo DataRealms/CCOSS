@@ -2334,15 +2334,16 @@ bool Scene::HasArea(std::string areaName)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Description:     Gets a specific area box identified by a name. Ownership is NOT transferred!
 
-Scene::Area * Scene::GetArea(const std::string_view &areaName, bool luaWarnNotError) {
+Scene::Area * Scene::GetArea(const std::string_view &areaName, bool required) {
 	for (Scene::Area &area : m_AreaList) {
 		if (area.GetName() == areaName) {
 			return &area;
 		}
 	}
 
-	std::string luaMessageStart = luaWarnNotError ? "WARNING" : "ERROR";
-    g_ConsoleMan.PrintString(luaMessageStart + ": Could not find the requested Scene Area named: " + areaName.data());
+    if (required) {
+        g_ConsoleMan.PrintString("WARNING: Could not find the requested Scene Area named : " + areaName.data());
+    }
 
     return nullptr;
 }

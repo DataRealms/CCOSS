@@ -139,6 +139,8 @@ namespace RTE {
 		windowTitle += " (Min Debug)";
 #elif DEBUG_RELEASE_BUILD
 		windowTitle += " (Debug Release)";
+#elif PROFILING_BUILD
+		windowTitle += " (Profiling)";
 #endif
 
 #ifdef TARGET_MACHINE_X86

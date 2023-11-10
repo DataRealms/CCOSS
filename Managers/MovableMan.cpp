@@ -1736,7 +1736,10 @@ void MovableMan::Update()
             [&](LuaStateWrapper& luaState) {
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
 
-                for (MovableObject *mo : luaState.GetRegisteredMOs()) {
+                // We may have new MOs registered to us by objects creating other things and being initialized
+                // So we need to copy this list before using it
+                std::unordered_set<MovableObject *> registeredMOs = luaState.GetRegisteredMOs();
+                for (MovableObject *mo : registeredMOs) {
                     mo->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
                 }
 

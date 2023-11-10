@@ -131,7 +131,6 @@ LuaStateWrapper & MovableObject::GetAndLockStateForScript(const std::string &scr
     if (g_LuaMan.IsScriptThreadSafe(scriptPath)) {
         if (m_ThreadedLuaState == nullptr) {
             m_ThreadedLuaState = g_LuaMan.GetAndLockFreeScriptState();
-            m_ThreadedLuaState->RegisterMO(this);
         } else {
             m_ThreadedLuaState->GetMutex().lock();
         }
@@ -550,6 +549,7 @@ void MovableObject::DestroyScriptState() {
             else {
                 std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex(), std::adopt_lock);
                 g_LuaMan.GetMasterScriptState().RunScriptString(m_ScriptObjectName + " = nil;");
+                g_LuaMan.GetMasterScriptState().UnregisterMO(this);
             }
         }
     }
@@ -647,11 +647,13 @@ int MovableObject::InitializeObjectScripts() {
     
     if (m_ThreadedLuaState) {
         std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex());
+        m_ThreadedLuaState->RegisterMO(this);
         createScriptedObjectInState(*m_ThreadedLuaState);
     }
 
     if (m_HasSinglethreadedScripts) {
         std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex());
+        g_LuaMan.GetMasterScriptState().RegisterMO(this);
         createScriptedObjectInState(g_LuaMan.GetMasterScriptState());
     }
 

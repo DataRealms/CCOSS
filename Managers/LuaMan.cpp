@@ -671,9 +671,8 @@ namespace RTE {
 
 		lua_pushcfunction(m_State, &AddFileAndLineToError);
 		SetLuaPath(fullScriptPath);
-
-		// Load the script file's contents onto the stack
-		if (luaL_loadfile(m_State, fullScriptPath.c_str())) {
+		// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
+		if (luaL_loadfile(m_State, fullScriptPath.c_str()) || lua_pcall(m_State, 0, LUA_MULTRET, -2)) {
 			m_LastError = lua_tostring(m_State, -1);
 			lua_pop(m_State, 1);
 			if (consoleErrors) {
@@ -682,36 +681,9 @@ namespace RTE {
 			}
 			error = -1;
 		}
-
-		// create a new environment table
-		lua_getglobal(m_State, filePath.c_str());
-		if (lua_isnil(m_State, -1)) {
-			lua_pop(m_State, 1);
-			lua_newtable(m_State);
-			lua_newtable(m_State);
-			lua_getglobal(m_State, "_G");
-			lua_setfield(m_State, -2, "__index");
-			lua_setmetatable(m_State, -2);
-			lua_setglobal(m_State, filePath.c_str());
-			lua_getglobal(m_State, filePath.c_str());
-		}
-
-		lua_setfenv(m_State, -2);
-
-		// execute script file with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
-		if (lua_pcall(m_State, 0, LUA_MULTRET, -2)) {
-			m_LastError = lua_tostring(m_State, -1);
-			lua_pop(m_State, 1);
-			if (consoleErrors) {
-				g_ConsoleMan.PrintString("ERROR: " + m_LastError);
-				ClearErrors();
-			}
-		}
-
-		// Pop the line error handler off the stack to clean it up
+		// Pop the file and line error handler off the stack to clean it up
 		lua_pop(m_State, 1);
 
-		RTEAssert(lua_gettop(m_State) == 0, "Malformed lua stack!");
 		return error;
 	}
 
@@ -726,7 +698,7 @@ namespace RTE {
 				outFunctionNamesAndObjects.try_emplace(pair.first, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
 			}
 
-			static bool disableCaching = false;
+			static bool disableCaching = true;
 			if (disableCaching) {
 				m_ScriptCache.erase(cachedScript);
 			}
@@ -737,15 +709,25 @@ namespace RTE {
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
 		s_currentLuaState = this;
 
+		std::string luaClearSupportedFunctionsString;
+		luaClearSupportedFunctionsString.reserve(160);
+		for (const std::string& functionName : functionNamesToLookFor) {
+			luaClearSupportedFunctionsString += functionName + " = nil;";
+		}
+
+		if (int error = RunScriptString(luaClearSupportedFunctionsString) < 0) {
+			return error;
+		}
+
 		if (int error = RunScriptFile(filePath); error < 0) {
 			return error;
 		}
 
 		luabind::object prefixObject;
 		if (prefix == "") {
-			prefixObject = luabind::globals(m_State)[filePath.c_str()];
+			prefixObject = luabind::globals(m_State);
 		} else {
-			prefixObject = luabind::globals(m_State)[filePath.c_str()][prefix];
+			prefixObject = luabind::globals(m_State)[prefix];
 		}
 
 		if (luabind::type(prefixObject) == LUA_TNIL) {

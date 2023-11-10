@@ -332,14 +332,24 @@ namespace RTE {
 			return s_luaStateOverride;
 		}
 
-		auto itr = std::min_element(m_ScriptStates.begin(), m_ScriptStates.end(), 
+		// TODO
+		// It would be nice to assign to least-saturated state, but that's a bit tricky with MO registering...
+		/*auto itr = std::min_element(m_ScriptStates.begin(), m_ScriptStates.end(), 
 			[](const LuaStateWrapper& lhs, const LuaStateWrapper& rhs) { return lhs.GetRegisteredMOs().size() < rhs.GetRegisteredMOs().size(); }
 		);
 
 		bool success = itr->GetMutex().try_lock();
 		RTEAssert(success, "Script mutex was already locked while in a non-multithreaded environment!");
 
-		return &(*itr);	
+		return &(*itr);*/
+
+		int ourState = m_LastAssignedLuaState;
+		m_LastAssignedLuaState = (m_LastAssignedLuaState + 1) % c_NumThreadedLuaStates;
+
+		bool success = m_ScriptStates[ourState].GetMutex().try_lock();
+		RTEAssert(success, "Script mutex was already locked while in a non-multithreaded environment!");
+
+		return &m_ScriptStates[ourState];	
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

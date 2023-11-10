@@ -512,6 +512,8 @@ namespace RTE {
 		std::vector<std::function<void()>> m_ScriptCallbacks; //!< A list of callback functions we'll trigger before processing lua scripts. This allows other threads (i.e pathing requests) to safely trigger callbacks in lua
 		std::mutex m_ScriptCallbacksMutex; //!< Mutex to ensure multiple threads aren't modifying the script callback vector at the same time.
 
+		int m_LastAssignedLuaState = 0;
+
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.
 		/// </summary>

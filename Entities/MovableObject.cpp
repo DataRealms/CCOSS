@@ -23,6 +23,8 @@
 #include "Actor.h"
 #include "SLTerrain.h"
 
+#include "tracy/Tracy.hpp"
+
 namespace RTE {
 
 AbstractClassInfo(MovableObject, SceneObject);
@@ -703,6 +705,8 @@ int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &fu
     }
 
     if (status >= 0) {
+        ZoneScoped;
+        ZoneText(functionName.c_str(), functionName.length());
         for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : itr->second) {
             bool scriptIsThreadSafe = g_LuaMan.IsScriptThreadSafe(functionObjectWrapper->GetFilePath());
             bool scriptIsSuitableForThread = scriptsToRun == ThreadScriptsToRun::SingleThreaded ? !scriptIsThreadSafe :
@@ -712,8 +716,9 @@ int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &fu
                 continue;
             }
 
-            if (runOnDisabledScripts || m_AllLoadedScripts.at(functionObjectWrapper->GetFilePath())) {
-                LuaStateWrapper& usedState = GetAndLockStateForScript(functionObjectWrapper->GetFilePath());
+            const std::string &path = functionObjectWrapper->GetFilePath();
+            if (runOnDisabledScripts || m_AllLoadedScripts.at(path)) {
+                LuaStateWrapper& usedState = GetAndLockStateForScript(path);
                 std::lock_guard<std::recursive_mutex> lock(usedState.GetMutex(), std::adopt_lock);   
 				status = usedState.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments, functionObjectArguments);
                 if (status < 0 && stopOnError) {

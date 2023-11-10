@@ -47,6 +47,8 @@
 #include "ActivityMan.h"
 #include "PrimitiveMan.h"
 
+#include "Tracy/Tracy.hpp"
+
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 
 using namespace RTE;
@@ -305,6 +307,8 @@ namespace RTE {
 
 			// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
 			while (g_TimerMan.TimeForSimUpdate()) {
+				ZoneScopedN("Simulation Update");
+
 				serverUpdated = false;
 
 				g_PerformanceMan.NewPerformanceSample();

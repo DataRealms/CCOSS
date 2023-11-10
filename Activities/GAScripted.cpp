@@ -76,7 +76,9 @@ int GAScripted::Create() {
     // Scan the script file for any mentions/uses of Areas.
     CollectRequiredAreas();
 
+
     // If the GAScripted has a OnSave() function, we assume it can be saved by default
+    ReloadScripts();
     m_AllowsUserSaving = HasSaveFunction();
 
     return 0;

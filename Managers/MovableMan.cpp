@@ -34,6 +34,8 @@
 #include "SettingsMan.h"
 #include "LuaMan.h"
 
+#include "tracy/tracy.hpp"
+
 #include <execution>
 
 namespace RTE {
@@ -1669,6 +1671,8 @@ void MovableMan::ReloadLuaScripts() {
 
 void MovableMan::Update()
 {
+    ZoneScoped;
+
     // Don't update if paused
     if (g_ActivityMan.GetActivity() && g_ActivityMan.ActivityPaused()) {
         return;
@@ -1742,49 +1746,61 @@ void MovableMan::Update()
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
     {
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
-        for (Actor *actor : m_Actors) {
-            actor->Update();
+        {
+            ZoneScopedN("Actors Update");
 
-            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-            actor->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
-            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+		    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
+            for (Actor* actor : m_Actors) {
+                actor->Update();
 
-            actor->ApplyImpulses();
+                g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+                actor->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+                g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+
+                actor->ApplyImpulses();
+            }
+            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
 
-        int count = 0;
-        int itemLimit = m_Items.size() - m_MaxDroppedItems;
-        for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count) {
-            (*iIt)->Update();
+        {
+            ZoneScopedN("Items Update");
 
-            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-            (*iIt)->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
-            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+            int count = 0;
+            int itemLimit = m_Items.size() - m_MaxDroppedItems;
+            for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count) {
+                (*iIt)->Update();
 
-            (*iIt)->ApplyImpulses();
-            if (count <= itemLimit) {
-                (*iIt)->SetToSettle(true);
+                g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+                (*iIt)->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+                g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+
+                (*iIt)->ApplyImpulses();
+                if (count <= itemLimit) {
+                    (*iIt)->SetToSettle(true);
+                }
             }
         }
 
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
-        for (MovableObject *particle : m_Particles) {
-            particle->Update();
+        {
+            ZoneScopedN("Particles Update");
 
-            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-            particle->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
-            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
+            for (MovableObject* particle : m_Particles) {
+                particle->Update();
 
-            particle->ApplyImpulses();
-            particle->RestDetection();
-            // Copy particles that are at rest to the terrain and mark them for deletion.
-            if (particle->IsAtRest()) {
-                particle->SetToSettle(true);
+                g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+                particle->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+                g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+
+                particle->ApplyImpulses();
+                particle->RestDetection();
+                // Copy particles that are at rest to the terrain and mark them for deletion.
+                if (particle->IsAtRest()) {
+                    particle->SetToSettle(true);
+                }
             }
+            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
 
         for (Actor *actor : m_Actors) {
             actor->PostUpdate();
@@ -2052,30 +2068,24 @@ void MovableMan::Update()
 
 void MovableMan::Travel()
 {
+    ZoneScoped;
+
     // Travel Actors
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
     {
+        g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
         for (auto aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
         {
             if (!((*aIt)->IsUpdated()))
             {
                 (*aIt)->ApplyForces();
                 (*aIt)->PreTravel();
-    /*
-                if (aIt == m_Actors.begin())
-                {
-                    PALETTE palette;
-                    get_palette(palette);
-                    save_bmp("poop.bmp", g_SceneMan.GetMOIDBitmap(), palette);
-                }
-    */
                 (*aIt)->Travel();
                 (*aIt)->PostTravel();
             }
             (*aIt)->NewFrame();
         }
+        g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
     }
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
 
     // Travel items
     {
@@ -2093,8 +2103,8 @@ void MovableMan::Travel()
     }
 
     // Travel particles
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
     {
+        g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
         for (auto parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
         {
             if (!((*parIt)->IsUpdated()))
@@ -2106,14 +2116,16 @@ void MovableMan::Travel()
             }
             (*parIt)->NewFrame();
         }
+        g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesTravel);
     }
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesTravel);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableMan::UpdateControllers()
 {
+    ZoneScoped;
+
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAI);
     {
         for (Actor* actor : m_Actors) {
@@ -2143,6 +2155,8 @@ void MovableMan::UpdateControllers()
 
 void MovableMan::PreControllerUpdate()
 {
+    ZoneScoped;
+
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
     for (Actor *actor : m_Actors) {
         actor->PreControllerUpdate();
@@ -2219,6 +2233,8 @@ void MovableMan::VerifyMOIDIndex()
 
 void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
 {
+    ZoneScoped;
+
     // Clear the index each frame and do it over because MO's get added and deleted between each frame.
     m_MOIDIndex.clear();
     m_ContiguousActorIDs.clear();
@@ -2271,6 +2287,8 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
 
 void MovableMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 {
+    ZoneScoped;
+
     // Draw objects to accumulation bitmap, in reverse order so actors appear on top.
     for (std::deque<MovableObject *>::iterator parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
         (*parIt)->Draw(pTargetBitmap, targetPos);
@@ -2291,6 +2309,8 @@ void MovableMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 
 void MovableMan::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int which, bool playerControlled)
 {
+    ZoneScoped;
+
     // Draw HUD elements
 	for (std::deque<MovableObject *>::reverse_iterator itmIt = m_Items.rbegin(); itmIt != m_Items.rend(); ++itmIt)
         (*itmIt)->DrawHUD(pTargetBitmap, targetPos, which);

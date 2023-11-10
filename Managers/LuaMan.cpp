@@ -1,6 +1,7 @@
 #include "LuaMan.h"
 #include "LuabindObjectWrapper.h"
 #include "LuaBindingRegisterDefinitions.h"
+#include "tracy/Tracy.hpp"
 #include "tracy/TracyLua.hpp"
 
 namespace RTE {
@@ -624,19 +625,24 @@ namespace RTE {
 			functionObjectArgument->GetLuabindObject()->push(m_State);
 		}
 
+		const std::string& path = functionObject->GetFilePath();
 		std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-		if (lua_pcall(m_State, argumentCount, LUA_MULTRET, -argumentCount - 2) > 0) {
-			m_LastError = lua_tostring(m_State, -1);
-			lua_pop(m_State, 1);
-			g_ConsoleMan.PrintString("ERROR: " + m_LastError);
-			ClearErrors();
-			status = -1;
+		{
+			ZoneScoped;
+			ZoneName(path.c_str(), path.length());
+
+			if (lua_pcall(m_State, argumentCount, LUA_MULTRET, -argumentCount - 2) > 0) {
+				m_LastError = lua_tostring(m_State, -1);
+				lua_pop(m_State, 1);
+				g_ConsoleMan.PrintString("ERROR: " + m_LastError);
+				ClearErrors();
+				status = -1;
+			}
 		}
 		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
 		// only track time in non-MT scripts, for now
 		if (&g_LuaMan.GetMasterScriptState() == this) {
-			const std::string& path = functionObject->GetFilePath();
 			m_ScriptTimings[path].m_Time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 			m_ScriptTimings[path].m_CallCount++;
 		}

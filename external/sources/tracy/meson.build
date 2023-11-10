@@ -1,4 +1,4 @@
-project('tracy', ['cpp'])
+project('tracy', ['cpp'], version: '0.10.0')
 
 if get_option('tracy_enable')
   add_project_arguments('-DTRACY_ENABLE', language : 'cpp')
@@ -62,6 +62,10 @@ endif
 
 if get_option('tracy_no_system_tracing')
   add_project_arguments('-DTRACY_NO_SYSTEM_TRACING', language : 'cpp')
+endif
+
+if get_option('tracy_patchable_nopsleds')
+  add_project_arguments('-DTRACY_PATCHABLE_NOPSLEDS', language : 'cpp')
 endif
 
 if get_option('tracy_delayed_init')
@@ -161,18 +165,17 @@ if tracy_shared_libs
     include_directories : tracy_public_include_dirs,
     override_options    : override_options,
     install             : true)
-    install_headers(includes)
-    install_headers(common_includes, subdir : 'common')
-    install_headers(client_includes, subdir : 'client')
 else
   tracy = static_library('tracy', tracy_src, tracy_header_files,
     dependencies        : [ threads_dep ],
     include_directories : tracy_public_include_dirs,
     override_options    : override_options,
-    install             : false)
+    install             : true)
 endif
 
-
+install_headers(includes)
+install_headers(common_includes, subdir : 'common')
+install_headers(client_includes, subdir : 'client')
 
 tracy_dep_compile_args = []
 

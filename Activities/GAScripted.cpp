@@ -203,7 +203,7 @@ int GAScripted::ReloadScripts() {
     }
 
     std::unordered_map<std::string, LuabindObjectWrapper*> scriptFileFunctions;
-    if ((error = g_LuaMan.GetMasterScriptState().RunScriptFileAndRetrieveFunctions(m_ScriptPath, m_LuaClassName, GetSupportedScriptFunctionNames(), scriptFileFunctions)) < 0) {
+    if ((error = g_LuaMan.GetMasterScriptState().RunScriptFileAndRetrieveFunctions(m_ScriptPath, m_LuaClassName, GetSupportedScriptFunctionNames(), scriptFileFunctions, true)) < 0) {
         return error;
     }
 

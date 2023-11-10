@@ -719,19 +719,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaStateWrapper::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects) {
+	int LuaStateWrapper::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects, bool forceReload) {
+		static bool disableCaching = false;
+		forceReload = forceReload || disableCaching;
+
 		// If it's already cached, we don't need to run it again
+		// TODO - fix activity restarting needing to force reload
 		auto cachedScript = m_ScriptCache.find(filePath);
-		if (cachedScript != m_ScriptCache.end()) {
+		if (!forceReload && cachedScript != m_ScriptCache.end()) {
 			for (auto& pair : cachedScript->second.functionNamesAndObjects) {
 				luabind::object* functionObjectCopyForStoring = new luabind::object(*pair.second->GetLuabindObject());
 				outFunctionNamesAndObjects.try_emplace(pair.first, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
-			}
-
-			// TODO - fix activity restarting then re-enable this
-			static bool disableCaching = true;
-			if (disableCaching) {
-				m_ScriptCache.erase(cachedScript);
 			}
 
 			return 0;
@@ -756,6 +754,7 @@ namespace RTE {
 		}
 
 		auto &newScript = m_ScriptCache[filePath];
+		newScript.functionNamesAndObjects.clear();
 		for (const std::string& functionName : functionNamesToLookFor) {
 			luabind::object functionObject = prefixObject[functionName];
 			if (luabind::type(functionObject) == LUA_TFUNCTION) {
@@ -764,7 +763,12 @@ namespace RTE {
 			}
 		}
 
-		return RunScriptFileAndRetrieveFunctions(filePath, prefix, functionNamesToLookFor, outFunctionNamesAndObjects);
+		for (auto& pair : newScript.functionNamesAndObjects) {
+			luabind::object* functionObjectCopyForStoring = new luabind::object(*pair.second->GetLuabindObject());
+			outFunctionNamesAndObjects.try_emplace(pair.first, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
+		}
+
+		return 0;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

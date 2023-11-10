@@ -158,7 +158,7 @@ namespace RTE {
 		/// <param name="outFunctionNamesAndObjects">The map of function names to LuabindObjectWrappers to be retrieved from the script that was run.</param>
 		/// <param name="noCaching">Whether caching shouldn't be used.</param>
 		/// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
-		int RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects);
+		int RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects, bool forceReload = false);
 #pragma endregion
 
 #pragma region Concrete Methods

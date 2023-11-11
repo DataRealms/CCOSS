@@ -1614,6 +1614,32 @@ enum MOType
     /// <returns>Whether or not there is an associated value for this key.</returns>
     bool ObjectValueExists(const std::string &key) const;
 
+    /// <summary>
+    /// Saves a string which will be stored in our ini.
+    /// </summary>
+    /// <param name="key">The key of the saved string.</param>
+    /// <param name="value">The string to save.</param>
+    void SaveScriptString(const std::string& key, const std::string& value) { m_SavedValues.SaveString(key, value); };
+
+    /// <summary>
+    /// Loads and returns a previously saved string.
+    /// </summary>
+    /// <param name="key">The key of the string to load.</param>
+    const std::string& LoadScriptString(const std::string& key) { return m_SavedValues.LoadString(key); };
+
+    /// <summary>
+    /// Saves a number which will be stored in our ini.
+    /// </summary>
+    /// <param name="key">The key of the saved number.</param>
+    /// <param name="value">The number to save.</param>
+    void SaveScriptNumber(const std::string& key, float value) { m_SavedValues.SaveNumber(key, value); };
+
+    /// <summary>
+    /// Loads and returns a previously saved number.
+    /// </summary>
+    /// <param name="key">The key of the string to load.</param>
+    float LoadScriptNumber(const std::string& key) { return m_SavedValues.LoadNumber(key); };
+
 	/// <summary>
 	/// Event listener to be run while this MovableObject's PieMenu is opened.
 	/// </summary>
@@ -2108,6 +2134,11 @@ protected:
 	unsigned int m_LastCollisionSimFrameNumber;
     int m_SimUpdatesBetweenScriptedUpdates; //!< The number of Sim updates between each scripted update for this MovableObject.
     int m_SimUpdatesSinceLastScriptedUpdate; //!< The counter for the current number of Sim updates since this MovableObject last ran a scripted update.
+
+    /// <summary>
+    /// Generic additional saved strings/numbers, which are used for scripts primarily.
+    /// </summary>
+    GenericSavedData m_SavedValues;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Private member variable and method declarations

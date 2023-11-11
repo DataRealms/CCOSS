@@ -47,7 +47,7 @@
 #include "ActivityMan.h"
 #include "PrimitiveMan.h"
 
-#include "Tracy/Tracy.hpp"
+#include "tracy/Tracy.hpp"
 
 extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
 

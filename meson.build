@@ -54,6 +54,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     debug_type = get_option('debug_type')
     if debug_type == 'release'
       preprocessor_flags += ['-DRELEASE_BUILD'] # enable minimal debug features
+	  add_global_arguments('-DLUABIND_NO_ERROR_CHECKING', language:'cpp')
     elif debug_type == 'minimal'
       preprocessor_flags += ['-DMIN_DEBUG_BUILD', '-DDEBUGMODE'] # enable some debug features
     elif debug_type == 'full'
@@ -61,7 +62,8 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     endif
   else
     extra_args = ['-w'] # Disable all warnings for release builds
-    preprocessor_flags += ['-DRELEASE_BUILD'] # disable all debug features
+    preprocessor_flags += ['-DRELEASE_BUILD', '-DNDEBUG', '-DLUABIND_NO_ERROR_CHECKING'] # disable all debug features
+    add_global_arguments('-DLUABIND_NO_ERROR_CHECKING', language:'cpp')
   endif
   if compiler.get_id() =='gcc' and compiler.version().version_compare('<9')
     link_args += ['-lstdc++fs']
@@ -84,6 +86,7 @@ elif compiler.get_argument_syntax()== 'msvc'
     if debug_type == 'release'
       elfname+='.release'
       preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
+      add_global_arguments('-DLUABIND_NO_ERROR_CHECKING', language:'cpp')
     elif debug_type == 'minimal'
       elfname += '.minimal'
       preprocessor_flags += ['-DDEBUGMODE'] # enable some debug features
@@ -93,10 +96,13 @@ elif compiler.get_argument_syntax()== 'msvc'
     endif
   else
     preprocessor_flags += ['-DRELEASE_BUILD', '-DNDEBUG']
+    add_global_arguments('-DLUABIND_NO_ERROR_CHECKING', language:'cpp')
   endif
 else
   error('Using unknown compiler, please use gcc or msvc compatible compilers')
 endif
+add_project_arguments(preprocessor_flags, extra_args, language:'cpp')
+add_project_link_arguments(link_args, language:'cpp')
 
 #### Configuration ####
 conf_data = configuration_data()

@@ -34,7 +34,7 @@
 #include "SettingsMan.h"
 #include "LuaMan.h"
 
-#include "tracy/tracy.hpp"
+#include "tracy/Tracy.hpp"
 
 #include <execution>
 

@@ -51,7 +51,7 @@ friend struct EntityLuaBindings;
 
 public:
 
-	ScriptFunctionNames("Create", "Destroy", "Update", "SyncedUpdate", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen", "OnGameSave", "OnMessage", "OnGlobalMessage");
+	ScriptFunctionNames("Create", "Destroy", "Update", "SyncedUpdate", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen", "OnSave", "OnMessage", "OnGlobalMessage");
 	SerializableOverrideMethods;
 	ClassInfoGetters;
 
@@ -1893,7 +1893,7 @@ enum MOType
 	/// <summary>
 	/// Method to be run when the game is saved via ActivityMan::SaveCurrentGame. Not currently used in metagame or editor saving.
 	/// </summary>
-	virtual void OnGameSave() { RunScriptedFunctionInAppropriateScripts("OnGameSave"); }
+	virtual void OnSave() { RunScriptedFunctionInAppropriateScripts("OnSave"); }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

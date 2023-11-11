@@ -832,7 +832,7 @@ ClassInfoGetters;
 	/// <summary>
 	/// Method to be run when the game is saved via ActivityMan::SaveCurrentGame. Not currently used in metagame or editor saving.
 	/// </summary>
-	void OnGameSave() override;
+	void OnSave() override;
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

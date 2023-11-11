@@ -2051,14 +2051,14 @@ void MOSRotating::CorrectAttachableAndWoundPositionsAndRotations() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MOSRotating::OnGameSave() {
-	MovableObject::OnGameSave();
+void MOSRotating::OnSave() {
 	for (AEmitter *wound : m_Wounds) {
-		wound->OnGameSave();
+		wound->OnSave();
 	}
 	for (Attachable *attachable : m_Attachables) {
-		attachable->OnGameSave();
+		attachable->OnSave();
 	}
+    MovableObject::OnSave();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

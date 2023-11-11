@@ -368,6 +368,7 @@ namespace RTE {
 		// Actually open the file and check if it has the multithread-safe mark
 		std::ifstream scriptFile = std::ifstream(scriptPath.c_str());
 		if (!scriptFile.good()) {
+			m_ScriptThreadSafetyMap.insert({ scriptPath, false });
 			return false;
 		}
 

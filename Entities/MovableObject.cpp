@@ -127,9 +127,9 @@ void MovableObject::Clear()
     m_SavedValues.Reset();
 }
 
-LuaStateWrapper & MovableObject::GetAndLockStateForScript(const std::string &scriptPath) {
+LuaStateWrapper & MovableObject::GetAndLockStateForScript(const std::string &scriptPath, const LuaFunction *function) {
     // Initialize our threaded state if required
-    if (g_LuaMan.IsScriptThreadSafe(scriptPath)) {
+    if ((function && function->m_ScriptIsThreadSafe) || g_LuaMan.IsScriptThreadSafe(scriptPath)) {
         if (m_ThreadedLuaState == nullptr) {
             m_ThreadedLuaState = g_LuaMan.GetAndLockFreeScriptState();
         } else {
@@ -596,8 +596,12 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 		return -4;
 	}
 
+    bool scriptThreadSafe = g_LuaMan.IsScriptThreadSafe(scriptPath);
 	for (const auto &[functionName, functionObject] : scriptFileFunctions) {
-		m_FunctionsAndScripts.at(functionName).emplace_back(std::unique_ptr<LuabindObjectWrapper>(functionObject));
+		LuaFunction& luaFunction = m_FunctionsAndScripts.at(functionName).emplace_back();
+        luaFunction.m_ScriptIsEnabled = loadAsEnabledScript;
+        luaFunction.m_ScriptIsThreadSafe = scriptThreadSafe;
+        luaFunction.m_LuaFunction = std::unique_ptr<LuabindObjectWrapper>(functionObject);
 	}
 
 	if (ObjectScriptsInitialized()) {
@@ -680,7 +684,18 @@ bool MovableObject::EnableOrDisableScript(const std::string &scriptPath, bool en
 		if (ObjectScriptsInitialized() && RunFunctionOfScript(scriptPath, enableScript ? "OnScriptEnable" : "OnScriptDisable") < 0) {
 			return false;
 		}
+
         scriptEntryIterator->second = enableScript;
+
+        // Slow, but better to spend this time here in EnableOrDisableScript than every update hashing the script path as we used to do
+        for (auto &[functionName, functionObjects] : m_FunctionsAndScripts) {
+            for (LuaFunction &luaFunction : functionObjects) {
+                if (luaFunction.m_LuaFunction->GetFilePath() == scriptPath) {
+                    luaFunction.m_ScriptIsEnabled = enableScript;
+                }
+            }
+        }
+
         return true;
     }
     return false;
@@ -713,20 +728,19 @@ int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &fu
     if (status >= 0) {
         ZoneScoped;
         ZoneText(functionName.c_str(), functionName.length());
-        for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : itr->second) {
-            bool scriptIsThreadSafe = g_LuaMan.IsScriptThreadSafe(functionObjectWrapper->GetFilePath());
-            bool scriptIsSuitableForThread = scriptsToRun == ThreadScriptsToRun::SingleThreaded ? !scriptIsThreadSafe :
-                                             scriptsToRun == ThreadScriptsToRun::MultiThreaded  ? scriptIsThreadSafe :
+        for (const LuaFunction &luaFunction : itr->second) {
+            bool scriptIsSuitableForThread = scriptsToRun == ThreadScriptsToRun::SingleThreaded ? !luaFunction.m_ScriptIsThreadSafe :
+                                             scriptsToRun == ThreadScriptsToRun::MultiThreaded  ? luaFunction.m_ScriptIsThreadSafe :
                                                                                                   true;
             if (!scriptIsSuitableForThread) {
                 continue;
             }
 
-            const std::string &path = functionObjectWrapper->GetFilePath();
-            if (runOnDisabledScripts || m_AllLoadedScripts.at(path)) {
-                LuaStateWrapper& usedState = GetAndLockStateForScript(path);
+            const LuabindObjectWrapper *luabindObjectWrapper = luaFunction.m_LuaFunction.get();
+            if (runOnDisabledScripts || luaFunction.m_ScriptIsEnabled) {
+                LuaStateWrapper& usedState = GetAndLockStateForScript(luabindObjectWrapper->GetFilePath(), &luaFunction);
                 std::lock_guard<std::recursive_mutex> lock(usedState.GetMutex(), std::adopt_lock);   
-				status = usedState.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments, functionObjectArguments);
+				status = usedState.RunScriptFunctionObject(luabindObjectWrapper, "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments, functionObjectArguments);
                 if (status < 0 && stopOnError) {
                     return status;
                 }
@@ -746,8 +760,9 @@ int MovableObject::RunFunctionOfScript(const std::string &scriptPath, const std:
     LuaStateWrapper& usedState = GetAndLockStateForScript(scriptPath);
     std::lock_guard<std::recursive_mutex> lock(usedState.GetMutex(), std::adopt_lock);
 
-	for (const std::unique_ptr<LuabindObjectWrapper> &functionObjectWrapper : m_FunctionsAndScripts.at(functionName)) {
-		if (scriptPath == functionObjectWrapper->GetFilePath() && usedState.RunScriptFunctionObject(functionObjectWrapper.get(), "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments) < 0) {
+	for (const LuaFunction &luaFunction : m_FunctionsAndScripts.at(functionName)) {
+        const LuabindObjectWrapper *luabindObjectWrapper = luaFunction.m_LuaFunction.get();
+		if (scriptPath == luabindObjectWrapper->GetFilePath() && usedState.RunScriptFunctionObject(luabindObjectWrapper, "_ScriptedObjects", std::to_string(m_UniqueID), functionEntityArguments, functionLiteralArguments) < 0) {
 			if (m_AllLoadedScripts.size() > 1) {
 				g_ConsoleMan.PrintString("ERROR: An error occured while trying to run the " + functionName + " function for script at path " + scriptPath);
 			}

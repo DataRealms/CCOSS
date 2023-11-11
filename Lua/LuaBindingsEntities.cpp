@@ -275,6 +275,7 @@ namespace RTE {
 		.def("AddInventoryItem", &Actor::AddInventoryItem, luabind::adopt(_2))
 		.def("RemoveInventoryItem", (void (Actor::*)(const std::string &))&Actor::RemoveInventoryItem)
 		.def("RemoveInventoryItem", (void (Actor::*)(const std::string &, const std::string &))&Actor::RemoveInventoryItem)
+		.def("RemoveInventoryItemAtIndex", &Actor::RemoveInventoryItemAtIndex, luabind::adopt(luabind::return_value))
 		.def("SwapNextInventory", &Actor::SwapNextInventory)
 		.def("SwapPrevInventory", &Actor::SwapPrevInventory)
 		.def("DropAllInventory", &Actor::DropAllInventory)

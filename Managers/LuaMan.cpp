@@ -701,28 +701,31 @@ namespace RTE {
 			error = -1;
 		}
 
-		// create a new environment table
-		lua_getglobal(m_State, filePath.c_str());
-		if (lua_isnil(m_State, -1)) {
-			lua_pop(m_State, 1);
-			lua_newtable(m_State);
-			lua_newtable(m_State);
-			lua_getglobal(m_State, "_G");
-			lua_setfield(m_State, -2, "__index");
-			lua_setmetatable(m_State, -2);
-			lua_setglobal(m_State, filePath.c_str());
+		if (error == 0) {
+			// create a new environment table
 			lua_getglobal(m_State, filePath.c_str());
-		}
+			if (lua_isnil(m_State, -1)) {
+				lua_pop(m_State, 1);
+				lua_newtable(m_State);
+				lua_newtable(m_State);
+				lua_getglobal(m_State, "_G");
+				lua_setfield(m_State, -2, "__index");
+				lua_setmetatable(m_State, -2);
+				lua_setglobal(m_State, filePath.c_str());
+				lua_getglobal(m_State, filePath.c_str());
+			}
 
-		lua_setfenv(m_State, -2);
+			lua_setfenv(m_State, -2);
 
-		// execute script file with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
-		if (lua_pcall(m_State, 0, LUA_MULTRET, -2)) {
-			m_LastError = lua_tostring(m_State, -1);
-			lua_pop(m_State, 1);
-			if (consoleErrors) {
-				g_ConsoleMan.PrintString("ERROR: " + m_LastError);
-				ClearErrors();
+			// execute script file with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
+			if (lua_pcall(m_State, 0, LUA_MULTRET, -2)) {
+				m_LastError = lua_tostring(m_State, -1);
+				lua_pop(m_State, 1);
+				if (consoleErrors) {
+					g_ConsoleMan.PrintString("ERROR: " + m_LastError);
+					ClearErrors();
+				}
+				error = -1;
 			}
 		}
 

@@ -546,15 +546,9 @@ void MovableObject::DestroyScriptState() {
         }
 
         if (m_HasSinglethreadedScripts) {
-            // Shouldn't ever happen (destruction is delayed in movableman to happen in singlethreaded manner), but lets check just in case
-            if (g_LuaMan.GetThreadLuaStateOverride() || !g_LuaMan.GetMasterScriptState().GetMutex().try_lock()) {
-                RTEAbort("Failed to destroy object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
-            }
-            else {
-                std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex(), std::adopt_lock);
-                g_LuaMan.GetMasterScriptState().RunScriptString(m_ScriptObjectName + " = nil;");
-                g_LuaMan.GetMasterScriptState().UnregisterMO(this);
-            }
+            std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex());
+            g_LuaMan.GetMasterScriptState().RunScriptString(m_ScriptObjectName + " = nil;");
+            g_LuaMan.GetMasterScriptState().UnregisterMO(this);
         }
     }
 }

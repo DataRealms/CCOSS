@@ -490,6 +490,11 @@ namespace RTE {
 		/// Updates the state of this LuaMan.
 		/// </summary>
 		void Update();
+
+		/// <summary>
+		/// Asynchronously enforces a GC run to occur.
+		/// </summary>
+		void StartAsyncGarbageCollection();
 #pragma endregion
 
 		/// <summary>
@@ -513,6 +518,8 @@ namespace RTE {
 		std::mutex m_ScriptCallbacksMutex; //!< Mutex to ensure multiple threads aren't modifying the script callback vector at the same time.
 
 		int m_LastAssignedLuaState = 0;
+
+		std::thread m_GCThread;
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

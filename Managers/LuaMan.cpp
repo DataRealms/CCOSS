@@ -24,6 +24,9 @@ namespace RTE {
 		luabind::open(m_State);
 		tracy::LuaRegister(m_State);
 
+		// Disable gc. We do this manually, so we can thread it to occur parallel with non-lua updates
+		lua_gc(m_State, LUA_GCSTOP, 0);
+
 		const luaL_Reg libsToLoad[] = {
 			{ LUA_COLIBNAME, luaopen_base },
 			{ LUA_LOADLIBNAME, luaopen_package },
@@ -1084,13 +1087,46 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::Update() {
+		ZoneScoped;
+
 		m_MasterScriptState.Update();
 		for (LuaStateWrapper &luaState : m_ScriptStates) {
 			luaState.Update();
 		}
 
+		// Make sure a GC run isn't happening while we try to apply deletions
+		if (m_GCThread.joinable()) {
+			m_GCThread.join();
+		}
+
 		// Apply all deletions queued from lua
     	LuabindObjectWrapper::ApplyQueuedDeletions();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaMan::StartAsyncGarbageCollection() {
+		ZoneScoped;
+		
+		// Start a new thread to perform the GC run.
+		m_GCThread = std::thread([this]() {
+			std::vector<LuaStateWrapper*> allStates;
+			allStates.reserve(m_ScriptStates.size() + 1);
+
+			allStates.push_back(&m_MasterScriptState);
+			for (LuaStateWrapper& wrapper : m_ScriptStates) {
+				allStates.push_back(&wrapper);
+			}
+
+			std::for_each(std::execution::par, allStates.begin(), allStates.end(),
+				[&](LuaStateWrapper* luaState) {
+					ZoneScopedN("Lua Garbage Collection");
+					std::lock_guard<std::recursive_mutex> lock(luaState->GetMutex());
+					lua_gc(luaState->GetLuaState(), LUA_GCSTEP, 100);
+					lua_gc(luaState->GetLuaState(), LUA_GCSTOP, 0);
+				}
+			);
+		});
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

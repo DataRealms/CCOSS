@@ -53,7 +53,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
 
     debug_type = get_option('debug_type')
     if debug_type == 'release'
-      preprocessor_flags += ['-DRELEASE_BUILD'] # enable minimal debug features
+      preprocessor_flags += ['-DRELEASE_BUILD', '-DLUABIND_NO_ERROR_CHECKING'] # enable minimal debug features
     elif debug_type == 'minimal'
       preprocessor_flags += ['-DMIN_DEBUG_BUILD', '-DDEBUGMODE'] # enable some debug features
     elif debug_type == 'full'
@@ -61,7 +61,7 @@ if compiler.get_argument_syntax()== 'gcc' # used for gcc compatible compilers
     endif
   else
     extra_args = ['-w'] # Disable all warnings for release builds
-    preprocessor_flags += ['-DRELEASE_BUILD'] # disable all debug features
+    preprocessor_flags += ['-DRELEASE_BUILD', '-DNDEBUG', '-DLUABIND_NO_ERROR_CHECKING'] # disable all debug features
   endif
   if compiler.get_id() =='gcc' and compiler.version().version_compare('<9')
     link_args += ['-lstdc++fs']

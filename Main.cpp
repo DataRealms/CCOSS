@@ -426,6 +426,12 @@ int main(int argc, char **argv) {
 		SDL_GameControllerAddMappingsFromFile("Base.rte/gamecontrollerdb.txt");
 	}
 
+#ifdef WIN32
+	// Stops framespiking from our child threads being sat on for too long
+	// TODO: use a better thread system that'll do what we want ASAP instead of letting the OS schedule all over us
+	SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
+#endif // WIN32
+
 	// argv[0] actually unreliable for exe path and name, because of course, why would it be, why would anything be simple and make sense.
 	// Just use it anyway until some dumb edge case pops up and it becomes a problem.
 	System::Initialize(argv[0]);

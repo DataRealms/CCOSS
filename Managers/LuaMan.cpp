@@ -395,11 +395,21 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void LuaMan::ClearUserModuleCache() {
+		if (m_GCThread.joinable()) {
+			m_GCThread.join();
+		}
+
+		m_ScriptThreadSafetyMap.clear();
+
+		m_MasterScriptState.ClearLuaScriptCache();
+		for (LuaStateWrapper& luaState : m_ScriptStates) {
+			luaState.ClearLuaScriptCache();
+		}
+
 		m_MasterScriptState.ClearUserModuleCache();
-		for (LuaStateWrapper &luaState : m_ScriptStates) {
+		for (LuaStateWrapper& luaState : m_ScriptStates) {
 			luaState.ClearUserModuleCache();
 		}
-		m_ScriptThreadSafetyMap.clear();
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -437,16 +447,6 @@ namespace RTE {
 			}
 		}
 		return timings;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void LuaMan::ClearLuaScriptCache() {
-		m_ScriptThreadSafetyMap.clear();
-		m_MasterScriptState.ClearLuaScriptCache();
-		for (LuaStateWrapper &luaState : m_ScriptStates) {
-			luaState.ClearLuaScriptCache();
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

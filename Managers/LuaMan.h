@@ -412,11 +412,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>m_ScriptTimings.</returns>
 		const std::unordered_map<std::string, PerformanceMan::ScriptTiming> GetScriptTimings() const;
-
-		/// <summary>
-		/// Clears the Lua script cache.
-		/// </summary>
-		void ClearLuaScriptCache();
 #pragma endregion
 
 #pragma region File I/O Handling

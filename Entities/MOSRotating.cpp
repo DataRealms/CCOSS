@@ -1881,13 +1881,20 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode 
         }
     }
 
+#ifdef DRAW_MOID_LAYER
+    bool needsWrap = true;
+#else
+    bool needsWrap = mode != g_DrawMOID;
+#endif
+
+
     // Take care of wrapping situations
     Vector aDrawPos[4];
     int passes = 1;
 
     aDrawPos[0] = spritePos;
 
-    if (g_SceneMan.SceneWrapsX()) {
+    if (needsWrap && g_SceneMan.SceneWrapsX()) {
         // See if need to double draw this across the scene seam if we're being drawn onto a scenewide bitmap
         if (targetPos.IsZero() && m_WrapDoubleDraw) {
             if (spritePos.m_X < m_SpriteDiameter) {
@@ -1915,16 +1922,24 @@ void MOSRotating::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode 
     }
 
     if (m_HFlipped && pFlipBitmap) {
-        // Don't size the intermediate bitmaps to the m_Scale, because the scaling happens after they are done
-        clear_to_color(pFlipBitmap, keyColor);
+#ifdef DRAW_MOID_LAYER
+        bool drawIntermediate = true;
+#else
+        bool drawIntermediate = mode != g_DrawMOID;
+#endif
 
-        // Draw either the source color bitmap or the intermediate material bitmap onto the intermediate flipping bitmap
-		if (mode == g_DrawColor || mode == g_DrawTrans) {
-			draw_sprite_h_flip(pFlipBitmap, m_aSprite[m_Frame], 0, 0);
-		} else {
-			// If using the temp bitmap (which is always larger than the sprite) make sure the flipped image ends up in the upper right corner as if it was just as small as the sprite bitmap
-            draw_sprite_h_flip(pFlipBitmap, pTempBitmap, -(pTempBitmap->w - m_aSprite[m_Frame]->w), 0);
-		}
+        if (drawIntermediate) {
+            // Don't size the intermediate bitmaps to the m_Scale, because the scaling happens after they are done
+            clear_to_color(pFlipBitmap, keyColor);
+
+            // Draw either the source color bitmap or the intermediate material bitmap onto the intermediate flipping bitmap
+		    if (mode == g_DrawColor || mode == g_DrawTrans) {
+			    draw_sprite_h_flip(pFlipBitmap, m_aSprite[m_Frame], 0, 0);
+		    } else {
+			    // If using the temp bitmap (which is always larger than the sprite) make sure the flipped image ends up in the upper right corner as if it was just as small as the sprite bitmap
+                draw_sprite_h_flip(pFlipBitmap, pTempBitmap, -(pTempBitmap->w - m_aSprite[m_Frame]->w), 0);
+		    }
+        }
 
         if (mode == g_DrawTrans) {
             clear_to_color(pTempBitmap, keyColor);

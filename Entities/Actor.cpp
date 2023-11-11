@@ -811,7 +811,7 @@ void Actor::RemoveInventoryItem(const std::string &moduleName, const std::string
 
 MovableObject * Actor::RemoveInventoryItemAtIndex(int inventoryIndex) {
     if (inventoryIndex >= 0 && inventoryIndex < m_Inventory.size()) {
-        MovableObject *itemAtIndex = m_Inventory.at(inventoryIndex);
+        MovableObject *itemAtIndex = m_Inventory[inventoryIndex];
         m_Inventory.erase(m_Inventory.begin() + inventoryIndex);
         return itemAtIndex;
     }

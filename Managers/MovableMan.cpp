@@ -2307,10 +2307,10 @@ void MovableMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
     for (std::deque<MovableObject *>::iterator parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
         (*parIt)->Draw(pTargetBitmap, targetPos);
 
-	for (std::deque<MovableObject *>::reverse_iterator itmIt = m_Items.rbegin(); itmIt != m_Items.rend(); ++itmIt)
+	for (std::deque<MovableObject *>::iterator itmIt = m_Items.begin(); itmIt != m_Items.end(); ++itmIt)
         (*itmIt)->Draw(pTargetBitmap, targetPos);
 
-    for (std::deque<Actor *>::reverse_iterator aIt = m_Actors.rbegin(); aIt != m_Actors.rend(); ++aIt)
+    for (std::deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
         (*aIt)->Draw(pTargetBitmap, targetPos);
 }
 
@@ -2326,10 +2326,10 @@ void MovableMan::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whi
     ZoneScoped;
 
     // Draw HUD elements
-	for (std::deque<MovableObject *>::reverse_iterator itmIt = m_Items.rbegin(); itmIt != m_Items.rend(); ++itmIt)
+	for (std::deque<MovableObject *>::iterator itmIt = m_Items.begin(); itmIt != m_Items.end(); ++itmIt)
         (*itmIt)->DrawHUD(pTargetBitmap, targetPos, which);
 
-    for (std::deque<Actor *>::reverse_iterator aIt = m_Actors.rbegin(); aIt != m_Actors.rend(); ++aIt)
+    for (std::deque<Actor *>::iterator aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
         (*aIt)->DrawHUD(pTargetBitmap, targetPos, which);
 }
 

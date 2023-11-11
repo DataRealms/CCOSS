@@ -442,6 +442,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::ClearLuaScriptCache() {
+		m_ScriptThreadSafetyMap.clear();
 		m_MasterScriptState.ClearLuaScriptCache();
 		for (LuaStateWrapper &luaState : m_ScriptStates) {
 			luaState.ClearLuaScriptCache();

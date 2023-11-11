@@ -1729,8 +1729,10 @@ void MovableMan::Update()
     std::deque<MovableObject *>::iterator midIt;
 
     // Update all scripts for all objects
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
     {
+        ZoneScopedN("Multithreaded Scripts Update");
+
+        g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
         std::for_each(std::execution::par, luaStates.begin(), luaStates.end(),
             [&](LuaStateWrapper& luaState) {
@@ -1745,8 +1747,8 @@ void MovableMan::Update()
 
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
             });
+        g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
     }
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
     {
         {

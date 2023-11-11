@@ -83,7 +83,7 @@ elif compiler.get_argument_syntax()== 'msvc'
     debug_type = get_option('debug_type')
     if debug_type == 'release'
       elfname+='.release'
-      preprocessor_flags += ['-DDEBUG_RELEASE_BUILD'] # enable minimal debug features
+      preprocessor_flags += ['-DDEBUG_RELEASE_BUILD', '-DLUABIND_NO_ERROR_CHECKING'] # enable minimal debug features
     elif debug_type == 'minimal'
       elfname += '.minimal'
       preprocessor_flags += ['-DDEBUGMODE'] # enable some debug features
@@ -92,7 +92,7 @@ elif compiler.get_argument_syntax()== 'msvc'
       preprocessor_flags += ['-DDEBUG_BUILD', '-DDEBUGMODE'] # enable all debug features; may slow down game
     endif
   else
-    preprocessor_flags += ['-DRELEASE_BUILD', '-DNDEBUG']
+    preprocessor_flags += ['-DRELEASE_BUILD', '-DNDEBUG', '-DLUABIND_NO_ERROR_CHECKING']
   endif
 else
   error('Using unknown compiler, please use gcc or msvc compatible compilers')

@@ -96,6 +96,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Actor` Lua function `RemoveInventoryItemAtIndex`, with removes the `MovableObject` inventory item at a given index and returns.
 
+- New `Scene` Lua functions `AddNavigatableArea(areaName)` and `ClearNavigatableAreas()`. This can be used to restrict pathfinding to only search a set of areas that have been added to the scene before via `Scene:SetArea(area)`.
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -110,6 +112,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`z` is the patch number, which is currently not enforced.  
 
   Mods published for any development builds must match that development version exactly.
+
+- Pressing F2 to reload scripts now also reloads the scripts for all MOs currently in the scene.
+
+- Various optimizations to improve Lua performance.
 
 - Lua `Scene.ScenePath` property has been changed to a function `Scene:GetScenePath()`. This was done for thread-safety with multithreading, but can be used in the same way.
 

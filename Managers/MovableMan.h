@@ -492,7 +492,7 @@ public:
 // Return value:    Whether the object was found in the particle list, and consequently
 //                  removed. If the particle entry wasn't found, false is returned.
 
-    bool RemoveActor(MovableObject *pActorToRem);
+    Actor * RemoveActor(MovableObject *pActorToRem);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -505,7 +505,7 @@ public:
 // Return value:    Whether the object was found in the particle list, and consequently
 //                  removed. If the particle entry wasn't found, false is returned.
 
-    bool RemoveItem(MovableObject *pItemToRem);
+    MovableObject * RemoveItem(MovableObject *pItemToRem);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -518,7 +518,7 @@ public:
 // Return value:    Whether the object was found in the particle list, and consequently
 //                  removed. If the particle entry wasn't found, false is returned.
 
-    bool RemoveParticle(MovableObject *pMOToRem);
+    MovableObject * RemoveParticle(MovableObject *pMOToRem);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////

@@ -953,9 +953,9 @@ void MovableMan::AddParticle(MovableObject *particleToAdd){
 //                  removed, ownership is effectively released and transferred to whatever
 //                  client called this method.
 
-bool MovableMan::RemoveActor(MovableObject *pActorToRem)
+Actor * MovableMan::RemoveActor(MovableObject *pActorToRem)
 {
-    bool removed = false;
+    Actor *removed = nullptr;
 
     if (pActorToRem)
     {
@@ -964,9 +964,9 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
             if (*itr == pActorToRem)
             {
                 std::lock_guard<std::mutex> lock(m_ActorsMutex);
+                removed = *itr;
                 m_ValidActors.erase(*itr);
                 m_Actors.erase(itr);
-                removed = true;
                 break;
             }
         }
@@ -978,9 +978,9 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
                 if (*itr == pActorToRem)
                 {
                     std::lock_guard<std::mutex> lock(m_AddedActorsMutex);
+                    removed = *itr;
                     m_ValidActors.erase(*itr);
                     m_AddedActors.erase(itr);
-                    removed = true;
                     break;
                 }
             }
@@ -999,9 +999,9 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
 //                  MO:s. After the item is removed, ownership is effectively released and
 //                  transferred to whatever client called this method.
 
-bool MovableMan::RemoveItem(MovableObject *pItemToRem)
+MovableObject * MovableMan::RemoveItem(MovableObject *pItemToRem)
 {
-    bool removed = false;
+    MovableObject *removed = nullptr;
 
     if (pItemToRem)
     {
@@ -1010,9 +1010,9 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
             if (*itr == pItemToRem)
             {
                 std::lock_guard<std::mutex> lock(m_ItemsMutex);
+                removed = *itr;
                 m_ValidItems.erase(*itr);
                 m_Items.erase(itr);
-                removed = true;
                 break;
             }
         }
@@ -1024,14 +1024,59 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
                 if (*itr == pItemToRem)
                 {
                     std::lock_guard<std::mutex> lock(m_AddedItemsMutex);
+                    removed = *itr;
                     m_ValidItems.erase(*itr);
                     m_AddedItems.erase(itr);
-                    removed = true;
                     break;
                 }
             }
         }
 		pItemToRem->SetAsAddedToMovableMan(false);
+    }
+    return removed;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          RemoveParticle
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Removes a MovableObject from the internal list of MO:s. After the
+//                  MO is removed, ownership is effectively released and transferred to
+//                  whatever client called this method.
+
+MovableObject * MovableMan::RemoveParticle(MovableObject *pMOToRem)
+{
+    MovableObject *removed = nullptr;
+
+    if (pMOToRem)
+    {
+        for (std::deque<MovableObject *>::iterator itr = m_Particles.begin(); itr != m_Particles.end(); ++itr)
+        {
+            if (*itr == pMOToRem)
+            {
+                std::lock_guard<std::mutex> lock(m_ParticlesMutex);
+                removed = *itr;
+                m_ValidParticles.erase(*itr);
+                m_Particles.erase(itr);
+                break;
+            }
+        }
+        // Try the newly added particles if we couldn't find it in the regular deque
+        if (!removed)
+        {
+            for (std::deque<MovableObject *>::iterator itr = m_AddedParticles.begin(); itr != m_AddedParticles.end(); ++itr)
+            {
+                if (*itr == pMOToRem)
+                {
+                    std::lock_guard<std::mutex> lock(m_AddedParticlesMutex);
+                    removed = *itr;
+                    m_ValidParticles.erase(*itr);
+                    m_AddedParticles.erase(itr);
+                    break;
+                }
+            }
+        }
+		pMOToRem->SetAsAddedToMovableMan(false);
     }
     return removed;
 }
@@ -1113,51 +1158,6 @@ void MovableMan::ChangeActorTeam(Actor * pActor, int team)
 		g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(actorAsADoor->GetBoundingBox());
 		g_SceneMan.GetScene()->UpdatePathFinding();
 	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveParticle
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a MovableObject from the internal list of MO:s. After the
-//                  MO is removed, ownership is effectively released and transferred to
-//                  whatever client called this method.
-
-bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
-{
-    bool removed = false;
-
-    if (pMOToRem)
-    {
-        for (std::deque<MovableObject *>::iterator itr = m_Particles.begin(); itr != m_Particles.end(); ++itr)
-        {
-            if (*itr == pMOToRem)
-            {
-                std::lock_guard<std::mutex> lock(m_ParticlesMutex);
-                m_ValidParticles.erase(*itr);
-                m_Particles.erase(itr);
-                removed = true;
-                break;
-            }
-        }
-        // Try the newly added particles if we couldn't find it in the regular deque
-        if (!removed)
-        {
-            for (std::deque<MovableObject *>::iterator itr = m_AddedParticles.begin(); itr != m_AddedParticles.end(); ++itr)
-            {
-                if (*itr == pMOToRem)
-                {
-                    std::lock_guard<std::mutex> lock(m_AddedParticlesMutex);
-                    m_ValidParticles.erase(*itr);
-                    m_AddedParticles.erase(itr);
-                    removed = true;
-                    break;
-                }
-            }
-        }
-		pMOToRem->SetAsAddedToMovableMan(false);
-    }
-    return removed;
 }
 
 
@@ -1310,11 +1310,11 @@ bool MovableMan::RemoveMO(MovableObject *pMOToRem)
 {
     if (pMOToRem)
     {
+        if (RemoveActor(pMOToRem))
+            return true;
         if (RemoveItem(pMOToRem))
             return true;
         if (RemoveParticle(pMOToRem))
-            return true;
-        if (RemoveActor(pMOToRem))
             return true;
     }
 

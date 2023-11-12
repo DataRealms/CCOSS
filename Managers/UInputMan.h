@@ -758,6 +758,15 @@ namespace RTE {
 		bool GetMouseButtonState(int whichPlayer, int whichButton, InputState whichState) const;
 
 		/// <summary>
+		/// Gets whether a multiplayer mouse button is in the specified state.
+		/// </summary>
+		/// <param name="whichPlayer">Which player to check for. See Players enumeration.</param>
+		/// <param name="whichButton">Which mouse button to check for. See MouseButtons enumeration.</param>
+		/// <param name="whichState">Which state to check for. See InputState enumeration.</param>
+		/// <returns>Whether the mouse button is in the specified state or not.</returns>
+		bool GetNetworkMouseButtonState(int whichPlayer, int whichButton, InputState whichState) const;
+
+		/// <summary>
 		/// Gets whether a joystick button is in the specified state.
 		/// </summary>
 		/// <param name="whichJoy">Which joystick to check for.</param>

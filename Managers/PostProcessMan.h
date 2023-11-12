@@ -95,16 +95,10 @@ namespace RTE {
 		/// <param name="targetBitmapOffset">The position of the specified player's draw screen on the backbuffer.</param>
 		/// <param name="screenRelativeEffectsList">List of the specified player's accumulated post effects for this frame.</param>
 		/// <param name="screenRelativeGlowBoxesList">List of the specified player's accumulated glow boxes for this frame.</param>
-		void AdjustEffectsPosToPlayerScreen(int playerScreen, BITMAP *targetBitmap, const Vector &targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList) const;
+		void AdjustEffectsPosToPlayerScreen(int playerScreen, BITMAP *targetBitmap, const Vector &targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList);
 #pragma endregion
 
 #pragma region Post Effect Handling
-		/// <summary>
-		/// Gets the list of effects to apply at the end of each frame.
-		/// </summary>
-		/// <returns>The list of effects to apply at the end of each frame.</returns>
-		std::list<PostEffect> * GetPostScreenEffectsList() { return &m_PostScreenEffects; }
-
 		/// <summary>
 		/// Registers a post effect to be added at the very last stage of 32bpp rendering by the FrameMan.
 		/// </summary>
@@ -136,11 +130,6 @@ namespace RTE {
 #pragma endregion
 
 #pragma region Post Pixel Glow Handling
-		/// <summary>
-		/// Gets the list of areas that will be processed with glow.
-		/// </summary>
-		/// <returns>The list of areas that will be processed with glow.</returns>
-		std::list<Box> * GetPostScreenGlowBoxesList() { return &m_PostScreenGlowBoxes; }
 
 		/// <summary>
 		/// Registers a specific IntRect to be post-processed and have special pixel colors lit up by glow effects in it.
@@ -284,7 +273,7 @@ namespace RTE {
 		/// <summary>
 		/// Draws all the glow effects registered for this frame. This is called from PostProcess().
 		/// </summary>
-		void DrawPostScreenEffects() const;
+		void DrawPostScreenEffects();
 #pragma endregion
 
 		/// <summary>

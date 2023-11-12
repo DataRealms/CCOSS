@@ -378,7 +378,7 @@ namespace RTE {
 		const std::string &pieSlicePresetName = pieSliceToAdd->GetPresetName();
 
 		if (pieSlicePresetName == "None") {
-			return AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, allowQuadrantOverflow);
+			return AddPieSlice(dynamic_cast<PieSlice*>(pieSliceToAdd->Clone()), pieSliceOriginalSource, allowQuadrantOverflow);
 		}
 
 		bool pieSliceAlreadyExists = onlyCheckPieSlicesWithSameOriginalSource ? false : GetFirstPieSliceByPresetName(pieSlicePresetName) != nullptr;
@@ -392,11 +392,10 @@ namespace RTE {
 		}
 
 		if (pieSliceAlreadyExists) {
-			delete pieSliceToAdd;
 			return false;
 		}
 
-		return AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, allowQuadrantOverflow);
+		return AddPieSlice(dynamic_cast<PieSlice*>(pieSliceToAdd->Clone()), pieSliceOriginalSource, allowQuadrantOverflow);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

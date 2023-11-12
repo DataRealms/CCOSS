@@ -559,12 +559,12 @@ void GAScripted::AddPieSlicesToActiveActorPieMenus() {
 			PieMenu *controlledActorPieMenu = m_ControlledActor[player]->GetPieMenu();
 			if (controlledActorPieMenu && m_ControlledActor[player]->GetController()->IsState(PIE_MENU_ACTIVE) && controlledActorPieMenu->IsEnabling()) {
 				for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlicesToAdd) {
-					controlledActorPieMenu->AddPieSliceIfPresetNameIsUnique(dynamic_cast<PieSlice *>(pieSlice->Clone()), this, true);
+					controlledActorPieMenu->AddPieSliceIfPresetNameIsUnique(pieSlice.get(), this, true);
 				}
 				for (const GlobalScript *globalScript : m_GlobalScriptsList) {
 					if (globalScript->IsActive()) {
 						for (const std::unique_ptr<PieSlice> &pieSlice : globalScript->GetPieSlicesToAdd()) {
-							controlledActorPieMenu->AddPieSliceIfPresetNameIsUnique(dynamic_cast<PieSlice *>(pieSlice->Clone()), globalScript, true);
+							controlledActorPieMenu->AddPieSliceIfPresetNameIsUnique(pieSlice.get(), globalScript, true);
 						}
 					}
 				}

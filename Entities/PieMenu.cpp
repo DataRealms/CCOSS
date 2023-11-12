@@ -866,7 +866,7 @@ namespace RTE {
 				m_ActiveSubPieMenu->SetHoveredPieSlice(m_ActiveSubPieMenu->m_PieQuadrants.at(m_ActiveSubPieMenu->m_DirectionIfSubPieMenu).m_MiddlePieSlice.get(), true);
 				m_ActiveSubPieMenu->m_HoverTimer.SetRealTimeLimitMS(2000);
 				m_ActiveSubPieMenu->m_HoverTimer.Reset();
-			} else if (m_ActivatedPieSlice && m_ActivatedPieSlice->GetLuabindFunctionObjectWrapper()->GetLuabindObject()) {
+			} else if (m_ActivatedPieSlice && m_ActivatedPieSlice->GetLuabindFunctionObjectWrapper() && m_ActivatedPieSlice->GetLuabindFunctionObjectWrapper()->GetLuabindObject()) {
 				if (const MovableObject *scriptTarget = m_Owner ? m_Owner : m_AffectedObject) {
 					g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(m_ActivatedPieSlice->GetLuabindFunctionObjectWrapper(), "", "", { scriptTarget, this, m_ActivatedPieSlice });
 				}

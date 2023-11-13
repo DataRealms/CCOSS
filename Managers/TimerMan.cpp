@@ -96,7 +96,7 @@ namespace RTE {
 
 	void TimerMan::UpdateSim() {
 		m_LatestUpdateStartTime = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - m_StartTime).count();
-		m_SimSpeed = GetDeltaTimeMS() / g_PerformanceMan.GetMSPUAverage();
+		m_SimSpeed = std::min(GetDeltaTimeMS() / g_PerformanceMan.GetMSPUAverage(), m_TimeScale);
 
 		if (TimeForSimUpdate()) {
 			// Transfer ticks from the accumulator to the sim time ticks.

@@ -1347,7 +1347,7 @@ void GameActivity::Update()
         // Assure that Controlled Actor is a safe pointer
 
         // Only allow this if player's brain is intact
-        if (g_MovableMan.IsActor(m_Brain[player]))
+        if (m_Brain[player] && !m_Brain[player]->IsDead() )
         {
             // Note that we have now had a brain
             m_HadBrain[player] = true;

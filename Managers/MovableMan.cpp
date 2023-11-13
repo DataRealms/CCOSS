@@ -1759,7 +1759,10 @@ void MovableMan::Update()
             g_LuaMan.SetThreadLuaStateOverride(&luaState);
 
             for (MovableObject* mo : luaState.GetRegisteredMOs()) {
-                mo->RunScriptedFunctionInAppropriateScripts(syncedUpdate, false, false, {}, {}, {}, ThreadScriptsToRun::MultiThreaded);
+                if (mo->HasRequestedSyncedUpdate()) {
+                    mo->RunScriptedFunctionInAppropriateScripts(syncedUpdate, false, false, {}, {}, {}, ThreadScriptsToRun::MultiThreaded);
+                    mo->ResetRequestedSyncedUpdateFlag();
+                }
             }
 
             g_LuaMan.SetThreadLuaStateOverride(nullptr);

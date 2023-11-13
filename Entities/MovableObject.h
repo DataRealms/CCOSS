@@ -1895,6 +1895,22 @@ enum MOType
 	/// </summary>
 	virtual void OnSave() { RunScriptedFunctionInAppropriateScripts("OnSave"); }
 
+    /// <summary>
+    /// Requests a synced update for the MO this frame.
+    /// </summary>
+    virtual void RequestSyncedUpdate() { m_RequestedSyncedUpdate = true; }
+
+    /// <summary>
+    /// Resets the requested update flag.
+    /// </summary>
+    virtual void ResetRequestedSyncedUpdateFlag() { m_RequestedSyncedUpdate = false; }
+
+    /// <summary>
+    /// Returns whether this MO has requested a synced update this frame.
+    /// </summary>
+    /// <returns>Whether this MO has requested a synced update this frame.</returns>
+    virtual bool HasRequestedSyncedUpdate() { return m_RequestedSyncedUpdate; }
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
@@ -2053,6 +2069,8 @@ protected:
     std::string m_ScriptObjectName; //!< The name of this object for script usage.
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
     std::unordered_map<std::string, std::vector<LuaFunction>> m_FunctionsAndScripts; //!< A map of function names to vectors of Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.
+
+    bool m_RequestedSyncedUpdate; //!< For optimisation purposes, multithreaded scripts explicitly request a synced update if they want one.
 
     std::unordered_map<std::string, std::string> m_StringValueMap; //<! Map to store any generic strings available from script
     std::unordered_map<std::string, double> m_NumberValueMap; //<! Map to store any generic numbers available from script

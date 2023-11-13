@@ -1956,7 +1956,7 @@ protected:
     // Member variables
     static Entity::ClassInfo m_sClass;
 	// Global counter with unique ID's
-	static unsigned long int m_UniqueIDCounter;
+	static std::atomic<unsigned long int> m_UniqueIDCounter;
     // The type of MO this is, either Actor, Item, or Particle
     int m_MOType;
     float m_Mass; // In metric kilograms (kg).

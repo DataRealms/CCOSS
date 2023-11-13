@@ -29,7 +29,7 @@ namespace RTE {
 
 AbstractClassInfo(MovableObject, SceneObject);
 
-unsigned long int MovableObject::m_UniqueIDCounter = 1;
+std::atomic<unsigned long int> MovableObject::m_UniqueIDCounter = 1;
 std::string MovableObject::ms_EmptyString = "";
 
 //////////////////////////////////////////////////////////////////////////////////////////

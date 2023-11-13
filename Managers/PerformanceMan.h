@@ -105,10 +105,10 @@ namespace RTE {
 		float GetMSPFAverage() const { return m_MSPFAverage; }
 
 		/// <summary>
-		/// Gets the average of the MSPF reading buffer, calculated each frame.
+		/// Gets the average of the MSPU reading buffer, calculated each frame.
 		/// </summary>
 		/// <returns>The average value of the MSPF reading buffer.</returns>
-		float GetMSPUAverage() const { return m_MSPFAverage; }
+		float GetMSPUAverage() const { return m_MSPUAverage; }
 #pragma endregion
 
 #pragma region Performance Counter Handling

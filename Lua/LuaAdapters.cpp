@@ -575,7 +575,7 @@ namespace RTE {
 			scriptedActivity->RunLuaFunction("OnGlobalMessage", {}, { message }, { &wrapper });
 		}
 
-		movableMan.RunLuaFunctionOnAllMOs("OnGlobalMessage", {}, { message }, { &wrapper });
+		movableMan.RunLuaFunctionOnAllMOs("OnGlobalMessage", true, {}, { message }, { &wrapper });
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

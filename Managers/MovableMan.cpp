@@ -1568,7 +1568,7 @@ void callLuaFunctionOnMORecursive(MovableObject* mo, const std::string& function
             Attachable* attachable = *attachablrItr;
             ++attachablrItr;
 
-            attachable->RunScriptedFunctionInAppropriateScripts("OnGlobalMessage", false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+            attachable->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
             callLuaFunctionOnMORecursive(attachable, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
         }
 
@@ -1576,27 +1576,29 @@ void callLuaFunctionOnMORecursive(MovableObject* mo, const std::string& function
             AEmitter* wound = *woundItr;
             ++woundItr;
 
-            wound->RunScriptedFunctionInAppropriateScripts("OnGlobalMessage", false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+            wound->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
             callLuaFunctionOnMORecursive(wound, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
         }
     }
 
-    mo->RunScriptedFunctionInAppropriateScripts("OnGlobalMessage", false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    mo->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, const std::vector<LuabindObjectWrapper*> &functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
-    for (Actor* actor : m_AddedActors) {
-        callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
-    }
+void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, bool includeAdded, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, const std::vector<LuabindObjectWrapper*> &functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
+    if (includeAdded) {
+        for (Actor* actor : m_AddedActors) {
+            callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        }
 
-    for (MovableObject *item : m_AddedItems) {
-        callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
-    }
+        for (MovableObject *item : m_AddedItems) {
+            callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        }
 
-    for (MovableObject* particle : m_AddedParticles) {
-        callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        for (MovableObject* particle : m_AddedParticles) {
+            callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        }
     }
     
     for (Actor *actor : m_Actors) {
@@ -1728,27 +1730,42 @@ void MovableMan::Update()
     std::deque<MovableObject *>::iterator parIt;
     std::deque<MovableObject *>::iterator midIt;
 
-    // Update all scripts for all objects
+    // Update all multithreaded scripts for all objects
+    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
     {
         ZoneScopedN("Multithreaded Scripts Update");
 
-        g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+        const std::string threadedUpdate = "Update"; // avoid string reconstruction
+
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
         std::for_each(std::execution::par, luaStates.begin(), luaStates.end(),
             [&](LuaStateWrapper& luaState) {
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
 
-                // We may have new MOs registered to us by objects creating other things and being initialized
-                // So we need to copy this list before using it
-                std::unordered_set<MovableObject *> registeredMOs = luaState.GetRegisteredMOs();
-                for (MovableObject *mo : registeredMOs) {
-                    mo->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
+                for (MovableObject *mo : luaState.GetRegisteredMOs()) {
+                    mo->RunScriptedFunctionInAppropriateScripts(threadedUpdate, false, false, {}, {}, {}, ThreadScriptsToRun::MultiThreaded);
                 }
 
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
             });
-        g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
     }
+
+    {
+        ZoneScopedN("Multithreaded Scripts SyncedUpdate");
+
+        const std::string syncedUpdate = "SyncedUpdate"; // avoid string reconstruction
+
+        for (LuaStateWrapper& luaState : g_LuaMan.GetThreadedScriptStates()) {
+            g_LuaMan.SetThreadLuaStateOverride(&luaState);
+
+            for (MovableObject* mo : luaState.GetRegisteredMOs()) {
+                mo->RunScriptedFunctionInAppropriateScripts(syncedUpdate, false, false, {}, {}, {}, ThreadScriptsToRun::MultiThreaded);
+            }
+
+            g_LuaMan.SetThreadLuaStateOverride(nullptr);
+        }
+    }
+    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
     {
         {

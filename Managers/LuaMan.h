@@ -93,13 +93,13 @@ namespace RTE {
 		/// Registers an MO as using us.
 		/// </summary>
 		/// <param name="moToRegister">The MO to register with us. Ownership is NOT transferred!</param>
-		void RegisterMO(MovableObject* moToRegister) { m_RegisteredMOs.insert(moToRegister); }
+		void RegisterMO(MovableObject* moToRegister) { m_AddedRegisteredMOs.insert(moToRegister); }
 
 		/// <summary>
 		/// Unregisters an MO as using us.
 		/// </summary>
 		/// <param name="moToUnregister">The MO to unregister as using us. Ownership is NOT transferred!</param>
-		void UnregisterMO(MovableObject *moToUnregister) { m_RegisteredMOs.erase(moToUnregister); }
+		void UnregisterMO(MovableObject *moToUnregister) { m_RegisteredMOs.erase(moToUnregister); m_AddedRegisteredMOs.erase(moToUnregister); }
 
 		/// <summary>
 		/// Gets a list of the MOs registed as using us.
@@ -290,6 +290,7 @@ namespace RTE {
 		void Clear();
 
 		std::unordered_set<MovableObject *> m_RegisteredMOs; //!< The objects using our lua state.
+		std::unordered_set<MovableObject *> m_AddedRegisteredMOs; //!< The objects using our lua state that were recently added.
 
 		lua_State *m_State;
 		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
@@ -310,7 +311,7 @@ namespace RTE {
 		RandomGenerator m_RandomGenerator; //!< The random number generator used for this lua state.
 	};
 
-	static constexpr int c_NumThreadedLuaStates = 8;
+	static constexpr int c_NumThreadedLuaStates = 16;
 	typedef std::array<LuaStateWrapper, c_NumThreadedLuaStates> LuaStatesArray;
 
 	/// <summary>

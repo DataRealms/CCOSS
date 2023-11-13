@@ -1083,10 +1083,6 @@ namespace RTE {
 		.def("IsAtRest", &MovableObject::IsAtRest)
 		.def("MoveOutOfTerrain", &MovableObject::MoveOutOfTerrain)
 		.def("RotateOffset", &MovableObject::RotateOffset)
-		.def("SaveString", &MovableObject::SaveScriptString)
-		.def("LoadString", &MovableObject::LoadScriptString)
-		.def("SaveNumber", &MovableObject::SaveScriptNumber)
-		.def("LoadNumber", &MovableObject::LoadScriptNumber)
 		.def("SendMessage", &LuaAdaptersMovableObject::SendMessage1)
 		.def("SendMessage", &LuaAdaptersMovableObject::SendMessage2);
 	}

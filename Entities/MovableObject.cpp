@@ -124,7 +124,6 @@ void MovableObject::Clear()
 
 	m_SimUpdatesBetweenScriptedUpdates = 1;
     m_SimUpdatesSinceLastScriptedUpdate = 0;
-    m_SavedValues.Reset();
 }
 
 LuaStateWrapper & MovableObject::GetAndLockStateForScript(const std::string &scriptPath, const LuaFunction *function) {
@@ -295,8 +294,6 @@ int MovableObject::Create(const MovableObject &reference)
 	m_UniqueID = MovableObject::GetNextUniqueID();
 	g_MovableMan.RegisterObject(this);
 
-    m_SavedValues = reference.m_SavedValues;
-
     return 0;
 }
 
@@ -407,7 +404,6 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 	MatchProperty("IgnoreTerrain", { reader >> m_IgnoreTerrain; });
     MatchProperty("SimUpdatesBetweenScriptedUpdates", { reader >> m_SimUpdatesBetweenScriptedUpdates; });
     MatchProperty("AddCustomValue", { ReadCustomValueProperty(reader); });
-    MatchProperty("GenericSavedValues", { reader >> m_SavedValues; });
 
     EndPropertyList;
 }
@@ -525,9 +521,6 @@ int MovableObject::Save(Writer &writer) const
         writer.ObjectStart("AddCustomValue = StringValue");
         writer.NewPropertyWithValue(key, value);
     }
-
-    writer.NewProperty("GenericSavedValues");
-    writer << m_SavedValues;
 
     return 0;
 }

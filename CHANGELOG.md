@@ -66,9 +66,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`tracy.Message(text)` to send a tracy message.  
 	Lua scripts without any tracy documentation are still profiled by tracy, however only at a granularity of how long the entire script takes to execute.  
 
-- New `MovableObject` Lua functions `SaveNumber(stringKey, floatValue)`, `LoadNumber(stringKey)`, `SaveString(stringKey, stringValue)` and `SaveString(stringKey)`.  
-	These work in the same manner as the likewise named functions on `Activity`.
-
 - New `HeldDevice` Lua function `IsBeingHeld`, which returns whether or not the `HeldDevice` is currently being held.  
 
 - New `HeldDevice` INI and Lua (R/W) property `GetsHitByMOsWhenHeld`, which defines whether this `HeldDevice` can be hit by MOs while equipped and held by an actor. Defaults to true.  

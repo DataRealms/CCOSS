@@ -1368,6 +1368,18 @@ ClassInfoGetters;
 	/// <param name="newRecoverDelay">The recovery delay, in MS.</param>
 	void SetStableRecoverDelay(int newRecoverDelay) { m_StableRecoverDelay = newRecoverDelay; }
 
+    /// <summary>
+    /// Gets the distance in which the Actor will have considered itself to have reached it's waypoint.
+    /// </summary>
+    /// <returns>The move proximity limit.</returns>
+    float GetMoveProximityLimit() const { return m_MoveProximityLimit; }
+
+    /// <summary>
+    /// Sets the distance in which the Actor will have considered itself to have reached it's waypoint.
+    /// </summary>
+    /// <param name="newProximityLimit">The move proximity limit.</param>
+    void SetMoveProximityLimit(float newProximityLimit) { m_MoveProximityLimit = newProximityLimit; }
+
 	/// <summary>
 	/// Gets whether or not this Actor has the organic flag set and should be considered as organic.
 	/// </summary>

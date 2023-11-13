@@ -125,7 +125,7 @@ void Actor::Clear() {
     m_MoveVector.Reset();
     m_MovePath.clear();
     m_UpdateMovePath = true;
-    m_MoveProximityLimit = 75.0F;
+    m_MoveProximityLimit = 20.0F;
     m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
     m_BaseMass = std::numeric_limits<float>::infinity();
 

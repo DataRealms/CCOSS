@@ -282,8 +282,7 @@ namespace RTE {
 		BITMAP *m_BackBitmap; //!< The backbuffer BITMAP of this SceneLayer.
 
 		// We use two bitmaps, as a backbuffer. While the main bitmap is being used, the secondary bitmap will be cleared on a separate thread. This is because we tend to want to clear some scene layers every frame and that is costly.
-		std::mutex m_BitmapClearMutex; //!< Mutex for clearing BITMAP in background.
-		volatile bool m_HasTransferredLock; //!< Bool to ensure that the other thread has actually acquired the lock before we can continue
+		std::thread m_BitmapClearThread; //!< Thread for clearing BITMAP in background.
 		ColorKeys m_LastClearColor; //!< The last color we cleared this SceneLayer to.
 		std::vector<IntRect> m_Drawings; //!< All the areas drawn within on this SceneLayer since the last clear.
 

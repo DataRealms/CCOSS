@@ -125,7 +125,7 @@ void Actor::Clear() {
     m_MoveVector.Reset();
     m_MovePath.clear();
     m_UpdateMovePath = true;
-    m_MoveProximityLimit = 75.0F;
+    m_MoveProximityLimit = 20.0F;
     m_AIBaseDigStrength = c_PathFindingDefaultDigStrength;
     m_BaseMass = std::numeric_limits<float>::infinity();
 
@@ -811,7 +811,7 @@ void Actor::RemoveInventoryItem(const std::string &moduleName, const std::string
 
 MovableObject * Actor::RemoveInventoryItemAtIndex(int inventoryIndex) {
     if (inventoryIndex >= 0 && inventoryIndex < m_Inventory.size()) {
-        MovableObject *itemAtIndex = m_Inventory.at(inventoryIndex);
+        MovableObject *itemAtIndex = m_Inventory[inventoryIndex];
         m_Inventory.erase(m_Inventory.begin() + inventoryIndex);
         return itemAtIndex;
     }

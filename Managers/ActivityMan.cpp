@@ -122,7 +122,7 @@ namespace RTE {
 		modifiableScene->RetrieveSceneObjects(false);
 		for (SceneObject *objectToSave : *modifiableScene->GetPlacedObjects(Scene::PlacedObjectSets::PLACEONLOAD)) {
 			if (MovableObject *objectToSaveAsMovableObject = dynamic_cast<MovableObject *>(objectToSave)) {
-				objectToSaveAsMovableObject->OnGameSave();
+				objectToSaveAsMovableObject->OnSave();
 			}
 		}
 

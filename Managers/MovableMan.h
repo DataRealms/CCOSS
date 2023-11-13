@@ -492,7 +492,7 @@ public:
 // Return value:    Whether the object was found in the particle list, and consequently
 //                  removed. If the particle entry wasn't found, false is returned.
 
-    bool RemoveActor(MovableObject *pActorToRem);
+    Actor * RemoveActor(MovableObject *pActorToRem);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -505,7 +505,7 @@ public:
 // Return value:    Whether the object was found in the particle list, and consequently
 //                  removed. If the particle entry wasn't found, false is returned.
 
-    bool RemoveItem(MovableObject *pItemToRem);
+    MovableObject * RemoveItem(MovableObject *pItemToRem);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -518,7 +518,7 @@ public:
 // Return value:    Whether the object was found in the particle list, and consequently
 //                  removed. If the particle entry wasn't found, false is returned.
 
-    bool RemoveParticle(MovableObject *pMOToRem);
+    MovableObject * RemoveParticle(MovableObject *pMOToRem);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -944,7 +944,12 @@ public:
     /// <summary>
     /// Runs a lua function on all MOs in the simulation, including owned child MOs.
     /// </summary>
-    void RunLuaFunctionOnAllMOs(const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments = std::vector<const Entity*>(), const std::vector<std::string_view>& functionLiteralArguments = std::vector<std::string_view>(), const std::vector<LuabindObjectWrapper*>& functionObjectArguments = std::vector<LuabindObjectWrapper*>(), ThreadScriptsToRun scriptsToRun = ThreadScriptsToRun::Both);
+    void RunLuaFunctionOnAllMOs(const std::string& functionName, bool includeAdded, const std::vector<const Entity*>& functionEntityArguments = std::vector<const Entity*>(), const std::vector<std::string_view>& functionLiteralArguments = std::vector<std::string_view>(), const std::vector<LuabindObjectWrapper*>& functionObjectArguments = std::vector<LuabindObjectWrapper*>(), ThreadScriptsToRun scriptsToRun = ThreadScriptsToRun::Both);
+
+    /// <summary>
+    /// Clears all cached lua functions on all MOs, including owned child MOs.
+    /// </summary>
+    void ReloadLuaScripts();
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

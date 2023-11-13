@@ -51,7 +51,7 @@ friend struct EntityLuaBindings;
 
 public:
 
-	ScriptFunctionNames("Create", "Destroy", "Update", "SyncedUpdate", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen", "OnGameSave", "OnMessage", "OnGlobalMessage");
+	ScriptFunctionNames("Create", "Destroy", "Update", "SyncedUpdate", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen", "OnSave", "OnMessage", "OnGlobalMessage");
 	SerializableOverrideMethods;
 	ClassInfoGetters;
 
@@ -1893,7 +1893,23 @@ enum MOType
 	/// <summary>
 	/// Method to be run when the game is saved via ActivityMan::SaveCurrentGame. Not currently used in metagame or editor saving.
 	/// </summary>
-	virtual void OnGameSave() { RunScriptedFunctionInAppropriateScripts("OnGameSave"); }
+	virtual void OnSave() { RunScriptedFunctionInAppropriateScripts("OnSave"); }
+
+    /// <summary>
+    /// Requests a synced update for the MO this frame.
+    /// </summary>
+    virtual void RequestSyncedUpdate() { m_RequestedSyncedUpdate = true; }
+
+    /// <summary>
+    /// Resets the requested update flag.
+    /// </summary>
+    virtual void ResetRequestedSyncedUpdateFlag() { m_RequestedSyncedUpdate = false; }
+
+    /// <summary>
+    /// Returns whether this MO has requested a synced update this frame.
+    /// </summary>
+    /// <returns>Whether this MO has requested a synced update this frame.</returns>
+    virtual bool HasRequestedSyncedUpdate() { return m_RequestedSyncedUpdate; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -1956,7 +1972,7 @@ protected:
     // Member variables
     static Entity::ClassInfo m_sClass;
 	// Global counter with unique ID's
-	static unsigned long int m_UniqueIDCounter;
+	static std::atomic<unsigned long int> m_UniqueIDCounter;
     // The type of MO this is, either Actor, Item, or Particle
     int m_MOType;
     float m_Mass; // In metric kilograms (kg).
@@ -2044,9 +2060,17 @@ protected:
     LuaStateWrapper *m_ThreadedLuaState; //!< The lua state that will runs our multithreaded lua scripts.
     bool m_HasSinglethreadedScripts; //!< Whether or not we have any single-threaded scripts attached to us.
 
+    struct LuaFunction {
+        bool m_ScriptIsThreadSafe; //!< Whether this function is in a script with the --[[MULTITHREAD]]- thread safety tag.
+        bool m_ScriptIsEnabled; //!< Whether this function is in an enabled script.
+        std::unique_ptr<LuabindObjectWrapper> m_LuaFunction; //!< The lua function itself.
+    };
+
     std::string m_ScriptObjectName; //!< The name of this object for script usage.
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
-    std::unordered_map<std::string, std::vector<std::unique_ptr<LuabindObjectWrapper>>> m_FunctionsAndScripts; //!< A map of function names to vectors of LuabindObjectWrappers that hold Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.
+    std::unordered_map<std::string, std::vector<LuaFunction>> m_FunctionsAndScripts; //!< A map of function names to vectors of Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.
+
+    bool m_RequestedSyncedUpdate; //!< For optimisation purposes, multithreaded scripts explicitly request a synced update if they want one.
 
     std::unordered_map<std::string, std::string> m_StringValueMap; //<! Map to store any generic strings available from script
     std::unordered_map<std::string, double> m_NumberValueMap; //<! Map to store any generic numbers available from script
@@ -2129,8 +2153,10 @@ private:
     /// Returns the script state to use for a given script path.
     /// This will be locked to our thread and safe to use - ensure that it'll be unlocked after use!
     /// </summary>
+    /// <param name="scriptPath">The path to the script to check for thread safety.</param>
+	/// <param name="function">A LuaFunction, to use as an early-out check instead of redundantly hashing and checking the filepath string.</param>
     /// <returns>A script state.</returns>
-    LuaStateWrapper & GetAndLockStateForScript(const std::string& scriptPath);
+    LuaStateWrapper & GetAndLockStateForScript(const std::string &scriptPath, const LuaFunction *function = nullptr);
 
 	// Disallow the use of some implicit methods.
 	MovableObject(const MovableObject &reference) = delete;

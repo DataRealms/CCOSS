@@ -911,6 +911,7 @@ void PresetMan::ReloadAllScripts() const {
 	for (const DataModule *dataModule : m_pDataModules) {
 		dataModule->ReloadAllScripts();
 	}
+	g_MovableMan.ReloadLuaScripts();
 	g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded!");
 }
 

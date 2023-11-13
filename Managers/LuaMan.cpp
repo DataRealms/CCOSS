@@ -1,6 +1,7 @@
 #include "LuaMan.h"
 #include "LuabindObjectWrapper.h"
 #include "LuaBindingRegisterDefinitions.h"
+#include "tracy/Tracy.hpp"
 #include "tracy/TracyLua.hpp"
 
 namespace RTE {
@@ -22,6 +23,9 @@ namespace RTE {
 		m_State = luaL_newstate();
 		luabind::open(m_State);
 		tracy::LuaRegister(m_State);
+
+		// Disable gc. We do this manually, so we can thread it to occur parallel with non-lua updates
+		lua_gc(m_State, LUA_GCSTOP, 0);
 
 		const luaL_Reg libsToLoad[] = {
 			{ LUA_COLIBNAME, luaopen_base },
@@ -331,6 +335,17 @@ namespace RTE {
 			return s_luaStateOverride;
 		}
 
+		// TODO
+		// It would be nice to assign to least-saturated state, but that's a bit tricky with MO registering...
+		/*auto itr = std::min_element(m_ScriptStates.begin(), m_ScriptStates.end(), 
+			[](const LuaStateWrapper& lhs, const LuaStateWrapper& rhs) { return lhs.GetRegisteredMOs().size() < rhs.GetRegisteredMOs().size(); }
+		);
+
+		bool success = itr->GetMutex().try_lock();
+		RTEAssert(success, "Script mutex was already locked while in a non-multithreaded environment!");
+
+		return &(*itr);*/
+
 		int ourState = m_LastAssignedLuaState;
 		m_LastAssignedLuaState = (m_LastAssignedLuaState + 1) % c_NumThreadedLuaStates;
 
@@ -356,6 +371,7 @@ namespace RTE {
 		// Actually open the file and check if it has the multithread-safe mark
 		std::ifstream scriptFile = std::ifstream(scriptPath.c_str());
 		if (!scriptFile.good()) {
+			m_ScriptThreadSafetyMap.insert({ scriptPath, false });
 			return false;
 		}
 
@@ -379,11 +395,21 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void LuaMan::ClearUserModuleCache() {
+		if (m_GCThread.joinable()) {
+			m_GCThread.join();
+		}
+
+		m_ScriptThreadSafetyMap.clear();
+
+		m_MasterScriptState.ClearLuaScriptCache();
+		for (LuaStateWrapper& luaState : m_ScriptStates) {
+			luaState.ClearLuaScriptCache();
+		}
+
 		m_MasterScriptState.ClearUserModuleCache();
-		for (LuaStateWrapper &luaState : m_ScriptStates) {
+		for (LuaStateWrapper& luaState : m_ScriptStates) {
 			luaState.ClearUserModuleCache();
 		}
-		m_ScriptThreadSafetyMap.clear();
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -436,6 +462,12 @@ namespace RTE {
 
 	void LuaStateWrapper::ClearUserModuleCache() {
 		luaL_dostring(m_State, "for m, n in pairs(package.loaded) do if type(n) == \"boolean\" then package.loaded[m] = nil; end; end;");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaStateWrapper::ClearLuaScriptCache() {
+		m_ScriptCache.clear();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -608,19 +640,24 @@ namespace RTE {
 			functionObjectArgument->GetLuabindObject()->push(m_State);
 		}
 
+		const std::string& path = functionObject->GetFilePath();
 		std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-		if (lua_pcall(m_State, argumentCount, LUA_MULTRET, -argumentCount - 2) > 0) {
-			m_LastError = lua_tostring(m_State, -1);
-			lua_pop(m_State, 1);
-			g_ConsoleMan.PrintString("ERROR: " + m_LastError);
-			ClearErrors();
-			status = -1;
+		{
+			ZoneScoped;
+			ZoneName(path.c_str(), path.length());
+
+			if (lua_pcall(m_State, argumentCount, LUA_MULTRET, -argumentCount - 2) > 0) {
+				m_LastError = lua_tostring(m_State, -1);
+				lua_pop(m_State, 1);
+				g_ConsoleMan.PrintString("ERROR: " + m_LastError);
+				ClearErrors();
+				status = -1;
+			}
 		}
 		std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
 		// only track time in non-MT scripts, for now
 		if (&g_LuaMan.GetMasterScriptState() == this) {
-			const std::string& path = functionObject->GetFilePath();
 			m_ScriptTimings[path].m_Time += std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
 			m_ScriptTimings[path].m_CallCount++;
 		}
@@ -653,10 +690,13 @@ namespace RTE {
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
 		s_currentLuaState = this;
 
+		const int stackStart = lua_gettop(m_State);
+
 		lua_pushcfunction(m_State, &AddFileAndLineToError);
 		SetLuaPath(fullScriptPath);
-		// Load the script file's contents onto the stack and then execute it with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
-		if (luaL_loadfile(m_State, fullScriptPath.c_str()) || lua_pcall(m_State, 0, LUA_MULTRET, -2)) {
+
+		// Load the script file's contents onto the stack
+		if (luaL_loadfile(m_State, fullScriptPath.c_str())) {
 			m_LastError = lua_tostring(m_State, -1);
 			lua_pop(m_State, 1);
 			if (consoleErrors) {
@@ -665,39 +705,91 @@ namespace RTE {
 			}
 			error = -1;
 		}
-		// Pop the file and line error handler off the stack to clean it up
+
+		if (error == 0) {
+			// create a new environment table
+			lua_getglobal(m_State, filePath.c_str());
+			if (lua_isnil(m_State, -1)) {
+				lua_pop(m_State, 1);
+				lua_newtable(m_State);
+				lua_newtable(m_State);
+				lua_getglobal(m_State, "_G");
+				lua_setfield(m_State, -2, "__index");
+				lua_setmetatable(m_State, -2);
+				lua_setglobal(m_State, filePath.c_str());
+				lua_getglobal(m_State, filePath.c_str());
+			}
+
+			lua_setfenv(m_State, -2);
+
+			// execute script file with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
+			if (lua_pcall(m_State, 0, LUA_MULTRET, -2)) {
+				m_LastError = lua_tostring(m_State, -1);
+				lua_pop(m_State, 1);
+				if (consoleErrors) {
+					g_ConsoleMan.PrintString("ERROR: " + m_LastError);
+					ClearErrors();
+				}
+				error = -1;
+			}
+		}
+
+		// Pop the line error handler off the stack to clean it up
 		lua_pop(m_State, 1);
 
+		RTEAssert(lua_gettop(m_State) == stackStart, "Malformed lua stack!");
 		return error;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaStateWrapper::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects) {
-		if (int error = RunScriptFile(filePath); error < 0) {
-			return error;
+	int LuaStateWrapper::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects, bool forceReload) {
+		static bool disableCaching = false;
+		forceReload = forceReload || disableCaching;
+
+		// If it's already cached, we don't need to run it again
+		// TODO - fix activity restarting needing to force reload
+		auto cachedScript = m_ScriptCache.find(filePath);
+		if (!forceReload && cachedScript != m_ScriptCache.end()) {
+			for (auto& pair : cachedScript->second.functionNamesAndObjects) {
+				luabind::object* functionObjectCopyForStoring = new luabind::object(*pair.second->GetLuabindObject());
+				outFunctionNamesAndObjects.try_emplace(pair.first, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
+			}
+
+			return 0;
 		}
 
 		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
 		s_currentLuaState = this;
 
+		if (int error = RunScriptFile(filePath); error < 0) {
+			return error;
+		}
+
 		luabind::object prefixObject;
 		if (prefix == "") {
-			prefixObject = luabind::globals(m_State);
+			prefixObject = luabind::globals(m_State)[filePath.c_str()];
 		} else {
-			prefixObject = luabind::globals(m_State)[prefix];
+			prefixObject = luabind::globals(m_State)[filePath.c_str()][prefix];
 		}
 
 		if (luabind::type(prefixObject) == LUA_TNIL) {
 			return -1;
 		}
 
-		for (const std::string &functionName : functionNamesToLookFor) {
+		auto &newScript = m_ScriptCache[filePath];
+		newScript.functionNamesAndObjects.clear();
+		for (const std::string& functionName : functionNamesToLookFor) {
 			luabind::object functionObject = prefixObject[functionName];
 			if (luabind::type(functionObject) == LUA_TFUNCTION) {
-				luabind::object *functionObjectCopyForStoring = new luabind::object(functionObject);
-				outFunctionNamesAndObjects.try_emplace(functionName, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
+				luabind::object* functionObjectCopyForStoring = new luabind::object(functionObject);
+				newScript.functionNamesAndObjects.try_emplace(functionName, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
 			}
+		}
+
+		for (auto& pair : newScript.functionNamesAndObjects) {
+			luabind::object* functionObjectCopyForStoring = new luabind::object(*pair.second->GetLuabindObject());
+			outFunctionNamesAndObjects.try_emplace(pair.first, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
 		}
 
 		return 0;
@@ -706,7 +798,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void LuaStateWrapper::Update() {
-
+		for (MovableObject* mo : m_AddedRegisteredMOs) {
+			m_RegisteredMOs.insert(mo);
+		}
+		m_AddedRegisteredMOs.clear();
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -996,13 +1091,46 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaMan::Update() {
+		ZoneScoped;
+
 		m_MasterScriptState.Update();
 		for (LuaStateWrapper &luaState : m_ScriptStates) {
 			luaState.Update();
 		}
 
+		// Make sure a GC run isn't happening while we try to apply deletions
+		if (m_GCThread.joinable()) {
+			m_GCThread.join();
+		}
+
 		// Apply all deletions queued from lua
     	LuabindObjectWrapper::ApplyQueuedDeletions();
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void LuaMan::StartAsyncGarbageCollection() {
+		ZoneScoped;
+		
+		// Start a new thread to perform the GC run.
+		m_GCThread = std::thread([this]() {
+			std::vector<LuaStateWrapper*> allStates;
+			allStates.reserve(m_ScriptStates.size() + 1);
+
+			allStates.push_back(&m_MasterScriptState);
+			for (LuaStateWrapper& wrapper : m_ScriptStates) {
+				allStates.push_back(&wrapper);
+			}
+
+			std::for_each(std::execution::par, allStates.begin(), allStates.end(),
+				[&](LuaStateWrapper* luaState) {
+					ZoneScopedN("Lua Garbage Collection");
+					std::lock_guard<std::recursive_mutex> lock(luaState->GetMutex());
+					lua_gc(luaState->GetLuaState(), LUA_GCSTEP, 100);
+					lua_gc(luaState->GetLuaState(), LUA_GCSTOP, 0);
+				}
+			);
+		});
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

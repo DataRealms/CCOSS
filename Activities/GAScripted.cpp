@@ -76,7 +76,9 @@ int GAScripted::Create() {
     // Scan the script file for any mentions/uses of Areas.
     CollectRequiredAreas();
 
+
     // If the GAScripted has a OnSave() function, we assume it can be saved by default
+    ReloadScripts();
     m_AllowsUserSaving = HasSaveFunction();
 
     return 0;
@@ -195,24 +197,15 @@ int GAScripted::ReloadScripts() {
     if (!g_LuaMan.GetMasterScriptState().GlobalIsDefined(m_LuaClassName)) {
         // Temporarily store this Activity so the Lua state can access it
         g_LuaMan.GetMasterScriptState().SetTempEntity(this);
-        
+
         // Define the var that will hold the script file definitions
         if ((error = g_LuaMan.GetMasterScriptState().RunScriptString(m_LuaClassName + " = ToGameActivity(LuaMan.TempEntity);")) < 0) {
             return error;
         }
     }
 
-    std::string luaClearSupportedFunctionsString;
-    for (const std::string& functionName : GetSupportedScriptFunctionNames()) {
-        luaClearSupportedFunctionsString += m_LuaClassName + "." + functionName + " = nil; ";
-    }
-
-    if ((error = g_LuaMan.GetMasterScriptState().RunScriptString(luaClearSupportedFunctionsString)) < 0) {
-        return error;
-    }
-
     std::unordered_map<std::string, LuabindObjectWrapper*> scriptFileFunctions;
-    if ((error = g_LuaMan.GetMasterScriptState().RunScriptFileAndRetrieveFunctions(m_ScriptPath, m_LuaClassName, GetSupportedScriptFunctionNames(), scriptFileFunctions)) < 0) {
+    if ((error = g_LuaMan.GetMasterScriptState().RunScriptFileAndRetrieveFunctions(m_ScriptPath, m_LuaClassName, GetSupportedScriptFunctionNames(), scriptFileFunctions, true)) < 0) {
         return error;
     }
 
@@ -310,8 +303,11 @@ int GAScripted::Start() {
         return error;
     }
 
-    // Create the Lua variable which will hold the class representation that we'll add some definitions to
-    if ((error = g_LuaMan.GetMasterScriptState().RunScriptString(m_LuaClassName + " = ToGameActivity(ActivityMan:GetActivity());")) < 0) {
+    // Temporarily store this Activity so the Lua state can access it
+    g_LuaMan.GetMasterScriptState().SetTempEntity(this);
+
+    // Define the var that will hold the script file definitions
+    if ((error = g_LuaMan.GetMasterScriptState().RunScriptString(m_LuaClassName + " = ToGameActivity(LuaMan.TempEntity);")) < 0) {
         return error;
     }
 
@@ -563,12 +559,12 @@ void GAScripted::AddPieSlicesToActiveActorPieMenus() {
 			PieMenu *controlledActorPieMenu = m_ControlledActor[player]->GetPieMenu();
 			if (controlledActorPieMenu && m_ControlledActor[player]->GetController()->IsState(PIE_MENU_ACTIVE) && controlledActorPieMenu->IsEnabling()) {
 				for (const std::unique_ptr<PieSlice> &pieSlice : m_PieSlicesToAdd) {
-					controlledActorPieMenu->AddPieSliceIfPresetNameIsUnique(dynamic_cast<PieSlice *>(pieSlice->Clone()), this, true);
+					controlledActorPieMenu->AddPieSliceIfPresetNameIsUnique(pieSlice.get(), this, true);
 				}
 				for (const GlobalScript *globalScript : m_GlobalScriptsList) {
 					if (globalScript->IsActive()) {
 						for (const std::unique_ptr<PieSlice> &pieSlice : globalScript->GetPieSlicesToAdd()) {
-							controlledActorPieMenu->AddPieSliceIfPresetNameIsUnique(dynamic_cast<PieSlice *>(pieSlice->Clone()), globalScript, true);
+							controlledActorPieMenu->AddPieSliceIfPresetNameIsUnique(pieSlice.get(), globalScript, true);
 						}
 					}
 				}

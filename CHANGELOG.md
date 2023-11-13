@@ -22,6 +22,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	The `OnGlobalMessage` callback works the exact same way, however global messages are sent to every object within the game, instead of a specific object.  
 	To send a global message, use `MovableMan:SendGlobalMessage(message, context)`.  
 
+- New `AEJetpack` type, which replaces the old technique of `ACrab`/`AHuman` using an `AEmitter` as a jetpack. This type inherits from `AEmitter`.  
+	New INI and Lua (R/W) property `JetpackType`, which can be either `AEJetpack.Standard` or `AEJetpack.JumpPack`. Standard acts the same as the typical jetpack, whereas JumpPacks can only be activated when fully recharged, and fires all of it's fuel in one burst. Defaults to Standard.  
+	New INI and Lua (R/W) property `MinimumFuelRatio`, which defines the ratio of current fuel to max fuel that has to be met to fire the jetpack. Defaults to 0 for Standard and 0.25 for JumpPacks.  
+	New INI and Lua (R/W) property `CanAdjustAngleWhileFiring`, which defines whether the jet angle can change while the jetpack is active. Defaults to true.  
+	New INI and Lua (R/W) property `AdjustsThrottleForWeight`, which defines whether the jetpack will adjust it's throttle (between `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier`) to account for any extra inventory mass. Increased throttle will decrease jet time accordingly. Defaults to true.  
+
 - New Lua event function `SyncedUpdate()`, which will be called in a thread-safe synchronized manner and allows multithreaded scripts to modify game state in a safe and consistent way.  
 
 - Multithreaded asynchronous pathfinding, which dramatically improves performance on large maps and improves AI responsiveness.
@@ -44,13 +50,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	);
 	```
 
-- New `AEJetpack` type, which replaces the old technique of `ACrab`/`AHuman` using an `AEmitter` as a jetpack. This type inherits from `AEmitter`.  
-	New INI and Lua (R/W) property `JetpackType`, which can be either `AEJetpack.Standard` or `AEJetpack.JumpPack`. Standard acts the same as the typical jetpack, whereas JumpPacks can only be activated when fully recharged, and fires all of it's fuel in one burst. Defaults to Standard.  
-	New INI and Lua (R/W) property `MinimumFuelRatio`, which defines the ratio of current fuel to max fuel that has to be met to fire the jetpack. Defaults to 0 for Standard and 0.25 for JumpPacks.  
-	New INI and Lua (R/W) property `CanAdjustAngleWhileFiring`, which defines whether the jet angle can change while the jetpack is active. Defaults to true.  
-	New INI and Lua (R/W) property `AdjustsThrottleForWeight`, which defines whether the jetpack will adjust it's throttle (between `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier`) to account for any extra inventory mass. Increased throttle will decrease jet time accordingly. Defaults to true.  
+- New FMOD and SoundContainer features:  
+	The game is now divided into SFX, UI, and Music busses which all route into the Master bus.  
+	The SFX bus has compression added for a better listening experience, and a safety volume limiter has been added to the Master bus.  
+	Aside from volume being attenuated, sounds will now also be lowpass filtered as distance increases.  
+	New `SoundContainer` INI and Lua (R/W) property `BusRouting`, which denotes which bus the SoundContainer routes to. Available busses: `SFX, UI, Music`. Defaults to `SFX`.  
+	`Enum` binding for `SoundContainer.BusRouting`: `SFX = 0, UI = 1, MUSIC = 2`.  
+	New `SoundContainer` INI and Lua (R/W) property `PanningStrengthMultiplier`, which will multiply the strength of 3D panning. This can be used to achieve for example a psuedo-Immobile effect where attenuation effects are still applied but the sound does not move from the center. Recommended to keep between 0.0 and 1.0.  
 
-- New `HeldDevice` Lua (R) function `IsBeingHeld`, which returns whether or not the `HeldDevice` is currently being held.  
+- Tracy profiler integration.  
+	You can now attach Tracy to builds of the game and see profiling information about various zones and how long they take.  
+	This can also be used to profile specific lua scripts, with the following functions:  
+	`tracy.ZoneBegin()`, `tracy.ZoneEnd()` to profile a block of code.  
+	`tracy.ZoneBeginN(text)` to begin a custom named zone, and `tracy.ZoneName(text)` to dynamically set the current zone name on a per-call basis.  
+	`tracy.Message(text)` to send a tracy message.  
+	Lua scripts without any tracy documentation are still profiled by tracy, however only at a granularity of how long the entire script takes to execute.  
+
+- New `HeldDevice` Lua function `IsBeingHeld`, which returns whether or not the `HeldDevice` is currently being held.  
 
 - New `HeldDevice` INI and Lua (R/W) property `GetsHitByMOsWhenHeld`, which defines whether this `HeldDevice` can be hit by MOs while equipped and held by an actor. Defaults to true.  
 	
@@ -78,13 +94,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `SLTerrain` INI property `OrbitDirection`, which defines which direction is considered to be orbit, for the sake of brain-path-to-orbit, dropship spawn/return location, etc. Can be any of `Up`, `Down`, `Left` or `Right`. Defaults to `Up`.
 
-- New FMOD and SoundContainer features:
-	The game is now divided into SFX, UI, and Music busses which all route into the Master bus.
-	The SFX bus has compression added for a better listening experience, and a safety volume limiter has been added to the Master bus.
-	Aside from volume being attenuated, sounds will now also be lowpass filtered as distance increases.
-	New `SoundContainer` INI and Lua (R/W) property `BusRouting`, which denotes which bus the SoundContainer routes to. Available busses: `SFX, UI, Music`. Defaults to `SFX`.
-	`Enum` binding for `SoundContainer.BusRouting`: `SFX = 0, UI = 1, MUSIC = 2`.
-	New `SoundContainer` INI and Lua (R/W) property `PanningStrengthMultiplier`, which will multiply the strength of 3D panning. This can be used to achieve for example a psuedo-Immobile effect where attenuation effects are still applied but the sound does not move from the center. Recommended to keep between 0.0 and 1.0.
+- New `Actor` Lua function `RemoveInventoryItemAtIndex`, with removes the `MovableObject` inventory item at a given index and returns.
+
+- New `Scene` Lua functions `AddNavigatableArea(areaName)` and `ClearNavigatableAreas()`. This can be used to restrict pathfinding to only search a set of areas that have been added to the scene before via `Scene:SetArea(area)`.
 
 </details>
 
@@ -100,6 +112,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	`z` is the patch number, which is currently not enforced.  
 
   Mods published for any development builds must match that development version exactly.
+
+- Pressing F2 to reload scripts now also reloads the scripts for all MOs currently in the scene.
+
+- Various optimizations to improve Lua performance.
 
 - Lua `Scene.ScenePath` property has been changed to a function `Scene:GetScenePath()`. This was done for thread-safety with multithreading, but can be used in the same way.
 

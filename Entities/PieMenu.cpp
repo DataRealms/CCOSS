@@ -378,7 +378,7 @@ namespace RTE {
 		const std::string &pieSlicePresetName = pieSliceToAdd->GetPresetName();
 
 		if (pieSlicePresetName == "None") {
-			return AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, allowQuadrantOverflow);
+			return AddPieSlice(dynamic_cast<PieSlice*>(pieSliceToAdd->Clone()), pieSliceOriginalSource, allowQuadrantOverflow);
 		}
 
 		bool pieSliceAlreadyExists = onlyCheckPieSlicesWithSameOriginalSource ? false : GetFirstPieSliceByPresetName(pieSlicePresetName) != nullptr;
@@ -392,11 +392,10 @@ namespace RTE {
 		}
 
 		if (pieSliceAlreadyExists) {
-			delete pieSliceToAdd;
 			return false;
 		}
 
-		return AddPieSlice(pieSliceToAdd, pieSliceOriginalSource, allowQuadrantOverflow);
+		return AddPieSlice(dynamic_cast<PieSlice*>(pieSliceToAdd->Clone()), pieSliceOriginalSource, allowQuadrantOverflow);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -866,7 +865,7 @@ namespace RTE {
 				m_ActiveSubPieMenu->SetHoveredPieSlice(m_ActiveSubPieMenu->m_PieQuadrants.at(m_ActiveSubPieMenu->m_DirectionIfSubPieMenu).m_MiddlePieSlice.get(), true);
 				m_ActiveSubPieMenu->m_HoverTimer.SetRealTimeLimitMS(2000);
 				m_ActiveSubPieMenu->m_HoverTimer.Reset();
-			} else if (m_ActivatedPieSlice && !m_ActivatedPieSlice->GetScriptPath().empty() && !m_ActivatedPieSlice->GetFunctionName().empty()) {
+			} else if (m_ActivatedPieSlice && m_ActivatedPieSlice->GetLuabindFunctionObjectWrapper() && m_ActivatedPieSlice->GetLuabindFunctionObjectWrapper()->GetLuabindObject()) {
 				if (const MovableObject *scriptTarget = m_Owner ? m_Owner : m_AffectedObject) {
 					g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(m_ActivatedPieSlice->GetLuabindFunctionObjectWrapper(), "", "", { scriptTarget, this, m_ActivatedPieSlice });
 				}

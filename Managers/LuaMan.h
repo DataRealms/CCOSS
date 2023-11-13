@@ -13,6 +13,7 @@ struct lua_State;
 namespace RTE {
 
 	class LuabindObjectWrapper;
+	class MovableObject;
 
 	/// <summary>
 	/// A single lua state. Multiple of these can exist at once for multithreaded scripting.
@@ -87,6 +88,26 @@ namespace RTE {
 		const std::unordered_map<std::string, PerformanceMan::ScriptTiming> & GetScriptTimings() const;
 #pragma endregion
 
+#pragma region Script Responsibility Handling
+		/// <summary>
+		/// Registers an MO as using us.
+		/// </summary>
+		/// <param name="moToRegister">The MO to register with us. Ownership is NOT transferred!</param>
+		void RegisterMO(MovableObject* moToRegister) { m_AddedRegisteredMOs.insert(moToRegister); }
+
+		/// <summary>
+		/// Unregisters an MO as using us.
+		/// </summary>
+		/// <param name="moToUnregister">The MO to unregister as using us. Ownership is NOT transferred!</param>
+		void UnregisterMO(MovableObject *moToUnregister) { m_RegisteredMOs.erase(moToUnregister); m_AddedRegisteredMOs.erase(moToUnregister); }
+
+		/// <summary>
+		/// Gets a list of the MOs registed as using us.
+		/// </summary>
+		/// <returns>The MOs registed as using us.</returns>
+		const std::unordered_set<MovableObject *> & GetRegisteredMOs() const { return m_RegisteredMOs; }
+#pragma endregion
+
 #pragma region Script Execution Handling
 		/// <summary>
 		/// Runs the given Lua function with optional safety checks and arguments. The first argument to the function will always be the self object.
@@ -135,8 +156,9 @@ namespace RTE {
 		/// <param name="prefix">The prefix before each function we're looking for. With normal objects this is usually nothing (free floating), but activities expect the activity name beforehand.</param>
 		/// <param name="functionNamesToLookFor">The vector of strings defining the function names to be retrieved.</param>
 		/// <param name="outFunctionNamesAndObjects">The map of function names to LuabindObjectWrappers to be retrieved from the script that was run.</param>
+		/// <param name="noCaching">Whether caching shouldn't be used.</param>
 		/// <returns>Returns less than zero if any errors encountered when running this script. To get the actual error string, call GetLastError.</returns>
-		int RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects);
+		int RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects, bool forceReload = false);
 #pragma endregion
 
 #pragma region Concrete Methods
@@ -193,6 +215,11 @@ namespace RTE {
 		/// Clears internal Lua package tables from all user-defined modules. Those must be reloaded with ReloadAllScripts().
 		/// </summary>
 		void ClearUserModuleCache();
+
+		/// <summary>
+		/// Clears the Lua script cache.
+		/// </summary>
+		void ClearLuaScriptCache();
 #pragma endregion
 
 #pragma region Error Handling
@@ -262,6 +289,9 @@ namespace RTE {
 		/// </summary>
 		void Clear();
 
+		std::unordered_set<MovableObject *> m_RegisteredMOs; //!< The objects using our lua state.
+		std::unordered_set<MovableObject *> m_AddedRegisteredMOs; //!< The objects using our lua state that were recently added.
+
 		lua_State *m_State;
 		Entity *m_TempEntity; //!< Temporary holder for an Entity object that we want to pass into the Lua state without fuss. Lets you export objects to lua easily.
 		std::vector<Entity *> m_TempEntityVector; //!< Temporary holder for a vector of Entities that we want to pass into the Lua state without a fuss. Usually used to pass arguments to special Lua functions.
@@ -270,13 +300,18 @@ namespace RTE {
 		// This mutex is more for safety, and with new script/AI architecture we shouldn't ever be locking on a mutex. As such we use this primarily to fire asserts.
 		std::recursive_mutex m_Mutex; //!< Mutex to ensure multiple threads aren't running something in this lua state simultaneously.
 
+		struct LuaScriptFunctionObjects {
+			std::unordered_map<std::string, LuabindObjectWrapper*> functionNamesAndObjects;
+		};
+		std::unordered_map<std::string, LuaScriptFunctionObjects> m_ScriptCache;
+
 		std::unordered_map<std::string, PerformanceMan::ScriptTiming> m_ScriptTimings; //!< Internal map of script timings.
 
 		// For determinism, every Lua state has it's own random number generator.
 		RandomGenerator m_RandomGenerator; //!< The random number generator used for this lua state.
 	};
 
-	static constexpr int c_NumThreadedLuaStates = 8;
+	static constexpr int c_NumThreadedLuaStates = 16;
 	typedef std::array<LuaStateWrapper, c_NumThreadedLuaStates> LuaStatesArray;
 
 	/// <summary>
@@ -451,6 +486,11 @@ namespace RTE {
 		/// Updates the state of this LuaMan.
 		/// </summary>
 		void Update();
+
+		/// <summary>
+		/// Asynchronously enforces a GC run to occur.
+		/// </summary>
+		void StartAsyncGarbageCollection();
 #pragma endregion
 
 		/// <summary>
@@ -474,6 +514,8 @@ namespace RTE {
 		std::mutex m_ScriptCallbacksMutex; //!< Mutex to ensure multiple threads aren't modifying the script callback vector at the same time.
 
 		int m_LastAssignedLuaState = 0;
+
+		std::thread m_GCThread;
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

@@ -34,6 +34,8 @@
 #include "SettingsMan.h"
 #include "LuaMan.h"
 
+#include "tracy/Tracy.hpp"
+
 #include <execution>
 
 namespace RTE {
@@ -951,9 +953,9 @@ void MovableMan::AddParticle(MovableObject *particleToAdd){
 //                  removed, ownership is effectively released and transferred to whatever
 //                  client called this method.
 
-bool MovableMan::RemoveActor(MovableObject *pActorToRem)
+Actor * MovableMan::RemoveActor(MovableObject *pActorToRem)
 {
-    bool removed = false;
+    Actor *removed = nullptr;
 
     if (pActorToRem)
     {
@@ -962,9 +964,9 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
             if (*itr == pActorToRem)
             {
                 std::lock_guard<std::mutex> lock(m_ActorsMutex);
+                removed = *itr;
                 m_ValidActors.erase(*itr);
                 m_Actors.erase(itr);
-                removed = true;
                 break;
             }
         }
@@ -976,9 +978,9 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
                 if (*itr == pActorToRem)
                 {
                     std::lock_guard<std::mutex> lock(m_AddedActorsMutex);
+                    removed = *itr;
                     m_ValidActors.erase(*itr);
                     m_AddedActors.erase(itr);
-                    removed = true;
                     break;
                 }
             }
@@ -997,9 +999,9 @@ bool MovableMan::RemoveActor(MovableObject *pActorToRem)
 //                  MO:s. After the item is removed, ownership is effectively released and
 //                  transferred to whatever client called this method.
 
-bool MovableMan::RemoveItem(MovableObject *pItemToRem)
+MovableObject * MovableMan::RemoveItem(MovableObject *pItemToRem)
 {
-    bool removed = false;
+    MovableObject *removed = nullptr;
 
     if (pItemToRem)
     {
@@ -1008,9 +1010,9 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
             if (*itr == pItemToRem)
             {
                 std::lock_guard<std::mutex> lock(m_ItemsMutex);
+                removed = *itr;
                 m_ValidItems.erase(*itr);
                 m_Items.erase(itr);
-                removed = true;
                 break;
             }
         }
@@ -1022,14 +1024,59 @@ bool MovableMan::RemoveItem(MovableObject *pItemToRem)
                 if (*itr == pItemToRem)
                 {
                     std::lock_guard<std::mutex> lock(m_AddedItemsMutex);
+                    removed = *itr;
                     m_ValidItems.erase(*itr);
                     m_AddedItems.erase(itr);
-                    removed = true;
                     break;
                 }
             }
         }
 		pItemToRem->SetAsAddedToMovableMan(false);
+    }
+    return removed;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Method:          RemoveParticle
+//////////////////////////////////////////////////////////////////////////////////////////
+// Description:     Removes a MovableObject from the internal list of MO:s. After the
+//                  MO is removed, ownership is effectively released and transferred to
+//                  whatever client called this method.
+
+MovableObject * MovableMan::RemoveParticle(MovableObject *pMOToRem)
+{
+    MovableObject *removed = nullptr;
+
+    if (pMOToRem)
+    {
+        for (std::deque<MovableObject *>::iterator itr = m_Particles.begin(); itr != m_Particles.end(); ++itr)
+        {
+            if (*itr == pMOToRem)
+            {
+                std::lock_guard<std::mutex> lock(m_ParticlesMutex);
+                removed = *itr;
+                m_ValidParticles.erase(*itr);
+                m_Particles.erase(itr);
+                break;
+            }
+        }
+        // Try the newly added particles if we couldn't find it in the regular deque
+        if (!removed)
+        {
+            for (std::deque<MovableObject *>::iterator itr = m_AddedParticles.begin(); itr != m_AddedParticles.end(); ++itr)
+            {
+                if (*itr == pMOToRem)
+                {
+                    std::lock_guard<std::mutex> lock(m_AddedParticlesMutex);
+                    removed = *itr;
+                    m_ValidParticles.erase(*itr);
+                    m_AddedParticles.erase(itr);
+                    break;
+                }
+            }
+        }
+		pMOToRem->SetAsAddedToMovableMan(false);
     }
     return removed;
 }
@@ -1111,51 +1158,6 @@ void MovableMan::ChangeActorTeam(Actor * pActor, int team)
 		g_SceneMan.GetTerrain()->AddUpdatedMaterialArea(actorAsADoor->GetBoundingBox());
 		g_SceneMan.GetScene()->UpdatePathFinding();
 	}
-}
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:          RemoveParticle
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Removes a MovableObject from the internal list of MO:s. After the
-//                  MO is removed, ownership is effectively released and transferred to
-//                  whatever client called this method.
-
-bool MovableMan::RemoveParticle(MovableObject *pMOToRem)
-{
-    bool removed = false;
-
-    if (pMOToRem)
-    {
-        for (std::deque<MovableObject *>::iterator itr = m_Particles.begin(); itr != m_Particles.end(); ++itr)
-        {
-            if (*itr == pMOToRem)
-            {
-                std::lock_guard<std::mutex> lock(m_ParticlesMutex);
-                m_ValidParticles.erase(*itr);
-                m_Particles.erase(itr);
-                removed = true;
-                break;
-            }
-        }
-        // Try the newly added particles if we couldn't find it in the regular deque
-        if (!removed)
-        {
-            for (std::deque<MovableObject *>::iterator itr = m_AddedParticles.begin(); itr != m_AddedParticles.end(); ++itr)
-            {
-                if (*itr == pMOToRem)
-                {
-                    std::lock_guard<std::mutex> lock(m_AddedParticlesMutex);
-                    m_ValidParticles.erase(*itr);
-                    m_AddedParticles.erase(itr);
-                    removed = true;
-                    break;
-                }
-            }
-        }
-		pMOToRem->SetAsAddedToMovableMan(false);
-    }
-    return removed;
 }
 
 
@@ -1308,11 +1310,11 @@ bool MovableMan::RemoveMO(MovableObject *pMOToRem)
 {
     if (pMOToRem)
     {
+        if (RemoveActor(pMOToRem))
+            return true;
         if (RemoveItem(pMOToRem))
             return true;
         if (RemoveParticle(pMOToRem))
-            return true;
-        if (RemoveActor(pMOToRem))
             return true;
     }
 
@@ -1560,43 +1562,13 @@ void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void updateMultiThreadedScripts(MovableObject* mo, LuaStateWrapper* luaState) {
-    if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
-        for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
-            Attachable* attachable = *attachablrItr;
-            ++attachablrItr;
-
-            if (!luaState || attachable->GetLuaState() == luaState) {
-                attachable->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
-            }
-            updateMultiThreadedScripts(attachable, luaState);
-        }
-
-        for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
-            AEmitter* wound = *woundItr;
-            ++woundItr;
-
-            if (!luaState || wound->GetLuaState() == luaState) {
-                wound->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
-            }
-            updateMultiThreadedScripts(wound, luaState);
-        }
-    }
-
-    if (!luaState || mo->GetLuaState() == luaState) {
-        mo->UpdateScripts(ThreadScriptsToRun::MultiThreaded);
-    }
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void callLuaFunctionOnMORecursive(MovableObject* mo, const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments, const std::vector<std::string_view>& functionLiteralArguments, const std::vector<LuabindObjectWrapper*>& functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
     if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
         for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
             Attachable* attachable = *attachablrItr;
             ++attachablrItr;
 
-            attachable->RunScriptedFunctionInAppropriateScripts("OnGlobalMessage", false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+            attachable->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
             callLuaFunctionOnMORecursive(attachable, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
         }
 
@@ -1604,27 +1576,29 @@ void callLuaFunctionOnMORecursive(MovableObject* mo, const std::string& function
             AEmitter* wound = *woundItr;
             ++woundItr;
 
-            wound->RunScriptedFunctionInAppropriateScripts("OnGlobalMessage", false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+            wound->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
             callLuaFunctionOnMORecursive(wound, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
         }
     }
 
-    mo->RunScriptedFunctionInAppropriateScripts("OnGlobalMessage", false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    mo->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, const std::vector<LuabindObjectWrapper*> &functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
-    for (Actor* actor : m_AddedActors) {
-        callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
-    }
+void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, bool includeAdded, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, const std::vector<LuabindObjectWrapper*> &functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
+    if (includeAdded) {
+        for (Actor* actor : m_AddedActors) {
+            callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        }
 
-    for (MovableObject *item : m_AddedItems) {
-        callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
-    }
+        for (MovableObject *item : m_AddedItems) {
+            callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        }
 
-    for (MovableObject* particle : m_AddedParticles) {
-        callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        for (MovableObject* particle : m_AddedParticles) {
+            callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        }
     }
     
     for (Actor *actor : m_Actors) {
@@ -1640,6 +1614,58 @@ void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, const s
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void reloadLuaFunctionsOnMORecursive(MovableObject* mo) {
+    if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
+        for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
+            Attachable* attachable = *attachablrItr;
+            ++attachablrItr;
+
+            attachable->ReloadScripts();
+            reloadLuaFunctionsOnMORecursive(attachable);
+        }
+
+        for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
+            AEmitter* wound = *woundItr;
+            ++woundItr;
+
+            wound->ReloadScripts();
+            reloadLuaFunctionsOnMORecursive(wound);
+        }
+    }
+
+    mo->ReloadScripts();
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableMan::ReloadLuaScripts() {
+    for (Actor* actor : m_AddedActors) {
+        reloadLuaFunctionsOnMORecursive(actor);
+    }
+
+    for (MovableObject* item : m_AddedItems) {
+        reloadLuaFunctionsOnMORecursive(item);
+    }
+
+    for (MovableObject* particle : m_AddedParticles) {
+        reloadLuaFunctionsOnMORecursive(particle);
+    }
+
+    for (Actor* actor : m_Actors) {
+        reloadLuaFunctionsOnMORecursive(actor);
+    }
+
+    for (MovableObject* item : m_Items) {
+        reloadLuaFunctionsOnMORecursive(item);
+    }
+
+    for (MovableObject* particle : m_Particles) {
+        reloadLuaFunctionsOnMORecursive(particle);
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Update
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1647,6 +1673,8 @@ void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, const s
 
 void MovableMan::Update()
 {
+    ZoneScoped;
+
     // Don't update if paused
     if (g_ActivityMan.GetActivity() && g_ActivityMan.ActivityPaused()) {
         return;
@@ -1702,293 +1730,325 @@ void MovableMan::Update()
     std::deque<MovableObject *>::iterator parIt;
     std::deque<MovableObject *>::iterator midIt;
 
-    // Update all scripts for all objects
+    // Update all multithreaded scripts for all objects
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
     {
+        ZoneScopedN("Multithreaded Scripts Update");
+
+        const std::string threadedUpdate = "Update"; // avoid string reconstruction
+
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
         std::for_each(std::execution::par, luaStates.begin(), luaStates.end(),
             [&](LuaStateWrapper& luaState) {
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
 
-                for (Actor* actor : m_Actors) {
-                    updateMultiThreadedScripts(actor, &luaState);
-                }
-
-                for (MovableObject* item : m_Items) {
-                    updateMultiThreadedScripts(item, &luaState);
-                }
-
-                for (MovableObject* particle : m_Particles) {
-                    updateMultiThreadedScripts(particle, &luaState);
+                for (MovableObject *mo : luaState.GetRegisteredMOs()) {
+                    mo->RunScriptedFunctionInAppropriateScripts(threadedUpdate, false, false, {}, {}, {}, ThreadScriptsToRun::MultiThreaded);
                 }
 
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
             });
     }
+
+    {
+        ZoneScopedN("Multithreaded Scripts SyncedUpdate");
+
+        const std::string syncedUpdate = "SyncedUpdate"; // avoid string reconstruction
+
+        for (LuaStateWrapper& luaState : g_LuaMan.GetThreadedScriptStates()) {
+            g_LuaMan.SetThreadLuaStateOverride(&luaState);
+
+            for (MovableObject* mo : luaState.GetRegisteredMOs()) {
+                if (mo->HasRequestedSyncedUpdate()) {
+                    mo->RunScriptedFunctionInAppropriateScripts(syncedUpdate, false, false, {}, {}, {}, ThreadScriptsToRun::MultiThreaded);
+                    mo->ResetRequestedSyncedUpdateFlag();
+                }
+            }
+
+            g_LuaMan.SetThreadLuaStateOverride(nullptr);
+        }
+    }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
     {
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
-        for (Actor *actor : m_Actors) {
-            actor->Update();
+        {
+            ZoneScopedN("Actors Update");
 
-            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-            actor->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
-            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+		    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
+            for (Actor* actor : m_Actors) {
+                actor->Update();
 
-            actor->ApplyImpulses();
+                g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+                actor->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+                g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+
+                actor->ApplyImpulses();
+            }
+            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsUpdate);
 
-        int count = 0;
-        int itemLimit = m_Items.size() - m_MaxDroppedItems;
-        for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count) {
-            (*iIt)->Update();
+        {
+            ZoneScopedN("Items Update");
 
-            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-            (*iIt)->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
-            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+            int count = 0;
+            int itemLimit = m_Items.size() - m_MaxDroppedItems;
+            for (iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt, ++count) {
+                (*iIt)->Update();
 
-            (*iIt)->ApplyImpulses();
-            if (count <= itemLimit) {
-                (*iIt)->SetToSettle(true);
+                g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+                (*iIt)->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+                g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+
+                (*iIt)->ApplyImpulses();
+                if (count <= itemLimit) {
+                    (*iIt)->SetToSettle(true);
+                }
             }
         }
 
-		g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
-        for (MovableObject *particle : m_Particles) {
-            particle->Update();
+        {
+            ZoneScopedN("Particles Update");
 
-            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-            particle->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
-            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+            g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
+            for (MovableObject* particle : m_Particles) {
+                particle->Update();
 
-            particle->ApplyImpulses();
-            particle->RestDetection();
-            // Copy particles that are at rest to the terrain and mark them for deletion.
-            if (particle->IsAtRest()) {
-                particle->SetToSettle(true);
+                g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+                particle->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+                g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+
+                particle->ApplyImpulses();
+                particle->RestDetection();
+                // Copy particles that are at rest to the terrain and mark them for deletion.
+                if (particle->IsAtRest()) {
+                    particle->SetToSettle(true);
+                }
             }
+            g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
         }
-		g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesUpdate);
 
-        for (Actor *actor : m_Actors) {
-            actor->PostUpdate();
-        }
-        for (MovableObject *item : m_Items) {
-            item->PostUpdate();
-        }
-        for (MovableObject *particle : m_Particles) {
-            particle->PostUpdate();
+        {
+            ZoneScopedN("Post Update");
+
+            for (Actor* actor : m_Actors) {
+                actor->PostUpdate();
+            }
+            for (MovableObject* item : m_Items) {
+                item->PostUpdate();
+            }
+            for (MovableObject* particle : m_Particles) {
+                particle->PostUpdate();
+            }
         }
     }
-
-
-    ///////////////////////////////////////////////////
-    // Clear the MOID layer before starting to delete stuff which may be in the MOIDIndex
-
-    g_SceneMan.ClearAllMOIDDrawings();
 
     //////////////////////////////////////////////////////////////////////
     // TRANSFER ALL MOs ADDED THIS FRAME
     // All Actors, Items, and Particles added this frame now are officially added
 
     {
-        // Actors
-        for (aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
-        {
-            // Delete instead if it's marked for it
-            if (!(*aIt)->IsSetToDelete())
-                m_Actors.push_back(*aIt);
-            else
-			{
-                m_ValidActors.erase(*aIt);
+        ZoneScopedN("MO Transfer and Deletion");
 
-				// Also remove actor from the roster
-                if ((*aIt)->GetTeam() >= 0) {
-                    //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
-                    RemoveActorFromTeamRoster(*aIt);
+        {
+            // Actors
+            for (aIt = m_AddedActors.begin(); aIt != m_AddedActors.end(); ++aIt)
+            {
+                // Delete instead if it's marked for it
+                if (!(*aIt)->IsSetToDelete())
+                    m_Actors.push_back(*aIt);
+                else
+			    {
+                    m_ValidActors.erase(*aIt);
+
+				    // Also remove actor from the roster
+                    if ((*aIt)->GetTeam() >= 0) {
+                        //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
+                        RemoveActorFromTeamRoster(*aIt);
+                    }
+
+                    (*aIt)->DestroyScriptState();
+                    delete (*aIt);
+			    }
+            }
+            m_AddedActors.clear();
+
+            // Items
+            for (iIt = m_AddedItems.begin(); iIt != m_AddedItems.end(); ++iIt)
+            {
+                // Delete instead if it's marked for it
+                if (!(*iIt)->IsSetToDelete()) {
+                    m_Items.push_back(*iIt);
+                } else {
+                    m_ValidItems.erase(*iIt);
+                    (*iIt)->DestroyScriptState();
+                    delete (*iIt);
                 }
-
-                (*aIt)->DestroyScriptState();
-                delete (*aIt);
-			}
-        }
-        m_AddedActors.clear();
-
-        // Items
-        for (iIt = m_AddedItems.begin(); iIt != m_AddedItems.end(); ++iIt)
-        {
-            // Delete instead if it's marked for it
-            if (!(*iIt)->IsSetToDelete()) {
-                m_Items.push_back(*iIt);
-            } else {
-                m_ValidItems.erase(*iIt);
-                (*iIt)->DestroyScriptState();
-                delete (*iIt);
             }
-        }
-        m_AddedItems.clear();
+            m_AddedItems.clear();
 
-        // Particles
-        for (parIt = m_AddedParticles.begin(); parIt != m_AddedParticles.end(); ++parIt)
-        {
-            // Delete instead if it's marked for it
-            if (!(*parIt)->IsSetToDelete()) {
-                m_Particles.push_back(*parIt);
-            } else {
-                m_ValidParticles.erase(*parIt);
-                (*parIt)->DestroyScriptState();
-                delete (*parIt);
+            // Particles
+            for (parIt = m_AddedParticles.begin(); parIt != m_AddedParticles.end(); ++parIt)
+            {
+                // Delete instead if it's marked for it
+                if (!(*parIt)->IsSetToDelete()) {
+                    m_Particles.push_back(*parIt);
+                } else {
+                    m_ValidParticles.erase(*parIt);
+                    (*parIt)->DestroyScriptState();
+                    delete (*parIt);
+                }
             }
+            m_AddedParticles.clear();
         }
-        m_AddedParticles.clear();
-    }
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Copy (Settle) Pass
+        ////////////////////////////////////////////////////////////////////////////
+        // Copy (Settle) Pass
 
-    {
-        // DEATH //////////////////////////////////////////////////////////
-        // Transfer dead actors from Actor list to particle list
-        aIt = partition(m_Actors.begin(), m_Actors.end(), std::not_fn(std::mem_fn(&Actor::IsDead)));
-        amidIt = aIt;
-
-        // Move dead Actor to particles list
-        if (amidIt != m_Actors.end()/* && m_Actors.size() > 1*/)
         {
+            // DEATH //////////////////////////////////////////////////////////
+            // Transfer dead actors from Actor list to particle list
+            aIt = partition(m_Actors.begin(), m_Actors.end(), std::not_fn(std::mem_fn(&Actor::IsDead)));
+            amidIt = aIt;
+
+            // Move dead Actor to particles list
+            if (amidIt != m_Actors.end()/* && m_Actors.size() > 1*/)
+            {
+                while (aIt != m_Actors.end())
+                {
+                    // Report the death of the actor to the game
+                    g_ActivityMan.GetActivity()->ReportDeath((*aIt)->GetTeam());
+
+                    // Add to the particles list
+                    m_Particles.push_back(*aIt);
+                    m_ValidParticles.insert(*aIt);
+                    // Remove from the team roster
+
+                    if ((*aIt)->GetTeam() >= 0) {
+                        //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
+                        RemoveActorFromTeamRoster(*aIt);
+                    }
+                
+                    m_ValidActors.erase(*aIt);
+                    aIt++;
+                }
+                // Try to set the existing iterator to a safer value, erase can crash in debug mode otherwise?
+                aIt = m_Actors.begin();
+                m_Actors.erase(amidIt, m_Actors.end());
+            }
+
+            // ITEM SETTLE //////////////////////////////////////////////////////////
+            // Transfer excess items to particle list - use stable partition, item orde is important
+            iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
+            imidIt = iIt;
+
+            // Move force-settled items to particles list
+            if (imidIt != m_Items.end()/* && m_Items.size() > 1*/)
+            {
+                while (iIt != m_Items.end())
+                {
+                    (*iIt)->SetToSettle(false);
+				    // Disable TDExplosive's immunity to settling
+                    if ((*iIt)->GetRestThreshold() < 0) {
+                        (*iIt)->SetRestThreshold(500);
+                    }
+                    m_ValidItems.erase(*iIt);
+                    m_Particles.push_back(*iIt);
+                    iIt++;
+                }
+                m_Items.erase(imidIt, m_Items.end());
+            }
+
+            // DELETE //////////////////////////////////////////////////////////
+            // Only delete after all travels & updates are done
+            // Actors
+            aIt = partition(m_Actors.begin(), m_Actors.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
+            amidIt = aIt;
+
             while (aIt != m_Actors.end())
             {
-                // Report the death of the actor to the game
-                g_ActivityMan.GetActivity()->ReportDeath((*aIt)->GetTeam());
+			    // Set brain to 0 to avoid crashes due to brain deletion
+			    Activity * pActivity = g_ActivityMan.GetActivity();
+			    if (pActivity)
+			    {
+				    if (pActivity->IsAssignedBrain(*aIt))
+					    pActivity->SetPlayerBrain(0, pActivity->IsBrainOfWhichPlayer(*aIt));
 
-                // Add to the particles list
-                m_Particles.push_back(*aIt);
-                m_ValidParticles.insert(*aIt);
-                // Remove from the team roster
+				    pActivity->ReportDeath((*aIt)->GetTeam());
+			    }
 
-                if ((*aIt)->GetTeam() >= 0) {
+                // Remove from team rosters
+			    if ((*aIt)->GetTeam() >= Activity::TeamOne && (*aIt)->GetTeam() < Activity::MaxTeamCount)
                     //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
-                    RemoveActorFromTeamRoster(*aIt);
-                }
-                
+				    RemoveActorFromTeamRoster(*aIt);
+
+                // Delete
                 m_ValidActors.erase(*aIt);
+                (*aIt)->DestroyScriptState();
+                delete (*aIt);
                 aIt++;
             }
             // Try to set the existing iterator to a safer value, erase can crash in debug mode otherwise?
             aIt = m_Actors.begin();
             m_Actors.erase(amidIt, m_Actors.end());
-        }
 
-        // ITEM SETTLE //////////////////////////////////////////////////////////
-        // Transfer excess items to particle list - use stable partition, item orde is important
-        iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
-        imidIt = iIt;
+            // Items
+            iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
+            imidIt = iIt;
 
-        // Move force-settled items to particles list
-        if (imidIt != m_Items.end()/* && m_Items.size() > 1*/)
-        {
-            while (iIt != m_Items.end())
-            {
-                (*iIt)->SetToSettle(false);
-				// Disable TDExplosive's immunity to settling
-                if ((*iIt)->GetRestThreshold() < 0) {
-                    (*iIt)->SetRestThreshold(500);
-                }
+            while (iIt != m_Items.end()) {
                 m_ValidItems.erase(*iIt);
-                m_Particles.push_back(*iIt);
+                (*iIt)->DestroyScriptState();
+                delete (*iIt);
                 iIt++;
             }
             m_Items.erase(imidIt, m_Items.end());
+
+            // Particles
+            parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
+            midIt = parIt;
+
+            while (parIt != m_Particles.end()) {
+                m_ValidParticles.erase(*parIt);
+                (*parIt)->DestroyScriptState();
+                delete (*parIt);
+                parIt++;
+            }
+            m_Particles.erase(midIt, m_Particles.end());
         }
 
-        // DELETE //////////////////////////////////////////////////////////
-        // Only delete after all travels & updates are done
-        // Actors
-        aIt = partition(m_Actors.begin(), m_Actors.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
-        amidIt = aIt;
+        // SETTLE PARTICLES //////////////////////////////////////////////////
+        // Only settle after all updates and deletions are done
+	    if (m_SettlingEnabled) {
+		    parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
+		    midIt = parIt;
 
-        while (aIt != m_Actors.end())
-        {
-			// Set brain to 0 to avoid crashes due to brain deletion
-			Activity * pActivity = g_ActivityMan.GetActivity();
-			if (pActivity)
-			{
-				if (pActivity->IsAssignedBrain(*aIt))
-					pActivity->SetPlayerBrain(0, pActivity->IsBrainOfWhichPlayer(*aIt));
-
-				pActivity->ReportDeath((*aIt)->GetTeam());
-			}
-
-            // Remove from team rosters
-			if ((*aIt)->GetTeam() >= Activity::TeamOne && (*aIt)->GetTeam() < Activity::MaxTeamCount)
-                //m_ActorRoster[(*aIt)->GetTeam()].remove(*aIt);
-				RemoveActorFromTeamRoster(*aIt);
-
-            // Delete
-            m_ValidActors.erase(*aIt);
-            (*aIt)->DestroyScriptState();
-            delete (*aIt);
-            aIt++;
-        }
-        // Try to set the existing iterator to a safer value, erase can crash in debug mode otherwise?
-        aIt = m_Actors.begin();
-        m_Actors.erase(amidIt, m_Actors.end());
-
-        // Items
-        iIt = stable_partition(m_Items.begin(), m_Items.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
-        imidIt = iIt;
-
-        while (iIt != m_Items.end()) {
-            m_ValidItems.erase(*iIt);
-            (*iIt)->DestroyScriptState();
-            delete (*iIt);
-            iIt++;
-        }
-        m_Items.erase(imidIt, m_Items.end());
-
-        // Particles
-        parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToDelete)));
-        midIt = parIt;
-
-        while (parIt != m_Particles.end()) {
-            m_ValidParticles.erase(*parIt);
-            (*parIt)->DestroyScriptState();
-            delete (*parIt);
-            parIt++;
-        }
-        m_Particles.erase(midIt, m_Particles.end());
+		    while (parIt != m_Particles.end()) {
+			    Vector parPos((*parIt)->GetPos());
+			    Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
+			    int piling = (*parIt)->GetMaterial()->GetPiling();
+			    if (piling > 0) {
+				    for (int s = 0; s < piling && (terrMat->GetIndex() == (*parIt)->GetMaterial()->GetIndex() || terrMat->GetIndex() == (*parIt)->GetMaterial()->GetSettleMaterial()); ++s) {
+					    if ((piling - s) % 2 == 0) {
+						    parPos.m_Y -= 1.0F;
+					    } else {
+						    parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
+					    }
+					    terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
+				    }
+				    (*parIt)->SetPos(parPos.GetFloored());
+			    }
+			    if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) { (*parIt)->DrawToTerrain(g_SceneMan.GetTerrain()); }
+                m_ValidParticles.erase(*parIt);
+                (*parIt)->DestroyScriptState();
+			    delete (*parIt);
+                parIt++;
+		    }
+		    m_Particles.erase(midIt, m_Particles.end());
+	    }
     }
 
-    // SETTLE PARTICLES //////////////////////////////////////////////////
-    // Only settle after all updates and deletions are done
-	if (m_SettlingEnabled) {
-		parIt = partition(m_Particles.begin(), m_Particles.end(), std::not_fn(std::mem_fn(&MovableObject::ToSettle)));
-		midIt = parIt;
-
-		while (parIt != m_Particles.end()) {
-			Vector parPos((*parIt)->GetPos());
-			Material const * terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
-			int piling = (*parIt)->GetMaterial()->GetPiling();
-			if (piling > 0) {
-				for (int s = 0; s < piling && (terrMat->GetIndex() == (*parIt)->GetMaterial()->GetIndex() || terrMat->GetIndex() == (*parIt)->GetMaterial()->GetSettleMaterial()); ++s) {
-					if ((piling - s) % 2 == 0) {
-						parPos.m_Y -= 1.0F;
-					} else {
-						parPos.m_X += (RandomNum() >= 0.5F ? 1.0F : -1.0F);
-					}
-					terrMat = g_SceneMan.GetMaterialFromID(g_SceneMan.GetTerrain()->GetMaterialPixel(parPos.GetFloorIntX(), parPos.GetFloorIntY()));
-				}
-				(*parIt)->SetPos(parPos.GetFloored());
-			}
-			if ((*parIt)->GetDrawPriority() >= terrMat->GetPriority()) { (*parIt)->DrawToTerrain(g_SceneMan.GetTerrain()); }
-            m_ValidParticles.erase(*parIt);
-            (*parIt)->DestroyScriptState();
-			delete (*parIt);
-            parIt++;
-		}
-		m_Particles.erase(midIt, m_Particles.end());
-	}
+    // We've finished stuff that can interact with lua script, so it's the ideal time to start a gc run
+    g_LuaMan.StartAsyncGarbageCollection();
 
     ////////////////////////////////////////////////////////////////////////
     // Draw the MO matter and IDs to their layers for next frame
@@ -2038,30 +2098,24 @@ void MovableMan::Update()
 
 void MovableMan::Travel()
 {
+    ZoneScoped;
+
     // Travel Actors
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
     {
+        g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
         for (auto aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
         {
             if (!((*aIt)->IsUpdated()))
             {
                 (*aIt)->ApplyForces();
                 (*aIt)->PreTravel();
-    /*
-                if (aIt == m_Actors.begin())
-                {
-                    PALETTE palette;
-                    get_palette(palette);
-                    save_bmp("poop.bmp", g_SceneMan.GetMOIDBitmap(), palette);
-                }
-    */
                 (*aIt)->Travel();
                 (*aIt)->PostTravel();
             }
             (*aIt)->NewFrame();
         }
+        g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
     }
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsTravel);
 
     // Travel items
     {
@@ -2079,8 +2133,8 @@ void MovableMan::Travel()
     }
 
     // Travel particles
-    g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
     {
+        g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
         for (auto parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
         {
             if (!((*parIt)->IsUpdated()))
@@ -2092,14 +2146,16 @@ void MovableMan::Travel()
             }
             (*parIt)->NewFrame();
         }
+        g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesTravel);
     }
-    g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ParticlesTravel);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableMan::UpdateControllers()
 {
+    ZoneScoped;
+
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsAI);
     {
         for (Actor* actor : m_Actors) {
@@ -2129,6 +2185,8 @@ void MovableMan::UpdateControllers()
 
 void MovableMan::PreControllerUpdate()
 {
+    ZoneScoped;
+
     g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsUpdate);
     for (Actor *actor : m_Actors) {
         actor->PreControllerUpdate();
@@ -2205,6 +2263,12 @@ void MovableMan::VerifyMOIDIndex()
 
 void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
 {
+    ZoneScoped;
+
+    ///////////////////////////////////////////////////
+    // Clear the MOID layer before starting to delete stuff which may be in the MOIDIndex
+    g_SceneMan.ClearAllMOIDDrawings();
+
     // Clear the index each frame and do it over because MO's get added and deleted between each frame.
     m_MOIDIndex.clear();
     m_ContiguousActorIDs.clear();
@@ -2257,6 +2321,8 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
 
 void MovableMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 {
+    ZoneScoped;
+
     // Draw objects to accumulation bitmap, in reverse order so actors appear on top.
     for (std::deque<MovableObject *>::iterator parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
         (*parIt)->Draw(pTargetBitmap, targetPos);
@@ -2277,6 +2343,8 @@ void MovableMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
 
 void MovableMan::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int which, bool playerControlled)
 {
+    ZoneScoped;
+
     // Draw HUD elements
 	for (std::deque<MovableObject *>::reverse_iterator itmIt = m_Items.rbegin(); itmIt != m_Items.rend(); ++itmIt)
         (*itmIt)->DrawHUD(pTargetBitmap, targetPos, which);

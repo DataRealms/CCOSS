@@ -935,7 +935,14 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 	/// <param name="areaName">The name of the Area to try to get.</param>
 	/// <param name="required">Whether the area is required, and should throw an error if not found.</param>
 	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
-	Area * GetArea(const std::string_view &areaName, bool required = true);
+	Area * GetArea(const std::string_view &areaName, bool required);
+
+    /// <summary>
+    /// Gets a specified Area identified by name. Ownership is NOT transferred!
+    /// </summary>
+    /// <param name="areaName">The name of the Area to try to get.</param>
+    /// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
+    Area* GetArea(const std::string &areaName) { return GetArea(areaName, true); }
 
 	/// <summary>
 	/// Gets a specified Area identified by name, showing a Lua warning if it's not found. Ownership is NOT transferred!
@@ -943,7 +950,10 @@ const SceneObject * PickPlacedActorInRange(int whichSet, Vector &scenePoint, int
 	/// </summary>
 	/// <param name="areaName">The name of the Area to try to get.</param>
 	/// <returns>A pointer to the Area asked for, or nullptr if no Area of that name was found.</returns>
-	Area * GetOptionalArea(const std::string &areaName) { return GetArea(areaName, false); };
+	Area * GetOptionalArea(const std::string &areaName) { return GetArea(areaName, false); }
+
+    void AddNavigatableArea(const std::string &areaName) { m_NavigatableAreas.push_back(areaName); m_NavigatableAreasUpToDate = false; }
+    void ClearNavigatableAreas(const std::string &areaName) { m_NavigatableAreas.clear(); m_NavigatableAreasUpToDate = false; }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1389,8 +1399,13 @@ protected:
     // Whether this Scene is scheduled to be orbitally scanned by any team
     bool m_ScanScheduled[Activity::MaxTeamCount];
 
-    // List of all the specified Area:s of the scene
+    // List of all the specified Area's of the scene
     std::list<Area> m_AreaList;
+
+    // List of navigatable areas in the scene. If this list is empty, the entire scene is assumed to be navigatable
+    std::vector<std::string> m_NavigatableAreas;
+    bool m_NavigatableAreasUpToDate;
+
     // Whether the scene's bitmaps are locked or not.
     bool m_Locked;
     // The global acceleration vector in m/s^2. (think gravity/wind)

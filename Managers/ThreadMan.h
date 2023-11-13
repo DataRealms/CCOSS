@@ -27,8 +27,10 @@ namespace RTE
         RenderableGameState();
         ~RenderableGameState();
 
-        std::unique_ptr<SLTerrain> m_Terrain = nullptr;
-        std::unique_ptr<Activity> m_Activity = std::make_unique<Activity>();
+        SLTerrain* m_Terrain = nullptr;
+        //std::unique_ptr<SLTerrain> m_Terrain = nullptr;
+        Activity* m_Activity = nullptr;
+        //std::unique_ptr<Activity> m_Activity = std::make_unique<Activity>();
         std::vector<std::function<void(float)>> m_RenderQueue;
     };
 

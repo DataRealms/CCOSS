@@ -63,8 +63,10 @@ void ThreadMan::TransferSimStateToRenderer() {
     // Copy game state into our current buffer
     // TODO_MULTITHREAD: Remove as much of this as possible...
     if (g_ActivityMan.IsInActivity()) {
-        m_GameStateModifiable->m_Activity.reset(dynamic_cast<Activity*>(g_ActivityMan.GetActivity()->Clone()));
-        m_GameStateModifiable->m_Terrain.reset(dynamic_cast<SLTerrain*>(g_SceneMan.GetScene()->GetTerrain()->Clone()));
+        m_GameStateModifiable->m_Activity = g_ActivityMan.GetActivity();
+        m_GameStateModifiable->m_Terrain = g_SceneMan.GetScene()->GetTerrain();
+        //m_GameStateModifiable->m_Activity.reset(dynamic_cast<Activity*>(g_ActivityMan.GetActivity()->Clone()));
+        //m_GameStateModifiable->m_Terrain.reset(dynamic_cast<SLTerrain*>(g_SceneMan.GetScene()->GetTerrain()->Clone()));
     }
     m_GameStateModifiable->m_RenderQueue = m_SimRenderQueue;
 

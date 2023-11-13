@@ -828,7 +828,7 @@ namespace RTE {
 		std::list<PostEffect> screenRelativeEffects;
 		std::list<Box> screenRelativeGlowBoxes;
 
-		const Activity *pActivity = g_ThreadMan.GetDrawableGameState().m_Activity.get();
+		const Activity *pActivity = g_ThreadMan.GetDrawableGameState().m_Activity;
 
 		for (int playerScreen = 0; playerScreen < screenCount; ++playerScreen) {
 			screenRelativeEffects.clear();

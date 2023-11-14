@@ -358,10 +358,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool LuaMan::IsScriptThreadSafe(const std::string &scriptPath) {
-		if (!g_SettingsMan.GetEnableMultithreadedLua()) {
-			return false;
-		}
-		
 		// First check our cache
 		auto itr = m_ScriptThreadSafetyMap.find(scriptPath);
 		if (itr != m_ScriptThreadSafetyMap.end()) {

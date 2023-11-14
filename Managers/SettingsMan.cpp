@@ -44,7 +44,6 @@ namespace RTE {
 		m_ShowForeignItems = true;
 		m_ShowMetaScenes = false;
 
-		m_EnableMultithreadedLua = true;
 		m_DisableLuaJIT = false;
 		m_RecommendedMOIDCount = 512;
 		m_SimplifiedCollisionDetection = false;
@@ -170,7 +169,6 @@ namespace RTE {
 		MatchProperty("DisableFactionBuyMenuThemes", { reader >> m_DisableFactionBuyMenuThemes; });
 		MatchProperty("DisableFactionBuyMenuThemeCursors", { reader >> m_DisableFactionBuyMenuThemeCursors; });
 		MatchProperty("PathFinderGridNodeSize", { reader >> m_PathFinderGridNodeSize; });
-		MatchProperty("EnableMultithreadedLua", { reader >> m_EnableMultithreadedLua; });
 		MatchProperty("AIUpdateInterval", { reader >> m_AIUpdateInterval; });
 		MatchProperty("EnableParticleSettling", { reader >> g_MovableMan.m_SettlingEnabled; });
 		MatchProperty("EnableMOSubtraction", { reader >> g_MovableMan.m_MOSubtractionEnabled; });
@@ -310,7 +308,6 @@ namespace RTE {
 		writer.NewDivider(false);
 		writer.NewLineString("// Engine Settings", false);
 		writer.NewLine(false);
-		writer.NewPropertyWithValue("EnableMultithreadedLua", m_EnableMultithreadedLua);
 		writer.NewPropertyWithValue("DisableLuaJIT", m_DisableLuaJIT);
 		writer.NewPropertyWithValue("RecommendedMOIDCount", m_RecommendedMOIDCount);
 		writer.NewPropertyWithValue("SimplifiedCollisionDetection", m_SimplifiedCollisionDetection);

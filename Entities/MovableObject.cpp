@@ -1072,7 +1072,13 @@ int MovableObject::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
 
 	if (status >= 0) {
 		status = RunScriptedFunctionInAppropriateScripts("Update", false, true, {}, {}, {}, scriptsToRun);
+
+        if (status >= 0 && HasRequestedSyncedUpdate()) {
+            RunScriptedFunctionInAppropriateScripts("SyncedUpdate", false, false, {}, {}, {}, ThreadScriptsToRun::SingleThreaded);
+        }
 	}
+
+    ResetRequestedSyncedUpdateFlag();
 
 	return status;
 }

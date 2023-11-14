@@ -1761,7 +1761,6 @@ void MovableMan::Update()
             for (MovableObject* mo : luaState.GetRegisteredMOs()) {
                 if (mo->HasRequestedSyncedUpdate()) {
                     mo->RunScriptedFunctionInAppropriateScripts(syncedUpdate, false, false, {}, {}, {}, ThreadScriptsToRun::MultiThreaded);
-                    mo->ResetRequestedSyncedUpdateFlag();
                 }
             }
 

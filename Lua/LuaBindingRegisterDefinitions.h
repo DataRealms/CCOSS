@@ -6,6 +6,112 @@
 
 namespace RTE {
 
+#define LIST_OF_LUABOUND_OBJECTS 				\
+	/* SystemLuaBindings */						\
+    PER_LUA_BINDING(Box)						\
+	PER_LUA_BINDING(Controller)					\
+	PER_LUA_BINDING(DataModule)					\
+	PER_LUA_BINDING(Timer)						\
+	PER_LUA_BINDING(Vector)						\
+	PER_LUA_BINDING(PathRequest)				\
+	/* ManagerLuaBindings */					\
+	PER_LUA_BINDING(ActivityMan)				\
+	PER_LUA_BINDING(AudioMan)					\
+	PER_LUA_BINDING(CameraMan)					\
+	PER_LUA_BINDING(ConsoleMan)					\
+	PER_LUA_BINDING(FrameMan)					\
+	PER_LUA_BINDING(MetaMan)					\
+	PER_LUA_BINDING(MovableMan)					\
+	PER_LUA_BINDING(PostProcessMan)				\
+	PER_LUA_BINDING(PresetMan)					\
+	PER_LUA_BINDING(PrimitiveMan)				\
+	PER_LUA_BINDING(SceneMan)					\
+	PER_LUA_BINDING(SettingsMan)				\
+	PER_LUA_BINDING(TimerMan)					\
+	PER_LUA_BINDING(UInputMan)					\
+	/* EntityLuaBindings */						\
+	PER_LUA_BINDING(Entity)						\
+	PER_LUA_BINDING(ACDropShip)					\
+	PER_LUA_BINDING(ACrab)						\
+	PER_LUA_BINDING(ACraft)						\
+	PER_LUA_BINDING(ACRocket)					\
+	PER_LUA_BINDING(Actor)						\
+	PER_LUA_BINDING(ADoor)						\
+	PER_LUA_BINDING(AEmitter)					\
+	PER_LUA_BINDING(AEJetpack)					\
+	PER_LUA_BINDING(AHuman)						\
+	PER_LUA_BINDING(Arm)						\
+	PER_LUA_BINDING(Attachable)					\
+	PER_LUA_BINDING(Deployment)					\
+	PER_LUA_BINDING(Emission)					\
+	PER_LUA_BINDING(Gib)						\
+	PER_LUA_BINDING(GlobalScript)				\
+	PER_LUA_BINDING(HDFirearm)					\
+	PER_LUA_BINDING(HeldDevice)					\
+	PER_LUA_BINDING(Leg)						\
+	PER_LUA_BINDING(LimbPath)					\
+	PER_LUA_BINDING(Magazine)					\
+	PER_LUA_BINDING(Material)					\
+	PER_LUA_BINDING(MetaPlayer)					\
+	PER_LUA_BINDING(MOPixel)					\
+	PER_LUA_BINDING(MOSParticle)				\
+	PER_LUA_BINDING(MOSprite)					\
+	PER_LUA_BINDING(MOSRotating)				\
+	PER_LUA_BINDING(MovableObject)				\
+	PER_LUA_BINDING(PEmitter)					\
+	PER_LUA_BINDING(PieSlice)					\
+	PER_LUA_BINDING(PieMenu)					\
+	PER_LUA_BINDING(Round)						\
+	PER_LUA_BINDING(Scene)						\
+	PER_LUA_BINDING(Scene::Area)				\
+	PER_LUA_BINDING(SceneLayer)					\
+	PER_LUA_BINDING(SceneObject)				\
+	PER_LUA_BINDING(SLBackground)				\
+	PER_LUA_BINDING(SoundContainer)				\
+	PER_LUA_BINDING(SoundSet)					\
+	PER_LUA_BINDING(TDExplosive)				\
+	PER_LUA_BINDING(TerrainObject)				\
+	PER_LUA_BINDING(ThrownDevice)				\
+	PER_LUA_BINDING(Turret)						\
+	/* ActivityLuaBindings */					\
+	PER_LUA_BINDING(Activity)					\
+	PER_LUA_BINDING(GameActivity)				\
+	/* GUILuaBindings */						\
+	PER_LUA_BINDING(GUIBanner)					\
+	PER_LUA_BINDING(BuyMenuGUI)					\
+	PER_LUA_BINDING(SceneEditorGUI)				\
+	/* PrimitiveLuaBindings */					\
+	PER_LUA_BINDING(GraphicalPrimitive)			\
+	PER_LUA_BINDING(LinePrimitive)				\
+	PER_LUA_BINDING(ArcPrimitive)				\
+	PER_LUA_BINDING(SplinePrimitive)			\
+	PER_LUA_BINDING(BoxPrimitive)				\
+	PER_LUA_BINDING(BoxFillPrimitive)			\
+	PER_LUA_BINDING(RoundedBoxPrimitive)		\
+	PER_LUA_BINDING(RoundedBoxFillPrimitive)	\
+	PER_LUA_BINDING(CirclePrimitive)			\
+	PER_LUA_BINDING(CircleFillPrimitive)		\
+	PER_LUA_BINDING(EllipsePrimitive)			\
+	PER_LUA_BINDING(EllipseFillPrimitive)		\
+	PER_LUA_BINDING(TrianglePrimitive)			\
+	PER_LUA_BINDING(TriangleFillPrimitive)		\
+	PER_LUA_BINDING(TextPrimitive)				\
+	PER_LUA_BINDING(BitmapPrimitive)			\
+	/* InputLuaBindings */						\
+	PER_LUA_BINDING(InputDevice)				\
+	PER_LUA_BINDING(InputElements)				\
+	PER_LUA_BINDING(MouseButtons)				\
+	PER_LUA_BINDING(JoyButtons)					\
+	PER_LUA_BINDING(JoyDirections)				\
+	PER_LUA_BINDING(SDL_Scancode)				\
+	PER_LUA_BINDING(SDL_Keycode)				\
+	PER_LUA_BINDING(SDL_GameControllerButton)	\
+	PER_LUA_BINDING(SDL_GameControllerAxis)		\
+	/* MiscLuaBindings */						\
+	PER_LUA_BINDING(AlarmEvent)					\
+	PER_LUA_BINDING(Directions)					\
+	PER_LUA_BINDING(DrawBlendMode)
+	
 #pragma region Lua Binding Registration Macros
 	/// <summary>
 	/// Convenience macro for declaring a binding register function.

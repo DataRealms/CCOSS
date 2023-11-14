@@ -3,6 +3,8 @@
 #include "LuabindObjectWrapper.h"
 #include "luabind/object.hpp"
 
+#include "LuaBindingRegisterDefinitions.h"
+
 namespace RTE {
 
 // With multithreaded Lua, objects can be destructed from multiple threads at once
@@ -55,6 +57,16 @@ luabind::adl::object GetCopyForStateInternal(const luabind::adl::object& obj, lu
 			}
 			return table;
 		}
+		else if (type == LUA_TUSERDATA) {
+#define PER_LUA_BINDING(Type)																		\
+			if (boost::optional<Type*> boundObject = luabind::object_cast_nothrow<Type*>(obj)) {	\
+				return luabind::adl::object(&targetState, boundObject.get());						\
+			}
+
+			LIST_OF_LUABOUND_OBJECTS
+#undef PER_LUA_BINDING
+		}
+
 	}
 
 	// Dear god, I hope this is safe and equivalent to nil, because I can't find another way of doing it.

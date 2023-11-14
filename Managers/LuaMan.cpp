@@ -326,8 +326,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	LuaStateWrapper * LuaMan::GetAndLockFreeScriptState() {
-		RTEAssert(g_SettingsMan.GetEnableMultithreadedLua(), "Trying to use a threaded script state while multithreaded lua is disabled!")
-
 		if (s_luaStateOverride) {
 			// We're creating this object in a multithreaded environment, ensure that it's assigned to the same script state as us
 			bool success = s_luaStateOverride->GetMutex().try_lock();

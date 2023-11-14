@@ -631,7 +631,12 @@ namespace RTE {
 		}
 
 		for (const LuabindObjectWrapper *functionObjectArgument : functionObjectArguments) {
-			functionObjectArgument->GetLuabindObject()->push(m_State);
+			if (functionObjectArgument->GetLuabindObject()->interpreter() != m_State) {
+				LuabindObjectWrapper copy = functionObjectArgument->GetCopyForState(*m_State);
+				copy.GetLuabindObject()->push(m_State);
+			} else {
+				functionObjectArgument->GetLuabindObject()->push(m_State);
+			}
 		}
 
 		const std::string& path = functionObject->GetFilePath();

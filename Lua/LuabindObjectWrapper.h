@@ -1,6 +1,8 @@
 #ifndef _RTELUABINDOBJECTWRAPPER_
 #define _RTELUABINDOBJECTWRAPPER_
 
+struct lua_State;
+
 namespace luabind::adl {
 	class object;
 }
@@ -46,6 +48,11 @@ namespace RTE {
 		/// </summary>
 		~LuabindObjectWrapper();
 #pragma endregion
+
+		/// <summary>
+		/// Attempts to copy a luabind object into another state.
+		/// </summary>
+		LuabindObjectWrapper GetCopyForState(lua_State& newState) const;
 
 #pragma region Getters
 		/// <summary>

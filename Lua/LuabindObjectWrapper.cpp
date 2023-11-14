@@ -34,4 +34,38 @@ LuabindObjectWrapper::~LuabindObjectWrapper() {
 	}
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+luabind::adl::object GetCopyForStateInternal(const luabind::adl::object& obj, lua_State& targetState) {
+	if (obj.is_valid()) {
+		int type = luabind::type(obj);
+		if (type == LUA_TNUMBER) {
+			return luabind::adl::object(&targetState, luabind::object_cast<double>(obj));
+		}
+		else if (type == LUA_TBOOLEAN) {
+			return luabind::adl::object(&targetState, luabind::object_cast<bool>(obj));
+		}
+		else if (type == LUA_TSTRING) {
+			return luabind::adl::object(&targetState, luabind::object_cast<std::string>(obj));
+		}
+		else if (type == LUA_TTABLE) {
+			luabind::object table = luabind::newtable(&targetState);
+			for (luabind::iterator itr(obj), itrEnd; itr != itrEnd; ++itr) {
+				table[GetCopyForStateInternal(itr.key(), targetState)] = GetCopyForStateInternal(*itr, targetState);
+			}
+			return table;
+		}
+	}
+
+	// Dear god, I hope this is safe and equivalent to nil, because I can't find another way of doing it.
+	return luabind::adl::object();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+LuabindObjectWrapper LuabindObjectWrapper::GetCopyForState(lua_State& targetState) const {
+	luabind::adl::object* copy = new luabind::adl::object(GetCopyForStateInternal(*m_LuabindObject, targetState));
+	return LuabindObjectWrapper(copy, m_FilePath, true);
+}
+
 }

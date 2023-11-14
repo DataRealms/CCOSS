@@ -410,10 +410,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaAdaptersMovableObject::SendMessage2(MovableObject *luaSelfObject, const std::string &message, luabind::object context) {
-		// We're not transferring context between lua states, so send context to singlethreaded scripts
 		LuabindObjectWrapper wrapper(&context, "", false);
-		luaSelfObject->RunScriptedFunctionInAppropriateScripts("OnMessage", false, false, {}, { message }, { &wrapper }, ThreadScriptsToRun::SingleThreaded);
-		luaSelfObject->RunScriptedFunctionInAppropriateScripts("OnMessage", false, false, {}, { message }, {          }, ThreadScriptsToRun::MultiThreaded);
+		luaSelfObject->RunScriptedFunctionInAppropriateScripts("OnMessage", false, false, {}, { message }, { &wrapper });
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -562,8 +560,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaAdaptersMovableMan::SendGlobalMessage1(MovableMan &movableMan, const std::string &message) {
-		luabind::object context;
-		SendGlobalMessage2(movableMan, message, context);
+		GAScripted* scriptedActivity = dynamic_cast<GAScripted*>(g_ActivityMan.GetActivity());
+		if (scriptedActivity) {
+			scriptedActivity->RunLuaFunction("OnGlobalMessage", {}, { message });
+		}
+
+		movableMan.RunLuaFunctionOnAllMOs("OnGlobalMessage", true, {}, { message });
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -2070,7 +2070,7 @@ protected:
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
     std::unordered_map<std::string, std::vector<LuaFunction>> m_FunctionsAndScripts; //!< A map of function names to vectors of Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.
 
-    bool m_RequestedSyncedUpdate; //!< For optimisation purposes, multithreaded scripts explicitly request a synced update if they want one.
+    volatile bool m_RequestedSyncedUpdate; //!< For optimisation purposes, multithreaded scripts explicitly request a synced update if they want one.
 
     std::unordered_map<std::string, std::string> m_StringValueMap; //<! Map to store any generic strings available from script
     std::unordered_map<std::string, double> m_NumberValueMap; //<! Map to store any generic numbers available from script

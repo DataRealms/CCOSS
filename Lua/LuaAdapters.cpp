@@ -410,9 +410,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void LuaAdaptersMovableObject::SendMessage2(MovableObject *luaSelfObject, const std::string &message, luabind::object context) {
-		// We're not transferring context between lua states, so only run singlethreaded scripts when we have context
+		// We're not transferring context between lua states, so send context to singlethreaded scripts
 		LuabindObjectWrapper wrapper(&context, "", false);
 		luaSelfObject->RunScriptedFunctionInAppropriateScripts("OnMessage", false, false, {}, { message }, { &wrapper }, ThreadScriptsToRun::SingleThreaded);
+		luaSelfObject->RunScriptedFunctionInAppropriateScripts("OnMessage", false, false, {}, { message }, {          }, ThreadScriptsToRun::MultiThreaded);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

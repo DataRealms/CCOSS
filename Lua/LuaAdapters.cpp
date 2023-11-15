@@ -374,7 +374,7 @@ namespace RTE {
 				g_ConsoleMan.PrintString("ERROR: The script path " + correctedScriptPath + "  did not point to a valid file.");
 				break;
 			case -3:
-				g_ConsoleMan.PrintString("ERROR: The script path " + correctedScriptPath + " is already loaded onto this object.");
+				// Already have this script. Not an issue, just ignore it.
 				break;
 			case -4:
 				g_ConsoleMan.PrintString("ERROR: Failed to do necessary setup to add scripts while attempting to add the script with path " + correctedScriptPath + ". This has nothing to do with your script, please report it to a developer.");

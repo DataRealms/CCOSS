@@ -601,7 +601,9 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
             }
         }
 
-		RunFunctionOfScript(scriptPath, "Create");
+		if (RunFunctionOfScript(scriptPath, "Create") < 0) {
+            return -5;
+        }
 	}
 
 	return 0;

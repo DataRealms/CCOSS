@@ -628,7 +628,7 @@ int MovableObject::ReloadScripts() {
 	for (const auto &[scriptPath, scriptEnabled] : loadedScriptsCopy) {
 		status = LoadScript(scriptPath, scriptEnabled);
 		// If the script fails to load because of an error in its Lua, we need to manually add the script path so it's not lost forever.
-		if (status == -5) {
+		if (status == -4) {
 			m_AllLoadedScripts.try_emplace(scriptPath, scriptEnabled);
 		} else if (status < 0) {
 			break;

@@ -2058,10 +2058,9 @@ protected:
 	bool m_IsTraveling; //!< Prevents self-intersection while traveling.
 
     LuaStateWrapper *m_ThreadedLuaState; //!< The lua state that will runs our multithreaded lua scripts.
-    bool m_HasSinglethreadedScripts; //!< Whether or not we have any single-threaded scripts attached to us.
 
     struct LuaFunction {
-        bool m_ScriptIsThreadSafe; //!< Whether this function is in a script with the --[[MULTITHREAD]]- thread safety tag.
+        bool m_ScriptIsMultithreaded; //!< Whether this function is in a script with the --[[MULTITHREAD]]- thread safety tag.
         bool m_ScriptIsEnabled; //!< Whether this function is in an enabled script.
         std::unique_ptr<LuabindObjectWrapper> m_LuaFunction; //!< The lua function itself.
     };

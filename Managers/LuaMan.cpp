@@ -355,17 +355,17 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::IsScriptThreadSafe(const std::string &scriptPath) {
+	bool LuaMan::IsScriptMultithreaded(const std::string &scriptPath) {
 		// First check our cache
-		auto itr = m_ScriptThreadSafetyMap.find(scriptPath);
-		if (itr != m_ScriptThreadSafetyMap.end()) {
+		auto itr = m_ScriptMultithreadedtyMap.find(scriptPath);
+		if (itr != m_ScriptMultithreadedtyMap.end()) {
 			return itr->second;
 		}
 
 		// Actually open the file and check if it has the multithread-safe mark
 		std::ifstream scriptFile = std::ifstream(scriptPath.c_str());
 		if (!scriptFile.good()) {
-			m_ScriptThreadSafetyMap.insert({ scriptPath, false });
+			m_ScriptMultithreadedtyMap.insert({ scriptPath, false });
 			return false;
 		}
 
@@ -377,12 +377,12 @@ namespace RTE {
 			std::string line = rawLine;
 
 			if (line.find("--[[MULTITHREAD]]--", 0) != std::string::npos) {
-				m_ScriptThreadSafetyMap.insert({scriptPath, true});
+				m_ScriptMultithreadedtyMap.insert({scriptPath, true});
 				return true;
 			}
 		}
 
-		m_ScriptThreadSafetyMap.insert({scriptPath, false});
+		m_ScriptMultithreadedtyMap.insert({scriptPath, false});
 		return false;
 	}
 
@@ -393,7 +393,7 @@ namespace RTE {
 			m_GCThread.join();
 		}
 
-		m_ScriptThreadSafetyMap.clear();
+		m_ScriptMultithreadedtyMap.clear();
 
 		m_MasterScriptState.ClearLuaScriptCache();
 		for (LuaStateWrapper& luaState : m_ScriptStates) {

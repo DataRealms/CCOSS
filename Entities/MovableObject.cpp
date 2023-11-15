@@ -89,7 +89,6 @@ void MovableObject::Clear()
     m_NumberValueMap.clear();
     m_ObjectValueMap.clear();
     m_ThreadedLuaState = nullptr;
-    m_HasSinglethreadedScripts = false;
     m_ScriptObjectName.clear();
     m_ScreenEffectFile.Reset();
     m_pScreenEffect = 0;
@@ -129,7 +128,7 @@ void MovableObject::Clear()
 
 LuaStateWrapper & MovableObject::GetAndLockStateForScript(const std::string &scriptPath, const LuaFunction *function) {
     // Initialize our threaded state if required
-    if ((function && function->m_ScriptIsThreadSafe) || g_LuaMan.IsScriptThreadSafe(scriptPath)) {
+    if ((function && function->m_ScriptIsMultithreaded) || g_LuaMan.IsScriptMultithreaded(scriptPath)) {
         if (m_ThreadedLuaState == nullptr) {
             m_ThreadedLuaState = g_LuaMan.GetAndLockFreeScriptState();
         } else {
@@ -138,7 +137,6 @@ LuaStateWrapper & MovableObject::GetAndLockStateForScript(const std::string &scr
         return *m_ThreadedLuaState;
     }
 
-    m_HasSinglethreadedScripts = true;
     g_LuaMan.GetMasterScriptState().GetMutex().lock();
     return g_LuaMan.GetMasterScriptState();
 }
@@ -539,7 +537,7 @@ void MovableObject::DestroyScriptState() {
             m_ThreadedLuaState = nullptr;
         }
 
-        if (m_HasSinglethreadedScripts) {
+        {
             std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex());
             g_LuaMan.GetMasterScriptState().RunScriptString(m_ScriptObjectName + " = nil;");
             g_LuaMan.GetMasterScriptState().UnregisterMO(this);
@@ -584,15 +582,25 @@ int MovableObject::LoadScript(const std::string &scriptPath, bool loadAsEnabledS
 		return -4;
 	}
 
-    bool scriptThreadSafe = g_LuaMan.IsScriptThreadSafe(scriptPath);
+    bool scriptMultithreaded = g_LuaMan.IsScriptMultithreaded(scriptPath);
 	for (const auto &[functionName, functionObject] : scriptFileFunctions) {
 		LuaFunction& luaFunction = m_FunctionsAndScripts.at(functionName).emplace_back();
         luaFunction.m_ScriptIsEnabled = loadAsEnabledScript;
-        luaFunction.m_ScriptIsThreadSafe = scriptThreadSafe;
+        luaFunction.m_ScriptIsMultithreaded = scriptMultithreaded;
         luaFunction.m_LuaFunction = std::unique_ptr<LuabindObjectWrapper>(functionObject);
 	}
 
 	if (ObjectScriptsInitialized()) {
+        if (scriptMultithreaded && m_ThreadedLuaState == nullptr) {
+            m_ThreadedLuaState = &usedState;
+            std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex());
+            m_ThreadedLuaState->RegisterMO(this);
+            m_ThreadedLuaState->SetTempEntity(this);
+            if (m_ThreadedLuaState->RunScriptString("_ScriptedObjects = _ScriptedObjects or {}; " + m_ScriptObjectName + " = To" + GetClassName() + "(LuaMan.TempEntity); ") < 0) {
+                RTEAbort("Failed to initialize object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
+            }
+        }
+
 		RunFunctionOfScript(scriptPath, "Create");
 	}
 
@@ -635,22 +643,23 @@ int MovableObject::ReloadScripts() {
 int MovableObject::InitializeObjectScripts() {
     auto createScriptedObjectInState = [&](LuaStateWrapper &luaState) {
         luaState.SetTempEntity(this);
-        m_ScriptObjectName = "_ScriptedObjects[\"" + std::to_string(m_UniqueID) + "\"]";
         if (luaState.RunScriptString("_ScriptedObjects = _ScriptedObjects or {}; " + m_ScriptObjectName + " = To" + GetClassName() + "(LuaMan.TempEntity); ") < 0) {
             RTEAbort("Failed to initialize object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
         }
     };
     
+    m_ScriptObjectName = "_ScriptedObjects[\"" + std::to_string(m_UniqueID) + "\"]";
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex());
+        g_LuaMan.GetMasterScriptState().RegisterMO(this);
+        createScriptedObjectInState(g_LuaMan.GetMasterScriptState());
+    }
+
     if (m_ThreadedLuaState) {
         std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex());
         m_ThreadedLuaState->RegisterMO(this);
         createScriptedObjectInState(*m_ThreadedLuaState);
-    }
-
-    if (m_HasSinglethreadedScripts) {
-        std::lock_guard<std::recursive_mutex> lock(g_LuaMan.GetMasterScriptState().GetMutex());
-        g_LuaMan.GetMasterScriptState().RegisterMO(this);
-        createScriptedObjectInState(g_LuaMan.GetMasterScriptState());
     }
 
 	if (!m_FunctionsAndScripts.at("Create").empty() && RunScriptedFunctionInAppropriateScripts("Create", false, true) < 0) {
@@ -717,8 +726,8 @@ int MovableObject::RunScriptedFunctionInAppropriateScripts(const std::string &fu
         ZoneScoped;
         ZoneText(functionName.c_str(), functionName.length());
         for (const LuaFunction &luaFunction : itr->second) {
-            bool scriptIsSuitableForThread = scriptsToRun == ThreadScriptsToRun::SingleThreaded ? !luaFunction.m_ScriptIsThreadSafe :
-                                             scriptsToRun == ThreadScriptsToRun::MultiThreaded  ? luaFunction.m_ScriptIsThreadSafe :
+            bool scriptIsSuitableForThread = scriptsToRun == ThreadScriptsToRun::SingleThreaded ? !luaFunction.m_ScriptIsMultithreaded :
+                                             scriptsToRun == ThreadScriptsToRun::MultiThreaded  ? luaFunction.m_ScriptIsMultithreaded :
                                                                                                   true;
             if (!scriptIsSuitableForThread) {
                 continue;

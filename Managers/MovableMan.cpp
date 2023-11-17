@@ -1735,7 +1735,7 @@ void MovableMan::Update()
     {
         ZoneScopedN("Multithreaded Scripts Update");
 
-        const std::string threadedUpdate = "Update"; // avoid string reconstruction
+        const std::string threadedUpdate = "ThreadedUpdate"; // avoid string reconstruction
 
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
         std::for_each(std::execution::par, luaStates.begin(), luaStates.end(),
@@ -1779,7 +1779,7 @@ void MovableMan::Update()
                 actor->Update();
 
                 g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-                actor->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+                actor->UpdateScripts(ThreadScriptsToRun::Both);
                 g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
                 actor->ApplyImpulses();
@@ -1796,7 +1796,7 @@ void MovableMan::Update()
                 (*iIt)->Update();
 
                 g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-                (*iIt)->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+                (*iIt)->UpdateScripts(ThreadScriptsToRun::Both);
                 g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
                 (*iIt)->ApplyImpulses();
@@ -1814,7 +1814,7 @@ void MovableMan::Update()
                 particle->Update();
 
                 g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-                particle->UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+                particle->UpdateScripts(ThreadScriptsToRun::Both);
                 g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
                 particle->ApplyImpulses();

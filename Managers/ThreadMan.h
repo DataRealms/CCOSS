@@ -14,13 +14,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "global_types.h"
-
-
-//#include <boost/thread.hpp>
-
 #include "Singleton.h"
 #define g_ThreadMan ThreadMan::Instance()
+
+#include "BS_thread_pool.hpp"
 
 namespace RTE
 {
@@ -96,6 +93,9 @@ public:
     void Destroy();
 
 
+    BS::thread_pool& GetThreadPool() { return m_ThreadPool; }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetClassName
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +134,7 @@ private:
     ThreadMan(const ThreadMan &reference);
     ThreadMan & operator=(const ThreadMan &rhs);
 
+    BS::thread_pool m_ThreadPool;
 };
 
 } // namespace RTE

@@ -621,6 +621,9 @@
     <ClInclude Include="System\AllegroTools.h">
       <Filter>System</Filter>
     </ClInclude>
+    <ClInclude Include="Managers\ThreadMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="System\Box.cpp">
@@ -1193,6 +1196,9 @@
     </ClCompile>
     <ClCompile Include="System\AllegroTools.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\ThreadMan.cpp">
+      <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

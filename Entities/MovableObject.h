@@ -51,7 +51,7 @@ friend struct EntityLuaBindings;
 
 public:
 
-	ScriptFunctionNames("Create", "Destroy", "Update", "SyncedUpdate", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen", "OnSave", "OnMessage", "OnGlobalMessage");
+	ScriptFunctionNames("Create", "Destroy", "Update", "ThreadedUpdate", "SyncedUpdate", "OnScriptDisable", "OnScriptEnable", "OnCollideWithTerrain", "OnCollideWithMO", "WhilePieMenuOpen", "OnSave", "OnMessage", "OnGlobalMessage");
 	SerializableOverrideMethods;
 	ClassInfoGetters;
 

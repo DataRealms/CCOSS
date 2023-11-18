@@ -515,7 +515,7 @@ namespace RTE {
 
 		int m_LastAssignedLuaState = 0;
 
-		std::thread m_GCThread;
+		std::future<void> m_GarbageCollectionTask;
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

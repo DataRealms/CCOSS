@@ -1,6 +1,9 @@
 #include "LuaMan.h"
+
 #include "LuabindObjectWrapper.h"
 #include "LuaBindingRegisterDefinitions.h"
+#include "ThreadMan.h"
+
 #include "tracy/Tracy.hpp"
 #include "tracy/TracyLua.hpp"
 
@@ -389,8 +392,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void LuaMan::ClearUserModuleCache() {
-		if (m_GCThread.joinable()) {
-			m_GCThread.join();
+		if (m_GarbageCollectionTask.valid()) {
+			m_GarbageCollectionTask.wait();
 		}
 
 		m_ScriptMultithreadedtyMap.clear();
@@ -1098,10 +1101,9 @@ namespace RTE {
 		}
 
 		// Make sure a GC run isn't happening while we try to apply deletions
-		if (m_GCThread.joinable()) {
-			m_GCThread.join();
+		if (m_GarbageCollectionTask.valid()) {
+			m_GarbageCollectionTask.wait();
 		}
-
 		// Apply all deletions queued from lua
     	LuabindObjectWrapper::ApplyQueuedDeletions();
 	}
@@ -1110,9 +1112,9 @@ namespace RTE {
 
 	void LuaMan::StartAsyncGarbageCollection() {
 		ZoneScoped;
-		
+
 		// Start a new thread to perform the GC run.
-		m_GCThread = std::thread([this]() {
+		m_GarbageCollectionTask = g_ThreadMan.GetThreadPool().submit([this]() {
 			std::vector<LuaStateWrapper*> allStates;
 			allStates.reserve(m_ScriptStates.size() + 1);
 

@@ -50,6 +50,11 @@ public:
 
     ThreadMan() { Clear(); Create(); }
 
+    /// <summary>
+    /// Makes the TimerMan object ready for use.
+    /// </summary>
+    void Initialize() { };
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Destructor:      ~ThreadMan
@@ -95,23 +100,10 @@ public:
 
     BS::thread_pool& GetThreadPool() { return m_ThreadPool; }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
-
-    virtual const std::string & GetClassName() const { return m_ClassName; }
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
-
-    // Member variables
-    static const std::string m_ClassName;
 
 
 

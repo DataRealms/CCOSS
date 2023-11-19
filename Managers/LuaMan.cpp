@@ -289,6 +289,8 @@ namespace RTE {
 
 	void LuaMan::Initialize() {
 		m_MasterScriptState.Initialize();
+
+		m_ScriptStates = std::vector<LuaStateWrapper>(g_ThreadMan.GetThreadPool().get_thread_count());
 		for (LuaStateWrapper &luaState : m_ScriptStates) {
 			luaState.Initialize();
 		}
@@ -348,7 +350,7 @@ namespace RTE {
 		return &(*itr);*/
 
 		int ourState = m_LastAssignedLuaState;
-		m_LastAssignedLuaState = (m_LastAssignedLuaState + 1) % c_NumThreadedLuaStates;
+		m_LastAssignedLuaState = (m_LastAssignedLuaState + 1) % m_ScriptStates.size();
 
 		bool success = m_ScriptStates[ourState].GetMutex().try_lock();
 		RTEAssert(success, "Script mutex was already locked while in a non-multithreaded environment!");

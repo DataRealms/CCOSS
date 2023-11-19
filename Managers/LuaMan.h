@@ -311,8 +311,7 @@ namespace RTE {
 		RandomGenerator m_RandomGenerator; //!< The random number generator used for this lua state.
 	};
 
-	static constexpr int c_NumThreadedLuaStates = 16;
-	typedef std::array<LuaStateWrapper, c_NumThreadedLuaStates> LuaStatesArray;
+	typedef std::vector<LuaStateWrapper> LuaStatesArray;
 
 	/// <summary>
 	/// The singleton manager of each Lua state.

@@ -4,6 +4,7 @@
 #include "SceneMan.h"
 #include "SettingsMan.h"
 #include "ActivityMan.h"
+#include "ThreadMan.h"
 
 namespace RTE {
 
@@ -293,8 +294,8 @@ namespace RTE {
 	void SceneLayerImpl<TRACK_DRAWINGS>::ClearBitmap(ColorKeys clearTo) {
 		RTEAssert(m_MainBitmapOwned, "Bitmap not owned! We shouldn't be clearing this!");
 
-		if (m_BitmapClearThread.joinable()) {
-			m_BitmapClearThread.join();
+		if (m_BitmapClearTask.valid()) {
+			m_BitmapClearTask.wait();
 		}
 
 		if (m_LastClearColor != clearTo) {
@@ -306,11 +307,9 @@ namespace RTE {
 		std::swap(m_MainBitmap, m_BackBitmap);
 
 		// Start a new thread to clear the backbuffer bitmap asynchronously.
-		m_BitmapClearThread = std::thread([this, clearTo](BITMAP *bitmap, std::vector<IntRect> drawings) {
+		m_BitmapClearTask = g_ThreadMan.GetThreadPool().submit([this, clearTo](BITMAP *bitmap, std::vector<IntRect> drawings) {
 			ClearDrawings(bitmap, drawings, clearTo);
 		}, m_BackBitmap, m_Drawings);
-
-		m_BitmapClearThread.detach();
 
 		m_Drawings.clear(); // This was copied into the new thread, so can be safely deleted.
 	}

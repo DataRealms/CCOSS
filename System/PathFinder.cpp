@@ -3,6 +3,7 @@
 #include "Material.h"
 #include "Scene.h"
 #include "SceneMan.h"
+#include "ThreadMan.h"
 
 namespace RTE {
 
@@ -207,7 +208,7 @@ namespace RTE {
 		const_cast<Vector &>(pathRequest->startPos) = start;
 		const_cast<Vector &>(pathRequest->targetPos) = end;
 
-		std::thread pathThread([this, start, end, digStrength, callback](std::shared_ptr<volatile PathRequest> volRequest) {
+		g_ThreadMan.GetThreadPool().push_task([this, start, end, digStrength, callback](std::shared_ptr<volatile PathRequest> volRequest) {
 			// Cast away the volatile-ness - only matters outside (and complicates the API otherwise)
 			PathRequest &request = const_cast<PathRequest &>(*volRequest);
 
@@ -225,7 +226,6 @@ namespace RTE {
 			request.complete = true;
 		}, pathRequest);
 
-		pathThread.detach();
 		return pathRequest;
     }
 

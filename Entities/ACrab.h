@@ -620,6 +620,8 @@ protected:
 	Timer m_PatrolTimer;
 	// Timer for how long to be firing the jetpack in a direction
 	Timer m_JumpTimer;
+	// Whether mouse input should be locked to the aim range, or whether we can "wander" out. For static emplacements like turrets, this is good, but for moving things it's a bit sticky.
+	bool m_LockMouseAimInput;
 
 #pragma region Event Handling
 	/// <summary>

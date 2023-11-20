@@ -92,6 +92,7 @@ void ACrab::Clear()
     m_JumpTimer.Reset();
     m_AimRangeUpperLimit = -1;
     m_AimRangeLowerLimit = -1;
+    m_LockMouseAimInput = false;
 }
 
 
@@ -246,6 +247,7 @@ int ACrab::Create(const ACrab &reference) {
     m_SweepRange = reference.m_SweepRange;
     m_AimRangeUpperLimit = reference.m_AimRangeUpperLimit;
     m_AimRangeLowerLimit = reference.m_AimRangeLowerLimit;
+    m_LockMouseAimInput = reference.m_LockMouseAimInput;
 
     return 0;
 }
@@ -347,6 +349,7 @@ int ACrab::ReadProperty(const std::string_view &propName, Reader &reader)
     MatchForwards("RDislodgeLimbPath") MatchProperty("RightDislodgeLimbPath", { reader >> m_Paths[RIGHTSIDE][FGROUND][DISLODGE]; });
     MatchProperty("AimRangeUpperLimit", { reader >> m_AimRangeUpperLimit; });
     MatchProperty("AimRangeLowerLimit", { reader >> m_AimRangeLowerLimit; });
+    MatchProperty("LockMouseAimInput", { reader >> m_LockMouseAimInput; });
     
     EndPropertyList;
 }
@@ -402,6 +405,8 @@ int ACrab::Save(Writer &writer) const
     writer << m_AimRangeUpperLimit;
     writer.NewProperty("AimRangeLowerLimit");
     writer << m_AimRangeLowerLimit;
+    writer.NewProperty("LockMouseAimInput");
+    writer << m_LockMouseAimInput;
 
     return 0;
 }
@@ -1133,7 +1138,7 @@ void ACrab::PreControllerUpdate()
         m_AimAngle = FacingAngle(m_AimAngle);
 
         // Clamp the analog aim too, so it doesn't feel "sticky" at the edges of the aim limit
-        if (m_Controller.IsPlayerControlled()) {
+        if (m_Controller.IsPlayerControlled() && m_LockMouseAimInput) {
             float mouseAngle = g_UInputMan.AnalogAimValues(m_Controller.GetPlayer()).GetAbsRadAngle();
             Clamp(mouseAngle, FacingAngle(adjustedAimRangeUpperLimit), FacingAngle(adjustedAimRangeLowerLimit));
             g_UInputMan.SetMouseValueAngle(mouseAngle, m_Controller.GetPlayer());

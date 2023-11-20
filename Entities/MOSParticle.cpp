@@ -147,6 +147,8 @@ namespace RTE {
 
 			if (m_Frame >= m_FrameCount) { m_Frame = m_FrameCount - 1; }
 		}
+
+		if (m_pScreenEffect) { SetPostScreenEffectToDraw(); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,8 +223,6 @@ namespace RTE {
 
 			g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, spriteX, spriteY, spriteX + m_aSprite[m_Frame]->w, spriteY + m_aSprite[m_Frame]->h);
 		}
-
-		if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical) { SetPostScreenEffectToDraw(); }
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

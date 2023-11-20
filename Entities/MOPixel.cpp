@@ -221,6 +221,10 @@ namespace RTE {
 				}
 			}
 		}
+
+		if (m_pScreenEffect) {
+			SetPostScreenEffectToDraw();
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -261,10 +265,6 @@ namespace RTE {
 		}
 
 		g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, pixelPos, 1.0F);
-
-		if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
-			SetPostScreenEffectToDraw();
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

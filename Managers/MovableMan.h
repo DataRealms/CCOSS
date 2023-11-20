@@ -994,6 +994,9 @@ protected:
     // Mutex to ensure actors don't change team roster from seperate threads at the same time
     std::mutex m_ActorRosterMutex;
 
+    // Async to draw MOIDs while rendering
+    std::future<void> m_DrawMOIDsTask;
+
     // Roster of each team's actors, sorted by their X positions in the scene. Actors not owned here
     std::list<Actor *> m_ActorRoster[Activity::MaxTeamCount];
     // Whether to draw HUD lines between the actors of a specific team

@@ -2055,27 +2055,9 @@ void MovableMan::Update()
 
     ////////////////////////////////////////////////////////////////////////
     // Draw the MO matter and IDs to their layers for next frame
-
-    UpdateDrawMOIDs(g_SceneMan.GetMOIDBitmap());
-
-	// COUNT MOID USAGE PER TEAM  //////////////////////////////////////////////////
-	{
-		int team = Activity::NoTeam;
-
-		for (team = Activity::TeamOne; team < Activity::MaxTeamCount; team++)
-			m_TeamMOIDCount[team] = 0;
-		
-		for (std::vector<MovableObject *>::iterator itr = m_MOIDIndex.begin(); itr != m_MOIDIndex.end(); ++itr)
-		{
-			if (*itr)
-			{
-				team = (*itr)->GetTeam();
-
-				if (team > Activity::NoTeam && team < Activity::MaxTeamCount)
-					m_TeamMOIDCount[team]++;
-			}
-		}
-	}
+    m_DrawMOIDsTask = g_ThreadMan.GetPriorityThreadPool().submit([this]() {
+        UpdateDrawMOIDs(g_SceneMan.GetMOIDBitmap());
+    });
 
 
     ////////////////////////////////////////////////////////////////////
@@ -2102,6 +2084,10 @@ void MovableMan::Update()
 void MovableMan::Travel()
 {
     ZoneScoped;
+
+    if (m_DrawMOIDsTask.valid()) {
+        m_DrawMOIDsTask.wait();
+    }
 
     // Travel Actors
     {
@@ -2313,6 +2299,20 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         } else {
             particle->SetAsNoID();
+        }
+    }
+
+    // COUNT MOID USAGE PER TEAM  //////////////////////////////////////////////////
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; team++) {
+        m_TeamMOIDCount[team] = 0;
+    }
+
+    for (auto itr = m_MOIDIndex.begin(); itr != m_MOIDIndex.end(); ++itr) {
+        if (*itr) {
+            int team = (*itr)->GetTeam();
+            if (team > Activity::NoTeam && team < Activity::MaxTeamCount) {
+                m_TeamMOIDCount[team]++;
+            }
         }
     }
 }

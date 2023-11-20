@@ -476,6 +476,7 @@ namespace RTE {
 		std::list<NetworkMusicData> m_MusicEvents[c_MaxClients]; //!< Lists of per player music events.
 
 		std::mutex g_SoundEventsListMutex[c_MaxClients]; //!< A list for locking sound events for multiplayer to avoid race conditions and other such problems.
+		std::mutex m_SoundChannelMinimumAudibleDistancesMutex; //!, As above but for m_SoundChannelMinimumAudibleDistances
 
 	private:
 

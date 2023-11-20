@@ -87,13 +87,18 @@ namespace RTE {
 			for (int x = topLeftCellX; x <= bottomRightCellX; x++) {
 				for (int y = topLeftCellY; y <= bottomRightCellY; y++) {
 					int cellId = GetCellIdForCellCoords(x, y);
-					m_UsedCellIds.insert(cellId);
 
 					m_Cells[team + 1][cellId].push_back(mo.GetID());
 					if (mo.GetsHitByMOs()) {
 						m_PhysicsCells[team + 1][cellId].push_back(mo.GetID());
 					}
 				}
+			}
+		}
+
+		for (int x = topLeftCellX; x <= bottomRightCellX; x++) {
+			for (int y = topLeftCellY; y <= bottomRightCellY; y++) {
+				m_UsedCellIds.insert(GetCellIdForCellCoords(x, y));
 			}
 		}
 	}

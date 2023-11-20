@@ -37,6 +37,8 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 
+#include "tracy/Tracy.hpp"
+
 namespace RTE {
 
 ConcreteClassInfo(Actor, MOSRotating, 20);
@@ -1309,6 +1311,8 @@ void Actor::PreControllerUpdate() {
 
 void Actor::Update()
 {
+    ZoneScoped;
+
     /////////////////////////////////
     // Hit Body update and handling
     MOSRotating::Update();

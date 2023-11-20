@@ -30,6 +30,8 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 
+#include "tracy/Tracy.hpp"
+
 namespace RTE {
 
 ConcreteClassInfo(AHuman, Actor, 20);
@@ -1710,6 +1712,8 @@ void AHuman::UpdateWalkAngle(AHuman::Layer whichLayer) {
 
 void AHuman::PreControllerUpdate()
 {
+	ZoneScoped;
+
     Actor::PreControllerUpdate();
 
 	float deltaTime = g_TimerMan.GetDeltaTimeSecs();
@@ -2499,6 +2503,8 @@ void AHuman::PreControllerUpdate()
 
 void AHuman::Update()
 {
+	ZoneScoped;
+
     float rot = m_Rotation.GetRadAngle(); // eugh, for backwards compat to be the same behaviour as with multithreaded AI
 
     Actor::Update();

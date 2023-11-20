@@ -98,7 +98,9 @@ public:
     void Destroy();
 
 
-    BS::thread_pool& GetThreadPool() { return m_ThreadPool; }
+    BS::thread_pool& GetPriorityThreadPool() { return m_PriorityThreadPool; }
+
+    BS::thread_pool& GetBackgroundThreadPool() { return m_BackgroundThreadPool; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
@@ -126,7 +128,11 @@ private:
     ThreadMan(const ThreadMan &reference);
     ThreadMan & operator=(const ThreadMan &rhs);
 
-    BS::thread_pool m_ThreadPool;
+    // For tasks that we want to be performed ASAP, i.e needs to be complete this frame at some point
+    BS::thread_pool m_PriorityThreadPool;
+
+    // For background tasks that we can just let happen whenever over multiple frames
+    BS::thread_pool m_BackgroundThreadPool;
 };
 
 } // namespace RTE

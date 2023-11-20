@@ -290,7 +290,7 @@ namespace RTE {
 	void LuaMan::Initialize() {
 		m_MasterScriptState.Initialize();
 
-		m_ScriptStates = std::vector<LuaStateWrapper>(g_ThreadMan.GetThreadPool().get_thread_count());
+		m_ScriptStates = std::vector<LuaStateWrapper>(std::thread::hardware_concurrency());
 		for (LuaStateWrapper &luaState : m_ScriptStates) {
 			luaState.Initialize();
 		}
@@ -1116,7 +1116,7 @@ namespace RTE {
 		ZoneScoped;
 
 		// Start a new thread to perform the GC run.
-		m_GarbageCollectionTask = g_ThreadMan.GetThreadPool().submit([this]() {
+		m_GarbageCollectionTask = g_ThreadMan.GetPriorityThreadPool().submit([this]() {
 			std::vector<LuaStateWrapper*> allStates;
 			allStates.reserve(m_ScriptStates.size() + 1);
 

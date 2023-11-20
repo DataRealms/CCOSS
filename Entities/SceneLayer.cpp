@@ -307,7 +307,7 @@ namespace RTE {
 		std::swap(m_MainBitmap, m_BackBitmap);
 
 		// Start a new thread to clear the backbuffer bitmap asynchronously.
-		m_BitmapClearTask = g_ThreadMan.GetThreadPool().submit([this, clearTo](BITMAP *bitmap, std::vector<IntRect> drawings) {
+		m_BitmapClearTask = g_ThreadMan.GetPriorityThreadPool().submit([this, clearTo](BITMAP *bitmap, std::vector<IntRect> drawings) {
 			ClearDrawings(bitmap, drawings, clearTo);
 		}, m_BackBitmap, m_Drawings);
 

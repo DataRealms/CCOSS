@@ -208,7 +208,7 @@ namespace RTE {
 		const_cast<Vector &>(pathRequest->startPos) = start;
 		const_cast<Vector &>(pathRequest->targetPos) = end;
 
-		g_ThreadMan.GetThreadPool().push_task([this, start, end, digStrength, callback](std::shared_ptr<volatile PathRequest> volRequest) {
+		g_ThreadMan.GetBackgroundThreadPool().push_task([this, start, end, digStrength, callback](std::shared_ptr<volatile PathRequest> volRequest) {
 			// Cast away the volatile-ness - only matters outside (and complicates the API otherwise)
 			PathRequest &request = const_cast<PathRequest &>(*volRequest);
 

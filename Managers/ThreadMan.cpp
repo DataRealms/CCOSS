@@ -27,7 +27,8 @@ namespace RTE
 
 void ThreadMan::Clear()
 {
-	m_ThreadPool.reset();
+	m_PriorityThreadPool.reset();
+	m_BackgroundThreadPool.reset();
 }
 
 

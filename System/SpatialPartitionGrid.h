@@ -6,6 +6,8 @@
 
 #include "Constants.h"
 
+#include "tsl/hopscotch_set.h"
+
 namespace RTE {
 
 	class Box;
@@ -98,7 +100,7 @@ namespace RTE {
 		std::array<std::vector<std::vector<int>>, Activity::MaxTeamCount + 1> m_Cells; //!< Array of cells for each team. The outside-vector is the vector of cells for the team, and each inside-vector entry contains all MOIDs in the cell's space that can collide with that team.
 		std::array<std::vector<std::vector<int>>, Activity::MaxTeamCount + 1> m_PhysicsCells; //!< Same as m_Cells, but includes only objects that are GetsHitByMOs.
 
-		std::unordered_set<int> m_UsedCellIds; //!< Set of used cell Ids, maintained to avoid wasting time looping through and clearing unused cells.
+		tsl::hopscotch_set<int> m_UsedCellIds; //!< Set of used cell Ids, maintained to avoid wasting time looping through and clearing unused cells.
 
 		/// <summary>
 		/// Gets the Id of the cell at the given SpatialPartitionGrid coordinates, automatically accounting for wrapping.

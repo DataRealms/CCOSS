@@ -326,7 +326,7 @@ int MOSRotating::ReadProperty(const std::string_view &propName, Reader &reader)
 	MatchProperty("SpecialBehaviour_ClearAllAttachables", {
 		// This special property is used to make Attachables work with our limited serialization system, when saving the game. Note that we discard the property value here, because all that matters is whether or not we have the property.
 		reader.ReadPropValue();
-		for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
+		for (auto attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
 			Attachable *attachable = *attachableIterator;
 			++attachableIterator;
 			delete RemoveAttachable(attachable);
@@ -404,7 +404,7 @@ int MOSRotating::Save(Writer &writer) const
         writer << (*aItr);
     }
 */
-    for (std::list<Gib>::const_iterator gItr = m_Gibs.begin(); gItr != m_Gibs.end(); ++gItr)
+    for (auto gItr = m_Gibs.begin(); gItr != m_Gibs.end(); ++gItr)
     {
         writer.NewProperty("AddGib");
         writer << (*gItr);
@@ -582,11 +582,11 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includePositive
 }
 
 void MOSRotating::DestroyScriptState() {
-    for (std::list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) {
+    for (auto itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) {
         (*itr)->DestroyScriptState();
     }
 
-    for (std::list<Attachable *>::const_iterator itr = m_Attachables.begin(); itr != m_Attachables.end(); ++itr) {
+    for (auto itr = m_Attachables.begin(); itr != m_Attachables.end(); ++itr) {
         (*itr)->DestroyScriptState();
     }
 
@@ -605,11 +605,11 @@ void MOSRotating::Destroy(bool notInherited)
     delete m_pAtomGroup;
     delete m_pDeepGroup;
 
-    for (std::list<AEmitter *>::iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) { 
+    for (auto itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) { 
         delete (*itr); 
     }
 
-    for (std::list<Attachable *>::iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr) {
+    for (auto aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr) {
         if (m_HardcodedAttachableUniqueIDsAndRemovers.find((*aItr)->GetUniqueID()) == m_HardcodedAttachableUniqueIDsAndRemovers.end()) {
             delete (*aItr);
         }
@@ -1261,10 +1261,10 @@ void MOSRotating::ResetAllTimers()
 {
     MovableObject::ResetAllTimers();
 
-    for (std::list<AEmitter *>::iterator emitter = m_Wounds.begin(); emitter != m_Wounds.end(); ++emitter)
+    for (auto emitter = m_Wounds.begin(); emitter != m_Wounds.end(); ++emitter)
         (*emitter)->ResetAllTimers();
 
-    for (std::list<Attachable *>::iterator attachable = m_Attachables.begin(); attachable != m_Attachables.end(); ++attachable)
+    for (auto attachable = m_Attachables.begin(); attachable != m_Attachables.end(); ++attachable)
         (*attachable)->ResetAllTimers();
 }
 
@@ -1543,7 +1543,7 @@ void MOSRotating::PostTravel()
 
 
     Attachable *attachable;
-    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
+    for (auto attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
         attachable = *attachableIterator;
         RTEAssert(attachable, "Broken Attachable in PostTravel!");
         ++attachableIterator;
@@ -1614,11 +1614,11 @@ void MOSRotating::Update() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MOSRotating::PostUpdate() {
-    for (std::list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) {
+    for (auto itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) {
         (*itr)->PostUpdate();
     }
 
-    for (std::list<Attachable *>::const_iterator itr = m_Attachables.begin(); itr != m_Attachables.end(); ++itr) {
+    for (auto itr = m_Attachables.begin(); itr != m_Attachables.end(); ++itr) {
         (*itr)->PostUpdate();
     }
 
@@ -1774,7 +1774,7 @@ void MOSRotating::RemoveAndDeleteAttachable(Attachable *attachable) {
 
 void MOSRotating::RemoveOrDestroyAllAttachables(bool destroy) {
     Attachable *attachable;
-    for (std::list<Attachable *>::iterator attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
+    for (auto attachableIterator = m_Attachables.begin(); attachableIterator != m_Attachables.end(); ) {
         attachable = *attachableIterator;
         RTEAssert(attachable, "Broken Attachable!");
         ++attachableIterator;

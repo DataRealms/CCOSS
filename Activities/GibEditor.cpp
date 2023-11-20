@@ -511,7 +511,7 @@ void GibEditor::Update()
                     std::list<MovableObject *> *pEditedGibList = m_pEditorGUI->GetPlacedGibs();
                     MovableObject *pGibCopy = 0;
 
-                    for (std::list<Gib>::iterator gItr = pLoadedGibList->begin(); gItr != pLoadedGibList->end(); ++gItr)
+                    for (auto gItr = pLoadedGibList->begin(); gItr != pLoadedGibList->end(); ++gItr)
                     {
                         pGibCopy = dynamic_cast<MovableObject *>((*gItr).GetParticlePreset()->Clone());
                         if (pGibCopy)

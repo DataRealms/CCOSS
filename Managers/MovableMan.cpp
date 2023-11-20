@@ -33,6 +33,7 @@
 #include "SceneMan.h"
 #include "SettingsMan.h"
 #include "LuaMan.h"
+#include "ThreadMan.h"
 
 #include "tracy/Tracy.hpp"
 
@@ -1738,8 +1739,10 @@ void MovableMan::Update()
         const std::string threadedUpdate = "ThreadedUpdate"; // avoid string reconstruction
 
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-        std::for_each(std::execution::par, luaStates.begin(), luaStates.end(),
-            [&](LuaStateWrapper& luaState) {
+        g_ThreadMan.GetPriorityThreadPool().parallelize_loop(luaStates.size(),
+            [&](int start, int end) {
+                RTEAssert(start + 1 == end, "Threaded script state being updated across multiple threads!");
+                LuaStateWrapper& luaState = luaStates[start];
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
 
                 for (MovableObject *mo : luaState.GetRegisteredMOs()) {
@@ -1747,7 +1750,7 @@ void MovableMan::Update()
                 }
 
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
-            });
+            }).wait();
     }
 
     {
@@ -2163,8 +2166,10 @@ void MovableMan::UpdateControllers()
         }
 
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-        std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
-            [&](LuaStateWrapper &luaState) {
+        g_ThreadMan.GetPriorityThreadPool().parallelize_loop(luaStates.size(),
+            [&](int start, int end) {
+                RTEAssert(start + 1 == end, "Threaded script state being updated across multiple threads!");
+                LuaStateWrapper& luaState = luaStates[start];
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
                 for (Actor *actor : m_Actors) {
                     if (actor->GetLuaState() == &luaState) {
@@ -2172,7 +2177,7 @@ void MovableMan::UpdateControllers()
                     }
                 }
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
-            });
+            }).wait();
 
         for (Actor* actor : m_Actors) {
             actor->GetController()->UpdateAI(ThreadScriptsToRun::SingleThreaded);

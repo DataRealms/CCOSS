@@ -394,9 +394,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     void LuaMan::ClearUserModuleCache() {
-		if (m_GarbageCollectionTask.valid()) {
-			m_GarbageCollectionTask.wait();
-		}
+		m_GarbageCollectionTask.wait();
 
 		m_ScriptMultithreadedtyMap.clear();
 
@@ -1103,9 +1101,8 @@ namespace RTE {
 		}
 
 		// Make sure a GC run isn't happening while we try to apply deletions
-		if (m_GarbageCollectionTask.valid()) {
-			m_GarbageCollectionTask.wait();
-		}
+		m_GarbageCollectionTask.wait();
+
 		// Apply all deletions queued from lua
     	LuabindObjectWrapper::ApplyQueuedDeletions();
 	}
@@ -1114,26 +1111,26 @@ namespace RTE {
 
 	void LuaMan::StartAsyncGarbageCollection() {
 		ZoneScoped;
+		
+		std::vector<LuaStateWrapper*> allStates;
+		allStates.reserve(m_ScriptStates.size() + 1);
 
-		// Start a new thread to perform the GC run.
-		m_GarbageCollectionTask = g_ThreadMan.GetPriorityThreadPool().submit([this]() {
-			std::vector<LuaStateWrapper*> allStates;
-			allStates.reserve(m_ScriptStates.size() + 1);
-
-			allStates.push_back(&m_MasterScriptState);
-			for (LuaStateWrapper& wrapper : m_ScriptStates) {
-				allStates.push_back(&wrapper);
-			}
-
-			std::for_each(std::execution::par, allStates.begin(), allStates.end(),
-				[&](LuaStateWrapper* luaState) {
+		allStates.push_back(&m_MasterScriptState);
+		for (LuaStateWrapper& wrapper : m_ScriptStates) {
+			allStates.push_back(&wrapper);
+		}
+		
+		m_GarbageCollectionTask = BS::multi_future<void>();
+		for (LuaStateWrapper* luaState : allStates) {
+			m_GarbageCollectionTask.push_back(
+				g_ThreadMan.GetPriorityThreadPool().submit([luaState]() {
 					ZoneScopedN("Lua Garbage Collection");
 					std::lock_guard<std::recursive_mutex> lock(luaState->GetMutex());
 					lua_gc(luaState->GetLuaState(), LUA_GCSTEP, 100);
 					lua_gc(luaState->GetLuaState(), LUA_GCSTOP, 0);
-				}
+				})
 			);
-		});
+		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

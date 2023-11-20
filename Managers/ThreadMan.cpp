@@ -28,7 +28,7 @@ namespace RTE
 void ThreadMan::Clear()
 {
 	m_PriorityThreadPool.reset();
-	m_BackgroundThreadPool.reset();
+	m_BackgroundThreadPool.reset(std::thread::hardware_concurrency() / 2);
 }
 
 

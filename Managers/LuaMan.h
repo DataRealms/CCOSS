@@ -6,6 +6,8 @@
 #include "RTETools.h"
 #include "PerformanceMan.h"
 
+#include "BS_thread_pool.hpp"
+
 #define g_LuaMan LuaMan::Instance()
 
 struct lua_State;
@@ -514,7 +516,7 @@ namespace RTE {
 
 		int m_LastAssignedLuaState = 0;
 
-		std::future<void> m_GarbageCollectionTask;
+		BS::multi_future<void> m_GarbageCollectionTask;
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

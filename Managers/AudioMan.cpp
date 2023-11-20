@@ -611,7 +611,11 @@ namespace RTE {
 				result = (result == FMOD_OK) ? dsp_multibandeq->setParameterFloat(1, 22000.0f) : result; // Functionally inactive lowpass filter
 				result = (result == FMOD_OK) ? channel->addDSP(0, dsp_multibandeq) : result;				
 				
-				m_SoundChannelMinimumAudibleDistances.insert({ channelIndex, soundData->MinimumAudibleDistance });
+				{
+					std::scoped_lock<std::mutex> lock(m_SoundChannelMinimumAudibleDistancesMutex);
+					m_SoundChannelMinimumAudibleDistances.insert({ channelIndex, soundData->MinimumAudibleDistance });
+				}
+
 				result = (result == FMOD_OK) ? channel->set3DLevel(m_SoundPanningEffectStrength * soundContainer->GetPanningStrengthMultiplier()) : result;
 
 				FMOD_VECTOR soundContainerPosition = GetAsFMODVector(soundContainer->GetPosition() + soundData->Offset);

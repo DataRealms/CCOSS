@@ -203,9 +203,7 @@ namespace RTE {
 		if (bitmapPath.empty()) {
 			return -1;
 		}
-		if (doAsyncSaves) {
-			g_ActivityMan.IncrementSavingThreadCount();
-		}
+
 		if (m_MainBitmap) {
 			// Make a copy of the bitmap to pass to the thread because the bitmap may be offloaded mid thread and everything will be on fire.
 			BITMAP *outputBitmap = create_bitmap_ex(bitmap_color_depth(m_MainBitmap), m_MainBitmap->w, m_MainBitmap->h);
@@ -218,15 +216,11 @@ namespace RTE {
 					RTEAbort(std::string("Failed to save SceneLayerImpl bitmap to path and name: " + bitmapPath));
 				}
 				destroy_bitmap(bitmapToSave);
-				if (doAsyncSaves) {
-					g_ActivityMan.DecrementSavingThreadCount();
-				}
 			};
 
 			m_BitmapFile.SetDataPath(bitmapPath);
 			if (doAsyncSaves) {
-				std::thread saveThread(saveLayerBitmap, outputBitmap);
-				saveThread.detach();
+				g_ActivityMan.GetSaveGameTask().push_back( g_ThreadMan.GetBackgroundThreadPool().submit(saveLayerBitmap, outputBitmap) );
 			} else {
 				saveLayerBitmap(outputBitmap);
 			}

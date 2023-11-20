@@ -11,6 +11,7 @@
 #include "PerformanceMan.h"
 #include "PostProcessMan.h"
 #include "MetaMan.h"
+#include "ThreadMan.h"
 
 #include "GAScripted.h"
 #include "SLTerrain.h"
@@ -26,6 +27,7 @@
 #include "MultiplayerServerLobby.h"
 #include "MultiplayerGame.h"
 
+
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +37,7 @@ namespace RTE {
 		m_DefaultActivityName = "Tutorial Mission";
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
-		m_ActiveSavingThreadCount = 0;
+		m_SaveGameTask = BS::multi_future<void>();
 		m_IsLoading = false;
 		m_InActivity = false;
 		m_ActivityNeedsRestart = false;
@@ -74,7 +76,10 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ActivityMan::SaveCurrentGame(const std::string &fileName) {
-		if (IsSaving() || m_IsLoading) {
+		m_SaveGameTask.wait();
+		m_SaveGameTask = BS::multi_future<void>();
+
+		if (m_IsLoading) {
 			RTEError::ShowMessageBox("Cannot Save Game\nA game is currently being saved/loaded, try again shortly.");
 			return false;
 		}
@@ -95,8 +100,6 @@ namespace RTE {
 			g_ConsoleMan.PrintString("ERROR: Failed to save scene bitmaps while saving!");
 			return false;
 		}
-
-		IncrementSavingThreadCount();
 
 		// We need a copy of our scene, because we have to do some fixup to remove PLACEONLOAD items and only keep the current MovableMan state.
 		std::unique_ptr<Scene> modifiableScene(dynamic_cast<Scene*>(scene->Clone()));
@@ -131,15 +134,13 @@ namespace RTE {
 		writer->NewPropertyWithValue("PlaceUnitsIfSceneIsRestarted", g_SceneMan.GetPlaceUnitsOnLoad());
 		writer->NewPropertyWithValue("Scene", modifiableScene.get());
 
-		auto saveWriterData = [this](std::unique_ptr<Writer> writerToSave) {
-			// Explicitly flush to disk. This'll happen anyways at the end of this scope, but otherwise this lambda looks rather empty :)
+		auto saveWriterData = [](Writer* writerToSave) {
 			writerToSave->EndWrite();
-			DecrementSavingThreadCount();
+			delete writerToSave;
 		};
 
-		// Make a thread to flush the data to the disk, and detach it so it can run concurrently with the game simulation.
-		std::thread saveThread(saveWriterData, std::move(writer));
-		saveThread.detach();
+		// For some reason I can't std::move a unique ptr in, so just releasing and deleting manually...
+		m_SaveGameTask.push_back( g_ThreadMan.GetBackgroundThreadPool().submit(saveWriterData, writer.release()) );
 
 		// We didn't transfer ownership, so we must be very careful that sceneAltered's deletion doesn't touch the stuff we got from MovableMan.
 		modifiableScene->ClearPlacedObjectSet(Scene::PlacedObjectSets::PLACEONLOAD, false);
@@ -150,11 +151,13 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool ActivityMan::LoadAndLaunchGame(const std::string &fileName) {
-		if (IsSaving() || m_IsLoading) {
+	bool ActivityMan::LoadAndLaunchGame(const std::string &fileName) {	
+		if (m_IsLoading) {
 			RTEError::ShowMessageBox("Cannot Load Game\nA game is currently being saved/loaded, try again shortly.");
 			return false;
 		}
+
+		m_SaveGameTask.wait();
 
 		std::string saveFilePath = g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + "/Save.ini";
 

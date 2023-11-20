@@ -44,6 +44,8 @@
 #include "Magazine.h"
 #include "ThrownDevice.h"
 
+#include "tracy/Tracy.hpp"
+
 namespace RTE {
 
 ConcreteClassInfo(Scene, Entity, 0);
@@ -2967,6 +2969,8 @@ void Scene::BlockUntilAllPathingRequestsComplete() {
 
 void Scene::UpdatePathFinding()
 {
+    ZoneScoped;
+    
     constexpr int nodeUpdatesPerCall = 100;
     constexpr int maxUnupdatedMaterialAreas = 1000;
 
@@ -3099,6 +3103,8 @@ void Scene::Unlock()
 
 void Scene::Update()
 {
+    ZoneScoped;
+
     m_PathfindingUpdated = false;
 
 	if (g_SettingsMan.BlipOnRevealUnseen())

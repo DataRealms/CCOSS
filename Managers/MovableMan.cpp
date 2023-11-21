@@ -881,7 +881,7 @@ void MovableMan::AddActor(Actor *actorToAdd) {
 			if (actorToAdd->IsStatus(Actor::INACTIVE)) { actorToAdd->SetStatus(Actor::STABLE); }
 			actorToAdd->NotResting();
 			actorToAdd->NewFrame();
-			actorToAdd->SetAge(0);
+			actorToAdd->SetAge(g_TimerMan.GetDeltaTimeMS() * -1.0f);
         }
 
         {
@@ -909,7 +909,7 @@ void MovableMan::AddItem(HeldDevice *itemToAdd) {
             if (!itemToAdd->IsSetToDelete()) { itemToAdd->MoveOutOfTerrain(g_MaterialGrass); }
 			itemToAdd->NotResting();
 			itemToAdd->NewFrame();
-			itemToAdd->SetAge(0);
+			itemToAdd->SetAge(g_TimerMan.GetDeltaTimeMS() * -1.0f);
         }
 
         std::lock_guard<std::mutex> lock(m_AddedItemsMutex);
@@ -932,7 +932,7 @@ void MovableMan::AddParticle(MovableObject *particleToAdd){
 			//TODO consider moving particles out of grass. It's old code that was removed because it's slow to do this for every particle.
             particleToAdd->NotResting();
             particleToAdd->NewFrame();
-            particleToAdd->SetAge(0);
+            particleToAdd->SetAge(g_TimerMan.GetDeltaTimeMS() * -1.0f);
         }
 		if (particleToAdd->IsDevice()) {
             std::lock_guard<std::mutex> lock(m_AddedItemsMutex);

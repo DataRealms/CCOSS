@@ -147,6 +147,12 @@ namespace RTE {
 
 			if (m_Frame >= m_FrameCount) { m_Frame = m_FrameCount - 1; }
 		}
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	void MOSParticle::Update() {
+		MOSprite::Update();
 
 		if (m_pScreenEffect) { SetPostScreenEffectToDraw(); }
 	}

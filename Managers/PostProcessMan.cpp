@@ -192,7 +192,7 @@ namespace RTE {
 		for (const PostEffect &postEffect : screenRelativeEffectsList) {
 			// Make sure we won't be adding any effects to a part of the screen that is occluded by menus and such
 			if (postEffect.m_Pos.GetFloorIntX() > screenOcclusionOffsetX && postEffect.m_Pos.GetFloorIntY() > screenOcclusionOffsetY && postEffect.m_Pos.GetFloorIntX() < occludedOffsetX && postEffect.m_Pos.GetFloorIntY() < occludedOffsetY) {
-				m_PostSceneEffects.emplace_back(postEffect.m_Pos + targetBitmapOffset, postEffect.m_Bitmap, postEffect.m_BitmapHash, postEffect.m_Strength, postEffect.m_Angle);
+				m_PostScreenEffects.emplace_back(postEffect.m_Pos + targetBitmapOffset, postEffect.m_Bitmap, postEffect.m_BitmapHash, postEffect.m_Strength, postEffect.m_Angle);
 			}
 		}
 		// Adjust glow areas for the player screen's position on the final buffer

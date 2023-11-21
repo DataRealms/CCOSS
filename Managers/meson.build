@@ -17,6 +17,7 @@ sources += files(
 'PrimitiveMan.cpp',
 'SceneMan.cpp',
 'SettingsMan.cpp',
+'ThreadMan.cpp',
 'TimerMan.cpp',
 'UInputMan.cpp',
 'WindowMan.cpp'

@@ -33,6 +33,7 @@
 #include "SceneMan.h"
 #include "SettingsMan.h"
 #include "LuaMan.h"
+#include "ThreadMan.h"
 
 #include "tracy/Tracy.hpp"
 
@@ -880,7 +881,7 @@ void MovableMan::AddActor(Actor *actorToAdd) {
 			if (actorToAdd->IsStatus(Actor::INACTIVE)) { actorToAdd->SetStatus(Actor::STABLE); }
 			actorToAdd->NotResting();
 			actorToAdd->NewFrame();
-			actorToAdd->SetAge(0);
+			actorToAdd->SetAge(g_TimerMan.GetDeltaTimeMS() * -1.0f);
         }
 
         {
@@ -908,7 +909,7 @@ void MovableMan::AddItem(HeldDevice *itemToAdd) {
             if (!itemToAdd->IsSetToDelete()) { itemToAdd->MoveOutOfTerrain(g_MaterialGrass); }
 			itemToAdd->NotResting();
 			itemToAdd->NewFrame();
-			itemToAdd->SetAge(0);
+			itemToAdd->SetAge(g_TimerMan.GetDeltaTimeMS() * -1.0f);
         }
 
         std::lock_guard<std::mutex> lock(m_AddedItemsMutex);
@@ -931,7 +932,7 @@ void MovableMan::AddParticle(MovableObject *particleToAdd){
 			//TODO consider moving particles out of grass. It's old code that was removed because it's slow to do this for every particle.
             particleToAdd->NotResting();
             particleToAdd->NewFrame();
-            particleToAdd->SetAge(0);
+            particleToAdd->SetAge(g_TimerMan.GetDeltaTimeMS() * -1.0f);
         }
 		if (particleToAdd->IsDevice()) {
             std::lock_guard<std::mutex> lock(m_AddedItemsMutex);
@@ -1738,8 +1739,10 @@ void MovableMan::Update()
         const std::string threadedUpdate = "ThreadedUpdate"; // avoid string reconstruction
 
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-        std::for_each(std::execution::par, luaStates.begin(), luaStates.end(),
-            [&](LuaStateWrapper& luaState) {
+        g_ThreadMan.GetPriorityThreadPool().parallelize_loop(luaStates.size(),
+            [&](int start, int end) {
+                RTEAssert(start + 1 == end, "Threaded script state being updated across multiple threads!");
+                LuaStateWrapper& luaState = luaStates[start];
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
 
                 for (MovableObject *mo : luaState.GetRegisteredMOs()) {
@@ -1747,7 +1750,7 @@ void MovableMan::Update()
                 }
 
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
-            });
+            }).wait();
     }
 
     {
@@ -2052,27 +2055,9 @@ void MovableMan::Update()
 
     ////////////////////////////////////////////////////////////////////////
     // Draw the MO matter and IDs to their layers for next frame
-
-    UpdateDrawMOIDs(g_SceneMan.GetMOIDBitmap());
-
-	// COUNT MOID USAGE PER TEAM  //////////////////////////////////////////////////
-	{
-		int team = Activity::NoTeam;
-
-		for (team = Activity::TeamOne; team < Activity::MaxTeamCount; team++)
-			m_TeamMOIDCount[team] = 0;
-		
-		for (std::vector<MovableObject *>::iterator itr = m_MOIDIndex.begin(); itr != m_MOIDIndex.end(); ++itr)
-		{
-			if (*itr)
-			{
-				team = (*itr)->GetTeam();
-
-				if (team > Activity::NoTeam && team < Activity::MaxTeamCount)
-					m_TeamMOIDCount[team]++;
-			}
-		}
-	}
+    m_DrawMOIDsTask = g_ThreadMan.GetPriorityThreadPool().submit([this]() {
+        UpdateDrawMOIDs(g_SceneMan.GetMOIDBitmap());
+    });
 
 
     ////////////////////////////////////////////////////////////////////
@@ -2099,6 +2084,10 @@ void MovableMan::Update()
 void MovableMan::Travel()
 {
     ZoneScoped;
+
+    if (m_DrawMOIDsTask.valid()) {
+        m_DrawMOIDsTask.wait();
+    }
 
     // Travel Actors
     {
@@ -2163,8 +2152,10 @@ void MovableMan::UpdateControllers()
         }
 
         LuaStatesArray& luaStates = g_LuaMan.GetThreadedScriptStates();
-        std::for_each(std::execution::par, luaStates.begin(), luaStates.end(), 
-            [&](LuaStateWrapper &luaState) {
+        g_ThreadMan.GetPriorityThreadPool().parallelize_loop(luaStates.size(),
+            [&](int start, int end) {
+                RTEAssert(start + 1 == end, "Threaded script state being updated across multiple threads!");
+                LuaStateWrapper& luaState = luaStates[start];
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
                 for (Actor *actor : m_Actors) {
                     if (actor->GetLuaState() == &luaState) {
@@ -2172,7 +2163,7 @@ void MovableMan::UpdateControllers()
                     }
                 }
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
-            });
+            }).wait();
 
         for (Actor* actor : m_Actors) {
             actor->GetController()->UpdateAI(ThreadScriptsToRun::SingleThreaded);
@@ -2308,6 +2299,20 @@ void MovableMan::UpdateDrawMOIDs(BITMAP *pTargetBitmap)
             currentMOID = m_MOIDIndex.size();
         } else {
             particle->SetAsNoID();
+        }
+    }
+
+    // COUNT MOID USAGE PER TEAM  //////////////////////////////////////////////////
+    for (int team = Activity::TeamOne; team < Activity::MaxTeamCount; team++) {
+        m_TeamMOIDCount[team] = 0;
+    }
+
+    for (auto itr = m_MOIDIndex.begin(); itr != m_MOIDIndex.end(); ++itr) {
+        if (*itr) {
+            int team = (*itr)->GetTeam();
+            if (team > Activity::NoTeam && team < Activity::MaxTeamCount) {
+                m_TeamMOIDCount[team]++;
+            }
         }
     }
 }

@@ -5,6 +5,8 @@
 #include "ConsoleMan.h"
 #include "MOSprite.h"
 
+#include "tracy/Tracy.hpp"
+
 namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -306,9 +308,12 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void PrimitiveMan::DrawPrimitives(int player, BITMAP *targetBitmap, const Vector &targetPos) const {
+		ZoneScoped;
+
 		if (m_ScheduledPrimitives.empty()) {
 			return;
 		}
+
 		int lastDrawMode = DRAW_MODE_SOLID;
 		DrawBlendMode lastBlendMode = DrawBlendMode::NoBlend;
 		std::array<int, 4> lastBlendAmounts = { BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend, BlendAmountLimits::MinBlend };

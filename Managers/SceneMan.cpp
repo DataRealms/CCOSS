@@ -36,6 +36,8 @@
 // Temp
 #include "Controller.h"
 
+#include "tracy/Tracy.hpp"
+
 namespace RTE
 {
 
@@ -2759,7 +2761,9 @@ bool SceneMan::AddSceneObject(SceneObject *sceneObject) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::Update(int screenId) {
-	if (!m_pCurrentScene) {
+	ZoneScoped;
+    
+    if (!m_pCurrentScene) {
 		return;
 	}
 
@@ -2805,7 +2809,9 @@ void SceneMan::Update(int screenId) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector &targetPos, bool skipBackgroundLayers, bool skipTerrain) {
-	if (!m_pCurrentScene) {
+	ZoneScoped;
+    
+    if (!m_pCurrentScene) {
 		return;
 	}
 	SLTerrain *terrain = m_pCurrentScene->GetTerrain();

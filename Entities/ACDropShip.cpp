@@ -18,6 +18,8 @@
 #include "AEmitter.h"
 #include "PresetMan.h"
 
+#include "tracy/Tracy.hpp"
+
 namespace RTE {
 
 ConcreteClassInfo(ACDropShip, ACraft, 10);
@@ -272,6 +274,8 @@ MOID ACDropShip::DetectObstacle(float distance)
 
 void ACDropShip::PreControllerUpdate()
 {
+    ZoneScoped;
+
 	ACraft::PreControllerUpdate();
 
     // TODO: Improve and make optional thrusters more robust!

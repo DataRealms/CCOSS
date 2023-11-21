@@ -6,6 +6,8 @@
 #include "PresetMan.h"
 #include "SettingsMan.h"
 
+#include "tracy/Tracy.hpp"
+
 namespace RTE {
 
 	ConcreteClassInfo(ADoor, Actor, 20);
@@ -379,6 +381,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void ADoor::Update() {
+		ZoneScoped;
+
 		if (m_Door) {
 			if (m_DoorState != STOPPED && m_Status != Actor::Status::INACTIVE && m_SensorTimer.IsPastSimMS(m_SensorInterval)) { 
 				UpdateSensors(); 

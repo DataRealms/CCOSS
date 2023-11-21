@@ -6,6 +6,8 @@
 #include "RTETools.h"
 #include "PerformanceMan.h"
 
+#include "BS_thread_pool.hpp"
+
 #define g_LuaMan LuaMan::Instance()
 
 struct lua_State;
@@ -311,8 +313,7 @@ namespace RTE {
 		RandomGenerator m_RandomGenerator; //!< The random number generator used for this lua state.
 	};
 
-	static constexpr int c_NumThreadedLuaStates = 16;
-	typedef std::array<LuaStateWrapper, c_NumThreadedLuaStates> LuaStatesArray;
+	typedef std::vector<LuaStateWrapper> LuaStatesArray;
 
 	/// <summary>
 	/// The singleton manager of each Lua state.
@@ -515,7 +516,7 @@ namespace RTE {
 
 		int m_LastAssignedLuaState = 0;
 
-		std::thread m_GCThread;
+		BS::multi_future<void> m_GarbageCollectionTask;
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

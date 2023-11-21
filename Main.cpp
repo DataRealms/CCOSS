@@ -46,6 +46,7 @@
 #include "CameraMan.h"
 #include "ActivityMan.h"
 #include "PrimitiveMan.h"
+#include "ThreadMan.h"
 
 #include "tracy/Tracy.hpp"
 
@@ -61,6 +62,7 @@ namespace RTE {
 	/// Initializes all the essential managers.
 	/// </summary>
 	void InitializeManagers() {
+		ThreadMan::Construct();
 		TimerMan::Construct();
 		PresetMan::Construct();
 		SettingsMan::Construct();
@@ -84,6 +86,7 @@ namespace RTE {
 		ActivityMan::Construct();
 		LoadingScreen::Construct();
 
+		g_ThreadMan.Initialize();
 		g_SettingsMan.Initialize();
 		g_WindowMan.Initialize();
 

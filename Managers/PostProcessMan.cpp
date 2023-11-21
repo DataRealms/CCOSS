@@ -177,7 +177,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::AdjustEffectsPosToPlayerScreen(int playerScreen, BITMAP *targetBitmap, const Vector &targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList) const {
+	void PostProcessMan::AdjustEffectsPosToPlayerScreen(int playerScreen, BITMAP *targetBitmap, const Vector &targetBitmapOffset, std::list<PostEffect> &screenRelativeEffectsList, std::list<Box> &screenRelativeGlowBoxesList) {
 		int screenOcclusionOffsetX = g_CameraMan.GetScreenOcclusion(playerScreen).GetFloorIntX();
 		int screenOcclusionOffsetY = g_CameraMan.GetScreenOcclusion(playerScreen).GetFloorIntY();
 		int occludedOffsetX = targetBitmap->w + screenOcclusionOffsetX;
@@ -185,21 +185,21 @@ namespace RTE {
 
 		// Copy post effects received by client if in network mode
 		if (g_FrameMan.GetDrawNetworkBackBuffer()) {
-			g_PostProcessMan.GetNetworkPostEffectsList(0, screenRelativeEffectsList);
+			GetNetworkPostEffectsList(0, screenRelativeEffectsList);
 		}
 
 		// Adjust for the player screen's position on the final buffer
 		for (const PostEffect &postEffect : screenRelativeEffectsList) {
 			// Make sure we won't be adding any effects to a part of the screen that is occluded by menus and such
 			if (postEffect.m_Pos.GetFloorIntX() > screenOcclusionOffsetX && postEffect.m_Pos.GetFloorIntY() > screenOcclusionOffsetY && postEffect.m_Pos.GetFloorIntX() < occludedOffsetX && postEffect.m_Pos.GetFloorIntY() < occludedOffsetY) {
-				g_PostProcessMan.GetPostScreenEffectsList()->push_back(PostEffect(postEffect.m_Pos + targetBitmapOffset, postEffect.m_Bitmap, postEffect.m_BitmapHash, postEffect.m_Strength, postEffect.m_Angle));
+				m_PostSceneEffects.emplace_back(postEffect.m_Pos + targetBitmapOffset, postEffect.m_Bitmap, postEffect.m_BitmapHash, postEffect.m_Strength, postEffect.m_Angle);
 			}
 		}
 		// Adjust glow areas for the player screen's position on the final buffer
 		for (const Box &glowBox : screenRelativeGlowBoxesList) {
-			g_PostProcessMan.GetPostScreenGlowBoxesList()->push_back(glowBox);
+			m_PostScreenGlowBoxes.push_back(glowBox);
 			// Adjust each added glow area for the player screen's position on the final buffer
-			g_PostProcessMan.GetPostScreenGlowBoxesList()->back().m_Corner += targetBitmapOffset;
+			m_PostScreenGlowBoxes.back().m_Corner += targetBitmapOffset;
 		}
 	}
 
@@ -208,9 +208,6 @@ namespace RTE {
 	void PostProcessMan::RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, int strength, float angle) {
 		// These effects get applied when there's a drawn frame that followed one or more sim updates.
 		// They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates.
-		if (effect && !effect->extra) {
-			LazyInitBitmap(effect);
-		}
 		
 		if (effect && g_TimerMan.SimUpdatesSinceDrawn() >= 0) {
 			m_PostSceneEffects.push_back(PostEffect(effectPos, effect, hash, strength, angle));
@@ -516,7 +513,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void PostProcessMan::DrawPostScreenEffects() const {
+	void PostProcessMan::DrawPostScreenEffects() {
 		BITMAP *effectBitmap = nullptr;
 		float effectPosX = 0;
 		float effectPosY = 0;
@@ -530,6 +527,9 @@ namespace RTE {
 
 		for (const PostEffect &postEffect : m_PostScreenEffects) {
 			if (postEffect.m_Bitmap) {
+				if (!postEffect.m_Bitmap->extra) {
+					LazyInitBitmap(postEffect.m_Bitmap);
+				}
 				effectBitmap = postEffect.m_Bitmap;
 				effectStrength = postEffect.m_Strength / 255.f;
 				effectPosX = postEffect.m_Pos.m_X;

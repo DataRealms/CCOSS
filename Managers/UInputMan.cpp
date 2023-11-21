@@ -651,16 +651,7 @@ namespace RTE {
 			return false;
 		}
 		if (IsInMultiplayerMode()) {
-			if (whichPlayer < Players::PlayerOne || whichPlayer >= Players::MaxPlayerCount) {
-				for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; player++) {
-					if (m_NetworkServerChangedMouseButtonState[player][whichButton]) {
-						return m_NetworkServerChangedMouseButtonState[player][whichButton];
-					}
-				}
-				return m_NetworkServerChangedMouseButtonState[Players::PlayerOne][whichButton];
-			} else {
-				return m_NetworkServerChangedMouseButtonState[whichPlayer][whichButton];
-			}
+			return GetNetworkMouseButtonState(whichPlayer, whichButton, whichState);
 		}
 
 		switch (whichState) {
@@ -670,6 +661,30 @@ namespace RTE {
 				return s_CurrentMouseButtonStates[whichButton] && s_ChangedMouseButtonStates[whichButton];
 			case InputState::Released:
 				return !s_CurrentMouseButtonStates[whichButton] && s_ChangedMouseButtonStates[whichButton];
+			default:
+				RTEAbort("Undefined InputState value passed in. See InputState enumeration.");
+				return false;
+		}
+	}
+
+	bool UInputMan::GetNetworkMouseButtonState(int whichPlayer, int whichButton, InputState whichState) const {
+		
+		if (whichPlayer == Players::NoPlayer || whichPlayer >= Players::MaxPlayerCount) {
+			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+				if (GetNetworkMouseButtonState(player, whichButton, whichState)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		switch (whichState) {
+			case InputState::Held:
+				return m_NetworkServerPreviousMouseButtonState[whichPlayer][whichButton];
+			case InputState::Pressed:
+				return m_NetworkServerPreviousMouseButtonState[whichPlayer][whichButton] && m_NetworkServerChangedMouseButtonState[whichPlayer][whichButton];
+			case InputState::Released:
+				return !m_NetworkServerPreviousMouseButtonState[whichPlayer][whichButton] && m_NetworkServerChangedMouseButtonState[whichPlayer][whichButton];
 			default:
 				RTEAbort("Undefined InputState value passed in. See InputState enumeration.");
 				return false;

@@ -209,7 +209,7 @@ bool PresetMan::LoadAllDataModules() {
 
 const DataModule * PresetMan::GetDataModule(int whichModule)
 {
-    RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Tried to access an out of bounds data module number!");
     return m_pDataModules[whichModule];
 }
 
@@ -220,11 +220,9 @@ const DataModule * PresetMan::GetDataModule(int whichModule)
 
 const std::string PresetMan::GetDataModuleName(int whichModule)
 {
-    RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Tried to access an out of bounds data module number!");
     return m_pDataModules[whichModule]->GetFileName();
 }
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetModuleID
@@ -374,7 +372,7 @@ bool PresetMan::AddEntityPreset(Entity *pEntToAdd, int whichModule, bool overwri
 
 const Entity * PresetMan::GetEntityPreset(std::string type, std::string preset, int whichModule)
 {
-    RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
     const Entity *pRetEntity = 0;
 

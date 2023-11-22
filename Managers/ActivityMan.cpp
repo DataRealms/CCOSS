@@ -38,7 +38,6 @@ namespace RTE {
 		m_Activity = nullptr;
 		m_StartActivity = nullptr;
 		m_SaveGameTask = BS::multi_future<void>();
-		m_IsLoading = false;
 		m_InActivity = false;
 		m_ActivityNeedsRestart = false;
 		m_ActivityNeedsResume = false;
@@ -78,11 +77,6 @@ namespace RTE {
 	bool ActivityMan::SaveCurrentGame(const std::string &fileName) {
 		m_SaveGameTask.wait();
 		m_SaveGameTask = BS::multi_future<void>();
-
-		if (m_IsLoading) {
-			RTEError::ShowMessageBox("Cannot Save Game\nA game is currently being saved/loaded, try again shortly.");
-			return false;
-		}
 
 		Scene *scene = g_SceneMan.GetScene();
 		GAScripted *activity = dynamic_cast<GAScripted *>(GetActivity());
@@ -152,11 +146,6 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool ActivityMan::LoadAndLaunchGame(const std::string &fileName) {	
-		if (m_IsLoading) {
-			RTEError::ShowMessageBox("Cannot Load Game\nA game is currently being saved/loaded, try again shortly.");
-			return false;
-		}
-
 		m_SaveGameTask.wait();
 
 		std::string saveFilePath = g_PresetMan.GetFullModulePath(c_UserScriptedSavesModuleName) + "/" + fileName + "/Save.ini";
@@ -167,7 +156,6 @@ namespace RTE {
 		}
 
 		Reader reader(saveFilePath, true, nullptr, false);
-		m_IsLoading = true;
 
 		std::unique_ptr<Scene> scene(std::make_unique<Scene>());
 		std::unique_ptr<GAScripted> activity(std::make_unique<GAScripted>());
@@ -201,8 +189,6 @@ namespace RTE {
 		g_SceneMan.SetSceneToLoad(originalScenePresetName, placeObjectsIfSceneIsRestarted, placeUnitsIfSceneIsRestarted);
 
 		g_ConsoleMan.PrintString("SYSTEM: Game \"" + fileName + "\" loaded!");
-
-		m_IsLoading = false;
 		return true;
 	}
 

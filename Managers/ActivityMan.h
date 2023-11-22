@@ -281,7 +281,6 @@ namespace RTE {
 		std::unique_ptr<Activity> m_StartActivity; //!< The starting condition of the next Activity to be (re)started.
 
 		BS::multi_future<void> m_SaveGameTask; //!< The current save game task.
-		bool m_IsLoading; //! Whether or not a game is loading.
 
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
 		bool m_ActivityNeedsRestart; //!< Whether the current Activity needs to be restarted.

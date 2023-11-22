@@ -360,43 +360,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	bool LuaMan::IsScriptMultithreaded(const std::string &scriptPath) {
-		// First check our cache
-		auto itr = m_ScriptMultithreadedtyMap.find(scriptPath);
-		if (itr != m_ScriptMultithreadedtyMap.end()) {
-			return itr->second;
-		}
-
-		// Actually open the file and check if it has the multithread-safe mark
-		std::ifstream scriptFile = std::ifstream(scriptPath.c_str());
-		if (!scriptFile.good()) {
-			m_ScriptMultithreadedtyMap.insert({ scriptPath, false });
-			return false;
-		}
-
-		std::string::size_type commentPos;
-		bool inBlockComment = false;
-		while (!scriptFile.eof()) {
-			char rawLine[512];
-			scriptFile.getline(rawLine, 512);
-			std::string line = rawLine;
-
-			if (line.find("--[[MULTITHREAD]]--", 0) != std::string::npos) {
-				m_ScriptMultithreadedtyMap.insert({scriptPath, true});
-				return true;
-			}
-		}
-
-		m_ScriptMultithreadedtyMap.insert({scriptPath, false});
-		return false;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
     void LuaMan::ClearUserModuleCache() {
 		m_GarbageCollectionTask.wait();
-
-		m_ScriptMultithreadedtyMap.clear();
 
 		m_MasterScriptState.ClearLuaScriptCache();
 		for (LuaStateWrapper& luaState : m_ScriptStates) {

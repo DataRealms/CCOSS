@@ -335,12 +335,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int Attachable::UpdateScripts(ThreadScriptsToRun scriptsToRun) {
+	int Attachable::UpdateScripts() {
 		if (m_Parent && !m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
-			RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, {}, {}, scriptsToRun);
+			RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, {}, {});
 		}
 
-		return MOSRotating::UpdateScripts(scriptsToRun);
+		return MOSRotating::UpdateScripts();
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -389,13 +389,12 @@ namespace RTE {
 		}
 
 		// If we're attached to something, MovableMan doesn't own us, and therefore isn't calling our UpdateScripts method (and neither is our parent), so we should here.
-		// We run our single-threaded scripts here, so that single-threaded behaviour is unchanged from prior to the multithreaded lua implementation
 		if (m_Parent && GetRootParent()->HasEverBeenAddedToMovableMan()) {
 			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 			if (!m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
-				RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, {}, {}, ThreadScriptsToRun::SingleThreaded);
+				RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, {}, {});
 			}
-			UpdateScripts(ThreadScriptsToRun::SingleThreaded);
+			UpdateScripts();
 			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 		}
 

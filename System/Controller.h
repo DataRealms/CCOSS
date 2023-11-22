@@ -315,15 +315,15 @@ namespace RTE {
 		/// </summary>
 		/// <param name="controlledActor">A pointer to a an Actor which is being controlled by this. Ownership is NOT transferred!</param>
 		void SetControlledActor(Actor *controlledActor = nullptr) { m_ControlledActor = controlledActor; }
+
+		/// <summary>
+		/// Returns whether the AI should be updated this frame.
+		/// </summary>
+		/// <returns>Whether the AI should be updated this frame.</returns>
+		bool ShouldUpdateAIThisFrame() const;
 #pragma endregion
 
 #pragma region Virtual Override Methods
-		/// <summary>
-		/// Updates this Controller. Supposed to be done every frame.
-		/// </summary>
-		/// <param name="scriptsToRun">Whether to update single-threaded, multi-threaded, or both types of AI scripts.</param>
-		void UpdateAI(ThreadScriptsToRun scriptsToRun);
-
 		/// <summary>
 		/// Updates this Controller. Supposed to be done every frame.
 		/// </summary>
@@ -417,8 +417,6 @@ namespace RTE {
 		/// Requests and applies input from the player.
 		/// </summary>
 		void GetInputFromPlayer();
-
-		bool ShouldUpdateAIThisFrame() const;
 #pragma endregion
 
 		/// <summary>

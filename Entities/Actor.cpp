@@ -1250,16 +1250,6 @@ float Actor::EstimateDigStrength() const {
     return m_AIBaseDigStrength;
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Actor::UpdateAIScripted(ThreadScriptsToRun scriptsToRun) {
-    RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true, {}, {}, {}, scriptsToRun);
-    if (scriptsToRun == ThreadScriptsToRun::SingleThreaded) {
-        // If we're in a SingleThreaded context, we run the MultiThreaded scripts synced updates
-         RunScriptedFunctionInAppropriateScripts("SyncedUpdateAI", false, true, {}, {}, {}, ThreadScriptsToRun::Both);
-    }
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          VerifyMOIDs
 //////////////////////////////////////////////////////////////////////////////////////////

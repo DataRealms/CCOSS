@@ -332,15 +332,6 @@ namespace RTE {
 		{Directions::Left, c_PI},
 		{Directions::Right, 0.0F}
 	};
-
-	/// <summary>
-	/// Enum of thread script types to run.
-	/// </summary>
-	enum class ThreadScriptsToRun {
-		SingleThreaded,
-		MultiThreaded,
-		Both
-	};
 #pragma endregion
 
 #pragma region Un-Definitions

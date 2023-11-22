@@ -212,7 +212,7 @@ enum MOType
     /// <param name="functionEntityArguments">Optional vector of entity pointers that should be passed into the Lua function. Their internal Lua states will not be accessible. Defaults to empty.</param>
     /// <param name="functionLiteralArguments">Optional vector of strings, that should be passed into the Lua function. Entries must be surrounded with escaped quotes (i.e.`\"`) they'll be passed in as-is, allowing them to act as booleans, etc.. Defaults to empty.</param>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>(), const std::vector<LuabindObjectWrapper*> &functionObjectArguments = std::vector<LuabindObjectWrapper*>(), ThreadScriptsToRun scriptsToRun = ThreadScriptsToRun::Both);
+    int RunScriptedFunctionInAppropriateScripts(const std::string &functionName, bool runOnDisabledScripts = false, bool stopOnError = false, const std::vector<const Entity *> &functionEntityArguments = std::vector<const Entity *>(), const std::vector<std::string_view> &functionLiteralArguments = std::vector<std::string_view>(), const std::vector<LuabindObjectWrapper*> &functionObjectArguments = std::vector<LuabindObjectWrapper*>());
 
     /// <summary>
     /// Cleans up and destroys the script state of this object, calling the Destroy callback in lua
@@ -1517,9 +1517,8 @@ enum MOType
     /// <summary>
 	/// Updates this MovableObject's Lua scripts.
 	/// </summary>
-    /// <param name="scriptsToRun">Whether to run this objects single-threaded or multi-threaded scripts.</params>
     /// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-	virtual int UpdateScripts(ThreadScriptsToRun scriptsToRun);
+	virtual int UpdateScripts();
 
     /// <summary>
     /// Gets a const reference to this MOSRotating's map of string values.
@@ -1899,9 +1898,9 @@ enum MOType
 	bool DrawToTerrain(SLTerrain *terrain);
 
 	/// <summary>
-	/// Used to get the Lua state that handles our multithread-safe scripts.
+	/// Used to get the Lua state that handles our scripts.
 	/// </summary>
-    /// <returns>Our lua state. Can potentially be nullptr.</returns>
+    /// <returns>Our lua state. Can potentially be nullptr if we're not setup yet.</returns>
     LuaStateWrapper* GetLuaState() { return m_ThreadedLuaState; }
 
 	/// <summary>
@@ -2071,10 +2070,9 @@ protected:
 
 	bool m_IsTraveling; //!< Prevents self-intersection while traveling.
 
-    LuaStateWrapper *m_ThreadedLuaState; //!< The lua state that will runs our multithreaded lua scripts.
+    LuaStateWrapper *m_ThreadedLuaState; //!< The lua state that will runs our lua scripts.
 
     struct LuaFunction {
-        bool m_ScriptIsMultithreaded; //!< Whether this function is in a script with the --[[MULTITHREAD]]- thread safety tag.
         bool m_ScriptIsEnabled; //!< Whether this function is in an enabled script.
         std::unique_ptr<LuabindObjectWrapper> m_LuaFunction; //!< The lua function itself.
     };
@@ -2083,7 +2081,7 @@ protected:
     std::unordered_map<std::string, bool> m_AllLoadedScripts; //!< A map of script paths to the enabled state of the given script.
     std::unordered_map<std::string, std::vector<LuaFunction>> m_FunctionsAndScripts; //!< A map of function names to vectors of Lua functions. Used to maintain script execution order and avoid extraneous Lua calls.
 
-    volatile bool m_RequestedSyncedUpdate; //!< For optimisation purposes, multithreaded scripts explicitly request a synced update if they want one.
+    volatile bool m_RequestedSyncedUpdate; //!< For optimisation purposes, scripts explicitly request a synced update if they want one.
 
     std::unordered_map<std::string, std::string> m_StringValueMap; //<! Map to store any generic strings available from script
     std::unordered_map<std::string, double> m_NumberValueMap; //<! Map to store any generic numbers available from script

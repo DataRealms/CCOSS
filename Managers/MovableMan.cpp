@@ -1563,55 +1563,55 @@ void MovableMan::RedrawOverlappingMOIDs(MovableObject *pOverlapsThis)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void callLuaFunctionOnMORecursive(MovableObject* mo, const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments, const std::vector<std::string_view>& functionLiteralArguments, const std::vector<LuabindObjectWrapper*>& functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
+void callLuaFunctionOnMORecursive(MovableObject* mo, const std::string& functionName, const std::vector<const Entity*>& functionEntityArguments, const std::vector<std::string_view>& functionLiteralArguments, const std::vector<LuabindObjectWrapper*>& functionObjectArguments) {
     if (MOSRotating* mosr = dynamic_cast<MOSRotating*>(mo)) {
         for (auto attachablrItr = mosr->GetAttachableList().begin(); attachablrItr != mosr->GetAttachableList().end(); ) {
             Attachable* attachable = *attachablrItr;
             ++attachablrItr;
 
-            attachable->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
-            callLuaFunctionOnMORecursive(attachable, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+            attachable->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
+            callLuaFunctionOnMORecursive(attachable, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
         }
 
         for (auto woundItr = mosr->GetWoundList().begin(); woundItr != mosr->GetWoundList().end(); ) {
             AEmitter* wound = *woundItr;
             ++woundItr;
 
-            wound->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
-            callLuaFunctionOnMORecursive(wound, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+            wound->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
+            callLuaFunctionOnMORecursive(wound, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
         }
     }
 
-    mo->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+    mo->RunScriptedFunctionInAppropriateScripts(functionName, false, false, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, bool includeAdded, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, const std::vector<LuabindObjectWrapper*> &functionObjectArguments, ThreadScriptsToRun scriptsToRun) {
+void MovableMan::RunLuaFunctionOnAllMOs(const std::string &functionName, bool includeAdded, const std::vector<const Entity*> &functionEntityArguments, const std::vector<std::string_view> &functionLiteralArguments, const std::vector<LuabindObjectWrapper*> &functionObjectArguments) {
     if (includeAdded) {
         for (Actor* actor : m_AddedActors) {
-            callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+            callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
         }
 
         for (MovableObject *item : m_AddedItems) {
-            callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+            callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
         }
 
         for (MovableObject* particle : m_AddedParticles) {
-            callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+            callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
         }
     }
     
     for (Actor *actor : m_Actors) {
-        callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        callLuaFunctionOnMORecursive(actor, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
     }
 
     for (MovableObject *item : m_Items) {
-        callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        callLuaFunctionOnMORecursive(item, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
     }
 
     for (MovableObject* particle : m_Particles) {
-        callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments, scriptsToRun);
+        callLuaFunctionOnMORecursive(particle, functionName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
     }
 }
 
@@ -1746,7 +1746,7 @@ void MovableMan::Update()
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
 
                 for (MovableObject *mo : luaState.GetRegisteredMOs()) {
-                    mo->RunScriptedFunctionInAppropriateScripts(threadedUpdate, false, false, {}, {}, {}, ThreadScriptsToRun::MultiThreaded);
+                    mo->RunScriptedFunctionInAppropriateScripts(threadedUpdate, false, false, {}, {}, {});
                 }
 
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
@@ -1763,7 +1763,7 @@ void MovableMan::Update()
 
             for (MovableObject* mo : luaState.GetRegisteredMOs()) {
                 if (mo->HasRequestedSyncedUpdate()) {
-                    mo->RunScriptedFunctionInAppropriateScripts(syncedUpdate, false, false, {}, {}, {}, ThreadScriptsToRun::MultiThreaded);
+                    mo->RunScriptedFunctionInAppropriateScripts(syncedUpdate, false, false, {}, {}, {});
                     mo->ResetRequestedSyncedUpdateFlag();
                 }
             }
@@ -1782,7 +1782,7 @@ void MovableMan::Update()
                 actor->Update();
 
                 g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-                actor->UpdateScripts(ThreadScriptsToRun::Both);
+                actor->UpdateScripts();
                 g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
                 actor->ApplyImpulses();
@@ -1799,7 +1799,7 @@ void MovableMan::Update()
                 (*iIt)->Update();
 
                 g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-                (*iIt)->UpdateScripts(ThreadScriptsToRun::Both);
+                (*iIt)->UpdateScripts();
                 g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
                 (*iIt)->ApplyImpulses();
@@ -1817,7 +1817,7 @@ void MovableMan::Update()
                 particle->Update();
 
                 g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
-                particle->UpdateScripts(ThreadScriptsToRun::Both);
+                particle->UpdateScripts();
                 g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 
                 particle->ApplyImpulses();
@@ -2164,15 +2164,17 @@ void MovableMan::UpdateControllers()
                 LuaStateWrapper& luaState = luaStates[start];
                 g_LuaMan.SetThreadLuaStateOverride(&luaState);
                 for (Actor *actor : m_Actors) {
-                    if (actor->GetLuaState() == &luaState) {
-                        actor->GetController()->UpdateAI(ThreadScriptsToRun::MultiThreaded);
+                    if (actor->GetLuaState() == &luaState && actor->GetController()->ShouldUpdateAIThisFrame()) {
+                        actor->RunScriptedFunctionInAppropriateScripts("ThreadedUpdateAI", false, true, {}, {}, {});
                     }
                 }
                 g_LuaMan.SetThreadLuaStateOverride(nullptr);
             }).wait();
 
         for (Actor* actor : m_Actors) {
-            actor->GetController()->UpdateAI(ThreadScriptsToRun::SingleThreaded);
+            if (actor->GetController()->ShouldUpdateAIThisFrame()) {
+                actor->RunScriptedFunctionInAppropriateScripts("UpdateAI", false, true, {}, {}, {});
+            }
         }
     }
     g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActorsAI);

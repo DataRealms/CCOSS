@@ -91,7 +91,7 @@ public:
 
 // Concrete allocation and cloning definitions
 EntityAllocation(Actor);
-AddScriptFunctionNames(MOSRotating, "UpdateAI", "SyncedUpdateAI", "OnControllerInputModeChange");
+AddScriptFunctionNames(MOSRotating, "ThreadedUpdateAI", "UpdateAI", "OnControllerInputModeChange");
 SerializableOverrideMethods;
 ClassInfoGetters;
 
@@ -1154,18 +1154,6 @@ ClassInfoGetters;
     /// </summary>
 	/// <param name="newAIBaseDigStrength">The new base dig strength for this Actor.</param>
     void SetAIBaseDigStrength(float newAIBaseDigStrength) { m_AIBaseDigStrength = newAIBaseDigStrength; }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Method:  UpdateAIScripted
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Updates this' AI state with the provided scripted AI Update function.
-// Arguments:       None.
-// Return value:    Whether there was an AI Update function defined for this in its script,
-//                  and if it was executed successfully.
-
-	void UpdateAIScripted(ThreadScriptsToRun scriptsToRun);
-
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  PreControllerUpdate

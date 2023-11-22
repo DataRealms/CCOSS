@@ -23,6 +23,7 @@
 #include "Actor.h"
 #include "SLTerrain.h"
 
+#include "Base64/base64.h"
 #include "tracy/Tracy.hpp"
 
 namespace RTE {
@@ -1102,6 +1103,18 @@ const std::string & MovableObject::GetStringValue(const std::string &key) const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+std::string MovableObject::GetEncodedStringValue(const std::string &key) const
+{
+    auto itr = m_StringValueMap.find(key);
+    if (itr == m_StringValueMap.end()) {
+        return ms_EmptyString;
+    }
+
+    return base64_decode(itr->second);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 double MovableObject::GetNumberValue(const std::string& key) const
 {
     auto itr = m_NumberValueMap.find(key);
@@ -1129,6 +1142,13 @@ Entity* MovableObject::GetObjectValue(const std::string &key) const
 void MovableObject::SetStringValue(const std::string &key, const std::string &value)
 {
     m_StringValueMap[key] = value;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MovableObject::SetEncodedStringValue(const std::string &key, const std::string &value)
+{
+    m_StringValueMap[key] = base64_encode(value, true);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

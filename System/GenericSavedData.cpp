@@ -83,7 +83,7 @@ namespace RTE {
 
 	int GenericSavedData::GenericSavedEncodedStrings::ReadProperty(const std::string_view &propName, Reader &reader) {
 		std::string value = reader.ReadPropValue();
-		m_Data[std::string(propName)] = base64_decode(value);; // until we get P0919R2.
+		m_Data[std::string(propName)] = base64_decode(value); // until we get P0919R2.
 		return 0;
 	}
 

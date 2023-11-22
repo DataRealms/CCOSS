@@ -1541,6 +1541,13 @@ enum MOType
     const std::string & GetStringValue(const std::string &key) const;
 
     /// <summary>
+    /// Returns an encoded string value associated with the specified key or "" if it does not exist.
+    /// </summary>
+    /// <param name="key">Key to retrieve value.</params>
+    /// <returns>The value associated with the key.</returns>
+    std::string GetEncodedStringValue(const std::string &key) const;
+
+    /// <summary>
     /// Returns the number value associated with the specified key or 0 if it does not exist.
     /// </summary>
     /// <param name="key">Key to retrieve value.</params>
@@ -1560,6 +1567,13 @@ enum MOType
     /// <param name="key">Key to retrieve value.</params>
     /// <param name="value">The new value to be associated with the key.</returns>
     void SetStringValue(const std::string &key, const std::string &value);
+
+    /// <summary>
+    /// Sets the string value associated with the specified key.
+    /// </summary>
+    /// <param name="key">Key to retrieve value.</params>
+    /// <param name="value">The new value to be associated with the key.</returns>
+    void SetEncodedStringValue(const std::string &key, const std::string &value);
 
     /// <summary>
     /// Sets the number value associated with the specified key.

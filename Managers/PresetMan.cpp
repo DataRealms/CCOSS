@@ -209,7 +209,7 @@ bool PresetMan::LoadAllDataModules() {
 
 const DataModule * PresetMan::GetDataModule(int whichModule)
 {
-    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule >= 0 && whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
     return m_pDataModules[whichModule];
 }
 
@@ -220,7 +220,7 @@ const DataModule * PresetMan::GetDataModule(int whichModule)
 
 const std::string PresetMan::GetDataModuleName(int whichModule)
 {
-    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule >= 0 && whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
     return m_pDataModules[whichModule]->GetFileName();
 }
 
@@ -360,7 +360,7 @@ std::string PresetMan::GetFullModulePath(const std::string &modulePath) const {
 
 bool PresetMan::AddEntityPreset(Entity *pEntToAdd, int whichModule, bool overwriteSame, std::string readFromFile)
 {
-    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule >= 0 && whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
     return m_pDataModules[whichModule]->AddEntityPreset(pEntToAdd, overwriteSame, readFromFile);
 }
@@ -372,7 +372,7 @@ bool PresetMan::AddEntityPreset(Entity *pEntToAdd, int whichModule, bool overwri
 
 const Entity * PresetMan::GetEntityPreset(std::string type, std::string preset, int whichModule)
 {
-    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Tried to access an out of bounds data module number!");
+    RTEAssert(whichModule < (int)m_pDataModules.size(), "Tried to access an out of bounds data module number!");
 
     const Entity *pRetEntity = 0;
 
@@ -427,7 +427,7 @@ const Entity * PresetMan::GetEntityPreset(Reader &reader)
 {
     // The reader is aware of which DataModule it is reading within
     int whichModule = reader.GetReadModuleID();
-    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Reader has an out of bounds module number!");
+    RTEAssert(whichModule >= 0 && whichModule < (int)m_pDataModules.size(), "Reader has an out of bounds module number!");
 
     std::string ClassName;
     const Entity::ClassInfo *pClass = 0;
@@ -488,7 +488,7 @@ Entity * PresetMan::ReadReflectedPreset(Reader &reader)
 {
     // The reader is aware of which DataModule it's reading within
     int whichModule = reader.GetReadModuleID();
-    RTEAssert(whichModule >= 0 && whichModule < m_pDataModules.size(), "Reader has an out of bounds module number!");
+    RTEAssert(whichModule >= 0 && whichModule < (int)m_pDataModules.size(), "Reader has an out of bounds module number!");
 
     std::string ClassName;
     const Entity::ClassInfo *pClass = 0;
@@ -546,7 +546,7 @@ bool PresetMan::GetAllOfType(std::list<Entity *> &entityList, std::string type, 
     // Specific module
     else
     {
-        RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
+        RTEAssert(whichModule < (int)m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID!");
         foundAny = m_pDataModules[whichModule]->GetAllOfType(entityList, type);
     }
 
@@ -595,7 +595,7 @@ bool PresetMan::GetAllOfGroups(std::list<Entity *> &entityList, const std::vecto
 			foundAny = dataModule->GetAllOfGroups(entityList, groups, type) || foundAny;
 		}
 	} else {
-		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID in PresetMan::GetAllOfGroups!");
+		RTEAssert(whichModule < (int)m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID in PresetMan::GetAllOfGroups!");
 		foundAny = m_pDataModules[whichModule]->GetAllOfGroups(entityList, groups, type);
 	}
 	return foundAny;
@@ -617,7 +617,7 @@ bool PresetMan::GetAllNotOfGroups(std::list<Entity *> &entityList, const std::ve
 			foundAny = dataModule->GetAllNotOfGroups(entityList, groups, type) || foundAny;
 		}
 	} else {
-		RTEAssert(whichModule < m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID in PresetMan::GetAllNotOfGroups!");
+		RTEAssert(whichModule < (int)m_pDataModules.size(), "Trying to get from an out of bounds DataModule ID in PresetMan::GetAllNotOfGroups!");
 		foundAny = m_pDataModules[whichModule]->GetAllNotOfGroups(entityList, groups, type);
 	}
 	return foundAny;

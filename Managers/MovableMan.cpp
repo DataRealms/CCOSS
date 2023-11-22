@@ -2091,6 +2091,7 @@ void MovableMan::Travel()
 
     // Travel Actors
     {
+        ZoneScopedN("Actors Travel")
         g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActorsTravel);
         for (auto aIt = m_Actors.begin(); aIt != m_Actors.end(); ++aIt)
         {
@@ -2108,6 +2109,7 @@ void MovableMan::Travel()
 
     // Travel items
     {
+        ZoneScopedN("Items Travel")
         for (auto iIt = m_Items.begin(); iIt != m_Items.end(); ++iIt)
         {
             if (!((*iIt)->IsUpdated()))
@@ -2123,6 +2125,7 @@ void MovableMan::Travel()
 
     // Travel particles
     {
+        ZoneScopedN("Particles Travel")
         g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ParticlesTravel);
         for (auto parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
         {
@@ -2329,14 +2332,27 @@ void MovableMan::Draw(BITMAP *pTargetBitmap, const Vector &targetPos)
     ZoneScoped;
 
     // Draw objects to accumulation bitmap, in reverse order so actors appear on top.
-    for (std::deque<MovableObject *>::iterator parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt)
-        (*parIt)->Draw(pTargetBitmap, targetPos);
 
-	for (std::deque<MovableObject *>::reverse_iterator itmIt = m_Items.rbegin(); itmIt != m_Items.rend(); ++itmIt)
-        (*itmIt)->Draw(pTargetBitmap, targetPos);
+    {
+        ZoneScopedN("Particles Draw")
+        for (std::deque<MovableObject*>::iterator parIt = m_Particles.begin(); parIt != m_Particles.end(); ++parIt) {
+            (*parIt)->Draw(pTargetBitmap, targetPos);
+        }
+    }
 
-    for (std::deque<Actor *>::reverse_iterator aIt = m_Actors.rbegin(); aIt != m_Actors.rend(); ++aIt)
-        (*aIt)->Draw(pTargetBitmap, targetPos);
+    {
+        ZoneScopedN("Items Draw")
+        for (std::deque<MovableObject*>::reverse_iterator itmIt = m_Items.rbegin(); itmIt != m_Items.rend(); ++itmIt) {
+            (*itmIt)->Draw(pTargetBitmap, targetPos);
+        }
+    }
+
+    {
+        ZoneScopedN("Actors Draw")
+        for (std::deque<Actor*>::reverse_iterator aIt = m_Actors.rbegin(); aIt != m_Actors.rend(); ++aIt) {
+            (*aIt)->Draw(pTargetBitmap, targetPos);
+        }
+    }
 }
 
 

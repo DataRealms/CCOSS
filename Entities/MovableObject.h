@@ -2071,6 +2071,7 @@ protected:
 	bool m_IsTraveling; //!< Prevents self-intersection while traveling.
 
     LuaStateWrapper *m_ThreadedLuaState; //!< The lua state that will runs our lua scripts.
+    bool m_ForceIntoMasterLuaState; //!< This is awful, and only exists for automovers because they mangle global state all over the place. TODO - change automovers to use messages.
 
     struct LuaFunction {
         bool m_ScriptIsEnabled; //!< Whether this function is in an enabled script.

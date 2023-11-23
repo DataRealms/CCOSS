@@ -90,6 +90,7 @@ void MovableObject::Clear()
     m_NumberValueMap.clear();
     m_ObjectValueMap.clear();
     m_ThreadedLuaState = nullptr;
+    m_ForceIntoMasterLuaState = false;
     m_ScriptObjectName.clear();
     m_ScreenEffectFile.Reset();
     m_pScreenEffect = 0;
@@ -128,6 +129,10 @@ void MovableObject::Clear()
 }
 
 LuaStateWrapper & MovableObject::GetAndLockStateForScript(const std::string &scriptPath, const LuaFunction *function) {
+    if (m_ForceIntoMasterLuaState) {
+        m_ThreadedLuaState = &g_LuaMan.GetMasterScriptState();
+    }
+    
     if (m_ThreadedLuaState == nullptr) {
         m_ThreadedLuaState = g_LuaMan.GetAndLockFreeScriptState();
     } else {
@@ -243,6 +248,7 @@ int MovableObject::Create(const MovableObject &reference)
     m_CanBeSquished = reference.m_CanBeSquished;
     m_HUDVisible = reference.m_HUDVisible;
 
+    m_ForceIntoMasterLuaState = reference.m_ForceIntoMasterLuaState;
     for (auto &[scriptPath, scriptEnabled] : reference.m_AllLoadedScripts) {
         LoadScript(scriptPath, scriptEnabled);
     }
@@ -399,6 +405,7 @@ int MovableObject::ReadProperty(const std::string_view &propName, Reader &reader
 	MatchProperty("IgnoreTerrain", { reader >> m_IgnoreTerrain; });
     MatchProperty("SimUpdatesBetweenScriptedUpdates", { reader >> m_SimUpdatesBetweenScriptedUpdates; });
     MatchProperty("AddCustomValue", { ReadCustomValueProperty(reader); });
+    MatchProperty("ForceIntoMasterLuaState", { reader >> m_ForceIntoMasterLuaState; });
 
     EndPropertyList;
 }
@@ -517,6 +524,9 @@ int MovableObject::Save(Writer &writer) const
         writer.NewPropertyWithValue(key, value);
     }
 
+    writer.NewProperty("ForceIntoMasterLuaState");
+    writer << m_ForceIntoMasterLuaState;
+
     return 0;
 }
 
@@ -621,14 +631,12 @@ int MovableObject::ReloadScripts() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int MovableObject::InitializeObjectScripts() {
-    if (m_ThreadedLuaState) {
-        std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex());
-        m_ScriptObjectName = "_ScriptedObjects[\"" + std::to_string(m_UniqueID) + "\"]";
-        m_ThreadedLuaState->RegisterMO(this);
-        m_ThreadedLuaState->SetTempEntity(this);
-        if (m_ThreadedLuaState->RunScriptString("_ScriptedObjects = _ScriptedObjects or {}; " + m_ScriptObjectName + " = To" + GetClassName() + "(LuaMan.TempEntity); ") < 0) {
-            RTEAbort("Failed to initialize object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
-        }
+    std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex());
+    m_ScriptObjectName = "_ScriptedObjects[\"" + std::to_string(m_UniqueID) + "\"]";
+    m_ThreadedLuaState->RegisterMO(this);
+    m_ThreadedLuaState->SetTempEntity(this);
+    if (m_ThreadedLuaState->RunScriptString("_ScriptedObjects = _ScriptedObjects or {}; " + m_ScriptObjectName + " = To" + GetClassName() + "(LuaMan.TempEntity); ") < 0) {
+        RTEAbort("Failed to initialize object scripts for " + GetModuleAndPresetName() + ". Please report this to a developer.");
     }
 
 	if (!m_FunctionsAndScripts.at("Create").empty() && RunScriptedFunctionInAppropriateScripts("Create", false, true) < 0) {

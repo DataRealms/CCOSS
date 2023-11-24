@@ -31,6 +31,8 @@
 #include "GUI.h"
 #include "AllegroBitmap.h"
 
+#include "tracy/Tracy.hpp"
+
 namespace RTE {
 
 ConcreteClassInfo(ACrab, Actor, 20);
@@ -997,6 +999,8 @@ void ACrab::OnNewMovePath()
 
 void ACrab::PreControllerUpdate()
 {
+    ZoneScoped;
+
     Actor::PreControllerUpdate();
 
     float deltaTime = g_TimerMan.GetDeltaTimeSecs();
@@ -1383,6 +1387,8 @@ void ACrab::PreControllerUpdate()
 
 void ACrab::Update() 
 {
+    ZoneScoped;
+
     Actor::Update();
 
     ////////////////////////////////////

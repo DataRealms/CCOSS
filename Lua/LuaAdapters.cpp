@@ -625,6 +625,14 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	std::list<Entity *> * LuaAdaptersPresetMan::GetAllEntitiesOfGroup(PresetMan &presetMan, const std::string &group, const std::string &type, int whichModule) {
+		std::list<Entity *> *entityList = new std::list<Entity *>();
+		presetMan.GetAllOfGroup(*entityList, group, type, whichModule);
+		return entityList;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	const std::list<Box> * LuaAdaptersSceneMan::WrapBoxes(SceneMan &sceneMan, const Box &boxToWrap) {
 		std::list<Box> *wrappedBoxes = new std::list<Box>();
 		sceneMan.WrapBox(boxToWrap, *wrappedBoxes);

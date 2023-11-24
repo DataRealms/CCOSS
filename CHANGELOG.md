@@ -12,7 +12,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Added a save/load game menu which can be accessed from the main or pause menus, which allows the user to save their current progress in an activity to resume at a later date.  
 
-- New `Settings.ini` property `EnableMultithreadedLua`, which can be used to enable multithreaded Lua scripts and AI, for any lua script with the `--[[MULTITHREAD]]--` tag. Defaults to true.  
+- Massive performance improvements, especially in very large scenes with lots of actors.  
+
+- New multithreaded AI and Lua scripts.
+	Lua scripts now have extra callback functions `ThreadedUpdateAI(self)`, `ThreadedUpdate(self)` and `SyncedUpdate(self)`.  
+	The `Threaded` callback functions are run in a multithreaded fashion, whereas `Update` runs in a singlethreaded fashion (where it's safe to modify global state or affect other objects).  
+	The `SyncedUpdate` callback is called in a single-threaded fashion, but only when an MO directly requests it by calling `self:RequestSyncedUpdate()`. This gives greater performance, as the script can avoid any single-threaded updates being called on it until it explicitly needs it.  
 
 - New generic Lua messaging system, to allow scripts on objects to communicate with other objects or scripts.
 	Scripts on `MovableObject` now have new callback functions `OnMessage(self, message, context)` and `OnGlobalMessage(self, message, context)`.  
@@ -27,8 +32,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	New INI and Lua (R/W) property `MinimumFuelRatio`, which defines the ratio of current fuel to max fuel that has to be met to fire the jetpack. Defaults to 0 for Standard and 0.25 for JumpPacks.  
 	New INI and Lua (R/W) property `CanAdjustAngleWhileFiring`, which defines whether the jet angle can change while the jetpack is active. Defaults to true.  
 	New INI and Lua (R/W) property `AdjustsThrottleForWeight`, which defines whether the jetpack will adjust it's throttle (between `NegativeThrottleMultiplier` and `PositiveThrottleMultiplier`) to account for any extra inventory mass. Increased throttle will decrease jet time accordingly. Defaults to true.  
-
-- New Lua event function `SyncedUpdate()`, which will be called in a thread-safe synchronized manner and allows multithreaded scripts to modify game state in a safe and consistent way.  
 
 - Multithreaded asynchronous pathfinding, which dramatically improves performance on large maps and improves AI responsiveness.
 	New `Actor` Lua property (R) `IsWaitingOnNewMovePath`, which returns true while the actor is currently calculating a new path.  

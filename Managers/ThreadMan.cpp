@@ -19,11 +19,6 @@ using namespace std;
 namespace RTE
 {
 
-#define DELTABUFFERSIZE 30
-
-const string ThreadMan::m_ClassName = "ThreadMan";
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          Clear
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -32,6 +27,8 @@ const string ThreadMan::m_ClassName = "ThreadMan";
 
 void ThreadMan::Clear()
 {
+	m_PriorityThreadPool.reset();
+	m_BackgroundThreadPool.reset(std::thread::hardware_concurrency() / 2);
 }
 
 
@@ -42,7 +39,6 @@ void ThreadMan::Clear()
 
 int ThreadMan::Create()
 {
-
 	return 0;
 }
 
@@ -54,8 +50,6 @@ int ThreadMan::Create()
 
 void ThreadMan::Destroy()
 {
-
-
     Clear();
 }
 

@@ -214,7 +214,7 @@ namespace RTE {
 
 	bool Controller::ShouldUpdateAIThisFrame() const
 	{
-		if (IsDisabled()) {
+		if (IsDisabled() || m_InputMode != InputMode::CIM_AI) {
 			return false;
 		}
 
@@ -226,19 +226,6 @@ namespace RTE {
 		}
 
 		return true;
-	}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	void Controller::UpdateAI(ThreadScriptsToRun scriptsToRun) {
-		if (m_InputMode != InputMode::CIM_AI || !ShouldUpdateAIThisFrame()) {
-			return;
-		}
-
-		// Run the scripted AI for the controlled Actor
-		if (m_ControlledActor && m_ControlledActor->ObjectScriptsInitialized()) {
-			m_ControlledActor->UpdateAIScripted(scriptsToRun);
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

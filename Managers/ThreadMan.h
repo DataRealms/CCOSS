@@ -14,13 +14,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // Inclusions of header files
 
-#include "global_types.h"
-
-
-//#include <boost/thread.hpp>
-
 #include "Singleton.h"
 #define g_ThreadMan ThreadMan::Instance()
+
+#include "BS_thread_pool.hpp"
 
 namespace RTE
 {
@@ -52,6 +49,11 @@ public:
 // Arguments:       None.
 
     ThreadMan() { Clear(); Create(); }
+
+    /// <summary>
+    /// Makes the TimerMan object ready for use.
+    /// </summary>
+    void Initialize() { };
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -96,22 +98,14 @@ public:
     void Destroy();
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetClassName
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Gets the class name of this Entity.
-// Arguments:       None.
-// Return value:    A string with the friendly-formatted type name of this object.
+    BS::thread_pool& GetPriorityThreadPool() { return m_PriorityThreadPool; }
 
-    virtual const std::string & GetClassName() const { return m_ClassName; }
+    BS::thread_pool& GetBackgroundThreadPool() { return m_BackgroundThreadPool; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations
 
 protected:
-
-    // Member variables
-    static const std::string m_ClassName;
 
 
 
@@ -134,6 +128,11 @@ private:
     ThreadMan(const ThreadMan &reference);
     ThreadMan & operator=(const ThreadMan &rhs);
 
+    // For tasks that we want to be performed ASAP, i.e needs to be complete this frame at some point
+    BS::thread_pool m_PriorityThreadPool;
+
+    // For background tasks that we can just let happen whenever over multiple frames
+    BS::thread_pool m_BackgroundThreadPool;
 };
 
 } // namespace RTE

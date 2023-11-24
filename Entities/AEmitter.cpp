@@ -591,6 +591,17 @@ void AEmitter::Update()
 			m_WasEmitting = false;
 		}
 	}
+
+    // Set the screen flash effect to draw at the final post processing stage
+    if (m_EmitEnabled && (!m_FlashOnlyOnBurst || m_BurstTriggered) && m_pFlash && m_pFlash->GetScreenEffect()) {
+        // Fudge the glow pos forward a bit so it aligns nicely with the flash
+        Vector emitPos(m_pFlash->GetScreenEffect()->w * 0.3F * m_FlashScale, 0);
+        emitPos.RadRotate(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
+        emitPos = m_Pos + RotateOffset(m_EmissionOffset) + emitPos;
+        if (m_EffectAlwaysShows || !g_SceneMan.ObscuredPoint(emitPos)) {
+            g_PostProcessMan.RegisterPostEffect(emitPos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), RandomNum(m_pFlash->GetEffectStopStrength(), m_pFlash->GetEffectStartStrength()) * std::clamp(m_FlashScale, 0.0F, 1.0F), m_pFlash->GetEffectRotAngle());
+        }
+    }
 }
 
 
@@ -616,17 +627,6 @@ void AEmitter::Draw(BITMAP *pTargetBitmap,
     if (m_pFlash && m_pFlash->IsDrawnAfterParent() &&
         !onlyPhysical && mode == g_DrawColor && m_EmitEnabled && (!m_FlashOnlyOnBurst || m_BurstTriggered))
         m_pFlash->Draw(pTargetBitmap, targetPos, mode, onlyPhysical);
-
-	// Set the screen flash effect to draw at the final post processing stage
-	if (m_EmitEnabled && (!m_FlashOnlyOnBurst || m_BurstTriggered) && m_pFlash && m_pFlash->GetScreenEffect() && mode == g_DrawColor && !onlyPhysical) {
-		// Fudge the glow pos forward a bit so it aligns nicely with the flash
-		Vector emitPos(m_pFlash->GetScreenEffect()->w * 0.3F * m_FlashScale, 0);
-		emitPos.RadRotate(m_HFlipped ? c_PI + m_Rotation.GetRadAngle() - m_EmitAngle.GetRadAngle() : m_Rotation.GetRadAngle() + m_EmitAngle.GetRadAngle());
-		emitPos = m_Pos + RotateOffset(m_EmissionOffset) + emitPos;
-		if (!g_SceneMan.ObscuredPoint(emitPos)) {
-			g_PostProcessMan.RegisterPostEffect(emitPos, m_pFlash->GetScreenEffect(), m_pFlash->GetScreenEffectHash(), RandomNum(m_pFlash->GetEffectStopStrength(), m_pFlash->GetEffectStartStrength()) * std::clamp(m_FlashScale, 0.0F, 1.0F), m_pFlash->GetEffectRotAngle());
-		}
-	}
 }
 
 } // namespace RTE

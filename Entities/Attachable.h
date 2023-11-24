@@ -455,9 +455,8 @@ namespace RTE {
 		/// <summary>
 		/// Updates this Attachable's Lua scripts.
 		/// </summary>
-		/// <param name="scriptsToRun">Whether to run this objects single-threaded or multi-threaded scripts.</params>
 		/// <returns>An error return value signaling success or any particular failure. Anything below 0 is an error signal.</returns>
-		int UpdateScripts(ThreadScriptsToRun scriptsToRun) override;
+		int UpdateScripts() override;
 
 		/// <summary>
 		/// Updates this Attachable. Supposed to be done every frame.

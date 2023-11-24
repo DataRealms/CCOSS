@@ -131,6 +131,11 @@ namespace RTE {
 		bool OnSink(HitData &hd) override { return false; }
 
 		/// <summary>
+		/// Updates this MOParticle. Supposed to be done every frame.
+		/// </summary>
+		void Update() override;
+
+		/// <summary>
 		/// Draws this MOSParticle's current graphical representation to a BITMAP of choice.
 		/// </summary>
 		/// <param name="targetBitmap">A pointer to a BITMAP to draw on.</param>

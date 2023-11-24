@@ -4,6 +4,8 @@
 #include "Singleton.h"
 #include "Activity.h"
 
+#include "BS_thread_pool.hpp"
+
 #define g_ActivityMan ActivityMan::Instance()
 
 namespace RTE {
@@ -49,20 +51,10 @@ namespace RTE {
 		Activity * GetActivity() const { return m_Activity.get(); }
 
 		/// <summary>
-		/// Gets whether or not there is a game currently being saved.
+		/// Gets the async save game task.
 		/// </summary>
-		/// <returns>Whether or not there is a game currently being saved.</returns>
-		bool IsSaving() const { return m_ActiveSavingThreadCount > 0; }
-
-		/// <summary>
-		/// Increments the saving thread count.
-		/// </summary>
-		void IncrementSavingThreadCount() { m_ActiveSavingThreadCount++; }
-
-		/// <summary>
-		/// Decrements the saving thread count.
-		/// </summary>
-		void DecrementSavingThreadCount() { m_ActiveSavingThreadCount--; }
+		/// <returns>The savegame task.</returns>
+		BS::multi_future<void>& GetSaveGameTask() { return m_SaveGameTask; }
 
 		/// <summary>
 		/// Indicates whether the game is currently running or not (not editing, over or paused).
@@ -288,8 +280,7 @@ namespace RTE {
 		std::unique_ptr<Activity> m_Activity; //!< The currently active Activity.
 		std::unique_ptr<Activity> m_StartActivity; //!< The starting condition of the next Activity to be (re)started.
 
-		std::atomic<int> m_ActiveSavingThreadCount; //!< The number of threads currently saving.
-		bool m_IsLoading; //! Whether or not a game is loading.
+		BS::multi_future<void> m_SaveGameTask; //!< The current save game task.
 
 		bool m_InActivity; //!< Whether we are currently in game (as in, not in the main menu or any other out-of-game menus), regardless of its state.
 		bool m_ActivityNeedsRestart; //!< Whether the current Activity needs to be restarted.

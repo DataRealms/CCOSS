@@ -944,7 +944,7 @@ public:
     /// <summary>
     /// Runs a lua function on all MOs in the simulation, including owned child MOs.
     /// </summary>
-    void RunLuaFunctionOnAllMOs(const std::string& functionName, bool includeAdded, const std::vector<const Entity*>& functionEntityArguments = std::vector<const Entity*>(), const std::vector<std::string_view>& functionLiteralArguments = std::vector<std::string_view>(), const std::vector<LuabindObjectWrapper*>& functionObjectArguments = std::vector<LuabindObjectWrapper*>(), ThreadScriptsToRun scriptsToRun = ThreadScriptsToRun::Both);
+    void RunLuaFunctionOnAllMOs(const std::string& functionName, bool includeAdded, const std::vector<const Entity*>& functionEntityArguments = std::vector<const Entity*>(), const std::vector<std::string_view>& functionLiteralArguments = std::vector<std::string_view>(), const std::vector<LuabindObjectWrapper*>& functionObjectArguments = std::vector<LuabindObjectWrapper*>());
 
     /// <summary>
     /// Clears all cached lua functions on all MOs, including owned child MOs.
@@ -993,6 +993,9 @@ protected:
 
     // Mutex to ensure actors don't change team roster from seperate threads at the same time
     std::mutex m_ActorRosterMutex;
+
+    // Async to draw MOIDs while rendering
+    std::future<void> m_DrawMOIDsTask;
 
     // Roster of each team's actors, sorted by their X positions in the scene. Actors not owned here
     std::list<Actor *> m_ActorRoster[Activity::MaxTeamCount];

@@ -6,6 +6,8 @@
 #include "RTETools.h"
 #include "PerformanceMan.h"
 
+#include "BS_thread_pool.hpp"
+
 #define g_LuaMan LuaMan::Instance()
 
 struct lua_State;
@@ -311,8 +313,7 @@ namespace RTE {
 		RandomGenerator m_RandomGenerator; //!< The random number generator used for this lua state.
 	};
 
-	static constexpr int c_NumThreadedLuaStates = 16;
-	typedef std::array<LuaStateWrapper, c_NumThreadedLuaStates> LuaStatesArray;
+	typedef std::vector<LuaStateWrapper> LuaStatesArray;
 
 	/// <summary>
 	/// The singleton manager of each Lua state.
@@ -385,12 +386,6 @@ namespace RTE {
 		/// </summary>
 		/// <returns>A script state.</returns>
 		LuaStateWrapper * GetAndLockFreeScriptState();
-
-		/// <summary>
-		/// Returns whether a script is safe to run in a multithreaded manner.
-		/// </summary>
-		/// <returns>Whether the script is thread-safe.</returns>
-		bool IsScriptMultithreaded(const std::string &scriptPath);
 
 		/// <summary>
 		/// Clears internal Lua package tables from all user-defined modules. Those must be reloaded with ReloadAllScripts().
@@ -508,14 +503,12 @@ namespace RTE {
 		LuaStateWrapper m_MasterScriptState;
 		LuaStatesArray m_ScriptStates;
 
-		std::unordered_map<std::string, bool> m_ScriptMultithreadedtyMap;
-
 		std::vector<std::function<void()>> m_ScriptCallbacks; //!< A list of callback functions we'll trigger before processing lua scripts. This allows other threads (i.e pathing requests) to safely trigger callbacks in lua
 		std::mutex m_ScriptCallbacksMutex; //!< Mutex to ensure multiple threads aren't modifying the script callback vector at the same time.
 
 		int m_LastAssignedLuaState = 0;
 
-		std::thread m_GCThread;
+		BS::multi_future<void> m_GarbageCollectionTask;
 
 		/// <summary>
 		/// Clears all the member variables of this LuaMan, effectively resetting the members of this abstraction level only.

@@ -29,8 +29,7 @@ namespace RTE {
 		m_SimSpeed = 1.0F;
 		m_TimeScale = 1.0F;
 		m_SimPaused = false;
-		// This gets dynamically turned on for short periods when sim gets heavy (explosions) and slow-mo effect is appropriate.
-		m_OneSimUpdatePerFrame = false;
+		m_OneSimUpdatePerFrame = true;
 		m_SimSpeedLimited = true;
 	}
 

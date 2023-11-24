@@ -155,8 +155,6 @@ namespace RTE {
 			std::snprintf(str, sizeof(str), "Sim Updates Since Last Drawn: %i", g_TimerMan.SimUpdatesSinceDrawn());
 			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 90, str, GUIFont::Left);
 
-			if (g_TimerMan.IsOneSimUpdatePerFrame()) { guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 100, "ONE Sim Update Per Frame!", GUIFont::Left); }
-
 			if (int totalPlayingChannelCount = 0, realPlayingChannelCount = 0; g_AudioMan.GetPlayingChannelCount(&totalPlayingChannelCount, &realPlayingChannelCount)) {
 				std::snprintf(str, sizeof(str), "Sound Channels: %d / %d Real | %d / %d Virtual", realPlayingChannelCount, g_AudioMan.GetTotalRealChannelCount(), totalPlayingChannelCount - realPlayingChannelCount, g_AudioMan.GetTotalVirtualChannelCount());
 			}

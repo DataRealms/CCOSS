@@ -1,0 +1,10 @@
+**/test
+**/tests
+
+**/.github
+**/.git
+
+**/.clang-format
+**/.clang-tidy
+**/.editorconfig
+**/.astyle

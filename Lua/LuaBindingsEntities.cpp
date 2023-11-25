@@ -1341,10 +1341,6 @@ namespace RTE {
 		.property("Buyable", &SceneObject::IsBuyable)
 		.property("BuyableMode", &SceneObject::GetBuyableMode)
 		
-		.def("IsBuyable", &SceneObject::IsBuyable)
-		.def("IsBuyableInBuyMenuOnly", &SceneObject::IsBuyableInBuyMenuOnly)
-		.def("IsBuyableInObjectPickerOnly", &SceneObject::IsBuyableInObjectPickerOnly)
-		.def("IsBuyableInScriptOnly", &SceneObject::IsBuyableInScriptOnly)
 		.def("IsOnScenePoint", &SceneObject::IsOnScenePoint)
 		.def("GetGoldValue", &SceneObject::GetGoldValueOld)
 		.def("GetGoldValue", &SceneObject::GetGoldValue)

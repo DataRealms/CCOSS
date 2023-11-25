@@ -101,6 +101,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `Scene` Lua functions `AddNavigatableArea(areaName)` and `ClearNavigatableAreas()`. This can be used to restrict pathfinding to only search a set of areas that have been added to the scene before via `Scene:SetArea(area)`.
 
+- New `ADoor` Lua function `ResetSensorTimer()`. Resets the sensor timer for that door, making it take the full SensorInterval again for it to detect actors.
+
+- New `SceneObject` Lua functions `IsBuyableInScriptOnly()`, `IsBuyableInObjectPickerOnly()`, and `IsBuyableInBuyMenuOnly()`. 
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -140,6 +144,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Improved loading times on large maps.  
 
 - Script values, i.e `GetStringValue`, `RemoveStringValue`, `StringValueExists` and the associated functions for `GetNumberValue`/`GetObjectValue`, have been moved from MOSRotating to MovableObject, so now any object with script support can use these values.  
+
+- The `SceneObject` property `IsBuyable` is now a function, e.g. `IsBuyable()`.
 
 </details>
 

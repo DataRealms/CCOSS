@@ -1338,11 +1338,13 @@ namespace RTE {
 		.property("RotAngle", &SceneObject::GetRotAngle, &SceneObject::SetRotAngle)
 		.property("Team", &SceneObject::GetTeam, &SceneObject::SetTeam)
 		.property("PlacedByPlayer", &SceneObject::GetPlacedByPlayer, &SceneObject::SetPlacedByPlayer)
+		.property("Buyable", &SceneObject::IsBuyable)
+		.property("BuyableMode", &SceneObject::GetBuyableMode)
 		
 		.def("IsBuyable", &SceneObject::IsBuyable)
-		.def("IsBuyableInScriptOnly", &SceneObject::IsBuyableInScriptOnly)
-		.def("IsBuyableInObjectPickerOnly", &SceneObject::IsBuyableInObjectPickerOnly)
 		.def("IsBuyableInBuyMenuOnly", &SceneObject::IsBuyableInBuyMenuOnly)
+		.def("IsBuyableInObjectPickerOnly", &SceneObject::IsBuyableInObjectPickerOnly)
+		.def("IsBuyableInScriptOnly", &SceneObject::IsBuyableInScriptOnly)
 		.def("IsOnScenePoint", &SceneObject::IsOnScenePoint)
 		.def("GetGoldValue", &SceneObject::GetGoldValueOld)
 		.def("GetGoldValue", &SceneObject::GetGoldValue)
@@ -1350,7 +1352,14 @@ namespace RTE {
 		.def("GetGoldValueString", &SceneObject::GetGoldValueString)
 		.def("GetTotalValue", &SceneObject::GetTotalValue)
 
-		.def("GetTotalValue", &LuaAdaptersSceneObject::GetTotalValue);
+		.def("GetTotalValue", &LuaAdaptersSceneObject::GetTotalValue)
+		
+		.enum_("BuyableMode")[
+			luabind::value("NORESTRICTIONS", SceneObject::BuyableMode::NoRestrictions),
+			luabind::value("BUYMENUONLY", SceneObject::BuyableMode::BuyMenuOnly),
+			luabind::value("OBJECTPICKERONLY", SceneObject::BuyableMode::ObjectPickerOnly),
+			luabind::value("SCRIPTONLY", SceneObject::BuyableMode::ScriptOnly)];
+		
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

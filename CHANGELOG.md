@@ -105,6 +105,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - New `SceneObject` Lua functions `IsBuyableInScriptOnly()`, `IsBuyableInObjectPickerOnly()`, and `IsBuyableInBuyMenuOnly()`. 
 
+- Exposed `SceneObject` property `BuyableMode` to Lua (R).
+
+- `Enum` binding for `SceneObject.BuyableMode`: `NORESTRICTIONS = 0, BUYMENUONLY = 1, OBJECTPICKERONLY = 2, SCRIPTONLY = 2`.  
+
 </details>
 
 <details><summary><b>Changed</b></summary>
@@ -145,7 +149,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 - Script values, i.e `GetStringValue`, `RemoveStringValue`, `StringValueExists` and the associated functions for `GetNumberValue`/`GetObjectValue`, have been moved from MOSRotating to MovableObject, so now any object with script support can use these values.  
 
-- The `SceneObject` property `IsBuyable` is now a function, e.g. `IsBuyable()`.
+- The `SceneObject` property `IsBuyable` is now a function, e.g. `IsBuyable()`. `Buyable` replaces it as a property.
 
 </details>
 

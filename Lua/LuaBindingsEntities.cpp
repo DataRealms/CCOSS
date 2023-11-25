@@ -371,6 +371,7 @@ namespace RTE {
 		.def("OpenDoor", &ADoor::OpenDoor)
 		.def("CloseDoor", &ADoor::CloseDoor)
 		.def("StopDoor", &ADoor::StopDoor)
+		.def("ResetSensorTimer", &ADoor::ResetSensorTimer)
 		.def("SetClosedByDefault", &ADoor::SetClosedByDefault)
 
 		.enum_("DoorState")[
@@ -1338,6 +1339,9 @@ namespace RTE {
 		.property("Team", &SceneObject::GetTeam, &SceneObject::SetTeam)
 		.property("PlacedByPlayer", &SceneObject::GetPlacedByPlayer, &SceneObject::SetPlacedByPlayer)
 		.property("IsBuyable", &SceneObject::IsBuyable)
+		.property("IsBuyableInScriptOnly", &SceneObject::IsBuyableInScriptOnly)
+		.property("IsBuyableInObjectPickerOnly", &SceneObject::IsBuyableInObjectPickerOnly)
+		.property("IsBuyableInBuyMenuOnly", &SceneObject::IsBuyableInBuyMenuOnly)
 
 		.def("IsOnScenePoint", &SceneObject::IsOnScenePoint)
 		.def("GetGoldValue", &SceneObject::GetGoldValueOld)

@@ -1338,11 +1338,11 @@ namespace RTE {
 		.property("RotAngle", &SceneObject::GetRotAngle, &SceneObject::SetRotAngle)
 		.property("Team", &SceneObject::GetTeam, &SceneObject::SetTeam)
 		.property("PlacedByPlayer", &SceneObject::GetPlacedByPlayer, &SceneObject::SetPlacedByPlayer)
-		.property("IsBuyable", &SceneObject::IsBuyable)
-		.property("IsBuyableInScriptOnly", &SceneObject::IsBuyableInScriptOnly)
-		.property("IsBuyableInObjectPickerOnly", &SceneObject::IsBuyableInObjectPickerOnly)
-		.property("IsBuyableInBuyMenuOnly", &SceneObject::IsBuyableInBuyMenuOnly)
-
+		
+		.def("IsBuyable", &SceneObject::IsBuyable)
+		.def("IsBuyableInScriptOnly", &SceneObject::IsBuyableInScriptOnly)
+		.def("IsBuyableInObjectPickerOnly", &SceneObject::IsBuyableInObjectPickerOnly)
+		.def("IsBuyableInBuyMenuOnly", &SceneObject::IsBuyableInBuyMenuOnly)
 		.def("IsOnScenePoint", &SceneObject::IsOnScenePoint)
 		.def("GetGoldValue", &SceneObject::GetGoldValueOld)
 		.def("GetGoldValue", &SceneObject::GetGoldValue)

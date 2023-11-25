@@ -464,6 +464,12 @@ public:
 
     bool IsBuyable() const { return m_Buyable; }
 
+    /// <summary>
+    /// Gets the BuyableMode of this SceneObject.
+    /// </summary>
+    /// <returns>The BuyableMode of this SceneObject</returns>
+    BuyableMode GetBuyableMode() const { return m_BuyableMode; }
+
 	/// <summary>
 	/// Gets whether this SceneObject is available only in the BuyMenu list when buyable.
 	/// </summary>

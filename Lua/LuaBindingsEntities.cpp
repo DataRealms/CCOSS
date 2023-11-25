@@ -371,6 +371,7 @@ namespace RTE {
 		.def("OpenDoor", &ADoor::OpenDoor)
 		.def("CloseDoor", &ADoor::CloseDoor)
 		.def("StopDoor", &ADoor::StopDoor)
+		.def("ResetSensorTimer", &ADoor::ResetSensorTimer)
 		.def("SetClosedByDefault", &ADoor::SetClosedByDefault)
 
 		.enum_("DoorState")[
@@ -1337,8 +1338,9 @@ namespace RTE {
 		.property("RotAngle", &SceneObject::GetRotAngle, &SceneObject::SetRotAngle)
 		.property("Team", &SceneObject::GetTeam, &SceneObject::SetTeam)
 		.property("PlacedByPlayer", &SceneObject::GetPlacedByPlayer, &SceneObject::SetPlacedByPlayer)
-		.property("IsBuyable", &SceneObject::IsBuyable)
-
+		.property("Buyable", &SceneObject::IsBuyable)
+		.property("BuyableMode", &SceneObject::GetBuyableMode)
+		
 		.def("IsOnScenePoint", &SceneObject::IsOnScenePoint)
 		.def("GetGoldValue", &SceneObject::GetGoldValueOld)
 		.def("GetGoldValue", &SceneObject::GetGoldValue)
@@ -1346,7 +1348,14 @@ namespace RTE {
 		.def("GetGoldValueString", &SceneObject::GetGoldValueString)
 		.def("GetTotalValue", &SceneObject::GetTotalValue)
 
-		.def("GetTotalValue", &LuaAdaptersSceneObject::GetTotalValue);
+		.def("GetTotalValue", &LuaAdaptersSceneObject::GetTotalValue)
+		
+		.enum_("BuyableMode")[
+			luabind::value("NORESTRICTIONS", SceneObject::BuyableMode::NoRestrictions),
+			luabind::value("BUYMENUONLY", SceneObject::BuyableMode::BuyMenuOnly),
+			luabind::value("OBJECTPICKERONLY", SceneObject::BuyableMode::ObjectPickerOnly),
+			luabind::value("SCRIPTONLY", SceneObject::BuyableMode::ScriptOnly)];
+		
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

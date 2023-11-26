@@ -340,6 +340,12 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	int LuaAdaptersSceneObject::GetBuyableMode(const SceneObject *luaSelfObject) {
+		return static_cast<int>(luaSelfObject->GetBuyableMode());
+	}
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	void LuaAdaptersActivity::SendMessage1(Activity *luaSelfObject, const std::string &message) {
 		luabind::object context;
 		SendMessage2(luaSelfObject, message, context);

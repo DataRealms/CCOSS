@@ -1339,15 +1339,16 @@ namespace RTE {
 		.property("Team", &SceneObject::GetTeam, &SceneObject::SetTeam)
 		.property("PlacedByPlayer", &SceneObject::GetPlacedByPlayer, &SceneObject::SetPlacedByPlayer)
 		.property("Buyable", &SceneObject::IsBuyable)
-		.property("BuyableMode", &SceneObject::GetBuyableMode)
+		
+		.property("BuyableMode", &LuaAdaptersSceneObject::GetBuyableMode)
 		
 		.def("IsOnScenePoint", &SceneObject::IsOnScenePoint)
 		.def("GetGoldValue", &SceneObject::GetGoldValueOld)
 		.def("GetGoldValue", &SceneObject::GetGoldValue)
 		.def("SetGoldValue", &SceneObject::SetGoldValue)
 		.def("GetGoldValueString", &SceneObject::GetGoldValueString)
+		
 		.def("GetTotalValue", &SceneObject::GetTotalValue)
-
 		.def("GetTotalValue", &LuaAdaptersSceneObject::GetTotalValue)
 		
 		.enum_("BuyableMode")[

@@ -386,6 +386,7 @@ namespace RTE {
 #pragma region SceneObject Lua Adapters
 	struct LuaAdaptersSceneObject {
 		static float GetTotalValue(const SceneObject *luaSelfObject, int nativeModule, float foreignMult);
+		static int GetBuyableMode(const SceneObject *luaSelfObject);
 	};
 #pragma endregion
 

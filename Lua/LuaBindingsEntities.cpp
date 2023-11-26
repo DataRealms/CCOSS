@@ -1347,7 +1347,8 @@ namespace RTE {
 		.def("GetGoldValue", &SceneObject::GetGoldValue)
 		.def("SetGoldValue", &SceneObject::SetGoldValue)
 		.def("GetGoldValueString", &SceneObject::GetGoldValueString)
-
+		
+		.def("GetTotalValue", &SceneObject::GetTotalValue)
 		.def("GetTotalValue", &LuaAdaptersSceneObject::GetTotalValue)
 		
 		.enum_("BuyableMode")[

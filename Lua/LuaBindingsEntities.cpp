@@ -1351,10 +1351,10 @@ namespace RTE {
 		.def("GetTotalValue", &LuaAdaptersSceneObject::GetTotalValue)
 		
 		.enum_("BuyableMode")[
-			luabind::value("NORESTRICTIONS", SceneObject::BuyableMode::NoRestrictions),
-			luabind::value("BUYMENUONLY", SceneObject::BuyableMode::BuyMenuOnly),
-			luabind::value("OBJECTPICKERONLY", SceneObject::BuyableMode::ObjectPickerOnly),
-			luabind::value("SCRIPTONLY", SceneObject::BuyableMode::ScriptOnly)];
+			luabind::value("NORESTRICTIONS", static_cast<int>(SceneObject::BuyableMode::NoRestrictions)),
+			luabind::value("BUYMENUONLY", static_cast<int>(SceneObject::BuyableMode::BuyMenuOnly)),
+			luabind::value("OBJECTPICKERONLY", static_cast<int>(SceneObject::BuyableMode::ObjectPickerOnly)),
+			luabind::value("SCRIPTONLY", static_cast<int>(SceneObject::BuyableMode::ScriptOnly))];
 		
 	}
 

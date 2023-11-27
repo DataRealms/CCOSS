@@ -6,6 +6,8 @@
 #include "LimbPath.h"
 #include "ConsoleMan.h"
 
+#include "tracy/Tracy.hpp"
+
 namespace RTE {
 
 	ConcreteClassInfo(AtomGroup, Entity, 500);
@@ -333,6 +335,8 @@ namespace RTE {
 
 	// TODO: Break down and rework this trainwreck.
 	float AtomGroup::Travel(Vector &position, Vector &velocity, Matrix &rotation, float &angularVel, bool &didWrap, Vector &totalImpulse, float mass, float travelTime, bool callOnBounce, bool callOnSink, bool scenePreLocked) {
+		ZoneScoped;
+
 		RTEAssert(m_OwnerMOSR, "Tried to travel an AtomGroup that has no parent!");
 
 		m_MomentOfInertia = GetMomentOfInertia();
@@ -769,6 +773,8 @@ namespace RTE {
 
 	// TODO: Break down and rework this dumpsterfire.
 	Vector AtomGroup::PushTravel(Vector &position, const Vector &velocity, float pushForce, bool &didWrap, float travelTime, bool callOnBounce, bool callOnSink, bool scenePreLocked) {
+		ZoneScoped;
+
 		RTEAssert(m_OwnerMOSR, "Tried to push-travel an AtomGroup that has no parent!");
 
 		didWrap = false;

@@ -152,15 +152,6 @@ public:
     int GetMOIDCount() { return m_MOIDIndex.size(); }
 
     /// <summary>
-    /// Tests whether the given MovableObject is currently at the specified pixel coordinates.
-    /// </summary>
-    /// <param name="mo">The MovableObject to test.</param>
-    /// <param name="pixelX">The X coordinate of the Scene pixel to test.</param>
-    /// <param name="pixelY">The Y coordinate of the Scene pixel to test.</param>
-    /// <returns>Whether the given MovableObject is currently at the specified pixel coordinates.</returns>
-    bool HitTestMOAtPixel(const MovableObject &mo, int pixelX, int pixelY) const;
-
-    /// <summary>
     /// Gets a MOID from pixel coordinates in the Scene.
     /// </summary>
     /// <param name="pixelX">The X coordinate of the Scene pixel to get the MOID of.</param>

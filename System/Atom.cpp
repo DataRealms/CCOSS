@@ -1,4 +1,5 @@
 #include "Atom.h"
+
 #include "SLTerrain.h"
 #include "MovableMan.h"
 #include "MovableObject.h"
@@ -6,6 +7,8 @@
 #include "MOPixel.h"
 #include "PresetMan.h"
 #include "Actor.h"
+
+#include "tracy/Tracy.hpp"
 
 namespace RTE {
 
@@ -601,6 +604,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int Atom::Travel(float travelTime, bool autoTravel, bool scenePreLocked) {
+		ZoneScoped;
+
 		if (!m_OwnerMO) {
 			RTEAbort("Traveling an Atom without a parent MO!");
 			return travelTime;

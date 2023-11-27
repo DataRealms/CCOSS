@@ -306,6 +306,26 @@ void MOSprite::Destroy(bool notInherited)
     Clear();
 }
 
+bool MOSprite::HitTestAtPixel(int pixelX, int pixelY) const {
+    if (!GetsHitByMOs() || GetRootParent()->GetTraveling()) {
+        return false;
+    }
+
+    Vector distanceBetweenTestPositionAndMO = g_SceneMan.ShortestDistance(m_Pos, Vector(static_cast<float>(pixelX), static_cast<float>(pixelY)));
+    if (distanceBetweenTestPositionAndMO.MagnitudeIsGreaterThan(m_SpriteRadius)) {
+        return false;
+    }
+
+    // Check the scene position in the current local space of the MO, accounting for Position, Sprite Offset, Angle and HFlipped.
+    //TODO Account for Scale as well someday, maybe.
+    Matrix rotation = m_Rotation; // <- Copy to non-const variable so / operator overload works.
+    Vector entryPos = (distanceBetweenTestPositionAndMO / rotation).GetXFlipped(m_HFlipped) - m_SpriteOffset;
+    int localX = entryPos.GetFloorIntX();
+    int localY = entryPos.GetFloorIntY();
+
+    BITMAP* sprite = m_aSprite[m_Frame];
+    return is_inside_bitmap(sprite, localX, localY, 0) && _getpixel(sprite, localX, localY) != ColorKeys::g_MaskColor;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          SetFrame

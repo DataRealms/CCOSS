@@ -1025,6 +1025,13 @@ enum MOType
 
     virtual bool IsDrawnAfterParent() const { return true; }
 
+    /// <summary>
+    /// Whether a set of X, Y coordinates overlap us (in world space).
+    /// </summary>
+    /// <param name="pixelX">The given X coordinate, in world space.</param>
+    /// <param name="pixelY">The given Y coordinate, in world space.</param>
+    /// <returns>Whether the given coordinate overlap us.</returns>
+    virtual bool HitTestAtPixel(int pixelX, int pixelY) const { return false; }
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          HasObject

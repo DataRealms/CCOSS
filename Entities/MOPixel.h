@@ -151,6 +151,14 @@ namespace RTE {
 		/// </summary>
 		/// <param name="staininess">The new staininess value.</param>
 		void SetStaininess(float staininess) { m_Staininess = staininess; }
+
+		/// <summary>
+		/// Whether a set of X, Y coordinates overlap us (in world space).
+		/// </summary>
+		/// <param name="pixelX">The given X coordinate, in world space.</param>
+		/// <param name="pixelY">The given Y coordinate, in world space.</param>
+		/// <returns>Whether the given coordinate overlap us.</returns>
+		bool HitTestAtPixel(int pixelX, int pixelY) const override;
 #pragma endregion
 
 #pragma region Virtual Override Methods

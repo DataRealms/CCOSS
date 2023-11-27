@@ -256,6 +256,14 @@ public:
 	/// <returns>The previous rotational angle in radians.</returns>
 	float GetPrevRotAngle() const { return m_PrevRotation.GetRadAngle(); }
 
+    /// <summary>
+    /// Whether a set of X, Y coordinates overlap us (in world space).
+    /// </summary>
+    /// <param name="pixelX">The given X coordinate, in world space.</param>
+    /// <param name="pixelY">The given Y coordinate, in world space.</param>
+    /// <returns>Whether the given coordinate overlap us.</returns>
+    bool HitTestAtPixel(int pixelX, int pixelY) const override;
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Method:          GetAngularVel
 //////////////////////////////////////////////////////////////////////////////////////////

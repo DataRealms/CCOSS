@@ -511,6 +511,7 @@ void MOSRotating::AddWound(AEmitter *woundToAdd, const Vector &parentOffsetToSet
 			} else {
 				// TODO: Don't hardcode the blast strength!
 				GibThis(Vector(-5.0F, 0).RadRotate(woundToAdd->GetEmitAngle()));
+                woundToAdd->DestroyScriptState();
 				delete woundToAdd;
 				return;
 			}

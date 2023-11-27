@@ -1343,7 +1343,9 @@ namespace RTE {
 
 	// TODO: Look into breaking this into smaller methods.
 	bool AtomGroup::ResolveTerrainIntersection(Vector &position, unsigned char strongerThan) const {
-		std::list<Atom *> intersectingAtoms;
+		thread_local std::vector<Atom *> intersectingAtoms;
+		intersectingAtoms.clear();
+
 		MOID hitMaterial = g_MaterialAir;
 
 		float strengthThreshold = (strongerThan != g_MaterialAir) ? g_SceneMan.GetMaterialFromID(strongerThan)->GetIntegrity() : 0.0F;

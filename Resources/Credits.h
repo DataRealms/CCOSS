@@ -30,6 +30,7 @@ T O P K E K
 Z A L O
 
 Art and Content Production
+A R M O K
 B H I J N
 C O M R A D E S H O O K
 G A R E T H   " G A C Y R "   Y R
@@ -38,6 +39,7 @@ J E F F
 J U S T   A L E X   :/
 M A J O R
 M A X   " M A X I M D U D E "   K
+M E T A L L O B O X
 M I S S A K   G H O S T   C O M O D O
 M R M I K E X  /  C H E R K O V
 P A W N I S H O O V Y

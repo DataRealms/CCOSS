@@ -393,12 +393,12 @@ int MOSRotating::Save(Writer &writer) const
     writer.NewProperty("OrientToVel");
     writer << m_OrientToVel;
 
-    for (std::list<AEmitter *>::const_iterator itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
+    for (auto itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr)
     {
         writer.NewProperty("AddEmitter");
         writer << (*itr);
     }
-    for (std::list<Attachable *>::const_iterator aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
+    for (auto aItr = m_Attachables.begin(); aItr != m_Attachables.end(); ++aItr)
     {
         writer.NewProperty("AddAttachable");
         writer << (*aItr);
@@ -555,10 +555,12 @@ float MOSRotating::RemoveWounds(int numberOfWoundsToRemove, bool includePositive
         if (m_Wounds.empty()) {
             return 0.0F;
         }
-        float woundDamage = m_Wounds.front()->GetBurstDamage();
         AEmitter *wound = m_Wounds.front();
+        float woundDamage = wound->GetBurstDamage();
         m_AttachableAndWoundMass -= wound->GetMass();
-        m_Wounds.pop_front();
+        std::iter_swap(m_Wounds.begin(), m_Wounds.end() - 1);
+        m_Wounds.pop_back();
+        wound->DestroyScriptState();
         delete wound;
         return woundDamage;
     };
@@ -1573,12 +1575,12 @@ void MOSRotating::Update() {
 
     for (auto woundItr = m_Wounds.begin(); woundItr != m_Wounds.end(); ) {
         AEmitter* wound = *woundItr;
-        ++woundItr;
         RTEAssert(wound && wound->IsAttachedTo(this), "Broken wound AEmitter in Update");
         wound->Update();
 
         if (wound->IsSetToDelete() || (wound->GetLifetime() > 0 && wound->GetAge() > wound->GetLifetime())) {
-            m_Wounds.remove(wound);
+            std::iter_swap(woundItr, m_Wounds.end() - 1);
+            m_Wounds.pop_back();
             m_AttachableAndWoundMass -= wound->GetMass();
             delete wound;
         } else {
@@ -1593,6 +1595,7 @@ void MOSRotating::Update() {
             }
 
             wound->ClearImpulseForces();
+            ++woundItr;
         }
     }
 

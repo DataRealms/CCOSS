@@ -699,7 +699,7 @@ ClassInfoGetters;
 	/// Gets a const reference to the list of wounds on this MOSRotating.
 	/// </summary>
 	/// <returns>A const reference to the list of wounds on this MOSRotating.</returns>
-	const std::list<AEmitter *> & GetWoundList() const { return m_Wounds; }
+	const std::vector<AEmitter *> & GetWoundList() const { return m_Wounds; }
 
     /// <summary>
     /// Gets the number of wounds attached to this MOSRotating.
@@ -903,7 +903,7 @@ protected:
     // The vector that the recoil offsets the sprite when m_Recoiled is true.
     Vector m_RecoilOffset;
     // The list of wound AEmitters currently attached to this MOSRotating, and owned here as well.
-    std::list<AEmitter *> m_Wounds;
+    std::vector<AEmitter *> m_Wounds;
     // The list of Attachables currently attached and Owned by this.
     std::list<Attachable *> m_Attachables;
     std::unordered_set<unsigned long> m_ReferenceHardcodedAttachableUniqueIDs; //!< An unordered set is filled with the Unique IDs of all of the reference object's hardcoded Attachables when using the copy Create.

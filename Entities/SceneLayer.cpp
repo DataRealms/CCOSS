@@ -6,6 +6,8 @@
 #include "ActivityMan.h"
 #include "ThreadMan.h"
 
+#include "tracy/Tracy.hpp"
+
 namespace RTE {
 
 	ConcreteClassInfo(SceneLayerTracked, Entity, 0);
@@ -302,6 +304,7 @@ namespace RTE {
 
 		// Start a new thread to clear the backbuffer bitmap asynchronously.
 		m_BitmapClearTask = g_ThreadMan.GetPriorityThreadPool().submit([this, clearTo](BITMAP *bitmap, std::vector<IntRect> drawings) {
+			ZoneScopedN("Clear Tracked Backbuffer");
 			ClearDrawings(bitmap, drawings, clearTo);
 		}, m_BackBitmap, m_Drawings);
 

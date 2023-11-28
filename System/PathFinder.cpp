@@ -5,6 +5,8 @@
 #include "SceneMan.h"
 #include "ThreadMan.h"
 
+#include "tracy/tracy.hpp"
+
 namespace RTE {
 
 	// One pathfinder per thread, lazily initialized. Shouldn't access this directly, use GetPather() instead.
@@ -136,6 +138,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	int PathFinder::CalculatePath(Vector start, Vector end, std::list<Vector> &pathResult, float &totalCostResult, float digStrength) {
+		ZoneScoped;
+		
 		++m_CurrentPathingRequests;
 		
 		// Make sure start and end are within scene bounds.
@@ -250,6 +254,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	std::vector<int> PathFinder::RecalculateAreaCosts(std::deque<Box> &boxList, int nodeUpdateLimit) {
+		ZoneScoped;
+		
 		std::unordered_set<int> nodeIDsToUpdate;
 
 		while (!boxList.empty()) {
@@ -463,6 +469,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool PathFinder::UpdateNodeList(const std::vector<int> &nodeVec) {
+		ZoneScoped;
+		
 		std::atomic<bool> anyChange = false;
 
 		// Update all the costs going out from each node.

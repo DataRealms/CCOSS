@@ -312,33 +312,26 @@ namespace RTE {
 
 	template <bool TRACK_DRAWINGS>
 	bool SceneLayerImpl<TRACK_DRAWINGS>::WrapPosition(int &posX, int &posY) const {
-		bool wrapped = false;
-		int width = m_ScaledDimensions.GetFloorIntX();
-		int height = m_ScaledDimensions.GetFloorIntY();
+		int oldX = posX;
+		int oldY = posY;
 
 		if (m_WrapX) {
+			int width = m_ScaledDimensions.GetFloorIntX();
+			posX %= width;
 			if (posX < 0) {
-				while (posX < 0) {
-					posX += width;
-				}
-				wrapped = true;
-			} else if (posX >= width) {
-				posX %= width;
-				wrapped = true;
+				posX += width;
 			}
 		}
+
 		if (m_WrapY) {
+			int height = m_ScaledDimensions.GetFloorIntY();
+			posY %= height;
 			if (posY < 0) {
-				while (posY < 0) {
-					posY += height;
-				}
-				wrapped = true;
-			} else if (posY >= height) {
-				posY %= height;
-				wrapped = true;
+				posY += height;
 			}
 		}
-		return wrapped;
+
+		return oldX != posX || oldY != posY;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

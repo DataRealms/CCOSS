@@ -1,0 +1,21 @@
+# Tests
+**/test
+**/tests
+
+# Git
+**/.github
+**/.git
+
+# Formatters
+**/.clang-format
+**/.clang-tidy
+**/.editorconfig
+**/.astyle
+
+# Binaries
+**/_Bin
+**/build
+
+# IDE
+**/.vs
+**/.vscode

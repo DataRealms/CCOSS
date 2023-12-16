@@ -60,7 +60,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 	New `SoundContainer` INI and Lua (R/W) property `BusRouting`, which denotes which bus the SoundContainer routes to. Available busses: `SFX, UI, Music`. Defaults to `SFX`.  
 	`Enum` binding for `SoundContainer.BusRouting`: `SFX = 0, UI = 1, MUSIC = 2`.  
 	New `SoundContainer` INI and Lua (R/W) property `PanningStrengthMultiplier`, which will multiply the strength of 3D panning. This can be used to achieve for example a psuedo-Immobile effect where attenuation effects are still applied but the sound does not move from the center. Recommended to keep between 0.0 and 1.0.  
-	New `SoundContainer` INI and Lua (R/W) property `CustomPanValue`, which hard-overrides the panning of a sound. Clamped between -1 and 1 for left and right panning. This should probably only be used on Immobile sounds, but it can be used on any sound. No guarantees.
+	New `SoundContainer` INI and Lua (R/W) property `CustomPanValue`, which hard-overrides the panning of a sound. Clamped between -1 and 1 for left and right panning. 0 disables the override and will re-enable default behavior. This should probably only be used on Immobile sounds, but it can be used on any sound. No guarantees.
 
 - Tracy profiler integration.  
 	You can now attach Tracy to builds of the game and see profiling information about various zones and how long they take.  

@@ -656,6 +656,8 @@ namespace RTE {
 									soundContainerToHandle->GetTopLevelSoundSet().AddSound(filePathFromHash, false);
 									soundContainerToHandle->SetImmobile(soundDataPointer->Immobile);
 									soundContainerToHandle->SetAttenuationStartDistance(soundDataPointer->AttenuationStartDistance);
+									soundContainerToHandle->SetCustomPanValue(soundDataPointer->CustomPanValue);
+									soundContainerToHandle->SetPanningStrengthMultiplier(soundDataPointer->PanningStrengthMultiplier);
 									soundContainerToHandle->SetLoopSetting(soundDataPointer->Loops);
 									soundContainerToHandle->SetPriority(soundDataPointer->Priority);
 									soundContainerToHandle->SetAffectedByGlobalPitch(soundDataPointer->AffectedByGlobalPitch);
@@ -675,6 +677,12 @@ namespace RTE {
 								break;
 							case AudioMan::SOUND_SET_VOLUME:
 								soundContainerToHandle->SetVolume(soundDataPointer->Volume);
+								break;
+							case AudioMan::SOUND_SET_CUSTOMPANVALUE:
+								soundContainerToHandle->SetCustomPanValue(soundDataPointer->CustomPanValue);
+								break;
+							case AudioMan::SOUND_SET_PANNINGSTRENGTHMULTIPLIER:
+								soundContainerToHandle->SetPanningStrengthMultiplier(soundDataPointer->PanningStrengthMultiplier);
 								break;
 							case AudioMan::SOUND_SET_PITCH:
 								soundContainerToHandle->SetPitch(soundDataPointer->Pitch);

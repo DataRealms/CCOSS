@@ -733,6 +733,28 @@ namespace RTE {
 		return result == FMOD_OK;
 	}
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	bool AudioMan::ChangeSoundContainerPlayingChannelsCustomPanValue(const SoundContainer *soundContainer) {
+		if (!m_AudioEnabled || !soundContainer || !soundContainer->IsBeingPlayed()) {
+			return false;
+		}
+		if (m_IsInMultiplayerMode) { RegisterSoundEvent(-1, SOUND_SET_PITCH, soundContainer); }
+
+		FMOD_RESULT result = FMOD_OK;
+		FMOD::Channel *soundChannel;
+
+		const std::unordered_set<int> *playingChannels = soundContainer->GetPlayingChannels();
+		for (int channelIndex : *playingChannels) {
+			result = m_AudioSystem->getChannel(channelIndex, &soundChannel);
+			result = result == FMOD_OK ? soundChannel->setPan(soundContainer->GetCustomPanValue()) : result;
+			if (result != FMOD_OK) {
+				g_ConsoleMan.PrintString("ERROR: Could not update sound custom pan value for the sound being played on channel " + std::to_string(channelIndex) + " for SoundContainer " + soundContainer->GetPresetName() + ": " + std::string(FMOD_ErrorString(result)));
+			}
+		}
+		return result == FMOD_OK;
+	}
+	
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	bool AudioMan::StopSoundContainerPlayingChannels(SoundContainer *soundContainer, int player) {

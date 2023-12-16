@@ -214,7 +214,7 @@ namespace RTE {
 		/// Sets the custom pan value of this SoundContainer. Clamped between -1 and 1.
 		/// </summary>
 		/// <param name="customPanValue">The new custom pan value.</param>
-		void SetCustomPanValue(float customPanValue) { m_CustomPanValue = std::clamp(customPanValue, -1.0f, 1.0f); m_SoundPropertiesUpToDate = false; }
+		void SetCustomPanValue(float customPanValue) { m_CustomPanValue = std::clamp(customPanValue, -1.0f, 1.0f); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsCustomPanValue(this); } }
 		
 		/// <summary>
 		/// Gets the panning strength multiplier of this SoundContainer.

@@ -603,7 +603,7 @@ namespace RTE {
 			float pitchVariationMultiplier = pitchVariationFactor == 1.0F ? 1.0F : RandomNum(1.0F / pitchVariationFactor, 1.0F * pitchVariationFactor);
 			result = (result == FMOD_OK) ? channel->setPitch(soundContainer->GetPitch() * pitchVariationMultiplier) : result;
 
-			if (soundContainer->GetCustomPanValue() != 0.0f){
+			if (soundContainer->GetCustomPanValue() != 0.0f) {
 				result = (result == FMOD_OK) ? channel->setPan(soundContainer->GetCustomPanValue()) : result;
 			}
 			
@@ -812,7 +812,7 @@ namespace RTE {
 					void *userData;
 					result = result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
 					const SoundContainer *soundContainer = static_cast<SoundContainer *>(userData);
-					if (sqrDistanceToPlayer < (m_MinimumDistanceForPanning * m_MinimumDistanceForPanning)) {
+					if (sqrDistanceToPlayer < (m_MinimumDistanceForPanning * m_MinimumDistanceForPanning) || soundContainer->GetCustomPanValue() != 0.0f) {
 						soundChannel->set3DLevel(0);
 					} else if (sqrDistanceToPlayer < (doubleMinimumDistanceForPanning * doubleMinimumDistanceForPanning)) {
 						soundChannel->set3DLevel(LERP(0, 1, 0, m_SoundPanningEffectStrength * soundContainer->GetPanningStrengthMultiplier(), channel3dLevel));
@@ -895,7 +895,7 @@ namespace RTE {
 		lowpassFrequency = std::clamp(lowpassFrequency, 350.0f, 22000.0f);
 		result = (result == FMOD_OK) ? dsp_multibandeq->setParameterFloat(1, lowpassFrequency) : result;
 		
-		if (channelSoundContainer->GetCustomPanValue() != 0.0f){
+		if (channelSoundContainer->GetCustomPanValue() != 0.0f) {
 			result = (result == FMOD_OK) ? soundChannel->setPan(channelSoundContainer->GetCustomPanValue()) : result;
 		}
 		

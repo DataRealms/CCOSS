@@ -602,6 +602,11 @@ namespace RTE {
 			result = (result == FMOD_OK) ? channel->setPriority(soundContainer->GetPriority()) : result;
 			float pitchVariationMultiplier = pitchVariationFactor == 1.0F ? 1.0F : RandomNum(1.0F / pitchVariationFactor, 1.0F * pitchVariationFactor);
 			result = (result == FMOD_OK) ? channel->setPitch(soundContainer->GetPitch() * pitchVariationMultiplier) : result;
+
+			if (soundContainer->GetCustomPanValue() != 0.0f){
+				result = (result == FMOD_OK) ? channel->setPan(soundContainer->GetCustomPanValue()) : result;
+			}
+			
 			if (soundContainer->IsImmobile()) {
 				result = (result == FMOD_OK) ? channel->setVolume(soundContainer->GetVolume()) : result;
 			} else {
@@ -828,6 +833,11 @@ namespace RTE {
 
 	FMOD_RESULT AudioMan::UpdatePositionalEffectsForSoundChannel(FMOD::Channel *soundChannel, const FMOD_VECTOR *positionOverride) const {
 		FMOD_RESULT result = FMOD_OK;
+		
+		void *userData;
+		result = result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
+		const SoundContainer *channelSoundContainer = static_cast<SoundContainer *>(userData);
+		
 		bool sceneWraps = g_SceneMan.SceneWrapsX();
 
 		FMOD_VECTOR channelPosition;
@@ -876,7 +886,7 @@ namespace RTE {
 		result = result == FMOD_OK ? soundChannel->get3DMinMaxDistance(&attenuationStartDistance, &soundMaxDistance) : result;
 		
 		float attenuatedVolume = (shortestDistance <= attenuationStartDistance) ? 1.0F : attenuationStartDistance / shortestDistance;
-
+		
 		// Lowpass as distance increases
 		FMOD::DSP *dsp_multibandeq;
 		result = (result == FMOD_OK) ? soundChannel->getDSP(0, &dsp_multibandeq) : result;
@@ -884,6 +894,10 @@ namespace RTE {
 		float lowpassFrequency = 22000.0f * factor;
 		lowpassFrequency = std::clamp(lowpassFrequency, 350.0f, 22000.0f);
 		result = (result == FMOD_OK) ? dsp_multibandeq->setParameterFloat(1, lowpassFrequency) : result;
+		
+		if (channelSoundContainer->GetCustomPanValue() != 0.0f){
+			result = (result == FMOD_OK) ? soundChannel->setPan(channelSoundContainer->GetCustomPanValue()) : result;
+		}
 		
 		float minimumAudibleDistance = m_SoundChannelMinimumAudibleDistances.at(soundChannelIndex);
 		if (shortestDistance >= soundMaxDistance) {
@@ -893,13 +907,10 @@ namespace RTE {
 		} else if (sqrLongestDistance < (minimumAudibleDistance * minimumAudibleDistance)) {
 			attenuatedVolume = 0.0F;
 		}
-
-		void *userData;
-		result = result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
+		
 		float panLevel;
 		result = result == FMOD_OK ? soundChannel->get3DLevel(&panLevel) : result;
 		if (result == FMOD_OK && (panLevel < 1.0F || attenuatedVolume == 0.0F)) {
-			const SoundContainer *channelSoundContainer = static_cast<SoundContainer *>(userData);
 			result = soundChannel->setVolume(attenuatedVolume * channelSoundContainer->GetVolume());
 		}
 

@@ -28,6 +28,7 @@ namespace RTE {
 		m_BusRouting = BusRouting::SFX;
 		m_Immobile = false;
 		m_AttenuationStartDistance = c_DefaultAttenuationStartDistance;
+		m_CustomPanValue = 0.0f;
 		m_PanningStrengthMultiplier = 1.0F;
 		m_Loops = 0;
 		m_SoundPropertiesUpToDate = false;
@@ -54,6 +55,7 @@ namespace RTE {
 		m_BusRouting = reference.m_BusRouting;
 		m_Immobile = reference.m_Immobile;
 		m_AttenuationStartDistance = reference.m_AttenuationStartDistance;
+		m_CustomPanValue = reference.m_CustomPanValue;
 		m_PanningStrengthMultiplier = reference.m_PanningStrengthMultiplier;
 		m_Loops = reference.m_Loops;
 
@@ -107,6 +109,10 @@ namespace RTE {
 		});
 		MatchProperty("Immobile", { reader >> m_Immobile; });
 		MatchProperty("AttenuationStartDistance", { reader >> m_AttenuationStartDistance; });
+		MatchProperty("CustomPanValue", {
+			reader >> m_CustomPanValue;
+			if (m_CustomPanValue < -1.0f || m_CustomPanValue > 1.0f) { reader.ReportError("SoundContainer CustomPanValue must be between -1 and 1."); }
+		});
 		MatchProperty("PanningStrengthMultiplier", { reader >> m_PanningStrengthMultiplier; });
 		MatchProperty("LoopSetting", { reader >> m_Loops; });
 		MatchProperty("Priority", {
@@ -146,6 +152,8 @@ namespace RTE {
 		writer << m_Immobile;
 		writer.NewProperty("AttenuationStartDistance");
 		writer << m_AttenuationStartDistance;
+		writer.NewProperty("CustomPanValue");
+		writer << m_CustomPanValue;
 		writer.NewProperty("PanningStrengthMultiplier");
 		writer << m_PanningStrengthMultiplier;
 		writer.NewProperty("LoopSetting");

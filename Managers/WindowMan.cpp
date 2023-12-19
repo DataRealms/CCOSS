@@ -15,6 +15,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/epsilon.hpp"
 #include "tracy/Tracy.hpp"
+#include "tracy/TracyOpenGL.hpp"
 
 #ifdef __linux__
 #include "Resources/cccp.xpm"
@@ -218,6 +219,7 @@ namespace RTE {
 		glGenTextures(1, &m_BackBuffer32Texture);
 		glGenTextures(1, &m_ScreenBufferTexture);
 		glGenFramebuffers(1, &m_ScreenBufferFBO);
+		TracyGpuContext;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -738,6 +740,7 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void WindowMan::UploadFrame() {
+		TracyGpuZone("Upload Frame");
 		glDisable(GL_DEPTH_TEST);
 
 		GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, m_ScreenBufferFBO));
@@ -749,37 +752,43 @@ namespace RTE {
 
 		glEnable(GL_BLEND);
 		if (m_DrawPostProcessBuffer) {
+			TracyGpuZone("Upload Post Process Buffer");
 			GL_CHECK(glBindTexture(GL_TEXTURE_2D, g_PostProcessMan.GetPostProcessColorBuffer()));
 			GL_CHECK(glActiveTexture(GL_TEXTURE1));
 			GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture));
 			GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
 			GL_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]));
 		} else {
+			TracyGpuZone("Upload no Post Process Buffer");
 			glBindTexture(GL_TEXTURE_2D, 0);
 			GL_CHECK(glActiveTexture(GL_TEXTURE1));
 			GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_BackBuffer32Texture));
 			GL_CHECK(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
 			GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, g_FrameMan.GetBackBuffer32()->w, g_FrameMan.GetBackBuffer32()->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, g_FrameMan.GetBackBuffer32()->line[0]));
 		}
-
-		GL_CHECK(glBindVertexArray(m_ScreenVAO));
-		m_ScreenBlitShader->Use();
-		m_ScreenBlitShader->SetInt(m_ScreenBlitShader->GetTextureUniform(), 0);
-		m_ScreenBlitShader->SetInt(m_ScreenBlitShader->GetUniformLocation("rteGUITexture"), 1);
-		m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), glm::mat4(1.0f));
-		m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), glm::scale(glm::mat4(1.0f), {1.0f, -1.0f, 1.0f}));
-		GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-		GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-		GL_CHECK(glActiveTexture(GL_TEXTURE0));
-		GL_CHECK(glBindTexture(GL_TEXTURE_2D, 0));
-		GL_CHECK(glActiveTexture(GL_TEXTURE1));
-		GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_ScreenBufferTexture));
+		{
+			TracyGpuZone("Setup Draw Screen");
+			GL_CHECK(glBindVertexArray(m_ScreenVAO));
+			m_ScreenBlitShader->Use();
+			m_ScreenBlitShader->SetInt(m_ScreenBlitShader->GetTextureUniform(), 0);
+			m_ScreenBlitShader->SetInt(m_ScreenBlitShader->GetUniformLocation("rteGUITexture"), 1);
+			m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetProjectionUniform(), glm::mat4(1.0f));
+			m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), glm::scale(glm::mat4(1.0f), {1.0f, -1.0f, 1.0f}));
+			GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+			GL_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+			GL_CHECK(glActiveTexture(GL_TEXTURE0));
+			GL_CHECK(glBindTexture(GL_TEXTURE_2D, 0));
+			GL_CHECK(glActiveTexture(GL_TEXTURE1));
+			GL_CHECK(glBindTexture(GL_TEXTURE_2D, m_ScreenBufferTexture));
+		}
 		if (m_MultiDisplayWindows.empty()) {
+			TracyGpuZone("Swap Window");
 			glViewport(m_PrimaryWindowViewport->x, m_PrimaryWindowViewport->y, m_PrimaryWindowViewport->w, m_PrimaryWindowViewport->h);
 			m_ScreenBlitShader->SetMatrix4f(m_ScreenBlitShader->GetTransformUniform(), glm::mat4(1.0f));
 			GL_CHECK(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 			SDL_GL_SwapWindow(m_PrimaryWindow.get());
 		} else {
+			TracyGpuZone("Swap Multi Display");
 			for (size_t i = 0; i < m_MultiDisplayWindows.size(); ++i) {
 				SDL_GL_MakeCurrent(m_MultiDisplayWindows.at(i).get(), m_GLContext.get());
 				int windowW, windowH;
@@ -791,7 +800,7 @@ namespace RTE {
 				SDL_GL_SwapWindow(m_MultiDisplayWindows.at(i).get());
 			}
 		}
-
+		TracyGpuCollect;
 		FrameMark;
 	}
 

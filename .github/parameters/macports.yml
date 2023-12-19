@@ -1,0 +1,15 @@
+
+version: "2.8.1"
+prefix: "/opt/local"
+ports:
+  - name: gcc${{env.GCC_VERSION}}
+  - name: meson
+  - name: libsdl2
+  - name: tbb
+  - name: lz4
+  - name: libpng
+  - name: minizip
+  - name: lua
+  - name: luajit
+  - name: flac
+  - name: dylibbundler

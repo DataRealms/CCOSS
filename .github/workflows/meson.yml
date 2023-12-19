@@ -124,19 +124,7 @@ jobs:
 
       - uses: melusina-org/setup-macports@v1
         with: 
-          version: "2.8.1"
-          ports:
-            - name: gcc${{env.GCC_VERSION}}
-            - name: meson
-            - name: libsdl2
-            - name: tbb
-            - name: lz4
-            - name: libpng
-            - name: minizip
-            - name: lua
-            - name: luajit
-            - name: flac
-            - name: dylibbundler
+          parameters:  ".github/parameters/macports.yml"
 
       - name: Setup Meson
         env:

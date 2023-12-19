@@ -2,7 +2,7 @@
 version: "2.8.1"
 prefix: "/opt/local"
 ports:
-  - name: gcc${{env.GCC_VERSION}}
+  - name: gcc13
   - name: meson
   - name: libsdl2
   - name: tbb

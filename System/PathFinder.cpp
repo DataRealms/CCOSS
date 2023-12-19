@@ -5,7 +5,7 @@
 #include "SceneMan.h"
 #include "ThreadMan.h"
 
-#include "tracy/tracy.hpp"
+#include "tracy/Tracy.hpp"
 
 namespace RTE {
 

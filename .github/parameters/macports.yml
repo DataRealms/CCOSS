@@ -6,7 +6,7 @@ ports:
   - name: pkgconfig
   - name: meson
   - name: libsdl2
-  - name: tbb
+  - name: onetbb
   - name: lz4
   - name: libpng
   - name: minizip

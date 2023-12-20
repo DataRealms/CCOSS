@@ -1,0 +1,14 @@
+version: "2.8.1"
+prefix: "/opt/local"
+ports:
+  - name: gcc13
+  - name: pkgconfig
+  - name: meson
+  - name: libsdl2
+  - name: onetbb
+  - name: lz4
+  - name: libpng
+  - name: minizip
+  - name: luajit
+  - name: flac
+  - name: dylibbundler

@@ -1389,6 +1389,7 @@ namespace RTE {
 		.property("BusRouting", &SoundContainer::GetBusRouting, &SoundContainer::SetBusRouting)
 		.property("Immobile", &SoundContainer::IsImmobile, &SoundContainer::SetImmobile)
 		.property("AttenuationStartDistance", &SoundContainer::GetAttenuationStartDistance, &SoundContainer::SetAttenuationStartDistance)
+		.property("CustomPanValue", &SoundContainer::GetCustomPanValue, &SoundContainer::SetCustomPanValue)
 		.property("PanningStrengthMultiplier", &SoundContainer::GetPanningStrengthMultiplier, &SoundContainer::SetPanningStrengthMultiplier)
 		.property("Loops", &SoundContainer::GetLoopSetting, &SoundContainer::SetLoopSetting)
 		.property("Priority", &SoundContainer::GetPriority, &SoundContainer::SetPriority)

@@ -205,6 +205,18 @@ namespace RTE {
 		void SetAttenuationStartDistance(float attenuationStartDistance) { m_AttenuationStartDistance = (attenuationStartDistance < 0) ? c_DefaultAttenuationStartDistance : attenuationStartDistance; m_SoundPropertiesUpToDate = false; }
 
 		/// <summary>
+		/// Gets the custom pan value of this SoundContainer.
+		/// </summary>
+		/// <returns>A float with the custom pan value.</returns>
+		float GetCustomPanValue() const { return m_CustomPanValue; }
+
+		/// <summary>
+		/// Sets the custom pan value of this SoundContainer. Clamped between -1 and 1.
+		/// </summary>
+		/// <param name="customPanValue">The new custom pan value.</param>
+		void SetCustomPanValue(float customPanValue) { m_CustomPanValue = std::clamp(customPanValue, -1.0f, 1.0f); if (IsBeingPlayed()) { g_AudioMan.ChangeSoundContainerPlayingChannelsCustomPanValue(this); } }
+		
+		/// <summary>
 		/// Gets the panning strength multiplier of this SoundContainer.
 		/// </summary>
 		/// <returns>A float with the panning strength multiplier.</returns>
@@ -395,6 +407,7 @@ namespace RTE {
 		
 		bool m_Immobile; //!< Whether this SoundContainer's sounds should be treated as immobile, i.e. not affected by 3D sound effects.
 		float m_AttenuationStartDistance; //!< The distance away from the AudioSystem listener to start attenuating this sound. Attenuation follows FMOD 3D Inverse roll-off model.
+		float m_CustomPanValue; //!< Custom stereo pan value using a Pan DSP on top of the basic spatialization.
 		float m_PanningStrengthMultiplier; //!< Multiplier for panning strength.
 		int m_Loops; //!< Number of loops (repeats) the SoundContainer's sounds should play when played. 0 means it plays once, -1 means it plays until stopped.
 		bool m_SoundPropertiesUpToDate = false; //!< Whether this SoundContainer's sounds' modes and properties are up to date. Used primarily to handle discrepancies that can occur when loading from ini if the line ordering isn't ideal.

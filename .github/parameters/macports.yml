@@ -1,4 +1,3 @@
-
 version: "2.8.1"
 prefix: "/opt/local"
 ports:
@@ -10,7 +9,6 @@ ports:
   - name: lz4
   - name: libpng
   - name: minizip
-  - name: lua
   - name: luajit
   - name: flac
   - name: dylibbundler

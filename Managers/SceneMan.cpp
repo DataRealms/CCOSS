@@ -2405,6 +2405,12 @@ Vector SceneMan::MovePointToGround(const Vector &from, int maxAltitude, int accu
     ForceBounds(temp);
 
     float altitude = FindAltitude(temp, g_SceneMan.GetSceneHeight(), accuracy);
+    
+    // If there's no ground beneath us, do nothing
+    if (altitude == g_SceneMan.GetSceneHeight()) {
+        return temp;
+    }
+
     // Only move down if we're above the maxAltitude over the ground
     Vector groundPoint(temp.m_X, temp.m_Y + (altitude > maxAltitude ? altitude - maxAltitude : 0));
     return groundPoint;

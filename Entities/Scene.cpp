@@ -18,6 +18,7 @@
 #include "FrameMan.h"
 #include "ConsoleMan.h"
 #include "SettingsMan.h"
+#include "ThreadMan.h"
 #include "MetaMan.h"
 #include "ContentFile.h"
 #include "SLTerrain.h"
@@ -3123,6 +3124,9 @@ void Scene::Update()
 	}
 
     if (m_NavigatableAreasUpToDate == false) {
+        // Need to block until all current pathfinding requests are finished. Ugh, if only we had a better way (interrupt/cancel a path request to start a new one?)
+        g_ThreadMan.GetBackgroundThreadPool().wait_for_tasks();
+
         m_NavigatableAreasUpToDate = true;
         for (int team = Activity::Teams::NoTeam; team < Activity::Teams::MaxTeamCount; ++team) {
             PathFinder& pathFinder = *GetPathFinder(static_cast<Activity::Teams>(team));

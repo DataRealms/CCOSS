@@ -533,16 +533,17 @@ int MovableObject::Save(Writer &writer) const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::DestroyScriptState() {
-    if (ObjectScriptsInitialized()) {
-        RunScriptedFunctionInAppropriateScripts("Destroy");
-
-        if (m_ThreadedLuaState) {
-            std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex());
+    if (m_ThreadedLuaState) {
+        std::lock_guard<std::recursive_mutex> lock(m_ThreadedLuaState->GetMutex());
+        
+        if (ObjectScriptsInitialized()) {
+            RunScriptedFunctionInAppropriateScripts("Destroy");
             m_ThreadedLuaState->RunScriptString(m_ScriptObjectName + " = nil;");
-            m_ThreadedLuaState->UnregisterMO(this);
-            m_ThreadedLuaState = nullptr;
             m_ScriptObjectName.clear();
         }
+
+        m_ThreadedLuaState->UnregisterMO(this);
+        m_ThreadedLuaState = nullptr;
     }
 }
 

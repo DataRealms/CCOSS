@@ -541,6 +541,7 @@ void MovableObject::DestroyScriptState() {
             m_ThreadedLuaState->RunScriptString(m_ScriptObjectName + " = nil;");
             m_ThreadedLuaState->UnregisterMO(this);
             m_ThreadedLuaState = nullptr;
+            m_ScriptObjectName.clear();
         }
     }
 }
@@ -548,7 +549,7 @@ void MovableObject::DestroyScriptState() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::Destroy(bool notInherited) {
-    RTEAssert(m_ThreadedLuaState == nullptr, "Destroying an MO that still has a script state!");
+    RTEAssert(m_ScriptObjectName.empty(), "Destroying an MO that still has a script state!");
 
 	g_MovableMan.UnregisterObject(this);
     if (!notInherited) { 

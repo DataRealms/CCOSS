@@ -549,8 +549,6 @@ void MovableObject::DestroyScriptState() {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void MovableObject::Destroy(bool notInherited) {
-    RTEAssert(m_ScriptObjectName.empty(), "Destroying an MO that still has a script state!");
-
 	g_MovableMan.UnregisterObject(this);
     if (!notInherited) { 
         SceneObject::Destroy(); 

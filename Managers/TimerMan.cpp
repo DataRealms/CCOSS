@@ -108,8 +108,8 @@ namespace RTE {
 
 		// Override the accumulator and just put one delta time in there so sim updates only once per frame.
 		if (m_OneSimUpdatePerFrame) {
-			// Only let it appear to go slower, not faster, if limited.
-			if (m_SimSpeedLimited && m_SimAccumulator > m_DeltaTime) { m_SimAccumulator = m_DeltaTime; }
+			// Make sure we don't get runaway behind
+			if (m_SimSpeedLimited && m_SimAccumulator > m_DeltaTime * 2.0f) { m_SimAccumulator = m_DeltaTime; }
 
 			// Reset the counter of sim updates since the last drawn. it will always be 0 since every update results in a drawn frame.
 			m_SimUpdatesSinceDrawn = -1;

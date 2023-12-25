@@ -474,6 +474,9 @@ int main(int argc, char **argv) {
 		RunGameLoop();
 	}
 
+	g_ThreadMan.GetPriorityThreadPool().wait_for_tasks();
+	g_ThreadMan.GetBackgroundThreadPool().wait_for_tasks();
+
 	DestroyManagers();
 
 	allegro_exit();

@@ -135,11 +135,13 @@ namespace RTE {
 			m_SimAccumulator += static_cast<long long>(static_cast<float>(timeIncrease) * m_TimeScale);
 		}
 
-		// If we run with infinite timescale, we can became extremely far behind, and we'll never catch up
-		// This means that even if we slow down timescale after to a reasonable value, it'll continue to run as-fast-as-possible
-		// So we cap our accumulator to never be more than 3 updates ahead
-		m_SimAccumulator = std::min(m_SimAccumulator.load(), m_DeltaTime * 3);
+		float maxPossibleSimSpeed = GetDeltaTimeMS() / std::max(g_PerformanceMan.GetMSPUAverage(), std::numeric_limits<float>::epsilon());
+
+		// Make sure we don't get runaway behind schedule
+		m_SimAccumulator = std::min(m_SimAccumulator.load(), m_DeltaTime + static_cast<long long>(m_DeltaTime * maxPossibleSimSpeed));
 
 		RTEAssert(m_SimAccumulator >= 0, "Negative sim time accumulator?!");
+
+		m_SimSpeed = std::min(maxPossibleSimSpeed, GetTimeScale());
 	}
 }

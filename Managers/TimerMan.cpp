@@ -106,8 +106,10 @@ namespace RTE {
 			m_SimAccumulator += static_cast<long long>(static_cast<float>(timeIncrease) * m_TimeScale);
 		}
 
+		float maxPossibleSimSpeed = GetDeltaTimeMS() / g_PerformanceMan.GetMSPSUAverage();
+
 		// Make sure we don't get runaway behind schedule
-		m_SimAccumulator = std::min(m_SimAccumulator, m_DeltaTime + (m_DeltaTime / 2));
+		m_SimAccumulator = std::min(m_SimAccumulator, m_DeltaTime + static_cast<long long>(m_DeltaTime * maxPossibleSimSpeed));
 
 		RTEAssert(m_SimAccumulator >= 0, "Negative sim time accumulator?!");
 
@@ -116,6 +118,6 @@ namespace RTE {
 			m_SimUpdatesSinceDrawn = -1; 
 		}
 
-		m_SimSpeed = std::min(GetDeltaTimeMS() / g_PerformanceMan.GetMSPSUAverage(), GetTimeScale());
+		m_SimSpeed = std::min(maxPossibleSimSpeed, GetTimeScale());
 	}
 }

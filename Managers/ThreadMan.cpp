@@ -18,6 +18,8 @@
 #include "MovableMan.h"
 #include "TimerMan.h"
 
+#include "tracy/Tracy.hpp"
+
 using namespace std;
 
 namespace RTE
@@ -58,6 +60,8 @@ void ThreadMan::Update() {
 }
 
 void ThreadMan::TransferSimStateToRenderer() {
+    ZoneScoped;
+
     std::lock_guard<std::mutex> lock(m_GameStateCopyMutex);
 
     // Copy game state into our current buffer
@@ -68,8 +72,8 @@ void ThreadMan::TransferSimStateToRenderer() {
         //m_GameStateModifiable->m_Activity.reset(dynamic_cast<Activity*>(g_ActivityMan.GetActivity()->Clone()));
         //m_GameStateModifiable->m_Terrain.reset(dynamic_cast<SLTerrain*>(g_SceneMan.GetScene()->GetTerrain()->Clone()));
     }
-    m_GameStateModifiable->m_RenderQueue = m_SimRenderQueue;
 
+    std::swap(m_GameStateModifiable->m_RenderQueue, m_SimRenderQueue);
     m_SimRenderQueue.clear();
 
     // TODO_MULTITHREAD: add post processing effects to RenderableGameState

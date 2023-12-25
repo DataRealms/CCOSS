@@ -326,11 +326,13 @@ namespace RTE {
 			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::SimTotal);
 
 			// TODO_MULTITHREAD
+#ifndef MULTITHREAD_SIM_AND_RENDER
 			// It is vital that server is updated after input manager but before activity because input manager will clear received pressed and released events on next update.
-			/*if (g_NetworkServer.IsServerModeEnabled()) {
+			if (g_NetworkServer.IsServerModeEnabled()) {
 				g_NetworkServer.Update(true);
 				serverUpdated = true;
-			}*/
+			}
+#endif
 
 			g_FrameMan.Update();
 			g_LuaMan.Update();
@@ -357,7 +359,8 @@ namespace RTE {
 			g_PerformanceMan.UpdateMSPU(updateEndTime - updateStartTime);
 
 			// TODO_MULTITHREAD
-			/*if (g_NetworkServer.IsServerModeEnabled()) {
+#ifndef MULTITHREAD_SIM_AND_RENDER
+			if (g_NetworkServer.IsServerModeEnabled()) {
 				// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
 				g_TimerMan.PauseSim(!(g_NetworkServer.ReadyForSimulation() && g_ActivityMan.IsInActivity()));
 
@@ -373,7 +376,8 @@ namespace RTE {
 						std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
 					}
 				}
-			}*/
+			}
+#endif
 		};
 
 		while (!System::IsSetToQuit()) {

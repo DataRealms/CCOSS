@@ -207,11 +207,13 @@ namespace RTE {
 
 	void PostProcessMan::RegisterPostEffect(const Vector &effectPos, BITMAP *effect, size_t hash, int strength, float angle) {
 		// TODO_MULTITHREAD
-		return;
-		
+#ifndef MULTITHREAD_SIM_AND_RENDER
 		// These effects get applied when there's a drawn frame that followed one or more sim updates.
 		// They are not only registered on drawn sim updates; flashes and stuff could be missed otherwise if they occur on undrawn sim updates.
-		if (effect) { m_PostSceneEffects.push_back(PostEffect(effectPos, effect, hash, strength, angle)); }
+		if (effect) {
+			m_PostSceneEffects.push_back(PostEffect(effectPos, effect, hash, strength, angle));
+		}
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -439,8 +441,13 @@ namespace RTE {
 		glViewport(0, 0, g_FrameMan.GetBackBuffer8()->w, g_FrameMan.GetBackBuffer8()->h);
 
 		// TODO_MULTITHREAD: add post processing effects to RenderableGameState
-		//DrawDotGlowEffects();
-		//DrawPostScreenEffects();
+#ifndef MULTITHREAD_SIM_AND_RENDER
+		DrawDotGlowEffects();
+		DrawPostScreenEffects();
+
+		// Clear the effects list for this frame
+		m_PostScreenEffects.clear();
+#endif
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

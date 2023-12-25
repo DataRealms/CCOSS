@@ -2312,7 +2312,7 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
 
     // Draw the objective points this player should care about
     // TODO_MULTITHREAD
-#ifdef NO_MULTITHREAD
+#ifndef MULTITHREAD_SIM_AND_RENDER
     for (std::list<ObjectivePoint>::iterator itr = m_Objectives.begin(); itr != m_Objectives.end(); ++itr)
     {
         // Only draw objectives of the same team as the current player

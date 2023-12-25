@@ -2760,8 +2760,10 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 			}
 
             // TODO_MULTITHREAD
-			//g_MovableMan.DrawHUD(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
-			g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
+#ifndef MULTITHREAD_SIM_AND_RENDER
+            g_MovableMan.DrawHUD(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
+            g_PrimitiveMan.DrawPrimitives(m_LastUpdatedScreen, targetGUIBitmap, targetPos);
+#endif
 			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
 			if (m_pDebugLayer) { 

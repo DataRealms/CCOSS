@@ -165,10 +165,13 @@ namespace RTE {
 			std::snprintf(str, sizeof(str), "MOIDs: %i", g_MovableMan.GetMOIDCount());
 			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 70, str, GUIFont::Left);
 
+			// TODO_MULTITHREAD
+#ifndef MULTITHREAD_SIM_AND_RENDER
 			if (int totalPlayingChannelCount = 0, realPlayingChannelCount = 0; g_AudioMan.GetPlayingChannelCount(&totalPlayingChannelCount, &realPlayingChannelCount)) {
 				std::snprintf(str, sizeof(str), "Sound Channels: %d / %d Real | %d / %d Virtual", realPlayingChannelCount, g_AudioMan.GetTotalRealChannelCount(), totalPlayingChannelCount - realPlayingChannelCount, g_AudioMan.GetTotalVirtualChannelCount());
 			}
-			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 80, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 90, str, GUIFont::Left);
+#endif
 
 			if (m_AdvancedPerfStats) { 
 				DrawPeformanceGraphs(intermediateDrawBitmap); 

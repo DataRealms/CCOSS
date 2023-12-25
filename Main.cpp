@@ -303,7 +303,9 @@ namespace RTE {
 			g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); 
 		}
 
-		auto simFunction = []() {
+		bool serverUpdated = false;
+
+		auto simFunction = [&serverUpdated]() {
 			g_ThreadMan.RunSimulationThreadFunctions();
 
 			if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) {
@@ -317,9 +319,10 @@ namespace RTE {
 
 			ZoneScopedN("Simulation Update");
 			long long updateStartTime = g_TimerMan.GetAbsoluteTime();
-			bool serverUpdated = false;
+			serverUpdated = false;
 
 			g_TimerMan.UpdateSim();
+			g_UInputMan.Update();
 
 			g_SceneMan.GetScene()->UpdateSim();
 
@@ -357,27 +360,6 @@ namespace RTE {
 			long long updateEndTime = g_TimerMan.GetAbsoluteTime();
 			g_PerformanceMan.NewPerformanceSample();
 			g_PerformanceMan.UpdateMSPU(updateEndTime - updateStartTime);
-
-			// TODO_MULTITHREAD
-#ifndef MULTITHREAD_SIM_AND_RENDER
-			if (g_NetworkServer.IsServerModeEnabled()) {
-				// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
-				g_TimerMan.PauseSim(!(g_NetworkServer.ReadyForSimulation() && g_ActivityMan.IsInActivity()));
-
-				if (!serverUpdated) { 
-					g_NetworkServer.Update(); 
-				}
-
-				if (g_NetworkServer.GetServerSimSleepWhenIdle()) {
-					long long ticksToSleep = g_TimerMan.GetTimeToSleep();
-					if (ticksToSleep > 0) {
-						double secsToSleep = static_cast<double>(ticksToSleep) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
-						long long milisToSleep = static_cast<long long>(secsToSleep) * 1000;
-						std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
-					}
-				}
-			}
-#endif
 		};
 
 		while (!System::IsSetToQuit()) {
@@ -408,8 +390,34 @@ namespace RTE {
 
 			simFunction();
 
+			// TODO_MULTITHREAD
+#ifndef MULTITHREAD_SIM_AND_RENDER
+			if (g_NetworkServer.IsServerModeEnabled()) {
+				// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
+				g_TimerMan.PauseSim(!(g_NetworkServer.ReadyForSimulation() && g_ActivityMan.IsInActivity()));
+
+				if (!serverUpdated) { 
+					g_NetworkServer.Update(); 
+				}
+
+				if (g_NetworkServer.GetServerSimSleepWhenIdle()) {
+					long long ticksToSleep = g_TimerMan.GetTimeToSleep();
+					if (ticksToSleep > 0) {
+						double secsToSleep = static_cast<double>(ticksToSleep) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
+						long long milisToSleep = static_cast<long long>(secsToSleep) * 1000;
+						std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
+					}
+				}
+			}
+#endif
+
 			g_TimerMan.Update();
-			g_UInputMan.Update();
+
+			PollSDLEvents();
+
+			g_WindowMan.Update();
+			g_WindowMan.ClearRenderer();
+
 			g_ConsoleMan.Update();
 			g_ThreadMan.Update();
 

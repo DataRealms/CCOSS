@@ -136,6 +136,10 @@ namespace RTE {
 		RTEAssert(g_SceneMan.GetScene(), "Trying to check offset before there is a scene or terrain!");
 
         const SLTerrain* terrain = g_ThreadMan.GetDrawableGameState().m_Terrain;
+		if (!terrain) {
+			return;
+		}
+
         RTEAssert(terrain, "Trying to get terrain matter before there is a scene or terrain!");
 
 		if (!terrain->WrapsX() && screen.Offset.GetX() < 0) {
@@ -212,6 +216,10 @@ namespace RTE {
 
 		// Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
 		const SLTerrain *terrain = g_ThreadMan.GetDrawableGameState().m_Terrain;
+		if (!terrain) {
+			return;
+		}
+
 		if (screen.TargetXWrapped) {
 			if (terrain->WrapsX()) {
 				int wrappingScrollDirection = (screen.ScrollTarget.GetFloorIntX() < (terrain->GetBitmap()->w / 2)) ? 1 : -1;

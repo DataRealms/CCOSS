@@ -388,7 +388,16 @@ namespace RTE {
 				g_PerformanceMan.ResetSimUpdateTimer();
 			}
 
-			simFunction();
+			g_TimerMan.Update();
+
+			PollSDLEvents();
+
+			g_WindowMan.Update();
+			g_WindowMan.ClearRenderer();
+
+			while(g_TimerMan.TimeForSimUpdate()) {
+				simFunction();
+			}
 
 			// TODO_MULTITHREAD
 #ifndef MULTITHREAD_SIM_AND_RENDER
@@ -410,13 +419,6 @@ namespace RTE {
 				}
 			}
 #endif
-
-			g_TimerMan.Update();
-
-			PollSDLEvents();
-
-			g_WindowMan.Update();
-			g_WindowMan.ClearRenderer();
 
 			g_ConsoleMan.Update();
 			g_ThreadMan.Update();

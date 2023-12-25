@@ -446,7 +446,7 @@ namespace RTE {
 		DrawPostScreenEffects();
 
 		// Clear the effects list for this frame
-		m_PostScreenEffects.clear();
+		ClearScreenPostEffects();
 #endif
 	}
 

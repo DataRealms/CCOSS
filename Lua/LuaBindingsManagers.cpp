@@ -379,13 +379,12 @@ namespace RTE {
 		return luabind::class_<TimerMan>("TimerManager")
 
 		.property("TimeScale", &TimerMan::GetTimeScale, &TimerMan::SetTimeScale)
-		.property("RealToSimCap", &TimerMan::GetRealToSimCap, &TimerMan::SetRealToSimCap)
+		.property("RealToSimCap", &TimerMan::GetRealToSimCap)
 		.property("DeltaTimeTicks", &LuaAdaptersTimerMan::GetDeltaTimeTicks, &TimerMan::SetDeltaTimeTicks)
 		.property("DeltaTimeSecs", &TimerMan::GetDeltaTimeSecs, &TimerMan::SetDeltaTimeSecs)
 		.property("DeltaTimeMS", &TimerMan::GetDeltaTimeMS)
 		.property("AIDeltaTimeSecs", &TimerMan::GetAIDeltaTimeSecs)
 		.property("AIDeltaTimeMS", &TimerMan::GetAIDeltaTimeMS)
-		.property("OneSimUpdatePerFrame", &TimerMan::IsOneSimUpdatePerFrame, &TimerMan::SetOneSimUpdatePerFrame)
 
 		.property("TicksPerSecond", &LuaAdaptersTimerMan::GetTicksPerSecond)
 

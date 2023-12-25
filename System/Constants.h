@@ -26,7 +26,7 @@ namespace RTE {
 
 #pragma region Time Constants
 	static constexpr float c_DefaultDeltaTimeS = 0.0166666F; //!< The default simulation update step size, in seconds.
-	static constexpr float c_DefaultRealToSimCap = 0.0333333F; //!< The default cap of number of ticks that the real time can add to the tick accumulator each update.
+	static constexpr float c_RealToSimCap = 0.0166666F; //!< The default cap of number of ticks that the real time can add to the tick accumulator each update.
 #pragma endregion
 
 #pragma region AI Constants

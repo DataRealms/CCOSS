@@ -942,9 +942,6 @@ namespace RTE {
 			// Ctrl+P to toggle performance stats
 			} else if (KeyPressed(SDLK_p)) {
 				g_PerformanceMan.ShowPerformanceStats(!g_PerformanceMan.IsShowingPerformanceStats());
-			// Ctrl+O to toggle one sim update per frame
-			} else if (KeyPressed(SDLK_o)) {
-				g_TimerMan.SetOneSimUpdatePerFrame(!g_TimerMan.IsOneSimUpdatePerFrame());
 			} else if (KeyPressed(SDLK_F2)) {
 				g_PresetMan.QuickReloadEntityPreset();
 			} else if (KeyPressed(SDLK_F9)) {
@@ -952,8 +949,6 @@ namespace RTE {
 			} else if (g_PerformanceMan.IsShowingPerformanceStats()) {
 				if (KeyHeld(SDLK_1)) {
 					g_TimerMan.SetTimeScale(1.0F);
-				} else if (KeyHeld(SDLK_3)) {
-					g_TimerMan.SetRealToSimCap(c_DefaultRealToSimCap);
 				} else if (KeyHeld(SDLK_5)) {
 					g_TimerMan.SetDeltaTimeSecs(c_DefaultDeltaTimeS);
 				}
@@ -1003,14 +998,6 @@ namespace RTE {
 				}
 				if (KeyHeld(SDLK_1) && g_TimerMan.GetTimeScale() - 0.01F > 0.001F) {
 					g_TimerMan.SetTimeScale(g_TimerMan.GetTimeScale() - 0.01F);
-				}
-
-				// Manipulate real to sim cap
-				if (KeyHeld(SDLK_4)) {
-					g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() + 0.001F);
-				}
-				if (KeyHeld(SDLK_3) && g_TimerMan.GetRealToSimCap() > 0) {
-					g_TimerMan.SetRealToSimCap(g_TimerMan.GetRealToSimCap() - 0.001F);
 				}
 
 				// Manipulate DeltaTime

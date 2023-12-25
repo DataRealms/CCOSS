@@ -173,7 +173,6 @@ namespace RTE {
 		MatchProperty("EnableParticleSettling", { reader >> g_MovableMan.m_SettlingEnabled; });
 		MatchProperty("EnableMOSubtraction", { reader >> g_MovableMan.m_MOSubtractionEnabled; });
 		MatchProperty("DeltaTime", { g_TimerMan.SetDeltaTimeSecs(std::stof(reader.ReadPropValue())); });
-		MatchProperty("RealToSimCap", { g_TimerMan.SetRealToSimCap(std::stof(reader.ReadPropValue())); });
 		MatchProperty("AllowSavingToBase", { reader >> m_AllowSavingToBase; });
 		MatchProperty("ShowMetaScenes", { reader >> m_ShowMetaScenes; });
 		MatchProperty("SkipIntro", { reader >> m_SkipIntro; });
@@ -319,7 +318,6 @@ namespace RTE {
 		writer.NewPropertyWithValue("EnableParticleSettling", g_MovableMan.m_SettlingEnabled);
 		writer.NewPropertyWithValue("EnableMOSubtraction", g_MovableMan.m_MOSubtractionEnabled);
 		writer.NewPropertyWithValue("DeltaTime", g_TimerMan.GetDeltaTimeSecs());
-		writer.NewPropertyWithValue("RealToSimCap", g_TimerMan.GetRealToSimCap());
 		
 		// No experimental settings right now :)
 		//writer.NewLine(false, 2);

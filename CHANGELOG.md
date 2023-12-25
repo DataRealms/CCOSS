@@ -173,6 +173,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 </details>
 
 <details><summary><b>Removed</b></summary>
+
+- Removed RealToSimCap and OneSimUpdatePerFrame. Instead we try to always target 60fps, even if it slows the simulation down a little.
+
 </details>
 
 ***

@@ -133,43 +133,37 @@ namespace RTE {
 			std::snprintf(str, sizeof(str), "Time Scale: x%.2f ([1]-, [2]+, [Ctrl+1]Rst) | Sim Speed: x%.2f", g_TimerMan.GetTimeScale(), g_TimerMan.GetSimSpeed());
 			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 20, str, GUIFont::Left);
 
-			std::snprintf(str, sizeof(str), "Real to Sim Cap: %.2f ms ([3]-, [4]+, [Ctrl+3]Rst)", g_TimerMan.GetRealToSimCap() * 1000.0F);
-			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 30, str, GUIFont::Left);
-
 			float deltaTime = g_TimerMan.GetDeltaTimeMS();
 			std::snprintf(str, sizeof(str), "DeltaTime: %.2f ms ([5]-, [6]+, [Ctrl+5]Rst)", deltaTime);
-			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 40, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 30, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Actors: %li", g_MovableMan.GetActorCount());
-			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 50, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 40, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Particles: %li", g_MovableMan.GetParticleCount());
-			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 60, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 50, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Objects: %i", g_MovableMan.GetKnownObjectsCount());
-			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 70, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 60, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "MOIDs: %i", g_MovableMan.GetMOIDCount());
-			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 80, str, GUIFont::Left);
-
-			std::snprintf(str, sizeof(str), "Sim Updates Since Last Drawn: %i", g_TimerMan.SimUpdatesSinceDrawn());
-			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 90, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 70, str, GUIFont::Left);
 
 			if (int totalPlayingChannelCount = 0, realPlayingChannelCount = 0; g_AudioMan.GetPlayingChannelCount(&totalPlayingChannelCount, &realPlayingChannelCount)) {
 				std::snprintf(str, sizeof(str), "Sound Channels: %d / %d Real | %d / %d Virtual", realPlayingChannelCount, g_AudioMan.GetTotalRealChannelCount(), totalPlayingChannelCount - realPlayingChannelCount, g_AudioMan.GetTotalVirtualChannelCount());
 			}
-			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 100, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 80, str, GUIFont::Left);
 
 			if (!m_SortedScriptTimings.empty()) {
 				std::snprintf(str, sizeof(str), "Lua scripts taking the most time to call Update() this frame:");
-				guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 120, str, GUIFont::Left);
+				guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 100, str, GUIFont::Left);
 
 				for (int i = 0; i < std::min((size_t)3, m_SortedScriptTimings.size()); i++)
 				{
 					std::pair<std::string, ScriptTiming> scriptTiming = m_SortedScriptTimings.at(i);
 
 					std::snprintf(str, sizeof(str), "%.1fms total with %i calls in %s", scriptTiming.second.m_Time / 1000.0, scriptTiming.second.m_CallCount, scriptTiming.first.c_str());
-					guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 130 + i * 10, str, GUIFont::Left);
+					guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 110 + i * 10, str, GUIFont::Left);
 				}
 			}
 

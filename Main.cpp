@@ -303,75 +303,78 @@ namespace RTE {
 			g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); 
 		}
 
-		std::thread simThread([]() {
-			while (!System::IsSetToQuit()) {
-				g_ThreadMan.RunSimulationThreadFunctions();
+		auto simFunction = []() {
+			g_ThreadMan.RunSimulationThreadFunctions();
 
-		while (!System::IsSetToQuit()) {
-			g_FrameMan.ClearFrame();
+			if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) {
+				return;
+			}
+
+			// Simulation update, as many times as the fixed update step allows in the span since last frame draw.
+			if (!g_TimerMan.TimeForSimUpdate()) {
+				return;
+			}
+
+			ZoneScopedN("Simulation Update");
+			long long updateStartTime = g_TimerMan.GetAbsoluteTime();
 			bool serverUpdated = false;
 
-				long long updateStartTime = g_TimerMan.GetAbsoluteTime();
-				bool serverUpdated = false;
+			g_TimerMan.UpdateSim();
 
-				g_TimerMan.UpdateSim();
+			g_SceneMan.GetScene()->UpdateSim();
 
-				g_SceneMan.GetScene()->UpdateSim();
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::SimTotal);
 
-				g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::SimTotal);
+			// TODO_MULTITHREAD
+			// It is vital that server is updated after input manager but before activity because input manager will clear received pressed and released events on next update.
+			/*if (g_NetworkServer.IsServerModeEnabled()) {
+				g_NetworkServer.Update(true);
+				serverUpdated = true;
+			}*/
 
-				// TODO_MULTITHREAD
-				// It is vital that server is updated after input manager but before activity because input manager will clear received pressed and released events on next update.
-				/*if (g_NetworkServer.IsServerModeEnabled()) {
-					g_NetworkServer.Update(true);
-					serverUpdated = true;
-				}*/
+			g_FrameMan.Update();
+			g_LuaMan.Update();
+			g_ActivityMan.Update();
 
-				g_FrameMan.Update();
-				g_LuaMan.Update();
-				g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ActivityUpdate);
-				g_ActivityMan.Update();
-				g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ActivityUpdate);
-				g_MovableMan.Update();
+			g_LuaMan.ClearScriptTimings();
+			g_MovableMan.Update();
+			g_PerformanceMan.UpdateSortedScriptTimings(g_LuaMan.GetScriptTimings());
 
-				g_AudioMan.Update();
+			g_AudioMan.Update();
 
-				g_ActivityMan.LateUpdateGlobalScripts();
+			g_ActivityMan.LateUpdateGlobalScripts();
 
-				// This is to support hot reloading entities in SceneEditorGUI. It's a bit hacky to put it in Main like this, but PresetMan has no update in which to clear the value, and I didn't want to set up a listener for the job.
-				// It's in this spot to allow it to be set by UInputMan update and ConsoleMan update, and read from ActivityMan update.
-				g_PresetMan.ClearReloadEntityPresetCalledThisUpdate();
+			// This is to support hot reloading entities in SceneEditorGUI. It's a bit hacky to put it in Main like this, but PresetMan has no update in which to clear the value, and I didn't want to set up a listener for the job.
+			// It's in this spot to allow it to be set by UInputMan update and ConsoleMan update, and read from ActivityMan update.
+			g_PresetMan.ClearReloadEntityPresetCalledThisUpdate();
 
-				g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::SimTotal);
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::SimTotal);
 
-				g_ThreadMan.TransferSimStateToRenderer();
+			g_ThreadMan.TransferSimStateToRenderer();
 
-				long long updateEndTime = g_TimerMan.GetAbsoluteTime();
-				g_PerformanceMan.NewPerformanceSample();
-				g_PerformanceMan.UpdateMSPU(updateEndTime - updateStartTime);
+			long long updateEndTime = g_TimerMan.GetAbsoluteTime();
+			g_PerformanceMan.NewPerformanceSample();
+			g_PerformanceMan.UpdateMSPU(updateEndTime - updateStartTime);
 
-				// TODO_MULTITHREAD
-				/*if (g_NetworkServer.IsServerModeEnabled()) {
-					// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
-					g_TimerMan.PauseSim(!(g_NetworkServer.ReadyForSimulation() && g_ActivityMan.IsInActivity()));
+			// TODO_MULTITHREAD
+			/*if (g_NetworkServer.IsServerModeEnabled()) {
+				// Pause sim while we're waiting for scene transmission or scene will start changing before clients receive them and those changes will be lost.
+				g_TimerMan.PauseSim(!(g_NetworkServer.ReadyForSimulation() && g_ActivityMan.IsInActivity()));
 
-					if (!serverUpdated) { 
-						g_NetworkServer.Update(); 
+				if (!serverUpdated) { 
+					g_NetworkServer.Update(); 
+				}
+
+				if (g_NetworkServer.GetServerSimSleepWhenIdle()) {
+					long long ticksToSleep = g_TimerMan.GetTimeToSleep();
+					if (ticksToSleep > 0) {
+						double secsToSleep = static_cast<double>(ticksToSleep) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
+						long long milisToSleep = static_cast<long long>(secsToSleep) * 1000;
+						std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
 					}
-
-					if (g_NetworkServer.GetServerSimSleepWhenIdle()) {
-						long long ticksToSleep = g_TimerMan.GetTimeToSleep();
-						if (ticksToSleep > 0) {
-							double secsToSleep = static_cast<double>(ticksToSleep) / static_cast<double>(g_TimerMan.GetTicksPerSecond());
-							long long milisToSleep = static_cast<long long>(secsToSleep) * 1000;
-							std::this_thread::sleep_for(std::chrono::milliseconds(milisToSleep));
-						}
-					}
-				}*/
-			}
-		});
-
-		simThread.detach();
+				}
+			}*/
+		};
 
 		while (!System::IsSetToQuit()) {
 			long long frameStartTime = g_TimerMan.GetAbsoluteTime();
@@ -398,6 +401,8 @@ namespace RTE {
 				g_ActivityMan.ResumeActivity();
 				g_PerformanceMan.ResetSimUpdateTimer();
 			}
+
+			simFunction();
 
 			g_TimerMan.Update();
 			g_UInputMan.Update();

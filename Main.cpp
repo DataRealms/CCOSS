@@ -327,6 +327,7 @@ namespace RTE {
 					g_NetworkServer.Update(true);
 					serverUpdated = true;
 				}
+
 				g_FrameMan.Update();
 				g_LuaMan.Update();
 				g_ActivityMan.Update();

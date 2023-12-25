@@ -110,18 +110,6 @@ namespace RTE {
 		void SetOneSimUpdatePerFrame(bool oneUpdate = true) { m_OneSimUpdatePerFrame = oneUpdate; }
 
 		/// <summary>
-		/// Shows whether the sim speed is limited to not exceed 1.0x.
-		/// </summary>
-		/// <returns>Whether the sim is limited to not exceed 1.0x of real time.</returns>
-		bool IsSimSpeedLimited() const { return m_OneSimUpdatePerFrame && m_SimSpeedLimited; }
-
-		/// <summary>
-		/// Sets whether to limit the sim speed to not exceed real time.
-		/// </summary>
-		/// <param name="simLimited">Whether the sim speed should be limited to not exceed 1.0.</param>
-		void SetSimSpeedLimited(bool simLimited = true) { m_SimSpeedLimited = simLimited; }
-
-		/// <summary>
 		/// Gets the number of ticks per second (the resolution of the timer).
 		/// </summary>
 		/// <returns>The number of ticks per second.</returns>
@@ -241,7 +229,6 @@ namespace RTE {
 
 		bool m_SimPaused; //!< Simulation paused; no real time ticks will go to the sim accumulator.
 		bool m_OneSimUpdatePerFrame; //!< Whether to force this to artificially make time for only one single sim update for the graphics frame. Useful for debugging or profiling.
-		bool m_SimSpeedLimited; //!< Whether the simulation is limited to going at 1.0x and not faster.
 
 	private:
 

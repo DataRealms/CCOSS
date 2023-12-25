@@ -93,6 +93,12 @@ namespace RTE {
 		void ShowAdvancedPerformanceStats(bool showGraphs = true) { m_AdvancedPerfStats = showGraphs; }
 
 		/// <summary>
+		/// Gets the average of the MSPU reading buffer, calculated each update.
+		/// </summary>
+		/// <returns>The average value of the MSPU reading buffer.</returns>
+		float GetMSPSUAverage() const { return m_MSPSUAverage; }
+
+		/// <summary>
 		/// Gets the average of the MSPF reading buffer, calculated each frame.
 		/// </summary>
 		/// <returns>The average value of the MSPF reading buffer.</returns>

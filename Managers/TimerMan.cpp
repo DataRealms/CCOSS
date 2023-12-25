@@ -30,7 +30,6 @@ namespace RTE {
 		m_TimeScale = 1.0F;
 		m_SimPaused = false;
 		m_OneSimUpdatePerFrame = true;
-		m_SimSpeedLimited = true;
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,35 +88,32 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#pragma optimize("", off)
 	void TimerMan::Update() {
 		long long prevTime = m_RealTimeTicks;
 		m_RealTimeTicks = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - m_StartTime).count();
-		unsigned long long timeIncrease = m_RealTimeTicks - prevTime;
-		// Cap it if too long (as when the app went out of focus).
-		if (timeIncrease > m_RealToSimCap) { timeIncrease = m_RealToSimCap; }
+
+		// Cap timeIncrease if too long (as when the app went out of focus), to m_RealToSimCap.
+		long long timeIncrease = std::min(m_RealTimeTicks - prevTime, m_RealToSimCap);
 
 		RTEAssert(timeIncrease > 0, "It seems your CPU is giving bad timing data to the game, this is known to happen on some multi-core processors. This may be fixed by downloading the latest CPU drivers from AMD or Intel.");
 
 		// If not paused, add the new time difference to the sim accumulator, scaling by the TimeScale.
-		if (!m_SimPaused) { m_SimAccumulator += static_cast<long long>(static_cast<float>(timeIncrease) * m_TimeScale); }
+		if (!m_SimPaused) { 
+			m_SimAccumulator += static_cast<long long>(static_cast<float>(timeIncrease) * m_TimeScale); 
+		}
+
+		// Make sure we don't get runaway behind schedule
+		m_SimAccumulator = std::min(m_SimAccumulator, m_DeltaTime * 2);
 
 		RTEAssert(m_SimAccumulator >= 0, "Negative sim time accumulator?!");
 
 		// Reset the counter since the last drawn update. Set it negative since we're counting full pure sim updates and this will be incremented to 0 on next SimUpdate.
-		if (m_DrawnSimUpdate) { m_SimUpdatesSinceDrawn = -1; }
-
-		// Override the accumulator and just put one delta time in there so sim updates only once per frame.
-		if (m_OneSimUpdatePerFrame) {
-			// Make sure we don't get runaway behind
-			if (m_SimSpeedLimited && m_SimAccumulator > m_DeltaTime * 2.0f) { m_SimAccumulator = m_DeltaTime; }
-
-			// Reset the counter of sim updates since the last drawn. it will always be 0 since every update results in a drawn frame.
-			m_SimUpdatesSinceDrawn = -1;
-
-			m_SimSpeed = GetDeltaTimeMS() / g_PerformanceMan.GetMSPFAverage();
-			if (IsSimSpeedLimited() && m_SimSpeed > 1.0F) { m_SimSpeed = 1.0F; }
-		} else {
-			m_SimSpeed = 1.0F;
+		if (m_DrawnSimUpdate || m_OneSimUpdatePerFrame) {
+			m_SimUpdatesSinceDrawn = -1; 
 		}
+
+		m_SimSpeed = std::min(GetDeltaTimeMS() / g_PerformanceMan.GetMSPSUAverage(), GetTimeScale());
 	}
+#pragma optimize("", on)
 }

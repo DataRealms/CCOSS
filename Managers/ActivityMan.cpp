@@ -330,6 +330,8 @@ namespace RTE {
 		m_LastMusicPos = 0;
 		g_AudioMan.PauseIngameSounds(false);
 
+		g_PerformanceMan.ResetPerformanceTimings();
+
 		return error;
 	}
 
@@ -397,6 +399,7 @@ namespace RTE {
 
 			PauseActivity(false);
 			g_TimerMan.PauseSim(false);
+			g_PerformanceMan.ResetPerformanceTimings();
 		}
 	}
 

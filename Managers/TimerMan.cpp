@@ -106,7 +106,7 @@ namespace RTE {
 			m_SimAccumulator += static_cast<long long>(static_cast<float>(timeIncrease) * m_TimeScale);
 		}
 
-		float maxPossibleSimSpeed = GetDeltaTimeMS() / g_PerformanceMan.GetMSPSUAverage();
+		float maxPossibleSimSpeed = GetDeltaTimeMS() / std::max(g_PerformanceMan.GetMSPSUAverage(), std::numeric_limits<float>::epsilon());
 
 		// Make sure we don't get runaway behind schedule
 		m_SimAccumulator = std::min(m_SimAccumulator, m_DeltaTime + static_cast<long long>(m_DeltaTime * maxPossibleSimSpeed));

@@ -555,7 +555,7 @@ void MovableObject::Destroy(bool notInherited) {
     // This means Destroy() doesn't get called, and the lua memory shit leaks because it never gets set to nil. But oh well.
     // So.. we need to do this shit... I guess. Even though it's fucking awful. And it definitely results in possible deadlocks depending on how different lua states interact.
     // TODO: try to make this at least reasonably workable
-    DestroyScriptState();
+    //DestroyScriptState();
 
 	g_MovableMan.UnregisterObject(this);
     if (!notInherited) { 

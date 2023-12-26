@@ -822,6 +822,12 @@ ClassInfoGetters;
     /// Notify that a new frame has started, allowing us to update information like our previous state.
     /// </summary>
     void NewFrame() override;
+    
+	/// <summary>
+	/// Method to be run when the game is saved via ActivityMan::SaveCurrentGame. Not currently used in metagame or editor saving.
+	/// </summary>
+	void OnSave() override;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Protected member variable and method declarations

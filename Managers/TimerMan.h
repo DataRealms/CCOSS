@@ -78,13 +78,7 @@ namespace RTE {
 		/// Gets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
 		/// </summary>
 		/// <returns>A float describing the current cap in seconds.</returns>
-		float GetRealToSimCap() const { return static_cast<float>(m_RealToSimCap) / static_cast<float>(m_TicksPerSecond); }
-
-		/// <summary>
-		/// Sets the cap of the amount of seconds which can be transferred from the real time to the simulated time in one update.
-		/// </summary>
-		/// <param name="newCap">A float specifying the new cap in seconds.</param>
-		void SetRealToSimCap(float newCap) { m_RealToSimCap = static_cast<long long>(newCap * static_cast<float>(m_TicksPerSecond)); }
+		float GetRealToSimCap() const;
 
 		/// <summary>
 		/// Gets the number of ticks per second (the resolution of the timer).
@@ -219,7 +213,6 @@ namespace RTE {
 		std::chrono::steady_clock::time_point m_StartTime; //!< The point in real time when the simulation (re)started.
 		long long m_TicksPerSecond; //!< The frequency of ticks each second, ie the resolution of the timer.
 		volatile long long m_RealTimeTicks; //!< The number of actual microseconds counted so far.
-		long long m_RealToSimCap; //!< The cap of number of ticks that the real time can add to the accumulator each update.
 		long long m_SimTimeTicks; //!< The number of simulation time ticks counted so far.
 		long long m_SimUpdateCount; //!< The number of whole simulation updates have been made since reset.
 		std::atomic<long long> m_SimAccumulator; //!< Simulation time accumulator keeps track of how much actual time has passed and is chunked into whole DeltaTime:s upon UpdateSim.

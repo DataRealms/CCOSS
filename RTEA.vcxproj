@@ -493,8 +493,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)external\include\win;$(ProjectDir)external\include\common\;$(ProjectDir)external\include\common\boost_1_75;$(ProjectDir)external\include\common\RakNet;$(ProjectDir)external\include\win\LZ4;$(ProjectDir)external\include\common\fmod;$(ProjectDir)external\include\common\luabind</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;ZLIB_WINAPI;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)System;$(ProjectDir)Lua;$(ProjectDir)Entities;$(ProjectDir)Activities;$(ProjectDir)Managers;$(ProjectDir)Menus;$(ProjectDir)GUI;$(ProjectDir)GUI\Wrappers;$(ProjectDir)external\include\boost_1_75;$(ProjectDir)external\include\glm-0.9.9.8;$(ProjectDir)external\include\glad-2.0.0-beta;$(ProjectDir)external\include\LZ4-1.9.3\LZ4;$(ProjectDir)external\include\fmod-2.2.13;$(ProjectDir)external\include\thread-pool-3.5.0\include;$(ProjectDir)external\include\hopscotch-map-2.3.1\include;$(ProjectDir)external\sources\libpng-1.6.40\include;$(ProjectDir)external\sources\zlib-ng-2.1.3\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\include;$(ProjectDir)external\sources\allegro 4.4.3.1-custom\addons\loadpng;$(ProjectDir)external\sources\SDL2-2.26.3\include;$(ProjectDir)external\sources\LuaJIT-2.1\src;$(ProjectDir)external\sources\luabind-0.7.1\;$(ProjectDir)external\sources\luabind-0.7.1\luabind;$(ProjectDir)external\sources\RakNet\include;$(ProjectDir)external\sources\minizip-ng-4.0.0\include;$(ProjectDir)external\sources\minizip-ng-4.0.0\src;$(ProjectDir)external\sources\tracy\public</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32_LEAN_AND_MEAN;ALLEGRO_STATICLINK;ALLEGRO_NO_STD_HEADERS;ALLEGRO_NO_MAGIC_MAIN;_CRT_SECURE_NO_DEPRECATE;ZLIB_WINAPI;ZLIB_COMPAT;_WINDOWS;WIN32;DEBUG_RELEASE_BUILD;NDEBUG;TRACY_ENABLE;TRACY_ON_DEMAND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -756,6 +756,7 @@
     <ClInclude Include="Managers\PostProcessMan.h" />
     <ClInclude Include="Managers\PrimitiveMan.h" />
     <ClInclude Include="Managers\ThreadMan.h" />
+    <ClInclude Include="Managers\WindowMan.h" />
     <ClInclude Include="Menus\LoadingScreen.h" />
     <ClInclude Include="Menus\ModManagerGUI.h" />
     <ClInclude Include="Menus\PauseMenuGUI.h" />
@@ -999,6 +1000,7 @@
     <ClCompile Include="Managers\PrimitiveMan.cpp" />
     <ClCompile Include="Managers\CameraMan.cpp" />
     <ClCompile Include="Managers\ThreadMan.cpp" />
+    <ClCompile Include="Managers\WindowMan.cpp" />
     <ClCompile Include="Menus\LoadingScreen.cpp" />
     <ClCompile Include="Menus\ModManagerGUI.cpp" />
     <ClCompile Include="Menus\PauseMenuGUI.cpp" />

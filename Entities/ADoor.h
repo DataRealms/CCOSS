@@ -213,7 +213,7 @@ namespace RTE {
 
 		static Entity::ClassInfo m_sClass; //!< ClassInfo for this class.
 
-		int m_InitialSpriteAnimDuration; //!< This stores the original SpriteAnimDuration value so we can drive the death spin-up animation using Lerp. For internal use only.
+		int m_InitialSpriteAnimDuration; //!< This stores the original SpriteAnimDuration value so we can drive the death spin-up animation using LERP. For internal use only.
 
 		std::list<ADSensor> m_Sensors; //!< All the sensors for detecting Actors approaching the door.
 		Timer m_SensorTimer; //!< Times the exit interval.

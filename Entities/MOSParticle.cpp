@@ -271,10 +271,6 @@ namespace RTE {
 		} else {
 			renderFunc(1.0F);
 		}
-
-		if (m_pScreenEffect && mode == g_DrawColor && !onlyPhysical) { 
-			SetPostScreenEffectToDraw(); 
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

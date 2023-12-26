@@ -369,8 +369,8 @@ int AEmitter::GetTotalBurstSize() const {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 float AEmitter::GetScaledThrottle(float throttle, float multiplier) const {
-    float throttleFactor = LERP(-1.0f, 1.0f, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, throttle);
-    return LERP(m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, -1.0f, 1.0f, throttleFactor * multiplier);
+    float throttleFactor = Lerp(-1.0f, 1.0f, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, throttle);
+    return Lerp(m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, -1.0f, 1.0f, throttleFactor * multiplier);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -525,7 +525,7 @@ void AEmitter::Update()
 							pParticle->SetPos(m_Pos + RotateOffset(m_EmissionOffset));
 						}
 					} else {
-						pParticle->SetPos(m_Pos + RotateOffset((*eItr)->GetOffset()));
+						pParticle->SetPos(m_Pos + RotateOffset(emission.GetOffset()));
 					}
     // TODO: Optimize making the random angles!")
                     emitVel.SetXY(velMin + RandomNum(0.0F, velRange), 0.0F);

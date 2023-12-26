@@ -1156,21 +1156,6 @@ bool Actor::ParticlePenetration(HitData &hd) {
     return penetrated;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnMOHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits another MO.
-//                  This is called by the owned Atom/AtomGroup of this MovableObject during
-//                  travel.
-
-bool Actor::OnMOHit(MovableObject *pOtherMO)
-{
-    // Don't terminate, continue travel
-    return false;
-}
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetAIModeIcon
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1494,6 +1479,7 @@ void Actor::FullUpdate() {
     Update();
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  DrawHUD
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1504,10 +1490,6 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 {
 	// This should probably be a local var and not alter a member one in a draw func. Would let us make these functions const
     m_HUDStack = -m_CharHeight / 2;
-
-    if (!m_HUDVisible) {
-        return;
-    }
 
     // Only do HUD if on a team
     if (m_Team < 0) {
@@ -1625,7 +1607,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                 pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 10, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
             }
 
-            std::snprintf(str, sizeof(str), "%.0f", m_Health);
+			std::snprintf(str, sizeof(str), "%.0f", std::ceil(m_Health));
             pSymbolFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack, str, GUIFont::Left);
 
             m_HUDStack += -12;
@@ -1637,54 +1619,18 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
 					std::snprintf(str, sizeof(str), "%.0f oz", GetGoldCarried());
 					pSmallFont->DrawAligned(&bitmapInt, drawPos.GetFloorIntX() - 0, drawPos.GetFloorIntY() + m_HUDStack + 2, str, GUIFont::Left);
 
-                m_HUDStack += -11;
-            }
-
-			// Player name
-			if (IsPlayerControlled() && g_FrameMan.IsInMultiplayerMode()) {
-				GameActivity * pGameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity());
-				if (pGameActivity) {
-					pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X - 0, drawPos.m_Y + m_HUDStack + 2, pGameActivity->GetNetworkPlayerName(m_Controller.GetPlayer()).c_str(), GUIFont::Centre);
-					m_HUDStack += -11;
+					m_HUDStack -= 11;
+				}
+				// Player name
+				if (g_FrameMan.IsInMultiplayerMode()) {
+					if (GameActivity * gameActivity = dynamic_cast<GameActivity *>(g_ActivityMan.GetActivity())) {
+						pSmallFont->DrawAligned(&bitmapInt, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 2, gameActivity->GetNetworkPlayerName(m_Controller.GetPlayer()).c_str(), GUIFont::Centre);
+						m_HUDStack -= 11;
+					}
 				}
 			}
         }
     }
-
-    // AI mode state debugging
-#ifdef DEBUG_BUILD
-    AllegroBitmap bitmapInt(pTargetBitmap);
-
-    // Obstacle state
-    if (m_ObstacleState == PROCEEDING) {
-        std::snprintf(str, sizeof(str), "PROCEEDING");
-    } else if (m_ObstacleState == BACKSTEPPING) {
-        std::snprintf(str, sizeof(str), "BACKSTEPPING");
-    } else if (m_ObstacleState == JUMPING) {
-        std::snprintf(str, sizeof(str), "JUMPING");
-    } else if (m_ObstacleState == SOFTLANDING) {
-        std::snprintf(str, sizeof(str), "SOFTLANDING");
-    } else {
-        std::snprintf(str, sizeof(str), "DIGPAUSING");
-    }
-
-    pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-
-    // Team Block State
-    if (m_TeamBlockState == BLOCKED) {
-        std::snprintf(str, sizeof(str), "BLOCKED");
-    } else if (m_TeamBlockState == IGNORINGBLOCK) {
-        std::snprintf(str, sizeof(str), "IGNORINGBLOCK");
-    } else if (m_TeamBlockState == FOLLOWWAIT) {
-        std::snprintf(str, sizeof(str), "FOLLOWWAIT");
-    } else {
-        std::snprintf(str, sizeof(str), "NOTBLOCKED");
-    }
-
-    pSmallFont->DrawAligned(&bitmapInt, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-#endif
 
     // Don't proceed to draw all the secret stuff below if this screen is for a player on the other team!
     if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->GetTeamOfPlayer(whichScreen) != m_Team) {
@@ -1692,7 +1638,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
     }
 
     // AI waypoints or points of interest
-    if (m_DrawWaypoints && (m_AIMode == AIMODE_GOTO || m_AIMode == AIMODE_SQUAD)) {
+    if (m_DrawWaypoints && m_PlayerControllable && (m_AIMode == AIMODE_GOTO || m_AIMode == AIMODE_SQUAD)) {
         // Draw the AI paths, from the ultimate destination back up to the actor's position.
         // We do this backwards so the lines won't crawl and the dots can be evenly spaced throughout
         Vector waypoint;
@@ -1794,7 +1740,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                     if ((*prevItr) == (*selfItr)) {
                         break;
                     }
-                } while ((*prevItr)->GetController()->IsPlayerControlled() || g_ActivityMan.GetActivity()->IsOtherPlayerBrain((*prevItr), m_Controller.GetPlayer()));
+                } while (!(*prevItr)->IsPlayerControllable() || (*prevItr)->GetController()->IsPlayerControlled() || g_ActivityMan.GetActivity()->IsOtherPlayerBrain((*prevItr), m_Controller.GetPlayer()));
 
                 // Get the next actor in the list (not controlled by another player)
                 std::list<Actor *>::iterator nextItr = selfItr;
@@ -1806,7 +1752,7 @@ void Actor::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScr
                     if ((*nextItr) == (*selfItr)) {
                         break;
                     }
-                } while ((*nextItr)->GetController()->IsPlayerControlled() || g_ActivityMan.GetActivity()->IsOtherPlayerBrain((*prevItr), m_Controller.GetPlayer()));
+                } while (!(*nextItr)->IsPlayerControllable() || (*nextItr)->GetController()->IsPlayerControlled() || g_ActivityMan.GetActivity()->IsOtherPlayerBrain((*prevItr), m_Controller.GetPlayer()));
 
                 Vector iconPos = cpuPos;
                 

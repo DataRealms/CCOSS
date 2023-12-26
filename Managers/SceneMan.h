@@ -494,7 +494,7 @@ public:
     /// <summary>
     /// Registers a moid being drawn, so it can be added to our spatial partitioning grid.
     /// </summary>
-    /// <param name="moid">The moid.</param>
+    /// <param name="moid">The MOID.</param>
     /// <param name="left">The left boundary of the draw area.</param>
     /// <param name="top">The top boundary of the drawn area.</param>
     /// <param name="right">The right boundary of the draw area.</param>
@@ -504,7 +504,7 @@ public:
     /// <summary>
     /// Registers a moid being drawn, so it can be added to our spatial partitioning grid.
     /// </summary>
-    /// <param name="moid">The moid.</param>
+    /// <param name="moid">The MOID.</param>
     /// <param name="center">The centre position of the drawn area.</param>
     /// <param name="radius">The radius of the drawn area.</param>
     void RegisterMOIDDrawing(int moid, const Vector &center, float radius);

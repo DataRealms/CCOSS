@@ -686,16 +686,24 @@ float LimbPath::GetMiddleX() const
 
 void LimbPath::Draw(BITMAP *pTargetBitmap,
                     const Vector &targetPos,
-                    unsigned char color) const {
+                    unsigned char color) const
+{
     // TODO_MULTITHREAD. Fix this
 
-    Vector prevPoint = m_JointPos.GetFloored() + (m_Start * m_Rotation) - targetPos;
+    Vector prevPoint = m_Start;
     Vector nextPoint = prevPoint;
     for (std::deque<Vector>::const_iterator itr = m_Segments.begin(); itr != m_Segments.end(); ++itr)
     {
-        nextPoint += (*itr) * m_Rotation;
-        line(pTargetBitmap, prevPoint.m_X, prevPoint.m_Y, nextPoint.m_X, nextPoint.m_Y, color);
-        prevPoint += (*itr) * m_Rotation;
+        nextPoint += *itr;
+
+        Vector prevWorldPosition = m_JointPos + RotatePoint(prevPoint);
+        Vector nextWorldPosition = m_JointPos + RotatePoint(nextPoint);
+        line(pTargetBitmap, prevWorldPosition.m_X, prevWorldPosition.m_Y, nextWorldPosition.m_X, nextWorldPosition.m_Y, color);
+
+        Vector min(std::min(prevWorldPosition.m_X, nextWorldPosition.m_X), std::min(prevWorldPosition.m_Y, nextWorldPosition.m_Y));
+        Vector max(std::max(prevWorldPosition.m_X, nextWorldPosition.m_X), std::max(prevWorldPosition.m_Y, nextWorldPosition.m_Y));
+
+        prevPoint += *itr;
     }
 }
 

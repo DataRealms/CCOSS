@@ -119,19 +119,16 @@ namespace RTE {
 	void TimerMan::Update() {
 		long long prevTime = m_RealTimeTicks;
 		m_RealTimeTicks = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - m_StartTime).count();
-		long long timeIncrease = m_RealTimeTicks - prevTime;
 
-		// Cap it if too long (as when the app went out of focus).
-		if (timeIncrease > m_RealToSimCap) { 
-			timeIncrease = m_RealToSimCap; 
-		}
+		// Cap timeIncrease if too long (as when the app went out of focus), to c_RealToSimCap.
+		long long timeIncrease = std::min(m_RealTimeTicks - prevTime, static_cast<long long>(c_RealToSimCap * m_TicksPerSecond));
 
 		RTEAssert(timeIncrease > 0, "It seems your CPU is giving bad timing data to the game, this is known to happen on some multi-core processors. This may be fixed by downloading the latest CPU drivers from AMD or Intel.");
 
 		m_DrawDeltaTimeS = static_cast<float>(timeIncrease) / 1000.0F;
 
-		// If not paused, add the new time difference to the sim accumulator, scaling by the TimeScale.
-		if (!m_SimPaused) { 
+		// If not paused, add the new time difference to the sim accumulator
+		if (!m_SimPaused) {
 			m_SimAccumulator += static_cast<long long>(static_cast<float>(timeIncrease) * m_TimeScale);
 		}
 

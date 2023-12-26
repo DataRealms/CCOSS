@@ -402,14 +402,14 @@ namespace RTE {
 			}
 
 			if (!m_HFlipped) {
-				if (mode == g_DrawWhite) {
+				if (mode == DrawMode::g_DrawWhite) {
 					draw_character_ex(pTargetBitmap, handSpriteBitmap, renderPos.GetFloorIntX(), renderPos.GetFloorIntY(), g_WhiteColor, -1);
 				} else {
 					draw_sprite(pTargetBitmap, handSpriteBitmap, renderPos.GetFloorIntX(), renderPos.GetFloorIntY());
 				}
 			} else {
 				//TODO this draw_character_ex won't draw flipped. It should draw onto a temp bitmap and then draw that flipped. Maybe it can reuse a temp bitmap from MOSR, maybe not?
-				if (mode == g_DrawWhite) {
+				if (mode == DrawMode::g_DrawWhite) {
 					draw_character_ex(pTargetBitmap, handSpriteBitmap, renderPos.GetFloorIntX(), renderPos.GetFloorIntY(), g_WhiteColor, -1);
 				} else {
 					draw_sprite_h_flip(pTargetBitmap, handSpriteBitmap, renderPos.GetFloorIntX(), renderPos.GetFloorIntY());

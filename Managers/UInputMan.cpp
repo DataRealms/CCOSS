@@ -669,11 +669,27 @@ namespace RTE {
 		}
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	bool UInputMan::GetNetworkMouseButtonState(int whichPlayer, int whichButton, InputState whichState) const {
+		
+		if (whichPlayer == Players::NoPlayer || whichPlayer >= Players::MaxPlayerCount) {
+			for (int player = Players::PlayerOne; player < Players::MaxPlayerCount; ++player) {
+				if (GetNetworkMouseButtonState(player, whichButton, whichState)) {
+					return true;
+				}
+			}
+			return false;
+		}
 
-	int UInputMan::GetJoystickAxisCount(int whichJoy) const {
-		if(whichJoy >= 0 && whichJoy < s_PrevJoystickStates.size()) {
-			return s_PrevJoystickStates[whichJoy].m_Axis.size();
+		switch (whichState) {
+			case InputState::Held:
+				return m_NetworkServerPreviousMouseButtonState[whichPlayer][whichButton];
+			case InputState::Pressed:
+				return m_NetworkServerPreviousMouseButtonState[whichPlayer][whichButton] && m_NetworkServerChangedMouseButtonState[whichPlayer][whichButton];
+			case InputState::Released:
+				return !m_NetworkServerPreviousMouseButtonState[whichPlayer][whichButton] && m_NetworkServerChangedMouseButtonState[whichPlayer][whichButton];
+			default:
+				RTEAbort("Undefined InputState value passed in. See InputState enumeration.");
+				return false;
 		}
 	}
 
@@ -769,98 +785,25 @@ namespace RTE {
 
 		m_TextInput.clear();
 		m_MouseWheelChange = 0;
+		m_RawMouseMovement.Reset();
 
 		SDL_Event inputEvent;
 		for (std::vector<SDL_Event>::const_iterator eventIterator = m_EventQueue.begin(); eventIterator != m_EventQueue.end(); eventIterator++) {
 			inputEvent = *eventIterator;
 
-		Vector mouseMovement(0.0F, 0.0F);
-
-		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT) {
-				System::SetQuit(true);
-			}
-			if (e.type == SDL_KEYUP || e.type == SDL_KEYDOWN) {
-				s_ChangedKeyStates[e.key.keysym.scancode] = (e.key.state != s_PrevKeyStates[e.key.keysym.scancode]);
-				s_PrevKeyStates[e.key.keysym.scancode] = e.key.state;
-			}
-			if (e.type == SDL_TEXTINPUT) {
-				char input = e.text.text[0];
-				size_t i = 0;
-				while (input != 0 && i < 32) {
-					++i;
-					if (input <= 127) {
-						m_TextInput += input;
-					}
-					input = e.text.text[i];
-				}
-			}
-			if (e.type == SDL_MOUSEMOTION) {
-				mouseMovement += Vector(e.motion.xrel, e.motion.yrel);
-				m_AbsoluteMousePos.SetXY(e.motion.x, e.motion.y);
-				if (g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
-					int x{0};
-					int y{0};
-					SDL_GetWindowPosition(SDL_GetWindowFromID(e.motion.windowID), &x, &y);
-					Vector windowCoord(x, y);
-					m_AbsoluteMousePos += windowCoord;
-				}
-			}
-			if (e.type == SDL_MOUSEBUTTONUP || e.type == SDL_MOUSEBUTTONDOWN) {
-				if (e.button.button > SDL_BUTTON_RIGHT)
-					continue;
-				s_ChangedMouseButtonStates[e.button.button] = (e.button.state != s_PrevMouseButtonStates[e.button.button]);
-				s_PrevMouseButtonStates[e.button.button] = e.button.state;
-				s_CurrentMouseButtonStates[e.button.button] = e.button.state;
-			}
-			if (e.type == SDL_MOUSEWHEEL) {
-				m_MouseWheelChange = e.wheel.direction == SDL_MOUSEWHEEL_NORMAL ? e.wheel.y : -e.wheel.y;
-			}
-			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
-				if (!m_FrameLostFocus)
-					g_FrameMan.DisplaySwitchIn();
-				m_GameHasAnyFocus = true;
-			}
-			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
-				m_GameHasAnyFocus = false;
-				m_FrameLostFocus = true;
-				g_FrameMan.DisplaySwitchOut();
-			}
-			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_ENTER) {
-				if (m_GameHasAnyFocus && g_FrameMan.IsWindowFullscreen() && SDL_GetNumVideoDisplays() > 1) {
-					SDL_RaiseWindow(SDL_GetWindowFromID(e.window.windowID));
-					SDL_SetWindowInputFocus(SDL_GetWindowFromID(e.window.windowID));
-					m_GameHasAnyFocus = true;
-				}
-			}
-			if (e.type == SDL_WINDOWEVENT && (e.window.event == SDL_WINDOWEVENT_RESIZED)) {
-				if (!g_FrameMan.IsWindowFullscreen()) {
-					g_FrameMan.WindowResizedCallback(e.window.data1, e.window.data2);
-				}
-			}
-			if (e.type == SDL_CONTROLLERAXISMOTION || e.type == SDL_JOYAXISMOTION) {
-				SDL_JoystickID id = e.type == SDL_CONTROLLERAXISMOTION ? e.caxis.which : e.jaxis.which;
-				std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), id);
-				if (device != s_PrevJoystickStates.end()) {
-					if (SDL_IsGameController(device->m_DeviceIndex) && e.type == SDL_CONTROLLERAXISMOTION) {
-						UpdateJoystickAxis(device, e.caxis.axis, e.caxis.value);
-					} else if (!SDL_IsGameController(device->m_DeviceIndex)) {
-						UpdateJoystickAxis(device, e.jaxis.axis, e.jaxis.value);
-                    }
-                }
-            }
-			if (e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP || e.type == SDL_JOYBUTTONDOWN || e.type == SDL_JOYBUTTONUP) {
-                SDL_JoystickID id = e.type == SDL_CONTROLLERBUTTONDOWN || e.type == SDL_CONTROLLERBUTTONUP ? e.cbutton.which : e.jbutton.which;
-                std::vector<Gamepad>::iterator device = std::find(s_PrevJoystickStates.begin(), s_PrevJoystickStates.end(), id);
-				if (device != s_PrevJoystickStates.end()) {
-					int button = -1;
-					int state = -1;
-					if (SDL_IsGameController(device->m_DeviceIndex)) {
-						if (e.type == SDL_CONTROLLERBUTTONUP || e.type == SDL_CONTROLLERBUTTONDOWN) {
-							button = e.cbutton.button;
-							state = e.cbutton.state;
-						} else {
-							continue;
+			switch (inputEvent.type) {
+				case SDL_KEYUP:
+				case SDL_KEYDOWN:
+					s_ChangedKeyStates[inputEvent.key.keysym.scancode] = (inputEvent.key.state != s_PrevKeyStates[inputEvent.key.keysym.scancode]);
+					s_PrevKeyStates[inputEvent.key.keysym.scancode] = inputEvent.key.state;
+					break;
+				case SDL_TEXTINPUT: {
+					char input = inputEvent.text.text[0];
+					size_t i = 0;
+					while (input != 0 && i < 32) {
+						++i;
+						if (input <= 127) {
+							m_TextInput += input;
 						}
 						input = inputEvent.text.text[i];
 					}
@@ -948,18 +891,16 @@ namespace RTE {
 			}
 
 		}
-		// TODO: Add sensitivity slider to settings menu
-		mouseMovement *= m_MouseSensitivity;
+		m_EventQueue.clear();
+		m_RawMouseMovement *= m_MouseSensitivity;
 
-		m_FrameLostFocus = false;
 		// NETWORK SERVER: Apply mouse input received from client or collect mouse input
 		if (IsInMultiplayerMode()) {
 			UpdateNetworkMouseMovement();
 		} else {
-			m_NetworkAccumulatedRawMouseMovement[Players::PlayerOne] += mouseMovement;
+			m_NetworkAccumulatedRawMouseMovement[Players::PlayerOne] += m_RawMouseMovement;
 		}
 
-		m_RawMouseMovement = mouseMovement;
 		UpdateMouseInput();
 		UpdateJoystickDigitalAxis();
 		HandleSpecialInput();
@@ -1019,8 +960,6 @@ namespace RTE {
 					g_TimerMan.SetTimeScale(1.0F);
 				} else if (KeyHeld(SDLK_2)) {
 					g_TimerMan.SetTimeScale(99999.9F);
-				} else if (KeyHeld(SDLK_3)) {
-					g_TimerMan.SetRealToSimCap(c_DefaultRealToSimCap);
 				} else if (KeyHeld(SDLK_5)) {
 					g_TimerMan.SetDeltaTimeSecs(c_DefaultDeltaTimeS);
 				}
@@ -1044,13 +983,16 @@ namespace RTE {
 				g_ConsoleMan.ShowShortcuts();
 			} else if (KeyPressed(SDLK_F2)) {
 				g_ThreadMan.QueueInSimulationThread([]() { g_PresetMan.ReloadAllScripts(); });
-				g_ConsoleMan.PrintString("SYSTEM: Scripts reloaded!");
 			} else if (KeyPressed(SDLK_F3)) {
 				g_ConsoleMan.SaveAllText("Console.dump.log");
 			} else if (KeyPressed(SDLK_F4)) {
 				g_ConsoleMan.SaveInputLog("Console.input.log");
 			} else if (KeyPressed(SDLK_F5)) {
-				g_ThreadMan.QueueInSimulationThread([]() { g_ActivityMan.SaveCurrentGame("QuickSave"); });
+				if (g_ActivityMan.GetActivity() && g_ActivityMan.GetActivity()->CanBeUserSaved()) {
+					g_ThreadMan.QueueInSimulationThread([]() { g_ActivityMan.SaveCurrentGame("QuickSave"); });
+				} else {
+					RTEError::ShowMessageBox("Cannot Save Game - This Activity Does Not Allow QuickSaving!");
+				}
 			} else if (KeyPressed(SDLK_F9)) {
 				g_ThreadMan.QueueInSimulationThread([]() { g_ActivityMan.LoadAndLaunchGame("QuickSave"); });
 			} else if (KeyPressed(SDLK_F10)) {

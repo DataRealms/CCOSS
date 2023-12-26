@@ -141,13 +141,10 @@ namespace RTE {
 			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Draw: %.1fms | Update: %.1fms", m_MSPDAverage.load(), m_MSPUAverage.load());
-			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 10, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 10, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "Time Scale: x%.2f ([1]-, [2]+, [Ctrl+1]Rst) | Sim Speed: x%.2f", g_TimerMan.GetTimeScale(), g_TimerMan.GetSimSpeed());
-			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 20, str, GUIFont::Left);
-
-			std::snprintf(str, sizeof(str), "Real to Sim Cap: %.2f ms ([3]-, [4]+, [Ctrl+3]Rst)", g_TimerMan.GetRealToSimCap() * 1000.0F);
-			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 30, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 20, str, GUIFont::Left);
 
 			float deltaTime = g_TimerMan.GetDeltaTimeMS();
 			std::snprintf(str, sizeof(str), "DeltaTime: %.2f ms ([5]-, [6]+, [Ctrl+5]Rst)", deltaTime);
@@ -163,19 +160,19 @@ namespace RTE {
 			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 60, str, GUIFont::Left);
 
 			std::snprintf(str, sizeof(str), "MOIDs: %i", g_MovableMan.GetMOIDCount());
-			guiFont->DrawAligned(&intermediateDrawBitmap, c_StatsOffsetX, c_StatsHeight + 70, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 70, str, GUIFont::Left);
 
 			// TODO_MULTITHREAD
 #ifndef MULTITHREAD_SIM_AND_RENDER
 			if (int totalPlayingChannelCount = 0, realPlayingChannelCount = 0; g_AudioMan.GetPlayingChannelCount(&totalPlayingChannelCount, &realPlayingChannelCount)) {
 				std::snprintf(str, sizeof(str), "Sound Channels: %d / %d Real | %d / %d Virtual", realPlayingChannelCount, g_AudioMan.GetTotalRealChannelCount(), totalPlayingChannelCount - realPlayingChannelCount, g_AudioMan.GetTotalVirtualChannelCount());
 			}
-			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 90, str, GUIFont::Left);
+			guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 80, str, GUIFont::Left);
 #endif
 
-			if (m_AdvancedPerfStats) { 
-				DrawPeformanceGraphs(intermediateDrawBitmap); 
-			}
+			if (!m_SortedScriptTimings.empty()) {
+				std::snprintf(str, sizeof(str), "Lua scripts taking the most time to call Update() this frame:");
+				guiFont->DrawAligned(&drawBitmap, c_StatsOffsetX, c_StatsHeight + 100, str, GUIFont::Left);
 
 				for (int i = 0; i < std::min((size_t)3, m_SortedScriptTimings.size()); i++)
 				{
@@ -186,8 +183,8 @@ namespace RTE {
 				}
 			}
 
-			if (m_AdvancedPerfStats) {
-				DrawPeformanceGraphs(drawBitmap);
+			if (m_AdvancedPerfStats) { 
+				DrawPeformanceGraphs(drawBitmap); 
 			}
 		}
 	}

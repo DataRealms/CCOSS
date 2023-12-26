@@ -284,13 +284,13 @@ public:
 	/// Gets the adjusted throttle multiplier that is factored into the emission rate of this PEmitter.
 	/// </summary>
 	/// <returns>The throttle strength as a multiplier.</returns>
-	float GetThrottleFactor() const { return LERP(-1.0f, 1.0f, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, m_Throttle); }
+	float GetThrottleFactor() const { return Lerp(-1.0f, 1.0f, m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, m_Throttle); }
 
 	/// <summary>
 	/// Gets the throttle value that will achieve a given throttle factor that is factored into the emission rate of this AEmitter.
 	/// </summary>
 	/// <returns>The throttle value that will achieve the given throttle factor.</returns>
-	float GetThrottleForThrottleFactor(float throttleFactor) const { return LERP(m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, -1.0f, 1.0f, throttleFactor); }
+	float GetThrottleForThrottleFactor(float throttleFactor) const { return Lerp(m_NegativeThrottleMultiplier, m_PositiveThrottleMultiplier, -1.0f, 1.0f, throttleFactor); }
 
 	/*
 	//////////////////////////////////////////////////////////////////////////////////////////

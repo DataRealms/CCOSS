@@ -1185,6 +1185,11 @@ enum MOType
 	/// </summary>
 	virtual void NotResting() { m_RestTimer.Reset(); m_ToSettle = false; m_VelOscillations = 0; }
 
+	/// <summary>
+	/// Indicates whether this MovableObject has been at rest with no movement for longer than its RestThreshold.
+	/// </summary>
+	virtual bool IsAtRest();
+
     /// <summary>
     /// Notify that a new frame has started, allowing us to update information like our previous state.
     /// </summary>

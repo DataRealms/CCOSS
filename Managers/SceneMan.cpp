@@ -58,7 +58,7 @@ void SceneMan::Clear()
     m_pSceneToLoad = nullptr;
     m_PlaceObjects = true;
 	m_PlaceUnits = true;
-    m_pCurrentScene = 0;
+    m_pCurrentScene = nullptr;
     m_MOIDsGrid = SpatialPartitionGrid();
     m_pDebugLayer = nullptr;
 
@@ -475,7 +475,7 @@ MOID SceneMan::GetMOIDPixel(int pixelX, int pixelY, int ignoreTeam)
         m_pDebugLayer->SetPixel(pixelX, pixelY, 5); 
     }
 
-    const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(pixelX, pixelY, ignoreTeam);
+    const std::vector<MOID> &moidList = m_MOIDsGrid.GetMOIDsAtPosition(pixelX, pixelY, ignoreTeam, true);
     MOID moid = g_MovableMan.GetMOIDPixel(pixelX, pixelY, moidList);
 
 	return moid;
@@ -536,11 +536,8 @@ bool SceneMan::SceneIsLocked() const
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::RegisterMOIDDrawing(int moid, int left, int top, int right, int bottom) {
-    if (moid != g_NoMOID) {
-        const MovableObject *mo = g_MovableMan.GetMOFromID(moid);
-        RTEAssert(mo, "Trying to register a no MOID to the MOID grid! This is not allowed.")
-        IntRect rect(left, top, right, bottom);
-        m_MOIDsGrid.Add(rect, *mo);
+    if (const MovableObject *mo = g_MovableMan.GetMOFromID(moid)) {
+        m_MOIDsGrid.Add(IntRect(left, top, right, bottom), *mo);
     }
 }
 
@@ -1977,7 +1974,7 @@ MOID SceneMan::CastMORay(const Vector &start, const Vector &ray, MOID ignoreMOID
             if (hitMOID != g_NoMOID && hitMOID != ignoreMOID && g_MovableMan.GetRootMOID(hitMOID) != ignoreMOID)
             {
                 // Save last ray pos
-                m_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
+                s_LastRayHitPos.SetXY(intPos[X], intPos[Y]);
                 return hitMOID;
             }
 
@@ -2667,17 +2664,18 @@ bool SceneMan::AddSceneObject(SceneObject *sceneObject) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SceneMan::Update(int screenId) {
+	ZoneScoped;
+    
     SLTerrain *terrain = g_ThreadMan.GetDrawableGameState().m_Terrain;
     if (!terrain) {
 		return;
 	}
 
-    m_LastUpdatedScreen = screenId;
-    g_CameraMan.Update(screenId);
+	m_LastUpdatedScreen = screenId;
 
-    const Vector& offset = g_CameraMan.GetOffset(screenId);
+    const Vector &offset = g_CameraMan.GetOffset(screenId);
 
-	if (m_pDebugLayer) { 
+	if (m_pDebugLayer) {
         m_pDebugLayer->SetOffset(offset);
     }
 
@@ -2766,7 +2764,28 @@ void SceneMan::Draw(BITMAP *targetBitmap, BITMAP *targetGUIBitmap, const Vector 
 #endif
 			g_ActivityMan.GetActivity()->DrawGUI(targetGUIBitmap, targetPos, m_LastUpdatedScreen);
 
-			if (m_pDebugLayer) { 
+#ifdef DRAW_NOGRAV_BOXES
+            if (Scene::Area* noGravArea = m_pCurrentScene->GetArea("NoGravityArea")) {
+                const std::vector<Box>& boxList = noGravArea->GetBoxes();
+                g_FrameMan.SetTransTableFromPreset(TransparencyPreset::MoreTrans);
+                drawing_mode(DRAW_MODE_TRANS, 0, 0, 0);
+
+                std::list<Box> wrappedBoxes;
+                for (std::vector<Box>::const_iterator bItr = boxList.begin(); bItr != boxList.end(); ++bItr)
+                {
+                    wrappedBoxes.clear();
+                    g_SceneMan.WrapBox(*bItr, wrappedBoxes);
+
+                    for (std::list<Box>::iterator wItr = wrappedBoxes.begin(); wItr != wrappedBoxes.end(); ++wItr)
+                    {
+                        Vector adjCorner = (*wItr).GetCorner() - targetPos;
+                        rectfill(targetBitmap, adjCorner.m_X, adjCorner.m_Y, adjCorner.m_X + (*wItr).GetWidth(), adjCorner.m_Y + (*wItr).GetHeight(), g_RedColor);
+                    }
+                }
+            }
+#endif
+
+			if (m_pDebugLayer) {
                 m_pDebugLayer->Draw(targetBitmap, targetBox);
                 m_pDebugLayer->ClearBitmap(g_MaskColor);
             }

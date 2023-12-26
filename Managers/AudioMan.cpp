@@ -818,22 +818,29 @@ namespace RTE {
 		}
 
 		for (int i = 0; i < numberOfPlayingChannels; i++) {
-			result = m_MobileSoundChannelGroup->getChannel(i, &soundChannel);
-			FMOD_VECTOR channelPosition;
-			result = result == FMOD_OK ? soundChannel->get3DAttributes(&channelPosition, nullptr) : result;
-			result = result == FMOD_OK ? UpdatePositionalEffectsForSoundChannel(soundChannel, &channelPosition) : result;
-
-			float channel3dLevel;
-			result = (result == FMOD_OK) ? soundChannel->get3DLevel(&channel3dLevel) : result;
-			if (result == FMOD_OK && m_CurrentActivityHumanPlayerPositions.size() == 1) {
-				float sqrDistanceToPlayer = (*(m_CurrentActivityHumanPlayerPositions[0].get()) - GetAsVector(channelPosition)).GetSqrMagnitude();
-				float doubleMinimumDistanceForPanning = m_MinimumDistanceForPanning * 2.0F;
-				if (sqrDistanceToPlayer < (m_MinimumDistanceForPanning * m_MinimumDistanceForPanning)) {
-					soundChannel->set3DLevel(0);
-				} else if (sqrDistanceToPlayer < (doubleMinimumDistanceForPanning * doubleMinimumDistanceForPanning)) {
-					soundChannel->set3DLevel(Lerp(0, 1, 0, m_SoundPanningEffectStrength, channel3dLevel));
-				} else {
-					soundChannel->set3DLevel(m_SoundPanningEffectStrength);
+			result = m_SFXChannelGroup->getChannel(i, &soundChannel);
+			FMOD_MODE mode;
+			result = (result == FMOD_OK) ? soundChannel->getMode(&mode) : result;
+			unsigned modeResult = mode & FMOD_2D;
+			if (modeResult == 0){
+				FMOD_VECTOR channelPosition;
+				result = result == FMOD_OK ? soundChannel->get3DAttributes(&channelPosition, nullptr) : result;
+				result = result == FMOD_OK ? UpdatePositionalEffectsForSoundChannel(soundChannel, &channelPosition) : result;
+				float channel3dLevel;
+				result = (result == FMOD_OK) ? soundChannel->get3DLevel(&channel3dLevel) : result;
+				if (result == FMOD_OK && m_CurrentActivityHumanPlayerPositions.size() == 1) {
+					float sqrDistanceToPlayer = (*(m_CurrentActivityHumanPlayerPositions[0].get()) - GetAsVector(channelPosition)).GetSqrMagnitude();
+					float doubleMinimumDistanceForPanning = m_MinimumDistanceForPanning * 2.0F;
+					void *userData;
+					result = result == FMOD_OK ? soundChannel->getUserData(&userData) : result;
+					const SoundContainer *soundContainer = static_cast<SoundContainer *>(userData);
+					if (sqrDistanceToPlayer < (m_MinimumDistanceForPanning * m_MinimumDistanceForPanning) || soundContainer->GetCustomPanValue() != 0.0f) {
+						soundChannel->set3DLevel(0);
+					} else if (sqrDistanceToPlayer < (doubleMinimumDistanceForPanning * doubleMinimumDistanceForPanning)) {
+						soundChannel->set3DLevel(Lerp(0, 1, 0, m_SoundPanningEffectStrength * soundContainer->GetPanningStrengthMultiplier(), channel3dLevel));
+					} else {
+						soundChannel->set3DLevel(m_SoundPanningEffectStrength * soundContainer->GetPanningStrengthMultiplier());
+					}
 				}
 			}
 			

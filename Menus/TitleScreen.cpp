@@ -175,18 +175,19 @@ namespace RTE {
 			} else {
 				float introScrollProgress = (static_cast<float>(m_IntroSongTimer.GetElapsedRealTimeS()) - m_IntroScrollStartTime) / m_IntroScrollDuration;
 
-			if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
-				UpdateIntroLogoSequence(g_UInputMan.AnyStartPress());
-			} else if (m_IntroSequenceState >= IntroSequence::SlideshowFadeIn && m_IntroSequenceState <= IntroSequence::SlideshowEnd) {
-				m_ScrollOffset.SetY(Lerp(0, 1.0F, m_IntroScrollStartOffsetY, m_GameLogoAppearScrollOffsetY, introScrollProgress));
-				UpdateIntroSlideshowSequence(g_UInputMan.AnyStartPress());
-			} else if (m_IntroSequenceState >= IntroSequence::GameLogoAppear && m_IntroSequenceState <= IntroSequence::MainMenuAppear) {
-				if (m_IntroSequenceState < IntroSequence::PreMainMenu) { m_ScrollOffset.SetY(EaseOut(m_GameLogoAppearScrollOffsetY, m_PreMainMenuScrollOffsetY, introScrollProgress)); }
-				UpdateIntroPreMainMenuSequence();
-			}
-			if (m_SectionElapsedTime >= m_SectionDuration) {
-				m_SectionSwitch = true;
-				m_IntroSequenceState = static_cast<IntroSequence>(static_cast<int>(m_IntroSequenceState) + 1);
+				if (m_IntroSequenceState >= IntroSequence::DataRealmsLogoFadeIn && m_IntroSequenceState <= IntroSequence::FmodLogoFadeOut) {
+					UpdateIntroLogoSequence(g_UInputMan.AnyStartPress());
+				} else if (m_IntroSequenceState >= IntroSequence::SlideshowFadeIn && m_IntroSequenceState <= IntroSequence::SlideshowEnd) {
+					m_ScrollOffset.SetY(Lerp(0, 1.0F, m_IntroScrollStartOffsetY, m_GameLogoAppearScrollOffsetY, introScrollProgress));
+					UpdateIntroSlideshowSequence(g_UInputMan.AnyStartPress());
+				} else if (m_IntroSequenceState >= IntroSequence::GameLogoAppear && m_IntroSequenceState <= IntroSequence::MainMenuAppear) {
+					if (m_IntroSequenceState < IntroSequence::PreMainMenu) { m_ScrollOffset.SetY(EaseOut(m_GameLogoAppearScrollOffsetY, m_PreMainMenuScrollOffsetY, introScrollProgress)); }
+					UpdateIntroPreMainMenuSequence();
+				}
+				if (m_SectionElapsedTime >= m_SectionDuration) {
+					m_SectionSwitch = true;
+					m_IntroSequenceState = static_cast<IntroSequence>(static_cast<int>(m_IntroSequenceState) + 1);
+				}
 			}
 		} else {
 			UpdateTitleTransitions();

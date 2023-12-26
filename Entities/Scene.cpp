@@ -3103,6 +3103,8 @@ void Scene::Unlock()
 //                  before drawing.
 
 void Scene::UpdateSim() {
+    ZoneScoped;
+
     m_PathfindingUpdated = false;
 
 	if (g_SettingsMan.BlipOnRevealUnseen())

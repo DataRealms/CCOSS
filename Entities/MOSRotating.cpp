@@ -116,6 +116,10 @@ int MOSRotating::Create()
     m_SpriteCenter.SetXY(m_aSprite[m_Frame]->w / 2, m_aSprite[m_Frame]->h / 2);
     m_SpriteCenter += m_SpriteOffset;
 
+	if (!m_pFlipBitmap && m_aSprite[0]) {
+		m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
+
     // Can't create these earlier in the static declaration because allegro_init needs to be called before create_bitmap
     if (!s_BitmapsInitialised) {
         s_BitmapsInitialised = true;
@@ -163,9 +167,6 @@ int MOSRotating::Create(ContentFile spriteFile,
 	
 	if (!m_pFlipBitmap && m_aSprite[0]) {
 		m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
-	}
-	if (!m_pFlipBitmapS && m_aSprite[0]) {
-		m_pFlipBitmapS = create_bitmap_ex(c_MOIDLayerBitDepth, m_aSprite[0]->w, m_aSprite[0]->h);
 	}
 
     return 0;
@@ -233,6 +234,10 @@ int MOSRotating::Create(const MOSRotating &reference) {
     m_NoSetDamageMultiplier = reference.m_NoSetDamageMultiplier;
 
     m_pTempBitmap = reference.m_pTempBitmap;
+	
+	if (!m_pFlipBitmap && m_aSprite[0]) {
+		m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h);
+	}
 
     return 0;
 }
@@ -1236,22 +1241,17 @@ void MOSRotating::RestDetection() {
 			m_ToSettle = false;
 		}
 	}
-	m_PrevRotation = m_Rotation;
-	m_PrevAngVel = m_AngularVel;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // If we seem to be about to settle, make sure we're not flying in the air still.
-    // Note that this uses sprite radius to avoid possibly settling when it shouldn't (e.g. if there's a lopsided attachable enlarging the radius, using GetRadius might make it settle in the air).
-    if (m_ToSettle || IsAtRest())
-    {
-        if (g_SceneMan.OverAltitude(m_Pos, m_SpriteRadius + 4, 3))
-        {
-            m_RestTimer.Reset();
-            m_ToSettle = false;
-        }
-    }
+bool MOSRotating::IsAtRest() {
+	if (m_RestThreshold < 0 || m_PinStrength != 0) {
+		return false;
+	} else if (m_VelOscillations > 2 || m_AngOscillations > 2) {
+		return true;
+	}
+	return m_RestTimer.IsPastSimMS(m_RestThreshold);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1547,10 +1547,20 @@ void MOSRotating::Update() {
             TransferForcesFromAttachable(attachable);
         }
     }
+}
 
-    if (m_HFlipped && !m_pFlipBitmap && m_aSprite[0]) { 
-        m_pFlipBitmap = create_bitmap_ex(8, m_aSprite[0]->w, m_aSprite[0]->h); 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void MOSRotating::PostUpdate() {
+    for (auto itr = m_Wounds.begin(); itr != m_Wounds.end(); ++itr) {
+        (*itr)->PostUpdate();
     }
+
+    for (auto itr = m_Attachables.begin(); itr != m_Attachables.end(); ++itr) {
+        (*itr)->PostUpdate();
+    }
+
+    MovableObject::PostUpdate();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1723,13 +1733,11 @@ void MOSRotating::SetWhichMOToNotHit(MovableObject *moToNotHit, float forHowLong
 // Description:     Draws this MOSRotating's current graphical representation to a
 //                  BITMAP of choice.
 
-void MOSRotating::Draw(BITMAP *targetBitmap,
-                       const Vector &targetPos,
-                       DrawMode mode,
-                       bool onlyPhysical) const
-{
+void MOSRotating::Draw(BITMAP *targetBitmap, const Vector &targetPos, DrawMode mode, bool onlyPhysical) const {
     RTEAssert(!m_aSprite.empty(), "No sprite bitmaps loaded to draw!");
     RTEAssert(m_Frame >= 0 && m_Frame < m_FrameCount, "Frame is out of bounds!");
+
+	if (mode == g_DrawColor && !m_FlashWhiteTimer.IsPastRealTimeLimit()) { mode = g_DrawWhite; }
 
     // Draw all the attached wound emitters, and only if the mode is g_DrawColor and not onlyphysical
     // Only draw attachables and emitters which are not drawn after parent, so we draw them before
@@ -1848,10 +1856,7 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
                 }
             }
 
-            //////////////////
-            // FLIPPED
-            if (hFlipped)
-            {
+            if (hFlipped) {
                 bool tempBitmap = false;
                 BITMAP* usedFlipBitmap = pFlipBitmap;
                 if (!usedFlipBitmap) {
@@ -1870,8 +1875,7 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
                 }
 
                 // Transparent mode
-                if (mode == g_DrawTrans)
-                {
+                if (mode == g_DrawTrans) {
                     clear_to_color(pTempBitmap, keyColor);
                     // Draw the rotated thing onto the intermediate bitmap so its COM position aligns with the middle of the temp bitmap.
                     // The temp bitmap should be able to hold the full size since it is larger than the max diameter.
@@ -1893,13 +1897,9 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
 
                         draw_trans_sprite(pTargetBitmap, pTempBitmap, spriteX, spriteY);
                     }
-                }
-                // Non-transparent mode
-                else
-                {
+                } else {
                     // Do the passes loop in here so the flipping operation doesn't get done multiple times
-                    for (int i = 0; i < drawPasses; ++i)
-                    {
+                    for (int i = 0; i < drawPasses; ++i) {
                         int spriteX = drawPositions[i].GetFloorIntX();
                         int spriteY = drawPositions[i].GetFloorIntY();
 
@@ -1918,14 +1918,9 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
                 if (tempBitmap) {
                     destroy_bitmap(usedFlipBitmap);
                 }
-            }
-            /////////////////
-            // NON-FLIPPED
-            else
-            {
+            } else {
                 // Transparent mode
-                if (mode == g_DrawTrans)
-                {
+                if (mode == g_DrawTrans) {
                     clear_to_color(pTempBitmap, keyColor);
                     // Draw the rotated thing onto the intermediate bitmap so its COM position aligns with the middle of the temp bitmap.
                     // The temp bitmap should be able to hold the full size since it is larger than the max diameter.
@@ -1947,12 +1942,8 @@ void MOSRotating::Draw(BITMAP *targetBitmap,
 
                         draw_trans_sprite(pTargetBitmap, pTempBitmap, spriteX, spriteY);
                     }
-                }
-                // Non-transparent mode
-                else
-                {
-                    for (int i = 0; i < drawPasses; ++i)
-                    {
+                } else {
+                    for (int i = 0; i < drawPasses; ++i) {
                         int spriteX = drawPositions[i].GetFloorIntX();
                         int spriteY = drawPositions[i].GetFloorIntY();
 
@@ -2059,145 +2050,6 @@ bool MOSRotating::TransferForcesFromAttachable(Attachable *attachable) {
     if (!forces.IsZero()) { AddForce(forces, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
     if (!impulses.IsZero()) { AddImpulseForce(impulses, attachable->GetApplyTransferredForcesAtOffset() ? attachable->GetParentOffset() * m_Rotation * c_MPP : Vector()); }
     return intact;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetStringValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the string value associated with the specified key or "" if it does not exist.
-
-std::string MOSRotating::GetStringValue(std::string key) const
-{
-	if (StringValueExists(key))
-		return m_StringValueMap.at(key);
-	else
-		return "";
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetNumberValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the number value associated with the specified key or 0 if it does not exist.
-// Arguments:       Key to retrieve value.
-// Return value:    Number (double) value.
-
-double MOSRotating::GetNumberValue(std::string key) const
-{
-	if (NumberValueExists(key))
-		return m_NumberValueMap.at(key);
-	else
-		return 0;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  GetObjectValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Returns the object value associated with the specified key or 0 if it does not exist.
-// Arguments:       None.
-// Return value:    Object (Entity *) value.
-
-Entity * MOSRotating::GetObjectValue(std::string key) const
-{
-	if (ObjectValueExists(key))
-		return m_ObjectValueMap.at(key);
-	else
-		return 0;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetStringValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the string value associated with the specified key.
-
-void MOSRotating::SetStringValue(std::string key, std::string value)
-{
-	m_StringValueMap[key] = value;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetNumberValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the string value associated with the specified key.
-
-void MOSRotating::SetNumberValue(std::string key, double value)
-{
-	m_NumberValueMap[key] = value;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  SetObjectValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Sets the string value associated with the specified key.
-
-void MOSRotating::SetObjectValue(std::string key, Entity * value)
-{
-	m_ObjectValueMap[key] = value;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RemoveStringValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Remove the string value associated with the specified key.
-
-void MOSRotating::RemoveStringValue(std::string key)
-{
-	m_StringValueMap.erase(key);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RemoveNumberValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Remove the number value associated with the specified key.
-
-void MOSRotating::RemoveNumberValue(std::string key)
-{
-	m_NumberValueMap.erase(key);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  RemoveObjectValue
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Remove the object value associated with the specified key.
-
-void MOSRotating::RemoveObjectValue(std::string key)
-{
-	m_ObjectValueMap.erase(key);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  StringValueExists
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether the value associated with the specified key exists.
-
-bool MOSRotating::StringValueExists(std::string key) const
-{
-	if (m_StringValueMap.find(key) != m_StringValueMap.end())
-		return true;
-	return false;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  NumberValueExists
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether the value associated with the specified key exists.
-
-bool MOSRotating::NumberValueExists(std::string key) const
-{
-	if (m_NumberValueMap.find(key) != m_NumberValueMap.end())
-		return true;
-	return false;
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  ObjectValueExists
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Checks whether the value associated with the specified key exists.
-
-bool MOSRotating::ObjectValueExists(std::string key) const
-{
-	if (m_ObjectValueMap.find(key) != m_ObjectValueMap.end())
-		return true;
-	return false;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

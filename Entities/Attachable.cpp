@@ -346,7 +346,11 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void Attachable::Update() {
-		PreUpdate(); 
+		if (!m_PreUpdateHasRunThisFrame) { 
+			PreUpdate(); 
+		}
+
+		UpdatePositionAndJointPositionBasedOnOffsets();
 
 		if (m_Parent) {
 			if (m_ParentOffset != m_PrevParentOffset || m_JointOffset != m_PrevJointOffset) { 
@@ -380,17 +384,19 @@ namespace RTE {
 
 		MOSRotating::Update();
 
-		if (m_Parent && m_InheritsFrame) { 
-			SetFrame(m_Parent->GetFrame()); 
+		if (m_Parent && m_InheritsFrame) {
+			SetFrame(m_Parent->GetFrame());
 		}
 
 		// If we're attached to something, MovableMan doesn't own us, and therefore isn't calling our UpdateScripts method (and neither is our parent), so we should here.
-		if (m_Parent && GetRootParent()->HasEverBeenAddedToMovableMan()) { 
-			UpdateScripts(); 
+		if (m_Parent && GetRootParent()->HasEverBeenAddedToMovableMan()) {
+			g_PerformanceMan.StartPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
+			if (!m_AllLoadedScripts.empty() && !ObjectScriptsInitialized()) {
+				RunScriptedFunctionInAppropriateScripts("OnAttach", false, false, { m_Parent }, {}, {});
+			}
+			UpdateScripts();
+			g_PerformanceMan.StopPerformanceMeasurement(PerformanceMan::ScriptsUpdate);
 		}
-
-		m_PrevParentOffset = m_ParentOffset;
-		m_PrevJointOffset = m_JointOffset;
 
 		m_PreUpdateHasRunThisFrame = false;
 	}

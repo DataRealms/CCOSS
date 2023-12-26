@@ -3,6 +3,7 @@
 #include "Atom.h"
 #include "PostProcessMan.h"
 #include "ThreadMan.h"
+#include "FrameMan.h"
 
 namespace RTE {
 
@@ -278,9 +279,6 @@ namespace RTE {
 			}
 		}
 		
-		if (mode == g_DrawColor && m_pScreenEffect && !onlyPhysical) {
-			SetPostScreenEffectToDraw();
-		}
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

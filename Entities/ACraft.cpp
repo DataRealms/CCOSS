@@ -805,22 +805,6 @@ float ACraft::GetCollectedInventoryMass() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Virtual method:  OnMOHit
-//////////////////////////////////////////////////////////////////////////////////////////
-// Description:     Defines what should happen when this MovableObject hits another MO.
-//                  This is called by the owned Atom/AtomGroup of this MovableObject during
-//                  travel.
-
-bool ACraft::OnMOHit(MovableObject *pOtherMO)
-{
-    // Don't terminate, continue travel
-    return false;
-}
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void ACraft::GibThis(const Vector &impactImpulse, MovableObject *movableObjectToIgnore) {
 	if (g_SettingsMan.CrabBombsEnabled() && !s_CrabBombInEffect) {
 		s_CrabBombInEffect = true;
@@ -987,10 +971,6 @@ void ACraft::Update()
 
 void ACraft::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
 	m_HUDStack = -m_CharHeight / 2;
-
-    if (!m_HUDVisible) {
-        return;
-    }
 
     // Only do HUD if on a team
     if (m_Team < 0) {

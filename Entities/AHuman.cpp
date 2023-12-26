@@ -2735,10 +2735,6 @@ void AHuman::Draw(BITMAP *pTargetBitmap, const Vector &targetPos, DrawMode mode,
 void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichScreen, bool playerControlled) {
 	m_HUDStack = -m_CharHeight / 2;
 
-    if (!m_HUDVisible) {
-        return;
-    }
-
     // Only do HUD if on a team
     if (m_Team < 0) {
         return;
@@ -2808,67 +2804,37 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
     GUIFont *pSmallFont = g_FrameMan.GetSmallFont();
 
     // Only show extra HUD if this guy is controlled by the same player that this screen belongs to
-    if (m_Controller.IsPlayerControlled() && g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller.GetPlayer()) == whichScreen && pSmallFont && pSymbolFont)
-    {
-        AllegroBitmap allegroBitmap(pTargetBitmap);
+	if (m_Controller.IsPlayerControlled() && g_ActivityMan.GetActivity()->ScreenOfPlayer(m_Controller.GetPlayer()) == whichScreen && pSmallFont && pSymbolFont)
+	{
+		AllegroBitmap allegroBitmap(pTargetBitmap);
+		/*
+				// Device aiming reticle
+				if (m_Controller.IsState(AIM_SHARP) &&
+					m_pFGArm && m_pFGArm->IsAttached() && m_pFGArm->HoldsHeldDevice())
+					m_pFGArm->GetHeldDevice()->DrawHUD(pTargetBitmap, targetPos, whichScreen);*/
 
 		Vector drawPos = m_Pos - targetPos;
 
-        // Adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam
-        if (!targetPos.IsZero()) {
-            // Spans vertical scene seam
-            int sceneWidth = g_SceneMan.GetSceneWidth();
-            if (g_SceneMan.SceneWrapsX() && pTargetBitmap->w < sceneWidth) {
-                if ((targetPos.m_X < 0) && (m_Pos.m_X > (sceneWidth - pTargetBitmap->w))) {
-                    drawPos.m_X -= sceneWidth;
-                } else if (((targetPos.m_X + pTargetBitmap->w) > sceneWidth) && (m_Pos.m_X < pTargetBitmap->w)) {
-                    drawPos.m_X += sceneWidth;
-                }
-            }
-
-            // Spans horizontal scene seam
-            int sceneHeight = g_SceneMan.GetSceneHeight();
-            if (g_SceneMan.SceneWrapsY() && pTargetBitmap->h < sceneHeight) {
-                if ((targetPos.m_Y < 0) && (m_Pos.m_Y > (sceneHeight - pTargetBitmap->h))) {
-                    drawPos.m_Y -= sceneHeight;
-                } else if (((targetPos.m_Y + pTargetBitmap->h) > sceneHeight) && (m_Pos.m_Y < pTargetBitmap->h)) {
-                    drawPos.m_Y += sceneHeight;
-                }
-            }
-        }
-
-        // Weight and jetpack energy
-        if (m_pJetpack && m_Controller.IsState(BODY_JUMP) && m_Status != INACTIVE)
-        {
-            // Draw empty fuel indicator
-            if (m_JetTimeLeft < 100)
-                str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
-            // Display normal jet icons
-            else
-            {
-                float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
-				if (acceleration > 0.47F) {
-					str[0] = -31;
-				} else {
-					str[0] = acceleration > 0.41F ? -30 : (acceleration > 0.35F ? -29 : -28);
-				}
-				// Do the blinky blink
-				if ((str[0] == -28 || str[0] == -29) && m_IconBlinkTimer.AlternateSim(250)) { str[0] = -27; }
-            }
-            // null-terminate
-            str[1] = 0;
-			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 9, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
-
-            float jetTimeRatio = m_JetTimeLeft / m_JetTimeTotal;
-			int gaugeColor = jetTimeRatio > 0.6F ? 149 : (jetTimeRatio > 0.3F ? 77 : 13);
-			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 16, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
-			rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
-
-			m_HUDStack -= 10;
-			if (m_pFGArm && !m_EquipHUDTimer.IsPastRealMS(500)) {
-				std::string equippedItemsString = (m_pFGArm->GetHeldDevice() ? m_pFGArm->GetHeldDevice()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->GetHeldDevice() ? " | " + m_pBGArm->GetHeldDevice()->GetPresetName() : "");
-				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
-				m_HUDStack -= 9;
+		// Adjust the draw position to work if drawn to a target screen bitmap that is straddling a scene seam
+		if (!targetPos.IsZero())
+		{
+			// Spans vertical scene seam
+			int sceneWidth = g_SceneMan.GetSceneWidth();
+			if (g_SceneMan.SceneWrapsX() && pTargetBitmap->w < sceneWidth)
+			{
+				if ((targetPos.m_X < 0) && (m_Pos.m_X > (sceneWidth - pTargetBitmap->w)))
+					drawPos.m_X -= sceneWidth;
+				else if (((targetPos.m_X + pTargetBitmap->w) > sceneWidth) && (m_Pos.m_X < pTargetBitmap->w))
+					drawPos.m_X += sceneWidth;
+			}
+			// Spans horizontal scene seam
+			int sceneHeight = g_SceneMan.GetSceneHeight();
+			if (g_SceneMan.SceneWrapsY() && pTargetBitmap->h < sceneHeight)
+			{
+				if ((targetPos.m_Y < 0) && (m_Pos.m_Y > (sceneHeight - pTargetBitmap->h)))
+					drawPos.m_Y -= sceneHeight;
+				else if (((targetPos.m_Y + pTargetBitmap->h) > sceneHeight) && (m_Pos.m_Y < pTargetBitmap->h))
+					drawPos.m_Y += sceneHeight;
 			}
 		}
 
@@ -2940,87 +2906,63 @@ void AHuman::DrawHUD(BITMAP *pTargetBitmap, const Vector &targetPos, int whichSc
 				m_HUDStack -= 9;
 			}
 			if (m_Controller.IsState(PIE_MENU_ACTIVE) || !m_EquipHUDTimer.IsPastRealMS(700)) {
-				std::string equippedItemsString = (m_pFGArm && m_pFGArm->GetHeldDevice() ? m_pFGArm->GetHeldDevice()->GetPresetName() : "EMPTY") + (m_pBGArm && m_pBGArm->GetHeldDevice() ? " | " + m_pBGArm->GetHeldDevice()->GetPresetName() : "");
+				HeldDevice* fgEquippedItem = GetEquippedItem();
+				HeldDevice* bgEquippedItem = GetEquippedBGItem();
+				std::string equippedItemsString = (fgEquippedItem ? fgEquippedItem->GetPresetName() : "EMPTY") + (bgEquippedItem ? " | " + bgEquippedItem->GetPresetName() : "");
 				pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 3, equippedItemsString, GUIFont::Centre);
 				m_HUDStack -= 9;
-            }
-        } else {
-            std::snprintf(str, sizeof(str), "NO ARM!");
-            pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-            m_HUDStack -= 9;
-        }
+			}
+		}
+		else
+		{
+			std::snprintf(str, sizeof(str), "NO ARM!");
+			pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
+			m_HUDStack -= 9;
+		}
 
-        // Pickup GUI
-        if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {
-            std::snprintf(str, sizeof(str), " %c %s", -49, m_pItemInReach->GetPresetName().c_str());
-            pSmallFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 3, str, GUIFont::Centre);
-        }
-    }
+		if (m_pJetpack && m_Status != INACTIVE && !m_Controller.IsState(PIE_MENU_ACTIVE) && (m_Controller.IsState(BODY_JUMP) || !m_pJetpack->IsFullyFueled())) {
+			if (m_pJetpack->GetJetTimeLeft() < 100.0F) {
+				str[0] = m_IconBlinkTimer.AlternateSim(100) ? -26 : -25;
+			}
+			else if (m_pJetpack->IsEmitting()) {
+				float acceleration = m_pJetpack->EstimateImpulse(false) / std::max(GetMass(), 0.1F);
+				if (acceleration > 0.41F) {
+					str[0] = acceleration > 0.47F ? -31 : -30;
+				}
+				else {
+					str[0] = acceleration > 0.35F ? -29 : -28;
+					if (m_IconBlinkTimer.AlternateSim(200)) { str[0] = -27; }
+				}
+			}
+			else {
+				str[0] = -27;
+			}
+			str[1] = 0;
+			pSymbolFont->DrawAligned(&allegroBitmap, drawPos.GetFloorIntX() - 7, drawPos.GetFloorIntY() + m_HUDStack, str, GUIFont::Centre);
 
-    // AI mode state debugging
-#ifdef DEBUG_BUILD
-
-    AllegroBitmap allegroBitmap(pTargetBitmap);
-    Vector drawPos = m_Pos - targetPos;
-
-    // Dig state
-    if (m_DigState == PREDIG)
-        std::snprintf(str, sizeof(str), "PREDIG");
-    else if (m_DigState == STARTDIG)
-        std::snprintf(str, sizeof(str), "STARTDIG");
-    else if (m_DigState == TUNNELING)
-        std::snprintf(str, sizeof(str), "TUNNELING");
-    else if (m_DigState == FINISHINGDIG)
-        std::snprintf(str, sizeof(str), "FINISHINGDIG");
-    else if (m_DigState == PAUSEDIGGER)
-        std::snprintf(str, sizeof(str), "PAUSEDIGGER");
-    else
-        std::snprintf(str, sizeof(str), "NOTDIGGING");
-    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-
-    // Device State
-    if (m_DeviceState == POINTING)
-        std::snprintf(str, sizeof(str), "POINTING");
-    else if (m_DeviceState == SCANNING)
-        std::snprintf(str, sizeof(str), "SCANNING");
-    else if (m_DeviceState == AIMING)
-        std::snprintf(str, sizeof(str), "AIMING");
-    else if (m_DeviceState == FIRING)
-        std::snprintf(str, sizeof(str), "FIRING");
-    else if (m_DeviceState == THROWING)
-        std::snprintf(str, sizeof(str), "THROWING");
-    else if (m_DeviceState == DIGGING)
-        std::snprintf(str, sizeof(str), "DIGGING");
-    else
-        std::snprintf(str, sizeof(str), "STILL");
-    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-
-    // Jump State
-    if (m_JumpState == FORWARDJUMP)
-        std::snprintf(str, sizeof(str), "FORWARDJUMP");
-    else if (m_JumpState == PREUPJUMP)
-        std::snprintf(str, sizeof(str), "PREUPJUMP");
-    else if (m_JumpState == UPJUMP)
-        std::snprintf(str, sizeof(str), "UPJUMP");
-    else if (m_JumpState == APEXJUMP)
-        std::snprintf(str, sizeof(str), "APEXJUMP");
-    else if (m_JumpState == LANDJUMP)
-        std::snprintf(str, sizeof(str), "LANDJUMP");
-    else
-        std::snprintf(str, sizeof(str), "NOTJUMPING");
-    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-
-    if (m_Status == STABLE)
-        std::snprintf(str, sizeof(str), "STABLE");
-    else if (m_Status == UNSTABLE)
-        std::snprintf(str, sizeof(str), "UNSTABLE");
-    pSmallFont->DrawAligned(&allegroBitmap, drawPos.m_X + 2, drawPos.m_Y + m_HUDStack + 3, str, GUIFont::Centre);
-    m_HUDStack += -9;
-
-#endif
+			rectfill(pTargetBitmap, drawPos.GetFloorIntX() + 1, drawPos.GetFloorIntY() + m_HUDStack + 7, drawPos.GetFloorIntX() + 15, drawPos.GetFloorIntY() + m_HUDStack + 8, 245);
+			if (m_pJetpack->GetJetTimeTotal() > 0) {
+				float jetTimeRatio = m_pJetpack->GetJetTimeRatio();
+				int gaugeColor;
+				if (jetTimeRatio > 0.75F) {
+					gaugeColor = 149;
+				}
+				else if (jetTimeRatio > 0.5F) {
+					gaugeColor = 133;
+				}
+				else if (jetTimeRatio > 0.375F) {
+					gaugeColor = 77;
+				}
+				else if (jetTimeRatio > 0.25F) {
+					gaugeColor = 48;
+				}
+				else {
+					gaugeColor = 13;
+				}
+				rectfill(pTargetBitmap, drawPos.GetFloorIntX(), drawPos.GetFloorIntY() + m_HUDStack + 6, drawPos.GetFloorIntX() + static_cast<int>(15.0F * jetTimeRatio), drawPos.GetFloorIntY() + m_HUDStack + 7, gaugeColor);
+			}
+			m_HUDStack -= 9;
+		}
 
 		// Pickup GUI
 		if (!m_Controller.IsState(PIE_MENU_ACTIVE) && m_pItemInReach) {

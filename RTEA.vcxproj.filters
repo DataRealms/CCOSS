@@ -582,6 +582,9 @@
     <ClInclude Include="Managers\WindowMan.h">
       <Filter>Managers</Filter>
     </ClInclude>
+    <ClInclude Include="Managers\ThreadMan.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
     <ClInclude Include="Resources\Credits.h">
       <Filter>Resources</Filter>
     </ClInclude>
@@ -620,9 +623,6 @@
     </ClInclude>
     <ClInclude Include="System\AllegroTools.h">
       <Filter>System</Filter>
-    </ClInclude>
-    <ClInclude Include="Managers\ThreadMan.h">
-      <Filter>Managers</Filter>
     </ClInclude>
     <ClInclude Include="Managers\ThreadMan.h">
       <Filter>Managers</Filter>
@@ -1131,6 +1131,9 @@
     <ClCompile Include="System\PieQuadrant.cpp">
       <Filter>System</Filter>
     </ClCompile>
+    <ClCompile Include="System\glad\gl.c">
+      <Filter>System\glad</Filter>
+    </ClCompile>
     <ClCompile Include="Managers\CameraMan.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
@@ -1181,6 +1184,24 @@
     </ClCompile>
     <ClCompile Include="System\glad\gl.c">
       <Filter>System\glad</Filter>
+    </ClCompile>
+    <ClCompile Include="System\GLCheck.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="external\sources\tracy\public\TracyClient.cpp">
+      <Filter>external\tracy</Filter>
+    </ClCompile>
+    <ClCompile Include="Entities\AEJetpack.cpp">
+      <Filter>Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="Menus\SaveLoadMenuGUI.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Base64\base64.cpp">
+      <Filter>System\Base64</Filter>
+    </ClCompile>
+    <ClCompile Include="System\AllegroTools.cpp">
+      <Filter>System</Filter>
     </ClCompile>
     <ClCompile Include="Managers\ThreadMan.cpp">
       <Filter>Managers</Filter>

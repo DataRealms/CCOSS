@@ -74,11 +74,6 @@ namespace RTE {
 		m_SmallFonts.fill(nullptr);
 		m_TextBlinkTimer.Reset();
 
-		m_TempBackBuffer8 = nullptr;
-		m_TempBackBuffer32 = nullptr;
-		m_TempOverlayBitmap32 = nullptr;
-		m_TempPlayerScreen = nullptr;
-
 		for (int screenCount = 0; screenCount < c_MaxScreenCount; ++screenCount) {
 			m_ScreenText[screenCount].clear();
 			m_TextDuration[screenCount] = -1;
@@ -110,6 +105,8 @@ namespace RTE {
 		// Store the default palette for re-use when creating new color tables for different blend modes because the palette can be changed via scripts, and handling per-palette per-mode color tables is too much headache.
 		get_palette(m_DefaultPalette);
 
+		CreatePresetColorTables();
+		SetTransTableFromPreset(TransparencyPreset::HalfTrans);
 		CreateBackBuffers();
 
 		ContentFile scenePreviewGradientFile("Base.rte/GUIs/PreviewSkyGradient.png");
@@ -219,14 +216,6 @@ namespace RTE {
 		// This needs to happen here, otherwise if there are multiple sim updates during a single frame duplicates will be added to the primitive queue.
 		g_PrimitiveMan.ClearPrimitivesQueue();
 
-		// Queue our MO renders
-		Vector targetPos{};
-		g_MovableMan.Draw(nullptr, targetPos);
-
-		// TODO_MULTITHREAD
-		//g_MovableMan.DrawHUD(nullptr, targetPos, playerScreen);
-	}
-
 		// Prune unused color tables every 5 real minutes to prevent ridiculous memory usage over time.
 		if (m_ColorTablePruneTimer.IsPastRealMS(300000)) {
 			long long currentTime = g_TimerMan.GetAbsoluteTime() / 10000;
@@ -252,6 +241,13 @@ namespace RTE {
 		for (int playerScreen = 0; playerScreen < screenCount; ++playerScreen) {
 			g_CameraMan.Update(playerScreen);
 		}
+
+		// Queue our MO renders
+		Vector targetPos{};
+		g_MovableMan.Draw(nullptr, targetPos);
+
+		// TODO_MULTITHREAD
+		//g_MovableMan.DrawHUD(nullptr, targetPos, playerScreen);
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -522,7 +518,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int FrameMan::SaveBitmap(SaveBitmapMode modeToSave, const char *nameBase, BITMAP *bitmapToSave) {
+	int FrameMan::SaveBitmap(SaveBitmapMode modeToSave, const std::string &nameBase, BITMAP *bitmapToSave) {
 		if ((modeToSave == WorldDump || modeToSave == ScenePreviewDump) && !g_ActivityMan.ActivityRunning()) {
 			return 0;
 		}
@@ -818,6 +814,8 @@ namespace RTE {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void FrameMan::Draw() {
+		ZoneScopedN("Draw");
+
 		// Count how many split screens we'll need
 		int screenCount = (m_HSplit ? 2 : 1) * (m_VSplit ? 2 : 1);
 		RTEAssert(screenCount <= 1 || m_PlayerScreen, "Splitscreen surface not ready when needed!");
@@ -951,8 +949,8 @@ namespace RTE {
 		}
 
 		// Draw the performance stats and console on top of everything.
-		g_PerformanceMan.Draw(m_BackBuffer32);
-		g_ConsoleMan.Draw(m_BackBuffer32);
+		g_PerformanceMan.Draw(m_BackBuffer32.get());
+		g_ConsoleMan.Draw(m_BackBuffer32.get());
 	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -987,7 +985,6 @@ namespace RTE {
 				case g_LayerTerrainMatter:
 					GetSmallFont()->DrawAligned(&playerGUIBitmap, GetPlayerScreenWidth() / 2, GetPlayerScreenHeight() - 12, "Viewing terrain material layer\nHit Ctrl+M to toggle", GUIFont::Centre, GUIFont::Bottom);
 					break;
-#endif
 				default:
 					break;
 			}
@@ -1047,7 +1044,7 @@ namespace RTE {
 			Vector targetPos(0, 0);
 
 			// Draw objects
-			g_MovableMan.Draw(m_WorldDumpBuffer);
+			g_MovableMan.Draw(m_WorldDumpBuffer.get());
 
 			// Draw post-effects
 			g_PostProcessMan.GetPostScreenEffectsWrapped(targetPos, worldBitmapWidth, worldBitmapHeight, postEffectsList, -1);

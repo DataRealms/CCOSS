@@ -38,6 +38,7 @@
 #include "PresetMan.h"
 #include "UInputMan.h"
 #include "PerformanceMan.h"
+#include "FrameMan.h"
 #include "ThreadMan.h"
 #include "MetaMan.h"
 #include "WindowMan.h"
@@ -135,6 +136,7 @@ namespace RTE {
 		g_LuaMan.Destroy();
 		ContentFile::FreeAllLoaded();
 		g_ConsoleMan.Destroy();
+		g_WindowMan.Destroy();
 		g_ThreadMan.Destroy();
 
 #ifdef DEBUG_BUILD
@@ -299,8 +301,15 @@ namespace RTE {
 		}
 		g_TimerMan.PauseSim(false);
 
-		if (g_ActivityMan.ActivitySetToRestart() && !g_ActivityMan.RestartActivity()) { 
-			g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn); 
+		if (g_ActivityMan.ActivitySetToRestart()) {
+			g_LoadingScreen.DrawLoadingSplash();
+			g_WindowMan.UploadFrame();
+			if (!g_ActivityMan.RestartActivity()) {
+				// This doesn't work.
+				// Somewhat related to https://github.com/cortex-command-community/Cortex-Command-Community-Project-Source/issues/472
+				// Deal with later.
+				// g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
+			}
 		}
 
 		bool serverUpdated = false;
@@ -367,24 +376,23 @@ namespace RTE {
 
 			if (!g_ActivityMan.IsInActivity()) {
 				g_TimerMan.PauseSim(true);
-				if (g_MetaMan.GameInProgress()) {
-					g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::MetaGameFadeIn);
-				} else if (!g_ActivityMan.ActivitySetToRestart()) {
-					const Activity *activity = g_ActivityMan.GetActivity();
-					// If we edited something then return to main menu instead of scenario menu.
-					if (activity && activity->GetPresetName() == "None") {
-						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScrollingFadeIn);
-					} else {
-						g_MenuMan.GetTitleScreen()->SetTitleTransitionState(TitleScreen::TitleTransition::ScenarioFadeIn);
-					}
-				}
+
 				if (!g_ActivityMan.ActivitySetToRestart()) {
+					g_MenuMan.HandleTransitionIntoMenuLoop();
 					RunMenuLoop();
 				}
-			} 
-			
+			}
+			if (g_ActivityMan.ActivitySetToRestart()) {
+				g_LoadingScreen.DrawLoadingSplash();
+				g_WindowMan.UploadFrame();
+				if (!g_ActivityMan.RestartActivity()) {
+					break;
+				}
+			}
 			if (g_ActivityMan.ActivitySetToResume()) {
 				g_ActivityMan.ResumeActivity();
+				
+				// TODO_MULTITHEAD is this okay?
 				g_PerformanceMan.ResetSimUpdateTimer();
 			}
 
@@ -424,13 +432,12 @@ namespace RTE {
 			g_ThreadMan.Update();
 
 			long long drawStartTime = g_TimerMan.GetAbsoluteTime();
-			g_FrameMan.ClearFrame();
 			g_FrameMan.Draw();
+			g_WindowMan.DrawPostProcessBuffer();
 			long long drawEndTime = g_TimerMan.GetAbsoluteTime();
 			g_PerformanceMan.UpdateMSPD(drawEndTime - drawStartTime);
 
-			g_FrameMan.FlipFrameBuffers();
-			g_FrameMan.SwapWindow();
+			g_WindowMan.UploadFrame();
 
 			long long frameEndTime = g_TimerMan.GetAbsoluteTime();
 			g_PerformanceMan.UpdateMSPF(frameEndTime - frameStartTime);

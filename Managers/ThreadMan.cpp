@@ -40,6 +40,8 @@ void ThreadMan::Clear() {
     m_SimFunctions.clear();
     m_RenderTarget = nullptr;
     m_RenderOffset.Reset();
+    m_PriorityThreadPool.reset();
+	m_BackgroundThreadPool.reset(std::thread::hardware_concurrency() / 2);
 }
 
 int ThreadMan::Initialize() {

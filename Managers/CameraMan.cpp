@@ -5,7 +5,6 @@
 #include "FrameMan.h"
 #include "Scene.h"
 #include "SceneMan.h"
-#include "SettingsMan.h"
 #include "ThreadMan.h"
 #include "SLTerrain.h"
 #include "NetworkClient.h"
@@ -53,10 +52,17 @@ namespace RTE {
 		return Vector(screen.Offset.GetX() + static_cast<float>(terrain->GetBitmap()->w * screen.SeamCrossCount[Axes::X]), screen.Offset.GetY() + static_cast<float>(terrain->GetBitmap()->h * screen.SeamCrossCount[Axes::Y]));
 	}
 
-    void CameraMan::Update(int screenId) {
-        Screen& screen = m_Screens[screenId];
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        const float screenShakeDecay = g_SettingsMan.GetScreenShakeDecay();
+	void CameraMan::SetScroll(const Vector &center, int screenId) {
+		Screen &screen = m_Screens[screenId];
+		if (g_FrameMan.IsInMultiplayerMode()) {
+			screen.Offset.SetXY(static_cast<float>(center.GetFloorIntX() - (g_FrameMan.GetPlayerFrameBufferWidth(screenId) / 2)), static_cast<float>(center.GetFloorIntY() - (g_FrameMan.GetPlayerFrameBufferHeight(screenId) / 2)));
+		} else {
+			screen.Offset.SetXY(static_cast<float>(center.GetFloorIntX() - (g_WindowMan.GetResX() / 2)), static_cast<float>(center.GetFloorIntY() - (g_WindowMan.GetResY() / 2)));
+		}
+		CheckOffset(screenId);
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -69,23 +75,10 @@ namespace RTE {
 	void CameraMan::SetScrollTarget(const Vector &targetCenter, float speed, int screenId) {
 		Screen &screen = m_Screens[screenId];
 
-        // Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
-        if (screen.m_TargetWrapped) {
-            const SLTerrain* terrain = g_ThreadMan.GetDrawableGameState().m_Terrain.get();
-            if (terrain->WrapsX()) {
-                int wrappingScrollDirection = (screen.m_ScrollTarget.GetFloorIntX() < (terrain->GetBitmap()->w / 2)) ? 1 : -1;
-                screen.m_Offset.SetX(screen.m_Offset.GetX() - (static_cast<float>(terrain->GetBitmap()->w * wrappingScrollDirection)));
-                screen.m_SeamCrossCount[X] += wrappingScrollDirection;
-            }
-            if (terrain->WrapsY()) {
-                int wrappingScrollDirection = (screen.m_ScrollTarget.GetFloorIntY() < (terrain->GetBitmap()->h / 2)) ? 1 : -1;
-                screen.m_Offset.SetY(screen.m_Offset.GetY() - (static_cast<float>(terrain->GetBitmap()->h * wrappingScrollDirection)));
-                screen.m_SeamCrossCount[Y] += wrappingScrollDirection;
-            }
-        }
-        screen.m_TargetWrapped = false;
-        
-        Vector oldOffset(screen.m_Offset);
+		// See if it would make sense to automatically wrap.
+		const SLTerrain *terrain = g_SceneMan.GetScene()->GetTerrain();
+		float targetXWrapped = terrain->WrapsX() && (std::fabs(targetCenter.GetX() - screen.ScrollTarget.GetX()) > static_cast<float>(terrain->GetBitmap()->w / 2));
+		float targetYWrapped = terrain->WrapsY() && (std::fabs(targetCenter.GetY() - screen.ScrollTarget.GetY()) > static_cast<float>(terrain->GetBitmap()->h / 2));
 
 		screen.ScrollTarget.SetXY(targetCenter.GetX(), targetCenter.GetY());
 		screen.ScrollSpeed = speed;
@@ -115,12 +108,13 @@ namespace RTE {
 			float distance = g_SceneMan.ShortestDistance(point, screen.ScrollTarget).GetMagnitude();
 			float scalar = 0.0F;
 
-    Vector CameraMan::GetUnwrappedOffset(int screenId) const {
-        const Screen& screen = m_Screens[screenId];
-        const SLTerrain* pTerrain = g_ThreadMan.GetDrawableGameState().m_Terrain.get();
-        return Vector(screen.m_Offset.GetX() + static_cast<float>(pTerrain->GetBitmap()->w * screen.m_SeamCrossCount[X]),
-            screen.m_Offset.GetY() + static_cast<float>(pTerrain->GetBitmap()->h * screen.m_SeamCrossCount[Y]));
-    }
+			// Check if we're off the screen and then fall off.
+			if (distance > screenRadius) {
+				// Get ratio of how close to the very opposite of the scene the point is.
+				scalar = 0.5F + (0.5F * (distance - screenRadius) / (sceneRadius - screenRadius));
+			} else {
+				scalar = 0.0F;
+			}
 
 			if (scalar < closestScalar) {
 				closestScalar = scalar;
@@ -132,8 +126,8 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void CameraMan::CheckOffset(int screenId) {
-		RTEAssert(g_SceneMan.GetScene(), "Trying to check offset before there is a scene or terrain!");
+    void CameraMan::CheckOffset(int screenId) {
+        Screen &screen = m_Screens[screenId];
 
         const SLTerrain* terrain = g_ThreadMan.GetDrawableGameState().m_Terrain;
 		if (!terrain) {
@@ -201,18 +195,27 @@ namespace RTE {
 			std::list<Box> wrappedBoxes;
 			g_SceneMan.WrapBox(screenBox, wrappedBoxes);
 
-    void CameraMan::CheckOffset(int screenId) {
-        Screen& screen = m_Screens[screenId];
+			float closestDistanceFromScreen = std::numeric_limits<float>::max();
+			for (const Box &box : wrappedBoxes) {
+				// Determine how far the position is from the box.
+				Vector closestPointOnBox = box.GetWithinBox(position);
+				Vector distanceFromBoxToPosition = closestPointOnBox - position;
+				closestDistanceFromScreen = std::min(closestDistanceFromScreen, distanceFromBoxToPosition.GetMagnitude());
+			}
 
-        // Handy
-        const SLTerrain* pTerrain = g_ThreadMan.GetDrawableGameState().m_Terrain.get();
-        RTEAssert(pTerrain, "Trying to get terrain matter before there is a scene or terrain!");
+			// Beyond this many screens distance, no shake will be applied.
+			const float screenShakeFalloff = 0.3F;
+
+			float screenDistance = std::max(frameSize.GetX(), frameSize.GetY()) * screenShakeFalloff;
+			float screenShakeMultipler = std::max(1.0F - (closestDistanceFromScreen / screenDistance), 0.0F);
+			screen.ScreenShakeMagnitude += magnitude * screenShakeMultipler;
+		}
+	}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	void CameraMan::Update(int screenId) {
 		Screen &screen = m_Screens[screenId];
-		const SLTerrain *terrain = g_SceneMan.GetScene()->GetTerrain();
 
 		// Adjust for wrapping if the scroll target jumped a seam this frame, as reported by whatever screen set it (the scroll target) this frame. This is to avoid big, scene-wide jumps in scrolling when traversing the seam.
 		const SLTerrain *terrain = g_ThreadMan.GetDrawableGameState().m_Terrain;
@@ -226,11 +229,16 @@ namespace RTE {
 				screen.Offset.SetX(screen.Offset.GetX() - (static_cast<float>(terrain->GetBitmap()->w * wrappingScrollDirection)));
 				screen.SeamCrossCount[Axes::X] += wrappingScrollDirection;
 			}
+			screen.TargetXWrapped = false;
+		}
+
+		if (screen.TargetYWrapped) {
 			if (terrain->WrapsY()) {
 				int wrappingScrollDirection = (screen.ScrollTarget.GetFloorIntY() < (terrain->GetBitmap()->h / 2)) ? 1 : -1;
 				screen.Offset.SetY(screen.Offset.GetY() - (static_cast<float>(terrain->GetBitmap()->h * wrappingScrollDirection)));
 				screen.SeamCrossCount[Axes::Y] += wrappingScrollDirection;
 			}
+			screen.TargetYWrapped = false;
 		}
 
 		Vector oldOffset(screen.Offset);

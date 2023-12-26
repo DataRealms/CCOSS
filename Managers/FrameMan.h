@@ -14,8 +14,8 @@ namespace RTE {
 	class GUIFont;
 	class ScreenShader;
 
-	struct SdlWindowDeleter {
-		void operator()(SDL_Window *window);
+	struct BitmapDeleter {
+		void operator() (BITMAP *bitmap) const;
 	};
 
 	/// <summary>
@@ -85,114 +85,7 @@ namespace RTE {
 		/// Gets the 32bpp bitmap that is used for overlaying the screen.
 		/// </summary>
 		/// <returns>A pointer to the overlay BITMAP. OWNERSHIP IS NOT TRANSFERRED!</returns>
-		BITMAP * GetOverlayBitmap32() const { return m_OverlayBitmap32; }
-
-		/// <summary>
-		/// Returns the main window pointer. OWNERSHIP IS NOT TRANSFERRED!.
-		/// </summary>
-		/// <returns>
-		/// The pointer to the main window.
-		/// </returns>
-		SDL_Window* GetWindow() const { return m_Window.get();}
-
-		SDL_GLContext GetContext() const { return m_GLContext.get(); }
-#pragma endregion
-
-#pragma region Display Switch Callbacks
-		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched away from the game window.
-		/// It will temporarily disable positioning of the mouse so that when focus is switched back to the game window, the game window won't fly away because the user clicked the title bar of the window.
-		/// </summary>
-		void DisplaySwitchOut();
-
-		/// <summary>
-		/// Callback function for the Allegro set_display_switch_callback. It will be called when focus is switched back to the game window.
-		/// </summary>
-		void DisplaySwitchIn();
-#pragma endregion
-
-#pragma region Resolution Handling
-		/// <summary>
-		/// Gets the graphics driver that is used for rendering.
-		/// </summary>
-		/// <returns>The graphics driver that is used for rendering.</returns>
-		int GetGraphicsDriver() const { return m_Fullscreen; }
-
-		/// <summary>
-		/// Gets whether the dedicated fullscreen graphics driver is currently being used or not.
-		/// </summary>
-		/// <returns>Whether the dedicated fullscreen graphics driver is currently being used or not.</returns>
-		bool IsUsingDedicatedGraphicsDriver() const { return false; }
-
-		/// <summary>
-		/// Gets the maximum horizontal resolution the game window can be (desktop width).
-		/// </summary>
-		/// <returns>The maximum horizontal resolution the game window can be (desktop width).</returns>
-		int GetMaxResX() const { return m_MaxResX; }
-
-		/// <summary>
-		/// Gets the maximum vertical resolution the game window can be (desktop height).
-		/// </summary>
-		/// <returns>The maximum vertical resolution the game window can be (desktop height).</returns>
-		int GetMaxResY() const { return m_MaxResY; }
-
-		/// <summary>
-		/// Gets the horizontal resolution of the screen.
-		/// </summary>
-		/// <returns>An int describing the horizontal resolution of the screen in pixels.</returns>
-		int GetResX() const { return m_ResX; }
-
-		/// <summary>
-		/// Gets the vertical resolution of the screen.
-		/// </summary>
-		/// <returns>An int describing the vertical resolution of the screen in pixels.</returns>
-		int GetResY() const { return m_ResY; }
-
-		/// <summary>
-		/// Gets how many times the screen resolution is being multiplied and the backbuffer stretched across for better readability.
-		/// </summary>
-		/// <returns>What multiple the screen resolution is run in.</returns>
-		int GetResMultiplier() const { return m_ResMultiplier; }
-
-		/// <summary>
-		/// Gets whether the game window resolution was changed.
-		/// </summary>
-		/// <returns>Whether the game window resolution was changed.</returns>
-		bool ResolutionChanged() const { return m_ResChanged; }
-
-		/// <summary>
-		/// Checks whether the game window is currently in fullscreen mode.
-		/// </summary>
-		/// <returns>
-		/// Whether the window is fullscreen.
-		/// </returns>
-		bool IsWindowFullscreen() const { return m_Fullscreen; }
-
-		/// <summary>
-		/// Sets and switches to a new windowed mode resolution multiplier.
-		/// </summary>
-		/// <param name="newMultiplier">The multiplier to switch to.</param>
-		void ChangeResolutionMultiplier(int newMultiplier = 1);
-
-		/// <summary>
-		/// Switches the game window resolution to the specified dimensions.
-		/// </summary>
-		/// <param name="newResX">New width to set window to.</param>
-		/// <param name="newResY">New height to set window to.</param>
-		/// <param name="upscaled">Whether the new resolution is upscaled.</param>
-		/// <param name="endActivity">Whether the current Activity should be ended before performing the switch.</param>
-		void ChangeResolution(int newResX, int newResY, bool upscaled, int newFullscreen);
-
-		/// <summary>
-		/// Apply resolution change after window resize.
-		/// </summary>
-		/// <param name="newResX">
-		/// The new horizontal resolution.
-		/// </param>
-		/// <param name="newResY">
-		/// The new verticla resolution.
-		/// </param>
-		void WindowResizedCallback(int newResX, int newResY);
+		BITMAP * GetOverlayBitmap32() const { return m_OverlayBitmap32.get(); }
 #pragma endregion
 
 #pragma region Split-Screen Handling
@@ -570,8 +463,12 @@ namespace RTE {
 		int SaveWorldPreviewToPNG(const char *nameBase) { return SaveBitmap(ScenePreviewDump, nameBase); }
 #pragma endregion
 
-	protected:
-		static constexpr int m_BPP = 32; //!< Color depth (bits per pixel).
+	private:
+
+		/// <summary>
+		/// Enumeration with different settings for the SaveBitmap() method.
+		/// </summary>
+		enum SaveBitmapMode { SingleBitmap, ScreenDump, WorldDump, ScenePreviewDump };
 
 		static const std::array<std::function<void(int r, int g, int b, int a)>, DrawBlendMode::BlendModeCount> c_BlenderSetterFunctions; //!< Array of function references to Allegro blender setters for convenient access when creating new color tables.
 

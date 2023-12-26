@@ -1020,16 +1020,6 @@ void MovableObject::Update() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void MovableObject::Draw(BITMAP* targetBitmap, const Vector& targetPos, DrawMode mode, bool onlyPhysical) const {
-    if (mode == g_DrawMOID && m_MOID == g_NoMOID) {
-        return;
-    }
-
-    g_SceneMan.RegisterDrawing(targetBitmap, mode == g_DrawNoMOID ? g_NoMOID : m_MOID, m_Pos - targetPos, 1.0F);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 int MovableObject::UpdateScripts() {
 	m_SimUpdatesSinceLastScriptedUpdate++;
 

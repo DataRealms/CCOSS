@@ -1204,7 +1204,6 @@ void GameActivity::UpdateEditing()
         if (!(m_IsActive[player] && m_IsHuman[player]))
             continue;
 
-        // Update the player controllers which control the switching and editor gui
         m_pEditorGUI[player]->Update();
 
         // Set the team associations with each screen displayed
@@ -2205,8 +2204,8 @@ void GameActivity::DrawGUI(BITMAP *pTargetBitmap, const Vector &targetPos, int w
             m_PlayerController[player].RelativeCursorMovement(m_ActorCursor[player]);
 
             // Set the view to the cursor pos
-            bool wrapped = g_SceneMan.ForceBounds(m_ActorCursor[player]);
-            g_CameraMan.SetScrollTarget(m_ActorCursor[player], 0.1, wrapped, ScreenOfPlayer(player));
+            g_SceneMan.ForceBounds(m_ActorCursor[player]);
+            g_CameraMan.SetScrollTarget(m_ActorCursor[player], 0.1, ScreenOfPlayer(player));
 
         }
         //TODO_MULTITHREAD

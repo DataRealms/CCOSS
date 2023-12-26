@@ -330,8 +330,6 @@ namespace RTE {
 		m_LastMusicPos = 0;
 		g_AudioMan.PauseIngameSounds(false);
 
-		g_PerformanceMan.ResetPerformanceTimings();
-
 		return error;
 	}
 
@@ -363,33 +361,8 @@ namespace RTE {
 			return;
 		}
 
-		if (m_Activity) {
-			if (pause) {
-				m_LastMusicPath = g_AudioMan.GetMusicPath();
-				m_LastMusicPos = g_AudioMan.GetMusicPosition();
-			} else {
-				if (!m_LastMusicPath.empty() && m_LastMusicPos > 0) {
-					g_AudioMan.ClearMusicQueue();
-					g_AudioMan.PlayMusic(m_LastMusicPath.c_str());
-					g_AudioMan.SetMusicPosition(m_LastMusicPos);
-					g_AudioMan.QueueSilence(30);
-					g_AudioMan.QueueMusicStream("Base.rte/Music/Watts/Last Man.ogg");
-					g_AudioMan.QueueSilence(30);
-					g_AudioMan.QueueMusicStream("Base.rte/Music/dBSoundworks/cc2g.ogg");
-				}
-			}
-
-			g_ThreadMan.QueueInSimulationThread([&]() { 
-				m_Activity->SetPaused(pause);
-			});
-
-			m_InActivity = !pause;
-			g_TimerMan.PauseSim(pause); 
-
-			g_AudioMan.PauseAllMobileSounds(pause);
-			g_ConsoleMan.PrintString("SYSTEM: Activity \"" + m_Activity->GetPresetName() + "\" was " + (pause ? "paused" : "resumed"));
-		} else {
-			g_ConsoleMan.PrintString("ERROR: No Activity to pause!");
+		if (pause == m_Activity->IsPaused()) {
+			return;
 		}
 
 		if (pause) {
@@ -407,7 +380,11 @@ namespace RTE {
 			}
 		}
 
-		m_Activity->SetPaused(pause);
+		g_ThreadMan.QueueInSimulationThread([&]() { 
+			m_Activity->SetPaused(pause);
+		});
+
+		g_TimerMan.PauseSim(pause); 
 		m_InActivity = !pause;
 		m_ResumingActivityFromPauseMenu = false;
 		m_SkipPauseMenuWhenPausingActivity = skipPauseMenu;
@@ -424,7 +401,6 @@ namespace RTE {
 
 			PauseActivity(false);
 			g_TimerMan.PauseSim(false);
-			g_PerformanceMan.ResetPerformanceTimings();
 		}
 	}
 

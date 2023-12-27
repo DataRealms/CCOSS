@@ -22,6 +22,7 @@
 #include "ThrownDevice.h"
 #include "MOPixel.h"
 #include "Actor.h"
+#include "Scene.h"
 
 namespace RTE {
 
@@ -1062,7 +1063,12 @@ void HDFirearm::Update()
             if (m_FireSound && !(m_FireSound->GetLoopSetting() == -1 && m_FireSound->IsBeingPlayed())) {
                 m_FireSound->Play(m_Pos);
             }
-			if (m_FireEchoSound) { m_FireEchoSound->Play(m_Pos); }
+			if (m_FireEchoSound) {
+                Scene::Area* noEchoArea = g_SceneMan.GetScene()->GetOptionalArea("IndoorArea");
+                if (noEchoArea == nullptr || !noEchoArea->IsInside(m_Pos)) {
+                    m_FireEchoSound->Play(m_Pos); 
+                }
+            }
         }
 
 		if (m_Loudness > 0) { g_MovableMan.RegisterAlarmEvent(AlarmEvent(m_Pos, m_Team, m_Loudness)); }

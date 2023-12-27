@@ -139,6 +139,11 @@ ClassInfoGetters;
 
 	int ReloadScripts() override;
 
+	/// <summary>
+	/// Refreshes our activity functions to find any changes from script.
+	/// </summary>
+	void RefreshActivityFunctions();
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Virtual method:  GetLuaClassName

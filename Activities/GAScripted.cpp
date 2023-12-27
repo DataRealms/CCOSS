@@ -204,17 +204,30 @@ int GAScripted::ReloadScripts() {
         }
     }
 
-    std::unordered_map<std::string, LuabindObjectWrapper*> scriptFileFunctions;
-    if ((error = g_LuaMan.GetMasterScriptState().RunScriptFileAndRetrieveFunctions(m_ScriptPath, m_LuaClassName, GetSupportedScriptFunctionNames(), scriptFileFunctions, true)) < 0) {
+    if ((error = g_LuaMan.GetMasterScriptState().RunScriptFile(m_ScriptPath, true, false)) < 0) {
         return error;
     }
 
+    RefreshActivityFunctions();
+
+    return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void GAScripted::RefreshActivityFunctions() {
     m_ScriptFunctions.clear();
+    if (m_ScriptPath.empty()) {
+        return;
+    }
+
+    // We use m_LuaClassName here, because we ran the script file in the global state instead of in an environment
+    std::unordered_map<std::string, LuabindObjectWrapper*> scriptFileFunctions;
+    g_LuaMan.GetMasterScriptState().RetrieveFunctions(m_LuaClassName, GetSupportedScriptFunctionNames(), scriptFileFunctions);
+
     for (const auto& [functionName, functionObject] : scriptFileFunctions) {
         m_ScriptFunctions[functionName] = std::unique_ptr<LuabindObjectWrapper>(functionObject);
     }
-
-    return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -485,7 +498,12 @@ int GAScripted::RunLuaFunction(const std::string& functionName, const std::vecto
         return 0;
     }
 
-    return g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(funcItr->second.get(), "_G", m_LuaClassName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
+    int error = g_LuaMan.GetMasterScriptState().RunScriptFunctionObject(funcItr->second.get(), "_G", m_LuaClassName, functionEntityArguments, functionLiteralArguments, functionObjectArguments);
+    
+    // Need to call this continually unfortunately, as something might change due to dofile()
+    RefreshActivityFunctions();
+
+    return error;
 }
 
 

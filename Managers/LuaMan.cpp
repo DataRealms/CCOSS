@@ -9,7 +9,7 @@
 
 namespace RTE {
 
-	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+" };
+	const std::unordered_set<std::string> LuaMan::c_FileAccessModes = { "r", "r+", "w", "w+", "a", "a+", "rt", "wt"};
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -227,8 +227,9 @@ namespace RTE {
 			// Override "math.random" in the lua state to use RTETools MT19937 implementation. Preserve return types of original to not break all the things.
 			"math.random = function(lower, upper) if lower ~= nil and upper ~= nil then return LuaMan:SelectRand(lower, upper); elseif lower ~= nil then return LuaMan:SelectRand(1, lower); else return LuaMan:PosRand(); end end"
 			"\n"
-			// Override "dofile" to be able to account for Data/ or Mods/ directory.
+			// Override "dofile"/"loadfile" to be able to account for Data/ or Mods/ directory.
 			"OriginalDoFile = dofile; dofile = function(filePath) filePath = PresetMan:GetFullModulePath(filePath); if filePath ~= '' then return OriginalDoFile(filePath); end end;"
+			"OriginalLoadFile = loadfile; loadfile = function(filePath) filePath = PresetMan:GetFullModulePath(filePath); if filePath ~= '' then return OriginalLoadFile(filePath); end end;"
 			// Internal helper functions to add callbacks for async pathing requests
 			"_AsyncPathCallbacks = {};"
 			"_AddAsyncPathCallback = function(id, callback) _AsyncPathCallbacks[id] = callback; end\n"
@@ -636,7 +637,7 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaStateWrapper::RunScriptFile(const std::string &filePath, bool consoleErrors) {
+	int LuaStateWrapper::RunScriptFile(const std::string &filePath, bool consoleErrors, bool doInSandboxedEnvironment) {
 		const std::string fullScriptPath = g_PresetMan.GetFullModulePath(filePath);
 		if (fullScriptPath.empty()) {
 			m_LastError = "Can't run a script file with an empty filepath!";
@@ -674,20 +675,22 @@ namespace RTE {
 		}
 
 		if (error == 0) {
-			// create a new environment table
-			lua_getglobal(m_State, filePath.c_str());
-			if (lua_isnil(m_State, -1)) {
-				lua_pop(m_State, 1);
-				lua_newtable(m_State);
-				lua_newtable(m_State);
-				lua_getglobal(m_State, "_G");
-				lua_setfield(m_State, -2, "__index");
-				lua_setmetatable(m_State, -2);
-				lua_setglobal(m_State, filePath.c_str());
+			if (doInSandboxedEnvironment) {
+				// create a new environment table
 				lua_getglobal(m_State, filePath.c_str());
-			}
+				if (lua_isnil(m_State, -1)) {
+					lua_pop(m_State, 1);
+					lua_newtable(m_State);
+					lua_newtable(m_State);
+					lua_getglobal(m_State, "_G");
+					lua_setfield(m_State, -2, "__index");
+					lua_setmetatable(m_State, -2);
+					lua_setglobal(m_State, filePath.c_str());
+					lua_getglobal(m_State, filePath.c_str());
+				}
 
-			lua_setfenv(m_State, -2);
+				lua_setfenv(m_State, -2);
+			}
 
 			// execute script file with pcall. Pcall will call the file and line error handler if there's an error by pointing 2 up the stack to it.
 			if (lua_pcall(m_State, 0, LUA_MULTRET, -2)) {
@@ -710,7 +713,36 @@ namespace RTE {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	int LuaStateWrapper::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::string &prefix, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects, bool forceReload) {
+	bool LuaStateWrapper::RetrieveFunctions(const std::string& funcObjectName, const std::vector<std::string>& functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper*>& outFunctionNamesAndObjects) {
+		std::lock_guard<std::recursive_mutex> lock(m_Mutex);
+		s_currentLuaState = this;
+
+		luabind::object funcHoldingObject = luabind::globals(m_State)[funcObjectName.c_str()];
+		if (luabind::type(funcHoldingObject) == LUA_TNIL) {
+			return false;
+		}
+
+		auto& newScript = m_ScriptCache[funcObjectName.c_str()];
+		newScript.functionNamesAndObjects.clear();
+		for (const std::string& functionName : functionNamesToLookFor) {
+			luabind::object functionObject = funcHoldingObject[functionName];
+			if (luabind::type(functionObject) == LUA_TFUNCTION) {
+				luabind::object* functionObjectCopyForStoring = new luabind::object(functionObject);
+				newScript.functionNamesAndObjects.try_emplace(functionName, new LuabindObjectWrapper(functionObjectCopyForStoring, funcObjectName));
+			}
+		}
+
+		for (auto& pair : newScript.functionNamesAndObjects) {
+			luabind::object* functionObjectCopyForStoring = new luabind::object(*pair.second->GetLuabindObject());
+			outFunctionNamesAndObjects.try_emplace(pair.first, new LuabindObjectWrapper(functionObjectCopyForStoring, funcObjectName));
+		}
+
+		return true;
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	int LuaStateWrapper::RunScriptFileAndRetrieveFunctions(const std::string &filePath, const std::vector<std::string> &functionNamesToLookFor, std::unordered_map<std::string, LuabindObjectWrapper *> &outFunctionNamesAndObjects, bool forceReload) {
 		static bool disableCaching = false;
 		forceReload = forceReload || disableCaching;
 
@@ -733,30 +765,8 @@ namespace RTE {
 			return error;
 		}
 
-		luabind::object prefixObject;
-		if (prefix == "") {
-			prefixObject = luabind::globals(m_State)[filePath.c_str()];
-		} else {
-			prefixObject = luabind::globals(m_State)[filePath.c_str()][prefix];
-		}
-
-		if (luabind::type(prefixObject) == LUA_TNIL) {
+		if (!RetrieveFunctions(filePath, functionNamesToLookFor, outFunctionNamesAndObjects)) {
 			return -1;
-		}
-
-		auto &newScript = m_ScriptCache[filePath];
-		newScript.functionNamesAndObjects.clear();
-		for (const std::string& functionName : functionNamesToLookFor) {
-			luabind::object functionObject = prefixObject[functionName];
-			if (luabind::type(functionObject) == LUA_TFUNCTION) {
-				luabind::object* functionObjectCopyForStoring = new luabind::object(functionObject);
-				newScript.functionNamesAndObjects.try_emplace(functionName, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
-			}
-		}
-
-		for (auto& pair : newScript.functionNamesAndObjects) {
-			luabind::object* functionObjectCopyForStoring = new luabind::object(*pair.second->GetLuabindObject());
-			outFunctionNamesAndObjects.try_emplace(pair.first, new LuabindObjectWrapper(functionObjectCopyForStoring, filePath));
 		}
 
 		return 0;
